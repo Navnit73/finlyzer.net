@@ -1,4 +1,4 @@
-# Design System — VEED-Inspired Video Creation Website
+# Design System — VEED-Inspired financial tool hub
 
 > Reference: five supplied screenshots of VEED pages (video editor, SEO/content sections, feature sections, dark editorial cards, and video ad maker).
 > This document translates the visible patterns into an implementation-ready design guide. Colors are visual estimates from screenshots; validate against source assets before treating them as exact brand values.

@@ -1,356 +1,667 @@
+import Link from "next/link";
 import {
-  Sparkles,
-  TrendingUp,
-  ShieldCheck,
-  Zap,
-  Layers,
   ArrowRight,
-  Palette,
-  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  TrendingUp,
   BarChart3,
-  Globe2,
+  Search,
+  FileSpreadsheet,
+  Cpu,
+  PieChart,
+  Sparkles,
+  Check,
+  Star,
+  Layers,
+  Activity,
+  Sliders,
 } from "lucide-react";
 
 export default function Home() {
-  const themes = [
-    "dark",
-    "light",
-    "emerald",
-    "synthwave",
-    "cyberpunk",
-    "dracula",
-    "luxury",
-    "night",
-    "nord",
-    "sunset",
-  ];
-
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-base-100/80 border-b border-base-content/10">
-        <div className="navbar max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="navbar-start gap-2">
-            <div className="dropdown lg:hidden">
-              <button tabIndex={0} role="button" className="btn btn-ghost btn-circle" aria-label="Open menu">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h8m-8 6h16"
-                  />
-                </svg>
-              </button>
-              <ul
-                tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-200 rounded-box z-1 mt-3 w-52 p-2 shadow"
-              >
-                <li>
-                  <a href="#features">Features</a>
-                </li>
-                <li>
-                  <a href="#stats">Stats</a>
-                </li>
-                <li>
-                  <a href="#components">Components</a>
-                </li>
-              </ul>
-            </div>
-            <a className="btn btn-ghost text-xl font-bold tracking-tight gap-2 flex items-center">
-              <span className="p-2 rounded-xl bg-primary text-primary-content flex items-center justify-center">
-                <TrendingUp className="w-5 h-5" />
-              </span>
-              <span>
-                Fin<span className="text-primary">lyzer</span>
-              </span>
+    <div className="flex flex-col min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)]">
+      {/* 1. Thin Promotional Announcement Bar */}
+      <div className="bg-[var(--color-ink)] text-white text-xs sm:text-sm py-2.5 px-4">
+        <div className="site-container flex items-center justify-between">
+          <div className="flex-1 text-center font-medium flex items-center justify-center gap-2">
+            <span className="inline-block px-2 py-0.5 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] text-[11px] font-bold uppercase tracking-wider">
+              NEW
+            </span>
+            <span>
+              Finlyzer AI 2.0 is live: Instant 10-K deep dives &amp; multi-scenario DCF models.
+            </span>
+            <a
+              href="#demo"
+              className="underline hover:text-[var(--color-brand)] transition-colors ml-1 hidden sm:inline"
+            >
+              Try the interactive model &rarr;
             </a>
           </div>
+        </div>
+      </div>
 
-          <div className="navbar-center hidden lg:flex">
-            <ul className="menu menu-horizontal px-1 font-medium gap-1">
-              <li>
-                <a href="#features">Features</a>
-              </li>
-              <li>
-                <a href="#stats">Stats</a>
-              </li>
-              <li>
-                <a href="#components">Components</a>
-              </li>
-            </ul>
+      {/* 2. Header and Navigation (Section 5) */}
+      <header className="sticky top-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-md border-b border-[var(--color-border)]">
+        <div className="site-container h-20 flex items-center justify-between">
+          {/* Brand Wordmark */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+              <span className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-sm">
+                <TrendingUp className="w-5 h-5 stroke-[2.5]" />
+              </span>
+              <span>
+                Fin<span className="text-[var(--color-ink)]">lyzer</span>
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-7 text-[16px] font-medium text-[#292929]">
+              <div className="dropdown dropdown-hover">
+                <button
+                  tabIndex={0}
+                  className="flex items-center gap-1 hover:text-[var(--color-ink)] transition-colors py-2 cursor-pointer"
+                >
+                  Valuation Tools <ChevronDown className="w-4 h-4 text-[var(--color-text-secondary)]" />
+                </button>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content z-50 menu p-2 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl w-64 text-sm"
+                >
+                  <li>
+                    <a href="#features" className="py-2.5 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl">
+                      Automated DCF Builder
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#features" className="py-2.5 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl">
+                      Comparable Company Analysis
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#features" className="py-2.5 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl">
+                      WACC &amp; Cost of Capital Calc
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#hub" className="py-2.5 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl">
+                      LBO &amp; M&amp;A Scenarios
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <a href="#features" className="hover:text-[var(--color-ink)] transition-colors py-2">
+                Financial Hub
+              </a>
+              <a href="#features" className="hover:text-[var(--color-ink)] transition-colors py-2">
+                SEC 10-K Copilot
+              </a>
+              <a href="#hub" className="hover:text-[var(--color-ink)] transition-colors py-2">
+                Enterprise
+              </a>
+              <a href="#hub" className="hover:text-[var(--color-ink)] transition-colors py-2">
+                Pricing
+              </a>
+            </nav>
           </div>
 
-          <div className="navbar-end gap-3">
-            {/* Theme Dropdown */}
-            <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-sm gap-2 normal-case"
-              >
-                <Palette className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline">Theme</span>
-              </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content bg-base-200 rounded-box z-50 w-44 p-2 shadow-2xl border border-base-content/10 max-h-60 overflow-y-auto"
-              >
-                {themes.map((theme) => (
-                  <li key={theme}>
-                    <input
-                      type="radio"
-                      name="theme-dropdown"
-                      className="theme-controller btn btn-sm btn-block btn-ghost justify-start capitalize font-normal"
-                      aria-label={theme}
-                      value={theme}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-
+          {/* Account Actions */}
+          <div className="flex items-center gap-4 sm:gap-6">
             <a
-              href="https://daisyui.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary btn-sm rounded-lg"
+              href="#login"
+              className="text-[16px] font-medium text-[var(--color-ink)] hover:text-[var(--color-text-secondary)] transition-colors"
             >
-              DaisyUI Docs
+              Login
+            </a>
+            <a
+              href="#signup"
+              className="btn-brand-dark"
+            >
+              Sign Up Free
             </a>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Main Content */}
       <main className="flex-1">
-        <section className="py-20 md:py-28 px-4 sm:px-8 max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            <div className="badge badge-outline badge-primary gap-2 py-3 px-4 font-semibold">
-              <Sparkles className="w-4 h-4 text-primary" /> Next.js 16 + Tailwind v4 + DaisyUI v5
+        {/* 3. Breadcrumbs (Section 6) */}
+        <div className="site-container pt-6 pb-2">
+          <nav className="flex items-center gap-2 text-[14px] text-[var(--color-text-secondary)]" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">
+              Home
+            </Link>
+            <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+            <a href="#hub" className="hover:text-[var(--color-ink)] transition-colors">
+              Financial Tool Hub
+            </a>
+            <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+            <span className="text-[var(--color-ink)] font-medium">DCF &amp; Valuation Suite</span>
+          </nav>
+        </div>
+
+        {/* 4. Hero Section (Section 7A: Tool Landing Hero) */}
+        <section className="site-container py-12 md:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            {/* Left Column (52%) */}
+            <div className="lg:col-span-6 space-y-6">
+              {/* Trust Indicator */}
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2 overflow-hidden">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-ink)] text-white text-xs font-bold ring-2 ring-white">
+                    JP
+                  </span>
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-ink-soft)] text-white text-xs font-bold ring-2 ring-white">
+                    MS
+                  </span>
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] text-xs font-bold ring-2 ring-white">
+                    GS
+                  </span>
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--media-violet)] text-white text-xs font-bold ring-2 ring-white">
+                    BK
+                  </span>
+                </div>
+                <p className="text-[15px] text-[var(--color-text-secondary)] font-normal">
+                  Trusted by <span className="font-semibold text-[var(--color-ink)]">50,000+</span> analysts, CFOs &amp; equity funds
+                </p>
+              </div>
+
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-[62px] font-black text-[var(--color-ink)] tracking-tight leading-[1.04] max-w-[580px]">
+                Analyze company financials &amp; valuations in{" "}
+                <span className="underline decoration-[var(--color-brand)] decoration-4 underline-offset-4">
+                  seconds
+                </span>
+                .
+              </h1>
+
+              {/* Description */}
+              <p className="text-[18px] text-[var(--color-text-secondary)] leading-relaxed max-w-[560px]">
+                Build automated Discounted Cash Flow models, audit 10-K SEC filings with AI, and benchmark valuation multiples across 40,000+ global equities. No broken spreadsheets required.
+              </p>
+
+              {/* CTA Group */}
+              <div className="pt-2 space-y-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                  <a
+                    href="#demo"
+                    className="btn-brand-primary"
+                  >
+                    Start Free Valuation <ArrowRight className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="#features"
+                    className="btn-brand-secondary"
+                  >
+                    Explore Models
+                  </a>
+                </div>
+                <p className="text-[14px] text-[var(--color-text-muted)]">
+                  No credit card required &bull; 5 free full valuation reports included
+                </p>
+              </div>
             </div>
-            <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
-              Build modern web apps at{" "}
-              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                lightning speed
+
+            {/* Right Column (48%): Product Preview */}
+            <div className="lg:col-span-6" id="demo">
+              <div className="relative rounded-[20px] bg-[var(--color-ink)] p-5 sm:p-6 text-white shadow-2xl border border-white/10 overflow-hidden">
+                {/* Header Bar of the Tool UI */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-3">
+                    <span className="px-2.5 py-1 rounded-md bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold text-xs tracking-wider">
+                      NVDA &bull; NASDAQ
+                    </span>
+                    <span className="text-sm font-semibold text-white">NVIDIA Corp Valuation Model</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-brand)] animate-pulse"></span>
+                    <span className="text-xs text-[var(--color-text-muted)]">Live SEC Data</span>
+                  </div>
+                </div>
+
+                {/* Dashboard Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 my-5">
+                  <div className="bg-[var(--color-ink-soft)] p-3.5 rounded-xl border border-white/5">
+                    <p className="text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider">Intrinsic Value (DCF)</p>
+                    <p className="text-xl font-bold text-[var(--color-brand)] mt-1">$148.50</p>
+                    <span className="text-[11px] text-[var(--color-brand)] font-medium">+18.4% upside</span>
+                  </div>
+                  <div className="bg-[var(--color-ink-soft)] p-3.5 rounded-xl border border-white/5">
+                    <p className="text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider">Implied EV/EBITDA</p>
+                    <p className="text-xl font-bold text-white mt-1">28.4x</p>
+                    <span className="text-[11px] text-[var(--color-text-muted)]">Peer Avg: 32.1x</span>
+                  </div>
+                  <div className="col-span-2 sm:col-span-1 bg-[var(--color-ink-soft)] p-3.5 rounded-xl border border-white/5">
+                    <p className="text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider">WACC Baseline</p>
+                    <p className="text-xl font-bold text-[var(--media-blue)] mt-1">9.2%</p>
+                    <span className="text-[11px] text-[var(--media-blue)]">Cost of Equity: 10.4%</span>
+                  </div>
+                </div>
+
+                {/* Simulated Financial Model Sliders */}
+                <div className="bg-[#242424] p-4 rounded-xl border border-white/5 space-y-4">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[var(--color-text-muted)] flex items-center gap-1.5 font-medium">
+                      <Sliders className="w-3.5 h-3.5 text-[var(--color-brand)]" /> 5-Year Revenue CAGR Assumption
+                    </span>
+                    <span className="font-bold text-[var(--color-brand)]">34.0%</span>
+                  </div>
+                  <div className="w-full bg-[var(--color-ink-soft)] h-2 rounded-full overflow-hidden">
+                    <div className="bg-[var(--color-brand)] h-full w-[68%] rounded-full"></div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-[var(--color-text-muted)] flex items-center gap-1.5 font-medium">
+                      <Activity className="w-3.5 h-3.5 text-[var(--media-blue)]" /> Terminal FCF Margin
+                    </span>
+                    <span className="font-bold text-[var(--media-blue)]">48.5%</span>
+                  </div>
+                  <div className="w-full bg-[var(--color-ink-soft)] h-2 rounded-full overflow-hidden">
+                    <div className="bg-[var(--media-blue)] h-full w-[75%] rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* AI Statement Summary Snippet */}
+                <div className="mt-4 p-3.5 bg-[var(--color-ink-soft)]/90 rounded-xl border border-[var(--color-brand)]/20 flex items-start gap-3">
+                  <Sparkles className="w-4 h-4 text-[var(--color-brand)] shrink-0 mt-0.5" />
+                  <p className="text-xs text-white/90 leading-relaxed">
+                    <strong className="text-[var(--color-brand)]">AI Analyst Audit:</strong> Data Center gross margins expanded +310bps QoQ. Free cash flow conversion at 54% of revenue supports the $148 intrinsic valuation thesis.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Logo / Trust Strip (Section 10) */}
+        <section className="border-y border-[var(--color-border)] bg-[var(--color-surface-subtle)] py-10">
+          <div className="site-container">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+              {/* Review Score Panel */}
+              <div className="flex items-center gap-4 shrink-0 pr-8 lg:border-r border-[var(--color-border)]">
+                <div className="flex gap-1 text-[var(--color-ink)]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-[var(--color-ink)] text-[var(--color-ink)]" />
+                  ))}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[var(--color-ink)]">4.9 / 5.0 Rating</p>
+                  <p className="text-xs text-[var(--color-text-secondary)]">Across G2 &bull; Trustpilot &bull; Capterra</p>
+                </div>
+              </div>
+
+              {/* Monochrome Financial Partner Integrations */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-end gap-8 sm:gap-12 opacity-70 grayscale">
+                <span className="font-bold tracking-widest text-sm text-[var(--color-ink)]">SEC EDGAR</span>
+                <span className="font-bold tracking-wider text-sm text-[var(--color-ink)]">BLOOMBERG API</span>
+                <span className="font-bold tracking-wider text-sm text-[var(--color-ink)]">NASDAQ DATA LINK</span>
+                <span className="font-bold tracking-wider text-sm text-[var(--color-ink)]">REFINITIV</span>
+                <span className="font-bold tracking-wider text-sm text-[var(--color-ink)]">S&amp;P GLOBAL</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Text-led Intro Panel (Section 7B) */}
+        <section className="site-container py-16 md:py-24">
+          <div className="intro-panel">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-6">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-ink)] tracking-tight leading-tight">
+                  The modern standard for institutional-grade financial analysis.
+                </h2>
+              </div>
+              <div className="lg:col-span-6 space-y-4">
+                <p className="text-[17px] text-[var(--color-text-secondary)] leading-relaxed">
+                  Traditional equity research is slowed down by error-prone spreadsheets, manual 10-K parsing, and disconnected tools. Finlyzer unifies automated DCF valuation models, real-time SEC data feeds, and AI-powered audit copilots into one high-salience platform.
+                </p>
+                <div className="flex items-center gap-6 pt-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                    <Check className="w-4 h-4 text-[var(--color-brand)] stroke-[3]" /> 40,000+ Equities
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                    <Check className="w-4 h-4 text-[var(--color-brand)] stroke-[3]" /> 100% Audited Formulas
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                    <Check className="w-4 h-4 text-[var(--color-brand)] stroke-[3]" /> Instant Export to Excel
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 7. Feature Detail Split Sections (Section 7C - Alternating Layout) */}
+        <section id="features" className="site-container py-8 space-y-24 md:space-y-32">
+          {/* Split 1: Automated DCF (Visual Left, Copy Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <div className="rounded-[18px] bg-[var(--color-surface-subtle)] p-6 sm:p-8 border border-[var(--color-border)] space-y-4 shadow-sm">
+                <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
+                  <span className="font-bold text-[var(--color-ink)] text-sm">Discounted Cash Flow Model (5-Year Unlevered)</span>
+                  <span className="text-xs px-2 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-semibold">
+                    Dynamic Link
+                  </span>
+                </div>
+                <div className="space-y-2 font-mono text-xs">
+                  <div className="flex justify-between py-2 px-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+                    <span className="text-[var(--color-text-secondary)]">Free Cash Flow to Firm (FY26E)</span>
+                    <span className="font-bold text-[var(--color-ink)]">$38.4B</span>
+                  </div>
+                  <div className="flex justify-between py-2 px-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+                    <span className="text-[var(--color-text-secondary)]">Discount Factor (PV @ 8.8%)</span>
+                    <span className="font-bold text-[var(--color-ink)]">0.841</span>
+                  </div>
+                  <div className="flex justify-between py-2 px-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+                    <span className="text-[var(--color-text-secondary)]">Cumulative PV of FCF</span>
+                    <span className="font-bold text-[var(--color-ink)]">$164.8B</span>
+                  </div>
+                  <div className="flex justify-between py-2 px-3 bg-[var(--color-ink)] text-white rounded-lg">
+                    <span className="text-[var(--color-text-muted)]">Estimated Equity Value / Share</span>
+                    <span className="font-bold text-[var(--color-brand)]">$184.20</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="lg:col-span-6 order-1 lg:order-2 space-y-5">
+              <div className="feature-badge">
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--color-on-brand)]" /> Automated DCF &amp; Valuation
+              </div>
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-ink)] tracking-tight leading-tight">
+                Institutional DCF models generated in one click.
+              </h3>
+              <p className="text-[17px] text-[var(--color-text-secondary)] leading-relaxed">
+                Connect directly to SEC filings to build dynamic, audited Discounted Cash Flow models. Adjust WACC, perpetual growth rates, and EBITDA margins on the fly with live sensitivity matrices.
+              </p>
+              <div className="pt-2">
+                <a href="#demo" className="text-[16px] font-semibold text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-4 hover:text-[var(--color-brand)] transition-colors flex items-center gap-1.5">
+                  See how automated sensitivity tables work <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Split 2: AI Statement Audit (Copy Left, Visual Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <div className="lg:col-span-6 space-y-5">
+              <div className="feature-badge">
+                <Cpu className="w-3.5 h-3.5 text-[var(--color-on-brand)]" /> AI 10-K &amp; Filing Copilot
+              </div>
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-ink)] tracking-tight leading-tight">
+                Interrogate annual reports with specialized financial AI.
+              </h3>
+              <p className="text-[17px] text-[var(--color-text-secondary)] leading-relaxed">
+                Ask targeted questions about off-balance sheet liabilities, revenue recognition policies, or executive compensation changes. Finlyzer citations link straight to specific paragraphs in the source 10-K and 10-Q documents.
+              </p>
+              <div className="pt-2">
+                <a href="#demo" className="text-[16px] font-semibold text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-4 hover:text-[var(--color-brand)] transition-colors flex items-center gap-1.5">
+                  Explore AI SEC filing queries <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+            <div className="lg:col-span-6">
+              <div className="rounded-[18px] bg-[var(--color-ink)] p-6 sm:p-8 text-white border border-white/10 space-y-4 shadow-xl">
+                <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-text-muted)] pb-3 border-b border-white/10">
+                  <Search className="w-4 h-4 text-[var(--color-brand)]" /> Query: &quot;Identify key margin risks cited in Item 1A&quot;
+                </div>
+                <div className="bg-[var(--color-ink-soft)] p-4 rounded-xl border border-white/5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-brand)]"></span>
+                    <span className="text-xs font-bold text-white">Item 1A Risk Factor Extraction</span>
+                  </div>
+                  <p className="text-xs text-[#E5E5E5] leading-relaxed">
+                    &quot;Raw material wafer procurement cost escalated 8.2% YoY. Supply concentration in Foundry partners represents primary operational margin bottleneck.&quot;
+                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)] pt-1">
+                    <span>Source: Form 10-K, Page 42, Paragraph 3</span>
+                    <span className="text-[var(--color-brand)] font-semibold cursor-pointer hover:underline">
+                      View Raw Citation &rarr;
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Split 3: Comparable Multiples (Visual Left, Copy Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <div className="rounded-[18px] bg-[var(--color-surface-subtle)] p-6 sm:p-8 border border-[var(--color-border)] space-y-3 shadow-sm">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
+                  <span className="font-bold text-[var(--color-ink)] text-sm">Enterprise Multiples Peer Matrix</span>
+                  <span className="text-xs text-[var(--color-text-secondary)]">Updated 15 mins ago</span>
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="grid grid-cols-4 font-semibold text-[var(--color-text-secondary)] px-3 py-1">
+                    <span>Ticker</span>
+                    <span>EV/EBITDA</span>
+                    <span>P/E (NTM)</span>
+                    <span>FCF Yield</span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center bg-[var(--color-surface)] p-3 rounded-lg border border-[var(--color-border)] font-medium">
+                    <span className="font-bold text-[var(--color-ink)]">NVDA</span>
+                    <span>28.4x</span>
+                    <span>31.2x</span>
+                    <span className="text-[var(--color-ink)] font-semibold">3.8%</span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center bg-[var(--color-surface)] p-3 rounded-lg border border-[var(--color-border)] font-medium">
+                    <span className="font-bold text-[var(--color-ink)]">AMD</span>
+                    <span>24.1x</span>
+                    <span>27.8x</span>
+                    <span className="text-[var(--color-ink)] font-semibold">2.9%</span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center bg-[var(--color-brand-soft)] p-3 rounded-lg border border-[var(--color-brand)]/30 font-medium">
+                    <span className="font-bold text-[var(--color-on-brand)]">Peer Median</span>
+                    <span className="font-bold text-[var(--color-on-brand)]">26.2x</span>
+                    <span className="font-bold text-[var(--color-on-brand)]">29.5x</span>
+                    <span className="font-bold text-[var(--color-on-brand)]">3.3%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="lg:col-span-6 order-1 lg:order-2 space-y-5">
+              <div className="feature-badge">
+                <PieChart className="w-3.5 h-3.5 text-[var(--color-on-brand)]" /> Multi-Asset Comps
+              </div>
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-ink)] tracking-tight leading-tight">
+                Instant peer group multiples and market benchmarking.
+              </h3>
+              <p className="text-[17px] text-[var(--color-text-secondary)] leading-relaxed">
+                Compare EV/Sales, EV/EBITDA, and Price-to-Earnings ratios against custom industry peer groups. Standardized GAAP-to-Non-GAAP reconciliation ensures accurate apples-to-apples evaluation.
+              </p>
+              <div className="pt-2">
+                <a href="#demo" className="text-[16px] font-semibold text-[var(--color-ink)] underline decoration-[var(--color-ink)] underline-offset-4 hover:text-[var(--color-brand)] transition-colors flex items-center gap-1.5">
+                  Explore peer benchmarking templates <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 8. Dark Editorial Card Section (Section 10B: "More from Finlyzer Hub") */}
+        <section id="hub" className="dark-editorial-section py-20 md:py-28 mt-20">
+          <div className="site-container space-y-16">
+            <div className="text-center max-w-2xl mx-auto space-y-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-brand)]">
+                FINANCIAL TOOLS HUB
               </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-base-content/70 leading-relaxed">
-              Your Next.js project is fully equipped with DaisyUI component library, Tailwind CSS v4, App Router, TypeScript, and modern themes.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-              <a href="#components" className="btn btn-primary gap-2 shadow-lg">
-                Explore Components <ArrowRight className="w-4 h-4" />
-              </a>
-              <a
-                href="https://github.com/saadeghi/daisyui"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-outline"
-              >
-                GitHub Repository
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section id="stats" className="py-12 bg-base-200/50 border-y border-base-content/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="stats stats-vertical lg:stats-horizontal shadow-lg bg-base-100 w-full border border-base-content/10">
-              <div className="stat">
-                <div className="stat-figure text-primary">
-                  <Zap className="w-8 h-8" />
-                </div>
-                <div className="stat-title">Component Classes</div>
-                <div className="stat-value text-primary">60+</div>
-                <div className="stat-desc">DaisyUI UI primitives included</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-figure text-secondary">
-                  <Palette className="w-8 h-8" />
-                </div>
-                <div className="stat-title">Built-in Themes</div>
-                <div className="stat-value text-secondary">32+</div>
-                <div className="stat-desc">Dark, light, synthwave & more</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-figure text-accent">
-                  <BarChart3 className="w-8 h-8" />
-                </div>
-                <div className="stat-title">Performance</div>
-                <div className="stat-value text-accent">100%</div>
-                <div className="stat-desc">Turbopack & Tailwind CSS v4</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Component Showcase */}
-        <section id="components" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight">Interactive DaisyUI Components</h2>
-            <p className="text-base-content/70">
-              Preview built-in buttons, alerts, badges, and card components.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Card 1: Buttons */}
-            <div className="card bg-base-200/60 border border-base-content/10 shadow-sm">
-              <div className="card-body">
-                <h3 className="card-title text-lg flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-primary" /> Buttons & Colors
-                </h3>
-                <p className="text-sm text-base-content/70">
-                  Semantic color system with accessible button variants.
-                </p>
-                <div className="flex flex-wrap gap-2 pt-3">
-                  <button className="btn btn-primary btn-sm">Primary</button>
-                  <button className="btn btn-secondary btn-sm">Secondary</button>
-                  <button className="btn btn-accent btn-sm">Accent</button>
-                  <button className="btn btn-neutral btn-sm">Neutral</button>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2: Badges & Tags */}
-            <div className="card bg-base-200/60 border border-base-content/10 shadow-sm">
-              <div className="card-body">
-                <h3 className="card-title text-lg flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-secondary" /> Badges & Status
-                </h3>
-                <p className="text-sm text-base-content/70">
-                  Tagging and state indicators out of the box.
-                </p>
-                <div className="flex flex-wrap gap-2 pt-3">
-                  <div className="badge badge-primary">Primary</div>
-                  <div className="badge badge-secondary">Secondary</div>
-                  <div className="badge badge-success">Success</div>
-                  <div className="badge badge-warning">Warning</div>
-                  <div className="badge badge-error">Error</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3: Form Controls */}
-            <div className="card bg-base-200/60 border border-base-content/10 shadow-sm">
-              <div className="card-body">
-                <h3 className="card-title text-lg flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-accent" /> Form Inputs
-                </h3>
-                <p className="text-sm text-base-content/70">
-                  Pre-styled inputs, toggles, and ranges.
-                </p>
-                <div className="flex items-center gap-4 pt-3">
-                  <input
-                    type="checkbox"
-                    defaultChecked
-                    className="toggle toggle-primary"
-                    aria-label="Toggle demo"
-                  />
-                  <input
-                    type="checkbox"
-                    defaultChecked
-                    className="checkbox checkbox-secondary"
-                    aria-label="Checkbox demo"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    defaultValue="60"
-                    className="range range-xs range-primary flex-1"
-                    aria-label="Range demo"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Alert Component Example */}
-          <div role="alert" className="alert alert-info shadow-md">
-            <CheckCircle2 className="w-5 h-5" />
-            <div>
-              <h3 className="font-bold">DaisyUI is installed and ready to use!</h3>
-              <div className="text-xs">
-                Edit <code>src/app/page.tsx</code> to customize this page for your application.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Feature Grid */}
-        <section id="features" className="py-16 bg-base-200/30 border-t border-base-content/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-12">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold tracking-tight">Why Next.js + DaisyUI?</h2>
-              <p className="text-base-content/70">
-                The fastest way to design semantic, themeable, high-performance UIs.
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                More tools to power your investment workflow.
+              </h2>
+              <p className="text-[17px] text-[var(--color-text-muted)]">
+                Explore specialized analytical suites built for private equity, investment banking, and retail research.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="flex gap-4 items-start">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary shrink-0">
-                  <Zap className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Pure CSS Component Classes</h3>
-                  <p className="text-sm text-base-content/70 mt-1">
-                    No extra JavaScript runtime overhead. Clean HTML markup with utility classes like <code>btn</code>, <code>card</code>, and <code>modal</code>.
+            {/* 3-Column Editorial Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Card 1 */}
+              <div className="dark-editorial-card p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                <div className="space-y-4">
+                  <div className="h-44 rounded-xl bg-[#242424] p-4 flex flex-col justify-between border border-white/5 relative overflow-hidden">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[var(--media-blue)]/20 text-[var(--media-blue)]">
+                        PORTFOLIO RISK
+                      </span>
+                      <BarChart3 className="w-4 h-4 text-[var(--media-blue)]" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-[var(--color-text-muted)]">Monte Carlo 10,000 Iterations</p>
+                      <p className="text-xl font-bold text-white">95% VaR: -6.4%</p>
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">Monte Carlo Risk Engine</h3>
+                  <p className="text-[15px] text-[var(--color-text-muted)] leading-relaxed">
+                    Simulate extreme macro stress tests, tail-risk probabilities, and sector correlation shifts across your active holdings.
                   </p>
                 </div>
+                <a
+                  href="#demo"
+                  className="btn-brand-primary w-full text-center"
+                >
+                  Launch Simulator
+                </a>
               </div>
 
-              <div className="flex gap-4 items-start">
-                <div className="p-3 rounded-xl bg-secondary/10 text-secondary shrink-0">
-                  <Palette className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Multi-Theme System</h3>
-                  <p className="text-sm text-base-content/70 mt-1">
-                    Seamless dark mode and dozens of pre-configured color palettes switchable with simple <code>data-theme</code> attributes.
+              {/* Card 2 */}
+              <div className="dark-editorial-card p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                <div className="space-y-4">
+                  <div className="h-44 rounded-xl bg-[#242424] p-4 flex flex-col justify-between border border-white/5 relative overflow-hidden">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[var(--media-violet)]/20 text-[var(--media-violet)]">
+                        M&amp;A / LBO
+                      </span>
+                      <Layers className="w-4 h-4 text-[var(--media-violet)]" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-[var(--color-text-muted)]">Target IRR @ 4.5x Leverage</p>
+                      <p className="text-xl font-bold text-white">22.8% Returns</p>
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">LBO &amp; M&amp;A Scenario Suite</h3>
+                  <p className="text-[15px] text-[var(--color-text-muted)] leading-relaxed">
+                    Model debt tranches, interest coverage covenants, debt paydown schedules, and exit multiples with institutional precision.
                   </p>
                 </div>
+                <a
+                  href="#demo"
+                  className="btn-brand-primary w-full text-center"
+                >
+                  Build LBO Model
+                </a>
               </div>
 
-              <div className="flex gap-4 items-start">
-                <div className="p-3 rounded-xl bg-accent/10 text-accent shrink-0">
-                  <Globe2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Next.js 16 & Turbopack</h3>
-                  <p className="text-sm text-base-content/70 mt-1">
-                    App Router, React 19 Server Components, fast Turbopack bundling, and full TypeScript support.
+              {/* Card 3 */}
+              <div className="dark-editorial-card p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                <div className="space-y-4">
+                  <div className="h-44 rounded-xl bg-[#242424] p-4 flex flex-col justify-between border border-white/5 relative overflow-hidden">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[var(--media-pink)]/20 text-[var(--media-pink)]">
+                        DIVIDEND &amp; YIELD
+                      </span>
+                      <TrendingUp className="w-4 h-4 text-[var(--media-pink)]" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-[var(--color-text-muted)]">Payout Ratio Sustainability</p>
+                      <p className="text-xl font-bold text-white">100% Safe Rating</p>
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">Dividend Cash Flow Predictor</h3>
+                  <p className="text-[15px] text-[var(--color-text-muted)] leading-relaxed">
+                    Forecast future dividend payouts, free cash flow coverage safety scores, and reinvestment compounding trajectories.
                   </p>
                 </div>
+                <a
+                  href="#demo"
+                  className="btn-brand-primary w-full text-center"
+                >
+                  Analyze Yields
+                </a>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 9. Final High-Contrast CTA Section */}
+        <section className="site-container py-20 md:py-28 text-center space-y-8">
+          <div className="max-w-3xl mx-auto space-y-5">
+            <h2 className="text-4xl sm:text-5xl font-black text-[var(--color-ink)] tracking-tight leading-tight">
+              Ready to elevate your financial analysis?
+            </h2>
+            <p className="text-lg text-[var(--color-text-secondary)] max-w-xl mx-auto">
+              Join thousands of analysts, investors, and CFOs building valuation models in minutes with Finlyzer.
+            </p>
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href="#demo"
+                className="btn-brand-primary"
+              >
+                Get Started for Free <ArrowRight className="w-5 h-5" />
+              </a>
+              <a
+                href="#demo"
+                className="btn-brand-secondary"
+              >
+                Schedule Enterprise Demo
+              </a>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="footer footer-center p-8 bg-base-200 text-base-content border-t border-base-content/10">
-        <aside>
-          <p className="font-medium">
-            Finlyzer &copy; {new Date().getFullYear()} - Powered by Next.js & DaisyUI
-          </p>
-          <p className="text-xs text-base-content/60">
-            Tailwind CSS v4 &bull; DaisyUI v5 &bull; Next.js App Router
-          </p>
-        </aside>
+      {/* 10. Clean Institutional Footer */}
+      <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface-subtle)] py-14">
+        <div className="site-container">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pb-12 border-b border-[var(--color-border)]">
+            <div className="col-span-2 space-y-4">
+              <div className="flex items-center gap-2 text-xl font-bold text-[var(--color-ink)]">
+                <span className="w-7 h-7 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)]">
+                  <TrendingUp className="w-4 h-4 stroke-[2.5]" />
+                </span>
+                <span>Finlyzer</span>
+              </div>
+              <p className="text-sm text-[var(--color-text-secondary)] max-w-sm">
+                Next-generation financial tool hub for automated DCF modeling, AI SEC filing investigation, and equity research.
+              </p>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <h4 className="font-bold text-[var(--color-ink)]">Valuation Tools</h4>
+              <ul className="space-y-2 text-[var(--color-text-secondary)]">
+                <li><a href="#features" className="hover:text-[var(--color-ink)] transition-colors">DCF Valuation</a></li>
+                <li><a href="#features" className="hover:text-[var(--color-ink)] transition-colors">Comps Analysis</a></li>
+                <li><a href="#features" className="hover:text-[var(--color-ink)] transition-colors">WACC Calculator</a></li>
+                <li><a href="#hub" className="hover:text-[var(--color-ink)] transition-colors">LBO Model</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <h4 className="font-bold text-[var(--color-ink)]">Financial Hub</h4>
+              <ul className="space-y-2 text-[var(--color-text-secondary)]">
+                <li><a href="#features" className="hover:text-[var(--color-ink)] transition-colors">SEC 10-K Copilot</a></li>
+                <li><a href="#hub" className="hover:text-[#171717] transition-colors">Monte Carlo Risk</a></li>
+                <li><a href="#hub" className="hover:text-[#171717] transition-colors">Dividend Forecast</a></li>
+                <li><a href="#demo" className="hover:text-[#171717] transition-colors">Excel Add-in</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <h4 className="font-bold text-[var(--color-ink)]">Company</h4>
+              <ul className="space-y-2 text-[var(--color-text-secondary)]">
+                <li><a href="#" className="hover:text-[var(--color-ink)] transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-[var(--color-ink)] transition-colors">Security &amp; SOC2</a></li>
+                <li><a href="#" className="hover:text-[var(--color-ink)] transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-[var(--color-ink)] transition-colors">Terms of Service</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
+            <p>&copy; {new Date().getFullYear()} Finlyzer Inc. All rights reserved.</p>
+            <p>Financial data provided for research &amp; analytical modeling purposes.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
 }
-

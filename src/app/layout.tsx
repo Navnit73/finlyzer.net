@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Finlyzer | Next.js & DaisyUI",
-  description: "Modern Next.js application styled with Tailwind CSS v4 & DaisyUI v5",
+  title: "Finlyzer — Financial Analysis & Valuation Tools Hub",
+  description: "High-contrast, AI-powered financial tool hub for DCF modeling, statement analysis, ratio auditing, and portfolio intelligence.",
 };
 
 export default function RootLayout({
@@ -23,11 +23,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen bg-base-100 text-base-content font-sans antialiased">
+    <html lang="en" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="min-h-screen bg-white text-[#171717] font-sans antialiased selection:bg-[#70F000] selection:text-[#141414]">
         {children}
       </body>
     </html>
   );
 }
+
 
