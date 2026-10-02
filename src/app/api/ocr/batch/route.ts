@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { batchExtractDocuments } from '@/lib/ocr-api';
 import { saveDocumentExtraction } from '@/lib/models/Document';
 import { incrementUserPageCount, getUserQuota } from '@/lib/models/User';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,12 +14,10 @@ export async function POST(req: NextRequest) {
 
     // Bulk uploads require user to login with Google
     if (!userEmail) {
-      return NextResponse.json(
-        {
-          error: 'Bulk batch document processing requires a free account. Please log in with Google to continue.',
-          code: 'LOGIN_REQUIRED',
-        },
-        { status: 403 }
+      return errorResponse(
+        'Bulk batch document processing requires a free account. Please log in with Google to continue.',
+        403,
+        'LOGIN_REQUIRED'
       );
     }
 
@@ -29,15 +28,12 @@ export async function POST(req: NextRequest) {
     const cleanWithAi = formData.get('clean_with_ai') !== 'false';
 
     if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'No files provided for batch processing' }, { status: 400 });
+      return errorResponse('No files provided for batch processing', 400, 'NO_FILES');
     }
 
     // Limit maximum batch size (max 50 files)
     if (files.length > 50) {
-      return NextResponse.json(
-        { error: 'Batch upload limit exceeded. Maximum 50 documents per batch.' },
-        { status: 400 }
-      );
+      return errorResponse('Batch upload limit exceeded. Maximum 50 documents per batch.', 400, 'BATCH_LIMIT_EXCEEDED');
     }
 
     // Server-Side File Size Limit (Max 50MB per file) & Format Whitelist
@@ -47,34 +43,32 @@ export async function POST(req: NextRequest) {
 
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { error: `File "${file.name}" exceeds maximum upload size of 50MB.` },
-          { status: 413 }
-        );
+        return errorResponse(`File "${file.name}" exceeds maximum upload size of 50MB.`, 413, 'FILE_TOO_LARGE');
       }
       const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase() : '';
       if (!ALLOWED_EXTS.includes(ext) && file.type && !ALLOWED_MIME.includes(file.type.toLowerCase())) {
-        return NextResponse.json(
-          { error: `File "${file.name}" has an unsupported format. Please upload PDF, PNG, JPG, WEBP, TIFF, or ZIP files.` },
-          { status: 415 }
+        return errorResponse(
+          `File "${file.name}" has an unsupported format. Please upload PDF, PNG, JPG, WEBP, TIFF, or ZIP files.`,
+          415,
+          'UNSUPPORTED_MEDIA_TYPE'
         );
       }
     }
 
     const quota = await getUserQuota(userEmail);
     if (quota.tier !== 'enterprise' && files.length > quota.freePagesRemaining) {
-      return NextResponse.json(
+      return errorResponse(
+        `Insufficient page credits. This batch has ${files.length} documents, but your account only has ${quota.freePagesRemaining} remaining credits. Please top up your package.`,
+        403,
+        'QUOTA_EXCEEDED',
         {
-          error: `Insufficient page credits. This batch has ${files.length} documents, but your account only has ${quota.freePagesRemaining} remaining credits. Please top up your package.`,
-          code: 'QUOTA_EXCEEDED',
           freePagesRemaining: quota.freePagesRemaining,
           requiredPages: files.length,
-        },
-        { status: 403 }
+        }
       );
     }
 
-    const fileNames = files.map(f => f.name);
+    const fileNames = files.map((f) => f.name);
     const batchResult = await batchExtractDocuments(files, fileNames, {
       documentType,
       language,
@@ -82,33 +76,32 @@ export async function POST(req: NextRequest) {
       userEmail,
     });
 
-    // Save batch document items to MongoDB
+    // Concurrently save batch document items to MongoDB
     if (batchResult.items && batchResult.items.length > 0) {
-      for (const item of batchResult.items) {
-        if (item.status === 'success' && item.extraction) {
-          try {
-            await saveDocumentExtraction(userEmail, {
+      const successfulItems = batchResult.items.filter((item) => item.status === 'success' && item.extraction);
+      await Promise.allSettled(
+        successfulItems.map((item) =>
+          saveDocumentExtraction(
+            userEmail,
+            {
               id: item.id,
               status: 'success',
               document_type: item.document_type,
-              extraction: item.extraction,
+              extraction: item.extraction!,
               raw_text: item.raw_text,
               metadata: { pages: 1, processing_time_ms: item.processing_time_ms },
-            }, item.filename);
-          } catch (e) {
-            console.warn('Batch item save failed:', (e as Error)?.message || 'DB Error');
-          }
-        }
-      }
-      await incrementUserPageCount(userEmail, batchResult.items.length);
+            },
+            item.filename
+          )
+        )
+      );
+
+      await incrementUserPageCount(userEmail, successfulItems.length);
     }
 
-    return NextResponse.json(batchResult);
+    return successResponse(batchResult);
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json(
-      { error: error.message || 'Batch OCR processing failed' },
-      { status: 500 }
-    );
+    return errorResponse(error.message || 'Batch OCR processing failed', 500);
   }
 }

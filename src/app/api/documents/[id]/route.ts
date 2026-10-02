@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getDocumentById, deleteDocumentById } from '@/lib/models/Document';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 export async function GET(
   req: NextRequest,
@@ -9,20 +10,24 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    if (!id || typeof id !== 'string' || !id.trim()) {
+      return errorResponse('Valid Document ID is required', 400, 'BAD_REQUEST');
+    }
+
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
-    const doc = await getDocumentById(id, userEmail || undefined);
+    const doc = await getDocumentById(id.trim(), userEmail || undefined);
     if (!doc) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+      return errorResponse('Document not found or access denied', 404, 'NOT_FOUND');
     }
 
     // Strip internal _id if present
     const { _id, ...safeDoc } = doc as unknown as { _id?: unknown };
-    return NextResponse.json(safeDoc);
+    return successResponse(safeDoc);
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Failed to fetch document' }, { status: 500 });
+    return errorResponse(error.message || 'Failed to fetch document', 500);
   }
 }
 
@@ -32,27 +37,31 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    if (!id || typeof id !== 'string' || !id.trim()) {
+      return errorResponse('Valid Document ID is required', 400, 'BAD_REQUEST');
+    }
+
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
-    const doc = await getDocumentById(id, userEmail || undefined);
+    const doc = await getDocumentById(id.trim(), userEmail || undefined);
     if (!doc) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+      return errorResponse('Document not found or access denied', 404, 'NOT_FOUND');
     }
 
     // Allow deleting if user owns it, or if it's a guest document
     if (doc.user_email !== 'guest' && (!userEmail || doc.user_email !== userEmail.toLowerCase().trim())) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return errorResponse('Unauthorized to delete this document', 403, 'FORBIDDEN');
     }
 
-    const deleted = await deleteDocumentById(id, userEmail || undefined);
+    const deleted = await deleteDocumentById(id.trim(), userEmail || undefined);
     if (!deleted) {
-      return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+      return errorResponse('Delete operation failed', 500);
     }
 
-    return NextResponse.json({ success: true, message: 'Document deleted successfully' });
+    return successResponse({ success: true, message: 'Document deleted successfully' });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Failed to delete document' }, { status: 500 });
+    return errorResponse(error.message || 'Failed to delete document', 500);
   }
 }

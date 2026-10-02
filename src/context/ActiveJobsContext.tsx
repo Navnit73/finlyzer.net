@@ -38,11 +38,27 @@ const ActiveJobsContext = createContext<ActiveJobsContextType | undefined>(undef
 const STORAGE_KEY = 'finlyzer_active_jobs_v1';
 
 export function ActiveJobsProvider({ children }: { children: React.ReactNode }) {
-  const [activeJobs, setActiveJobs] = useState<ActiveJobItem[]>([]);
+  const [activeJobs, setActiveJobs] = useState<ActiveJobItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          return JSON.parse(stored);
+        }
+      } catch {
+        // Ignore storage errors
+      }
+    }
+    return [];
+  });
   const [selectedJobModal, setSelectedJobModal] = useState<ActiveJobItem | null>(null);
   const [isFloatingTrackerOpen, setIsFloatingTrackerOpen] = useState(true);
   const eventSourcesRef = useRef<Map<string, EventSource>>(new Map());
-  const isInitialized = useRef(false);
+  const activeJobsRef = useRef(activeJobs);
+
+  useEffect(() => {
+    activeJobsRef.current = activeJobs;
+  }, [activeJobs]);
 
   const removeJob = useCallback((jobId: string) => {
     setActiveJobs((prev) => prev.filter((j) => j.jobId !== jobId));
@@ -114,19 +130,8 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
     setActiveJobs((prev) => prev.filter((j) => j.status === 'processing' || j.status === 'queued'));
   }, []);
 
-  // 1. Load active jobs from localStorage on initial mount and listen for external additions
+  // 1. Listen for external additions
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed: ActiveJobItem[] = JSON.parse(stored);
-        setActiveJobs(parsed);
-      }
-    } catch {
-      // Ignore storage errors
-    }
-    isInitialized.current = true;
-
     const handleExternalJobAdd = (e: Event) => {
       const customEvent = e as CustomEvent<Partial<ActiveJobItem> & { jobId: string; filename: string }>;
       if (customEvent?.detail?.jobId) {
@@ -142,7 +147,6 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
 
   // 2. Save active jobs to localStorage when changed (Sanitizing result payload to prevent 5MB storage quota overflow)
   useEffect(() => {
-    if (!isInitialized.current) return;
     try {
       const sanitized = activeJobs.slice(0, 20).map((job) => ({
         ...job,
@@ -156,8 +160,8 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
   }, [activeJobs]);
 
   // 3. Stable Background Job Sync: Connect SSE per active job ID without tearing down timers on every progress tick
-  const activeJobsRef = useRef(activeJobs);
-  activeJobsRef.current = activeJobs;
+  const inFlightSyncKey = activeJobs.map((j) => `${j.jobId}:${j.status}`).join(',');
+  const hasInFlightJobs = activeJobs.some((j) => j.status === 'queued' || j.status === 'processing');
 
   useEffect(() => {
     const inFlightJobs = activeJobs.filter(
@@ -242,12 +246,11 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
         eventSourcesRef.current.delete(jobId);
       }
     });
-  }, [activeJobs.map((j) => `${j.jobId}:${j.status}`).join(','), updateJob]);
+  }, [inFlightSyncKey, updateJob]);
 
   // Fallback background polling (only runs when in-flight jobs exist and SSE is closed/missing)
   useEffect(() => {
-    const hasInFlight = activeJobs.some((j) => j.status === 'queued' || j.status === 'processing');
-    if (!hasInFlight) return;
+    if (!hasInFlightJobs) return;
 
     const pollTimer = setInterval(async () => {
       const currentInFlight = activeJobsRef.current.filter(
@@ -280,7 +283,7 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
     return () => {
       clearInterval(pollTimer);
     };
-  }, [activeJobs.some((j) => j.status === 'queued' || j.status === 'processing'), updateJob]);
+  }, [hasInFlightJobs, updateJob]);
 
   return (
     <ActiveJobsContext.Provider

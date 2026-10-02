@@ -1,6 +1,6 @@
 import { getDatabase, ensureDatabaseIndexes } from '../mongodb';
 import { findOrCreateUser, getUserQuota, getUserStats, incrementUserPageCount, addPurchasedPages, deleteUserAccount } from '../models/User';
-import { saveDocumentExtraction, getUserDocuments, getDocumentById, getDocumentsByIds, deleteDocumentById, deleteAllUserDocuments } from '../models/Document';
+import { saveDocumentExtraction, getUserDocuments, getDocumentById, getDocumentsByIds, deleteAllUserDocuments } from '../models/Document';
 import { createOrder, updateOrderStatus, getOrderById, getUserOrders, deleteAllUserOrders } from '../models/Order';
 import { ExtractionResponse } from '@/types/ocr';
 
@@ -103,6 +103,10 @@ async function runDatabaseAuditTests() {
     const singleDoc = await getDocumentById(mockExtraction.id, testEmail);
     assert(!!singleDoc, 'Single document retrieval by ID succeeded');
     assert(singleDoc?.raw_text !== undefined, 'Full single document includes raw_text when inspecting');
+
+    // Query batch by IDs
+    const docsByIds = await getDocumentsByIds([mockExtraction.id], testEmail);
+    assert(docsByIds.length === 1 && docsByIds[0].id === mockExtraction.id, 'getDocumentsByIds returned matching document');
 
     // 4. Orders & Billing Operations
     console.log('\n--- 4. Orders & Billing Operations ---');

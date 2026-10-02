@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cancelJob } from '@/lib/ocr-api';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 export async function POST(
   req: NextRequest,
@@ -7,18 +8,19 @@ export async function POST(
 ) {
   try {
     const { id: jobId } = await params;
-    if (!jobId) {
-      return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
+    if (!jobId || typeof jobId !== 'string' || !jobId.trim()) {
+      return errorResponse('Valid Job ID is required', 400, 'BAD_REQUEST');
     }
 
-    const success = await cancelJob(jobId);
+    const sanitizedJobId = jobId.trim();
+    const success = await cancelJob(sanitizedJobId);
     if (!success) {
-      return NextResponse.json({ error: 'Failed to cancel job on backend' }, { status: 500 });
+      return errorResponse('Failed to cancel job on background worker', 502, 'WORKER_ERROR');
     }
 
-    return NextResponse.json({ success: true, message: `Job ${jobId} cancelled successfully` });
+    return successResponse({ success: true, message: `Job ${sanitizedJobId} cancelled successfully` });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Cancel request failed' }, { status: 500 });
+    return errorResponse(error.message || 'Cancel request failed', 500);
   }
 }

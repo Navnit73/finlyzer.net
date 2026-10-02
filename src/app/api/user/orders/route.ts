@@ -2,42 +2,69 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { createOrder, updateOrderStatus, getUserOrders, getOrderById, PRICING_PLANS, OrderRecord } from '@/lib/models/Order';
+import {
+  createOrder,
+  updateOrderStatus,
+  getUserOrders,
+  getOrderById,
+  PRICING_PLANS,
+  OrderRecord,
+} from '@/lib/models/Order';
 import { addPurchasedPages, getUserQuota } from '@/lib/models/User';
+import { errorResponse, successResponse, safeParseJson } from '@/lib/api-utils';
 
+/**
+ * GET /api/user/orders
+ * Returns all billing orders and invoice records for the authenticated user.
+ */
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return errorResponse('Unauthorized. Please sign in to view billing history.', 401, 'UNAUTHORIZED');
     }
 
     const orders = await getUserOrders(session.user.email);
     const sanitizedOrders = orders.map(({ _id, ...rest }: { _id?: unknown } & OrderRecord) => rest);
-    return NextResponse.json({ orders: sanitizedOrders });
+    return successResponse({ orders: sanitizedOrders });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Failed to fetch orders' }, { status: 500 });
+    return errorResponse(error.message || 'Failed to fetch billing orders', 500);
   }
 }
 
+/**
+ * POST /api/user/orders
+ * Initializes a new checkout order with server-validated pricing.
+ */
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return errorResponse('Unauthorized. Please sign in to create an order.', 401, 'UNAUTHORIZED');
     }
 
-    const body = await req.json();
+    const { data: body, error: parseError } = await safeParseJson<{
+      plan_id?: string;
+      gateway?: OrderRecord['payment_gateway'];
+    }>(req);
+
+    if (parseError || !body) {
+      return errorResponse(parseError || 'Invalid request body', 400, 'BAD_REQUEST');
+    }
+
     const { plan_id, gateway = 'razorpay' } = body;
 
     const plan = PRICING_PLANS.find((p) => p.id === plan_id);
     if (!plan) {
-      return NextResponse.json({ error: 'Invalid pricing plan selected' }, { status: 400 });
+      return errorResponse('Invalid pricing plan selected.', 400, 'INVALID_PLAN');
     }
 
+    const allowedGateways: OrderRecord['payment_gateway'][] = ['razorpay', 'stripe', 'test', 'manual'];
+    const safeGateway = allowedGateways.includes(gateway) ? gateway : 'razorpay';
+
     // 1. Create DB order record (initial status: created)
-    const order = await createOrder(session.user.email, plan.id, gateway);
+    const order = await createOrder(session.user.email, plan.id, safeGateway);
 
     // Order configuration payload
     const orderPayload = {
@@ -57,26 +84,42 @@ export async function POST(req: NextRequest) {
     };
 
     const { _id, ...safeOrder } = order as unknown as { _id?: unknown } & OrderRecord;
-    return NextResponse.json({
+    return successResponse({
       success: true,
       order: safeOrder,
       payload: orderPayload,
     });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Failed to create order' }, { status: 500 });
+    return errorResponse(error.message || 'Failed to create order', 500);
   }
 }
 
+/**
+ * PUT /api/user/orders
+ * Verifies payment confirmation with HMAC-SHA256 signature verification and allocates page credits.
+ */
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return errorResponse('Unauthorized. Please sign in to complete payment.', 401, 'UNAUTHORIZED');
     }
 
     const normalizedUserEmail = session.user.email.toLowerCase().trim();
-    const body = await req.json();
+
+    const { data: body, error: parseError } = await safeParseJson<{
+      order_id?: string;
+      status?: OrderRecord['status'];
+      razorpay_payment_id?: string;
+      razorpay_order_id?: string;
+      razorpay_signature?: string;
+    }>(req);
+
+    if (parseError || !body) {
+      return errorResponse(parseError || 'Invalid request body', 400, 'BAD_REQUEST');
+    }
+
     const {
       order_id,
       status = 'completed',
@@ -85,25 +128,25 @@ export async function PUT(req: NextRequest) {
       razorpay_signature,
     } = body;
 
-    if (!order_id) {
-      return NextResponse.json({ error: 'order_id is required' }, { status: 400 });
+    if (!order_id || typeof order_id !== 'string') {
+      return errorResponse('Valid order_id is required', 400, 'MISSING_ORDER_ID');
     }
 
     // 1. Ownership & Existence Verification BEFORE any state modification
-    const existingOrder = await getOrderById(order_id);
+    const existingOrder = await getOrderById(order_id.trim());
     if (!existingOrder) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      return errorResponse('Order not found', 404, 'NOT_FOUND');
     }
 
     if (existingOrder.user_email !== normalizedUserEmail) {
-      return NextResponse.json({ error: 'Unauthorized: Order belongs to another account' }, { status: 403 });
+      return errorResponse('Unauthorized: Order belongs to another account', 403, 'FORBIDDEN');
     }
 
     // 2. Prevent Replay Attack / Double Crediting
     if (existingOrder.status === 'completed') {
       const freshQuota = await getUserQuota(session.user.email);
       const { _id, ...safeOrder } = existingOrder as unknown as { _id?: unknown } & OrderRecord;
-      return NextResponse.json({
+      return successResponse({
         success: true,
         order: safeOrder,
         quota: freshQuota,
@@ -116,10 +159,7 @@ export async function PUT(req: NextRequest) {
     if (status === 'completed' && existingOrder.payment_gateway === 'razorpay') {
       if (razorpayKeySecret) {
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-          return NextResponse.json(
-            { error: 'Missing required Razorpay payment verification parameters' },
-            { status: 400 }
-          );
+          return errorResponse('Missing required Razorpay payment verification parameters', 400, 'MISSING_PAYMENT_PROOF');
         }
 
         const generatedSignature = crypto
@@ -129,18 +169,12 @@ export async function PUT(req: NextRequest) {
 
         if (generatedSignature !== razorpay_signature) {
           console.error(`[SECURITY ALERT] Invalid payment signature for order ${order_id}`);
-          return NextResponse.json(
-            { error: 'Payment signature verification failed. Access denied.' },
-            { status: 400 }
-          );
+          return errorResponse('Payment signature verification failed. Access denied.', 400, 'INVALID_SIGNATURE');
         }
       } else {
         // In development/mock mode without secret, require at least mock payment id
         if (!razorpay_payment_id) {
-          return NextResponse.json(
-            { error: 'Payment confirmation details are required' },
-            { status: 400 }
-          );
+          return errorResponse('Payment confirmation details are required', 400, 'PAYMENT_ID_REQUIRED');
         }
       }
     }
@@ -153,7 +187,7 @@ export async function PUT(req: NextRequest) {
     });
 
     if (!updatedOrder) {
-      return NextResponse.json({ error: 'Order update failed' }, { status: 500 });
+      return errorResponse('Order update failed', 500);
     }
 
     // 5. Secure Credit Allocation only after strict verification
@@ -166,7 +200,7 @@ export async function PUT(req: NextRequest) {
     const freshQuota = await getUserQuota(session.user.email);
     const { _id, ...safeOrder } = updatedOrder as unknown as { _id?: unknown } & OrderRecord;
 
-    return NextResponse.json({
+    return successResponse({
       success: true,
       order: safeOrder,
       quota: freshQuota,
@@ -174,6 +208,6 @@ export async function PUT(req: NextRequest) {
     });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Failed to update order' }, { status: 500 });
+    return errorResponse(error.message || 'Failed to update order', 500);
   }
 }

@@ -4,6 +4,7 @@ import { OCRWebhookPayload, ExtractionResponse } from '@/types/ocr';
 import { saveDocumentExtraction } from '@/lib/models/Document';
 import { incrementUserPageCount } from '@/lib/models/User';
 import { fetchDocumentById } from '@/lib/ocr-api';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 const WEBHOOK_SECRET = process.env.OCR_WEBHOOK_SECRET || 'ocr_webhook_secret_2026';
 
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     // 1. Signature Verification with HMAC-SHA256
     if (!signatureHeader) {
       console.warn('⚠️ [OCR Webhook] Missing x-webhook-signature header');
-      return NextResponse.json({ error: 'Missing x-webhook-signature header' }, { status: 401 });
+      return errorResponse('Missing x-webhook-signature header', 401, 'MISSING_SIGNATURE');
     }
 
     const cleanSignature = signatureHeader.startsWith('sha256=')
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     if (!isValid) {
       console.error('❌ [OCR Webhook] Invalid HMAC signature provided:', signatureHeader);
-      return NextResponse.json({ error: 'Invalid HMAC signature' }, { status: 403 });
+      return errorResponse('Invalid HMAC signature', 403, 'INVALID_SIGNATURE');
     }
 
     // 2. Parse Event Payload
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
         (result?.metadata as Record<string, unknown> | undefined)?.user_email as string ||
         'guest'
       ).toLowerCase().trim();
-      
+
       const filename = (metadata?.filename as string) || result?.filename || 'statement.pdf';
       const rawPages = metadata?.total_pages ?? result?.metadata?.pages ?? (metadata as unknown as Record<string, unknown>)?.pages ?? 1;
       const pages = Math.max(1, typeof rawPages === 'number' ? rawPages : parseInt(String(rawPages), 10) || 1);
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return successResponse({
       received: true,
       event,
       job_id,
@@ -122,9 +123,6 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     const error = err as { message?: string };
     console.error('❌ [OCR Webhook] Handler error:', error.message);
-    return NextResponse.json(
-      { error: error.message || 'Internal webhook processing error' },
-      { status: 500 }
-    );
+    return errorResponse(error.message || 'Internal webhook processing error', 500);
   }
 }

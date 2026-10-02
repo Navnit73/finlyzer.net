@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { fetchJobStatus } from '@/lib/ocr-api';
 import { saveDocumentExtraction } from '@/lib/models/Document';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 export async function GET(
   req: NextRequest,
@@ -10,14 +11,14 @@ export async function GET(
 ) {
   try {
     const { id: jobId } = await params;
-    if (!jobId) {
-      return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
+    if (!jobId || typeof jobId !== 'string' || !jobId.trim()) {
+      return errorResponse('Valid Job ID is required', 400, 'BAD_REQUEST');
     }
 
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
-    const job = await fetchJobStatus(jobId);
+    const job = await fetchJobStatus(jobId.trim());
 
     // If job finished with extraction, ensure it is persisted in local MongoDB
     if (job.status === 'completed' && job.result) {
@@ -38,12 +39,9 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(job);
+    return successResponse(job);
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch job status' },
-      { status: 500 }
-    );
+    return errorResponse(error.message || 'Failed to fetch job status', 500);
   }
 }

@@ -110,7 +110,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   // Left Column: Order Information
   const col1X = margin + 16;
   const col2X = margin + (width - margin * 2) / 2 + 16;
-  let metaY = currentY - 20;
+  const metaY = currentY - 20;
 
   page.drawText('INVOICE REFERENCE:', { x: col1X, y: metaY, size: 8, font: boldFont, color: textMuted });
   page.drawText(order.order_id, { x: col1X, y: metaY - 12, size: 10, font: boldFont, color: inkDark });

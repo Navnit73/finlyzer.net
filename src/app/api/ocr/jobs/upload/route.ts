@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getUserQuota } from '@/lib/models/User';
 import { uploadAsyncJob } from '@/lib/ocr-api';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 const WEBHOOK_SECRET = process.env.OCR_WEBHOOK_SECRET || 'ocr_webhook_secret_2026';
 
@@ -18,19 +19,20 @@ export async function POST(req: NextRequest) {
     const language = (formData.get('language') as SupportedLanguage) || 'en';
     const cleanWithAi = formData.get('clean_with_ai') !== 'false';
     const password = (formData.get('password') as string) || undefined;
-    const estimatedPages = parseInt((formData.get('page_count') as string) || '1', 10);
+    const estimatedPages = Math.max(1, parseInt((formData.get('page_count') as string) || '1', 10) || 1);
     const customRequestId = (formData.get('request_id') as string) || undefined;
 
     if (!file) {
-      return NextResponse.json({ error: 'No document file provided' }, { status: 400 });
+      return errorResponse('No document file provided', 400, 'NO_FILE');
     }
 
     // 1. File Size & Format Validation (Support up to 100MB for long documents)
     const MAX_FILE_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File exceeds maximum upload size of 100MB for long document processing' },
-        { status: 413 }
+      return errorResponse(
+        'File exceeds maximum upload size of 100MB for long document processing',
+        413,
+        'FILE_TOO_LARGE'
       );
     }
 
@@ -39,9 +41,10 @@ export async function POST(req: NextRequest) {
     const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase() : '';
 
     if (!ALLOWED_EXTS.includes(ext) && file.type && !ALLOWED_MIME.includes(file.type.toLowerCase())) {
-      return NextResponse.json(
-        { error: 'Unsupported file format. Please upload a PDF, PNG, JPG, WEBP, or TIFF document.' },
-        { status: 415 }
+      return errorResponse(
+        'Unsupported file format. Please upload a PDF, PNG, JPG, WEBP, or TIFF document.',
+        415,
+        'UNSUPPORTED_MEDIA_TYPE'
       );
     }
 
@@ -49,25 +52,23 @@ export async function POST(req: NextRequest) {
     const quota = await getUserQuota(userEmail);
 
     if (!userEmail && estimatedPages > 10) {
-      return NextResponse.json(
-        {
-          error: 'Long documents (10+ pages) require a free registered account. Please sign in with Google.',
-          code: 'LOGIN_REQUIRED',
-          pageCount: estimatedPages,
-        },
-        { status: 403 }
+      return errorResponse(
+        'Long documents (10+ pages) require a free registered account. Please sign in with Google.',
+        403,
+        'LOGIN_REQUIRED',
+        { pageCount: estimatedPages }
       );
     }
 
     if (userEmail && quota.tier !== 'enterprise' && estimatedPages > quota.freePagesRemaining) {
-      return NextResponse.json(
+      return errorResponse(
+        `Insufficient page balance. This document requires approximately ${estimatedPages} page credits, but your account only has ${quota.freePagesRemaining} remaining.`,
+        403,
+        'QUOTA_EXCEEDED',
         {
-          error: `Insufficient page balance. This document requires approximately ${estimatedPages} page credits, but your account only has ${quota.freePagesRemaining} remaining.`,
-          code: 'QUOTA_EXCEEDED',
           freePagesRemaining: quota.freePagesRemaining,
           requiredPages: estimatedPages,
-        },
-        { status: 403 }
+        }
       );
     }
 
@@ -119,22 +120,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(jobResponse, { status: 202 });
+    return successResponse(jobResponse, 202);
   } catch (err: unknown) {
     const error = err as { code?: string; message?: string };
     if (error.code === 'PASSWORD_REQUIRED') {
-      return NextResponse.json(
-        {
-          error: 'This PDF file is password protected. Please provide a password.',
-          code: 'PASSWORD_REQUIRED',
-        },
-        { status: 401 }
-      );
+      return errorResponse('This PDF file is password protected. Please provide a password.', 401, 'PASSWORD_REQUIRED');
     }
 
-    return NextResponse.json(
-      { error: error.message || 'Failed to initialize asynchronous document processing' },
-      { status: 500 }
-    );
+    return errorResponse(error.message || 'Failed to initialize asynchronous document processing', 500);
   }
 }

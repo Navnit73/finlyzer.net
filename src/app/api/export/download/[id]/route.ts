@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { downloadExportFile, generateExportDirect } from '@/lib/ocr-api';
 import { getDocumentById } from '@/lib/models/Document';
 import { ExportFormat } from '@/types/ocr';
-
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { errorResponse } from '@/lib/api-utils';
 
 const CONTENT_TYPES: Record<ExportFormat, string> = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -21,26 +21,29 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    if (!id || typeof id !== 'string' || !id.trim()) {
+      return errorResponse('Valid Document ID is required', 400, 'BAD_REQUEST');
+    }
+
     const { searchParams } = new URL(req.url);
-    const format = (searchParams.get('format') as ExportFormat) || 'xlsx';
+    const rawFormat = (searchParams.get('format') || 'xlsx').toLowerCase().trim() as ExportFormat;
+    const allowedFormats: ExportFormat[] = ['xlsx', 'pdf', 'csv', 'ofx', 'qbo', 'qif'];
+    const format = allowedFormats.includes(rawFormat) ? rawFormat : 'xlsx';
 
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
     // Check document ownership first
-    const storedDoc = await getDocumentById(id, userEmail || undefined);
+    const storedDoc = await getDocumentById(id.trim(), userEmail || undefined);
     if (!storedDoc) {
-      return NextResponse.json(
-        { error: 'Document extraction not found or access denied.' },
-        { status: 404 }
-      );
+      return errorResponse('Document extraction not found or access denied.', 404, 'NOT_FOUND');
     }
 
     let blob: Blob;
 
     try {
       // 1. First attempt direct binary stream from OCR API backend memory cache
-      blob = await downloadExportFile(id, format);
+      blob = await downloadExportFile(id.trim(), format);
     } catch {
       // 2. If memory cache missed, check MongoDB stored extraction JSON and generate direct export
       if (storedDoc.extraction) {
@@ -52,26 +55,24 @@ export async function GET(
           storedDoc.raw_text || ''
         );
       } else {
-        return NextResponse.json(
-          { error: 'Document extraction not found. Please re-upload the document to generate exports.' },
-          { status: 404 }
-        );
+        return errorResponse('Document extraction not found. Please re-upload the document to generate exports.', 404, 'EXTRACTION_MISSING');
       }
     }
 
     const buffer = Buffer.from(await blob.arrayBuffer());
     const contentType = CONTENT_TYPES[format] || 'application/octet-stream';
-    const filename = `finlyzer_export_${id}.${format}`;
+    const filename = `finlyzer_export_${id.trim()}.${format}`;
 
     return new NextResponse(buffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,
+        'Cache-Control': 'no-store, max-age=0',
       },
     });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Export download failed' }, { status: 500 });
+    return errorResponse(error.message || 'Export download failed', 500);
   }
 }

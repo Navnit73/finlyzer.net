@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { retryJob } from '@/lib/ocr-api';
+import { errorResponse, successResponse } from '@/lib/api-utils';
 
 export async function POST(
   req: NextRequest,
@@ -7,18 +8,19 @@ export async function POST(
 ) {
   try {
     const { id: jobId } = await params;
-    if (!jobId) {
-      return NextResponse.json({ error: 'Job ID is required' }, { status: 400 });
+    if (!jobId || typeof jobId !== 'string' || !jobId.trim()) {
+      return errorResponse('Valid Job ID is required', 400, 'BAD_REQUEST');
     }
 
-    const success = await retryJob(jobId);
+    const sanitizedJobId = jobId.trim();
+    const success = await retryJob(sanitizedJobId);
     if (!success) {
-      return NextResponse.json({ error: 'Failed to retry job on backend' }, { status: 500 });
+      return errorResponse('Failed to retry job on background worker', 502, 'WORKER_ERROR');
     }
 
-    return NextResponse.json({ success: true, message: `Job ${jobId} re-enqueued for processing` });
+    return successResponse({ success: true, message: `Job ${sanitizedJobId} re-enqueued for processing` });
   } catch (err: unknown) {
     const error = err as { message?: string };
-    return NextResponse.json({ error: error.message || 'Retry request failed' }, { status: 500 });
+    return errorResponse(error.message || 'Retry request failed', 500);
   }
 }
