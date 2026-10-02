@@ -199,8 +199,8 @@ export default function BatchProcessingModal({
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-700 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-2xl text-xs text-[var(--color-danger)] flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -214,7 +214,7 @@ export default function BatchProcessingModal({
                 </span>
                 <button
                   onClick={() => setSelectedFiles([])}
-                  className="text-red-600 hover:underline font-semibold"
+                  className="text-[var(--color-danger)] hover:underline font-semibold cursor-pointer"
                   disabled={isProcessing}
                 >
                   Clear All
@@ -240,7 +240,7 @@ export default function BatchProcessingModal({
                         removeFile(i);
                       }}
                       disabled={isProcessing}
-                      className="text-[var(--color-text-muted)] hover:text-red-600 p-1 transition-colors"
+                      className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] p-1 transition-colors cursor-pointer"
                       aria-label="Remove file"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

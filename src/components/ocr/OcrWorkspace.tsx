@@ -42,7 +42,7 @@ export default function OcrWorkspace() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsBatchModalOpen(true)}
-            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-xs transition-all hover:scale-[1.02]"
+            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-xs transition-all hover:scale-[1.02]"
           >
             <Layers className="w-3.5 h-3.5" />
             <span>Bulk Batch Extraction</span>

@@ -186,12 +186,12 @@ export default function HistoryDrawer({
             {!session?.user && (
               <div className="p-3.5 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2 text-[var(--color-ink)] font-medium">
-                  <Laptop className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Laptop className="w-4 h-4 text-[var(--color-success)] shrink-0" />
                   <span>Free guest storage (Saved in browser &amp; DB)</span>
                 </div>
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="btn btn-xs rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold border-none hover:bg-[var(--color-brand-hover)] shrink-0 px-3"
+                  className="btn btn-xs rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold border-none hover:bg-[var(--color-brand-hover)] shrink-0 px-3 cursor-pointer"
                 >
                   Sign In to Sync
                 </button>
@@ -288,14 +288,14 @@ export default function HistoryDrawer({
                         <div className="flex items-center gap-1">
                           <button
                             onClick={(e) => handleDownload(e, doc.id, 'xlsx')}
-                            className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                             title="Download Excel (.xlsx)"
                           >
                             <Download className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={(e) => handleDelete(e, doc.id)}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--color-text-secondary)] hover:text-red-600 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-[var(--color-danger-soft)] text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -326,7 +326,7 @@ export default function HistoryDrawer({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 truncate">
                         <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
-                          <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                          <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)]" />
                         </div>
                         <div className="truncate">
                           <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-hover)] transition-colors">
@@ -356,14 +356,14 @@ export default function HistoryDrawer({
                       <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => handleDownload(e, item.id, 'xlsx')}
-                          className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                           title="Download Excel (.xlsx)"
                         >
                           <Download className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDelete(e, item.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--color-text-secondary)] hover:text-red-600 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-[var(--color-danger-soft)] text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                           title="Remove from history"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

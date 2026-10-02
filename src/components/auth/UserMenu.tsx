@@ -120,7 +120,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               <li>
                 <button
                   onClick={() => signOut()}
-                  className="py-2 flex items-center gap-2 font-semibold text-red-600 hover:bg-red-50 rounded-xl w-full text-left"
+                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-xl w-full text-left cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>

@@ -74,8 +74,8 @@ export default function PdfPasswordModal({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+          <div className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-xl text-xs text-[var(--color-danger)] flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}

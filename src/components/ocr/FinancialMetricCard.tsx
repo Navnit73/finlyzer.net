@@ -36,19 +36,19 @@ export default function FinancialMetricCard({
       iconBg: 'bg-[var(--color-brand)] text-[var(--color-on-brand)]',
     },
     blue: {
-      bg: 'bg-[#EBF5FC]',
+      bg: 'bg-[var(--media-blue-soft)]',
       border: 'border-[var(--media-blue)]/60',
-      accent: 'text-[#1D6399]',
+      accent: 'text-[var(--media-blue-text)]',
       iconBg: 'bg-[var(--media-blue)] text-white',
     },
     violet: {
-      bg: 'bg-[#F2EDFD]',
+      bg: 'bg-[var(--media-violet-soft)]',
       border: 'border-[var(--media-violet)]/50',
       accent: 'text-[var(--media-violet)]',
       iconBg: 'bg-[var(--media-violet)] text-white',
     },
     pink: {
-      bg: 'bg-[#FDF0F5]',
+      bg: 'bg-[var(--media-pink-soft)]',
       border: 'border-[var(--media-pink)]/50',
       accent: 'text-[var(--media-pink)]',
       iconBg: 'bg-[var(--media-pink)] text-white',

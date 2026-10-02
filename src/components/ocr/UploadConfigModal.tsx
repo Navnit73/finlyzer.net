@@ -86,7 +86,7 @@ export default function UploadConfigModal({
               Document Setup
             </span>
             {isEncrypted && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]">
                 <Lock className="w-3 h-3" /> Password Protected
               </span>
             )}
@@ -105,7 +105,7 @@ export default function UploadConfigModal({
         {/* File Preview Card */}
         <div className="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
           <div className="w-11 h-11 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand-hover)] shrink-0 shadow-xs">
-            <FileText className="w-6 h-6 text-emerald-600" />
+            <FileText className="w-6 h-6 text-[var(--color-success)]" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-[var(--color-ink)] truncate" title={file.name}>

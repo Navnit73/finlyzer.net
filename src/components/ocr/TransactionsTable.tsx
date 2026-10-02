@@ -244,10 +244,10 @@ export default function TransactionsTable({
                     </td>
 
                     {/* Debit */}
-                    <td className="text-right font-mono font-bold whitespace-nowrap text-red-600 px-3 py-3 sm:py-3.5 align-middle">
+                    <td className="text-right font-mono font-bold whitespace-nowrap text-[var(--color-danger)] px-3 py-3 sm:py-3.5 align-middle">
                       {t.debit ? (
                         <span className="inline-flex items-center justify-end gap-1">
-                          <ArrowDownRight className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                          <ArrowDownRight className="w-3.5 h-3.5 text-[var(--color-danger)] shrink-0" />
                           -{formatCurrency(t.debit)}
                         </span>
                       ) : (
@@ -256,10 +256,10 @@ export default function TransactionsTable({
                     </td>
 
                     {/* Credit */}
-                    <td className="text-right font-mono font-bold whitespace-nowrap text-emerald-600 px-3 py-3 sm:py-3.5 align-middle">
+                    <td className="text-right font-mono font-bold whitespace-nowrap text-[var(--color-success)] px-3 py-3 sm:py-3.5 align-middle">
                       {t.credit ? (
                         <span className="inline-flex items-center justify-end gap-1">
-                          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <ArrowUpRight className="w-3.5 h-3.5 text-[var(--color-success)] shrink-0" />
                           +{formatCurrency(t.credit)}
                         </span>
                       ) : (

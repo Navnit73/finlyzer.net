@@ -70,7 +70,7 @@ export default function ExportActionBar({
       ext: '.xlsx',
       subtitle: 'Formulas & Charts',
       icon: FileSpreadsheet,
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      badgeColor: 'bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]',
       isPrimary: true,
     },
     {
@@ -79,7 +79,7 @@ export default function ExportActionBar({
       ext: '.csv',
       subtitle: 'Universal Raw Data',
       icon: FileText,
-      badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
+      badgeColor: 'bg-[var(--color-surface-muted)] text-[var(--color-ink)] border-[var(--color-border)]',
     },
     {
       format: 'pdf',
@@ -87,7 +87,7 @@ export default function ExportActionBar({
       ext: '.pdf',
       subtitle: 'Formatted Document',
       icon: FileText,
-      badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
+      badgeColor: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]',
     },
     {
       format: 'qbo',
@@ -95,7 +95,7 @@ export default function ExportActionBar({
       ext: '.qbo',
       subtitle: 'Intuit Bank Feed',
       icon: FileCode,
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      badgeColor: 'bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]',
     },
     {
       format: 'ofx',
@@ -103,7 +103,7 @@ export default function ExportActionBar({
       ext: '.ofx',
       subtitle: 'Zoho / Tally / Xero',
       icon: FileCode,
-      badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
+      badgeColor: 'bg-[var(--media-blue-soft)] text-[var(--media-blue-text)] border-[var(--media-blue-border)]',
     },
     {
       format: 'qif',
@@ -111,7 +111,7 @@ export default function ExportActionBar({
       ext: '.qif',
       subtitle: 'Desktop Finance',
       icon: FileCode,
-      badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
+      badgeColor: 'bg-[var(--media-violet-soft)] text-[var(--media-violet-text)] border-[var(--media-violet-border)]',
     },
   ];
 
@@ -139,7 +139,7 @@ export default function ExportActionBar({
         {onConsolidateClick && (
           <button
             onClick={onConsolidateClick}
-            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto shadow-2xs cursor-pointer"
+            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto shadow-2xs cursor-pointer"
             title="Consolidate multiple statements into unified P&L"
           >
             <Layers className="w-3.5 h-3.5" />
@@ -178,7 +178,7 @@ export default function ExportActionBar({
                   {isDownloading ? (
                     <span className="loading loading-spinner loading-xs"></span>
                   ) : isSuccess ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                    <Check className="w-3.5 h-3.5 text-[var(--color-success)] stroke-[3]" />
                   ) : (
                     <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
                   )}

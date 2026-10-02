@@ -17,18 +17,52 @@
   --color-surface: #ffffff;
   --color-surface-subtle: #f5f5f5;
   --color-surface-muted: #efefef;
+  --color-border: #e5e5e5;
   --color-border-subtle: #e5e5e5;
+  --color-border-hover: #d1d1d1;
   --color-brand: #70f000;
   --color-brand-hover: #61d900;
   --color-brand-soft: #e9ffd6;
   --color-on-brand: #141414;
   --color-on-dark: #ffffff;
+  --color-dark-bg: #111111;
+  --color-dark-surface: #1e1e1e;
+
+  /* Semantic Status Tokens */
+  --color-success: #059669;
+  --color-success-hover: #047857;
+  --color-success-soft: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-warning: #d97706;
+  --color-warning-hover: #b45309;
+  --color-warning-soft: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-info: #0284c7;
+  --color-info-soft: #f0f9ff;
+  --color-info-border: #bae6fd;
 
   /* Financial Media & Accent Tokens */
   --color-media-blue: #8fc5ee;
+  --color-media-blue-soft: #ebf5fc;
+  --color-media-blue-text: #1d6399;
+  --color-media-blue-border: #cbe5f8;
   --color-media-violet: #7654e8;
+  --color-media-violet-soft: #f2edfd;
+  --color-media-violet-hover: #eae1fb;
+  --color-media-violet-text: #5936c9;
+  --color-media-violet-border: #d8cafb;
   --color-media-pink: #f25d9a;
+  --color-media-pink-soft: #fdf0f5;
+  --color-media-pink-text: #c7286a;
+  --color-media-pink-border: #fbc7dc;
   --color-media-orange: #ff6b55;
+  --color-media-orange-soft: #fff0ed;
+  --color-media-orange-text: #c9402c;
+  --color-media-orange-border: #ffccbe;
   --color-media-deep-purple: #52106b;
 
   /* Typography Scale */
@@ -53,17 +87,51 @@
   --color-surface-subtle: #f5f5f5;
   --color-surface-muted: #efefef;
   --color-border: #e5e5e5;
+  --color-border-subtle: #e5e5e5;
+  --color-border-hover: #d1d1d1;
   --color-brand: #70f000;
   --color-brand-hover: #61d900;
   --color-brand-soft: #e9ffd6;
   --color-on-brand: #141414;
   --color-on-dark: #ffffff;
+  --color-dark-bg: #111111;
+  --color-dark-surface: #1e1e1e;
+
+  /* Semantic Status Tokens */
+  --color-success: #059669;
+  --color-success-hover: #047857;
+  --color-success-soft: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-warning: #d97706;
+  --color-warning-hover: #b45309;
+  --color-warning-soft: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-info: #0284c7;
+  --color-info-soft: #f0f9ff;
+  --color-info-border: #bae6fd;
 
   /* Financial Supporting Colors */
   --media-blue: #8fc5ee;
+  --media-blue-soft: #ebf5fc;
+  --media-blue-text: #1d6399;
+  --media-blue-border: #cbe5f8;
   --media-violet: #7654e8;
+  --media-violet-soft: #f2edfd;
+  --media-violet-hover: #eae1fb;
+  --media-violet-text: #5936c9;
+  --media-violet-border: #d8cafb;
   --media-pink: #f25d9a;
+  --media-pink-soft: #fdf0f5;
+  --media-pink-text: #c7286a;
+  --media-pink-border: #fbc7dc;
   --media-orange: #ff6b55;
+  --media-orange-soft: #fff0ed;
+  --media-orange-text: #c9402c;
+  --media-orange-border: #ffccbe;
   --media-deep-purple: #52106b;
 
   /* Layout and Transition Tokens */

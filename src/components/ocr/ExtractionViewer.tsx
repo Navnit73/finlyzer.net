@@ -434,11 +434,11 @@ export default function ExtractionViewer({
                 onClick={copyJson}
                 className="btn btn-xs rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center gap-1.5"
               >
-                {copiedJson ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedJson ? <Check className="w-3.5 h-3.5 text-[var(--color-success)]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedJson ? 'Copied' : 'Copy JSON'}</span>
               </button>
             </div>
-            <pre className="p-5 rounded-2xl bg-[#1e1e1e] text-[#70F000] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-white/10">
+            <pre className="p-5 rounded-2xl bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-white/10">
               {JSON.stringify(data, null, 2)}
             </pre>
           </div>

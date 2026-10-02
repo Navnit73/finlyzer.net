@@ -299,8 +299,8 @@ export default function OcrUploader({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-700 flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+          <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-2xl text-xs text-[var(--color-danger)] flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-bold">Extraction Notice</p>
               <p>{errorMessage}</p>
@@ -316,18 +316,18 @@ export default function OcrUploader({
               <span>AI Reconciliation</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-success)]" />
               <span>100% In-Memory &amp; Private</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
-              <Lock className="w-3.5 h-3.5 text-amber-600" />
+              <Lock className="w-3.5 h-3.5 text-[var(--color-warning)]" />
               <span>Password-Protected Support</span>
             </span>
           </div>
 
           <button
             onClick={onOpenBatchModal}
-            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] font-bold px-4 py-1.5 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] font-bold px-4 py-1.5 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
           >
             <Layers className="w-4 h-4" />
             <span>Bulk / Batch Upload</span>

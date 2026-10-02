@@ -136,7 +136,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setIsBatchModalOpen(true)}
-              className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 shadow-2xs cursor-pointer"
+              className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 shadow-2xs cursor-pointer"
               title="Bulk Batch Extraction"
             >
               <Layers className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           </div>
         ) : errorMessage ? (
           <div className="max-w-lg mx-auto py-16 text-center space-y-6">
-            <div className="w-16 h-16 mx-auto rounded-3xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto rounded-3xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)] flex items-center justify-center">
               <AlertCircle className="w-8 h-8" />
             </div>
             <div className="space-y-2">
