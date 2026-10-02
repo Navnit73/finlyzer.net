@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminTopNav from './AdminTopNav';
 
@@ -15,6 +15,25 @@ export default function AdminShell({ children }: AdminShellProps) {
   const toggleCollapse = () => {
     setIsCollapsed((prev) => !prev);
   };
+
+  // Lock body scroll and listen for Escape key when mobile sidebar drawer is open
+  useEffect(() => {
+    if (isMobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setIsMobileSidebarOpen(false);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isMobileSidebarOpen]);
 
   return (
     <div className="min-h-screen flex bg-[var(--color-surface)] text-[var(--color-ink)]">
@@ -32,15 +51,21 @@ export default function AdminShell({ children }: AdminShellProps) {
 
       {/* Mobile Slide-Over Drawer */}
       {isMobileSidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-in">
+        <div
+          className="lg:hidden fixed inset-0 z-50 flex animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile Navigation Sidebar"
+        >
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileSidebarOpen(false)}
+            aria-hidden="true"
           />
 
           {/* Drawer Content */}
-          <div className="relative z-10 w-64 max-w-[80vw] h-full bg-[var(--color-surface)] shadow-2xl animate-slide-right">
+          <div className="relative z-10 w-72 max-w-[85vw] h-full bg-[var(--color-surface)] shadow-2xl animate-slide-right flex flex-col">
             <AdminSidebar
               isCollapsed={false}
               onCloseMobile={() => setIsMobileSidebarOpen(false)}
@@ -60,7 +85,7 @@ export default function AdminShell({ children }: AdminShellProps) {
           onToggleCollapse={toggleCollapse}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-[var(--color-surface)] max-w-[1600px] w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 bg-[var(--color-surface)] max-w-[1600px] w-full mx-auto overflow-x-hidden">
           {children}
         </main>
       </div>

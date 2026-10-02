@@ -97,7 +97,7 @@ export default function AdminSidebar({
           href: '/',
           icon: Sparkles,
           active: pathname === '/',
-          badge: 'DeepSeek',
+          badge: 'AI',
         },
         {
           name: 'Converted Documents',
@@ -139,9 +139,9 @@ export default function AdminSidebar({
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      {/* Top Branding & Header */}
-      <div>
-        <div className={`h-16 flex items-center border-b border-[var(--color-border)] px-4 ${
+      {/* Top Branding & Navigation */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className={`h-16 flex items-center border-b border-[var(--color-border)] px-4 shrink-0 ${
           isCollapsed ? 'justify-center' : 'justify-between'
         }`}>
           <Link
@@ -209,7 +209,7 @@ export default function AdminSidebar({
         </div>
 
         {/* Navigation Sections */}
-        <div className="py-4 px-2 space-y-5 overflow-y-auto">
+        <div className="py-4 px-2 space-y-5 overflow-y-auto flex-1 min-h-0">
           {navSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
               {!isCollapsed && (

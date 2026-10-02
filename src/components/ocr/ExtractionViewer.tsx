@@ -83,7 +83,7 @@ export default function ExtractionViewer({
                 </span>
                 <span className="text-[11px] sm:text-xs text-[var(--color-text-muted)] flex items-center gap-1">
                   <Cpu className="w-3.5 h-3.5 text-[var(--media-blue)]" />
-                  {data.metadata?.ai_model || 'DeepSeek AI Model'}
+                  AI Financial Model
                 </span>
                 <span className="badge badge-sm bg-[var(--color-ink-soft)] text-white border border-[#444444] font-semibold text-[10px] sm:text-xs">
                   {data.metadata?.pages || 1} Page{data.metadata?.pages !== 1 ? 's' : ''}
@@ -336,7 +336,7 @@ export default function ExtractionViewer({
             <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
               <Sparkles className="w-5 h-5 text-[var(--color-brand-hover)] shrink-0 mt-0.5" />
               <div className="space-y-1 text-xs">
-                <p className="font-bold text-sm">DeepSeek AI Reconciliation Verified</p>
+                <p className="font-bold text-sm">AI Reconciliation Verified</p>
                 <p className="leading-relaxed">
                   The document extraction was validated against arithmetic balance checks and verified with zero discrepancy between line items and opening/closing totals.
                 </p>
@@ -362,7 +362,7 @@ export default function ExtractionViewer({
                   </div>
                   <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
                     <span className="text-[var(--color-text-secondary)]">AI Model Stage</span>
-                    <span className="font-bold text-[var(--color-ink)]">{data.metadata?.ai_model || 'DeepSeek-V3'}</span>
+                    <span className="font-bold text-[var(--color-ink)]">AI Financial Engine</span>
                   </div>
                 </div>
               </div>

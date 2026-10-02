@@ -26,6 +26,7 @@ import {
 import { StoredDocument, ExportFormat } from '@/types/ocr';
 import { OrderRecord } from '@/types/pricing';
 import AuthModal from '@/components/auth/AuthModal';
+import { formatUSD } from '@/lib/format';
 
 interface UserStatsState {
   totalDocuments: number;
@@ -283,11 +284,11 @@ export default function DashboardOverviewPage() {
               </div>
               <div>
                 <p className="text-xl font-black text-[var(--color-ink)]">
-                  DeepSeek AI
+                  AI Financial Engine
                 </p>
                 <p className="text-[11px] text-[var(--color-success)] font-bold mt-0.5 flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-[var(--color-success)]"></span>
-                  99.8% Financial Precision
+                  99.8% Precision Rate
                 </p>
               </div>
             </div>
@@ -341,7 +342,7 @@ export default function DashboardOverviewPage() {
                   Recent Converted Statements
                 </h2>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  Latest files parsed with DeepSeek AI OCR.
+                  Latest files parsed with AI Financial OCR.
                 </p>
               </div>
 
@@ -450,7 +451,7 @@ export default function DashboardOverviewPage() {
                         <td className="font-mono font-bold text-[var(--color-ink)]">{order.order_id}</td>
                         <td className="font-semibold text-[var(--color-ink)]">{order.plan_name}</td>
                         <td className="font-mono font-bold text-[var(--color-brand-dark)]">+{order.pages_credited.toLocaleString()}</td>
-                        <td className="font-bold text-[var(--color-ink)] font-mono">${order.amount_usd} USD</td>
+                        <td className="font-bold text-[var(--color-ink)] font-mono">{formatUSD(order.amount_usd)} USD</td>
                         <td>
                           <span className="badge badge-xs font-bold uppercase rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] border-none">
                             {order.status}

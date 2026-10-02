@@ -110,7 +110,7 @@ export default function PricingPage() {
           Flexible Credit Packages For Any Volume
         </h1>
         <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
-          No monthly lock-ins or recurring commitments. Buy page credits when you need them, processed with high-accuracy DeepSeek AI and PyMuPDF.
+          No monthly lock-ins or recurring commitments. Buy page credits when you need them, processed with high-accuracy AI financial parsing.
         </p>
 
         {/* Live Active Balance Strip if Logged In */}

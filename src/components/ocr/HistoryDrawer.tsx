@@ -17,6 +17,7 @@ import { DocumentListResponse, StoredDocument, ExportFormat } from '@/types/ocr'
 import { getBrowserHistory, removeFromBrowserHistory, BrowserHistoryItem } from '@/lib/browser-history';
 import { useIsMounted } from '@/lib/useIsMounted';
 import AuthModal from '../auth/AuthModal';
+import { formatUSD } from '@/lib/format';
 
 interface HistoryDrawerProps {
   isOpen: boolean;
@@ -274,7 +275,7 @@ export default function HistoryDrawer({
 
                         {(balance !== undefined || total !== undefined) && (
                           <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
-                            ${((balance ?? total) || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            {formatUSD(balance ?? total)}
                           </span>
                         )}
                       </div>
@@ -342,7 +343,7 @@ export default function HistoryDrawer({
 
                       {item.closing_balance !== undefined && item.closing_balance !== null && (
                         <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
-                          ${item.closing_balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          {formatUSD(item.closing_balance)}
                         </span>
                       )}
                     </div>
@@ -390,7 +391,7 @@ export default function HistoryDrawer({
 
           {/* Drawer Footer */}
           <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-muted)]">
-            <span>Powered by PyMuPDF &amp; DeepSeek AI</span>
+            <span>Powered by AI Financial Engine</span>
             <button
               onClick={onClose}
               className="font-bold text-[var(--color-ink)] hover:underline"

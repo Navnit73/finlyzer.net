@@ -253,7 +253,7 @@ export default function OcrUploader({
 
               <div className="space-y-2">
                 <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
-                  Upload Financial Statement or PDF
+                  Upload Bank Statement or PDF
                 </h3>
                 <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
                   Drag &amp; drop your bank statement, invoice, or receipt here, or{' '}

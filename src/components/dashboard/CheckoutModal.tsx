@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, CheckCircle2, ShieldCheck, Sparkles, CreditCard, ArrowRight, AlertCircle, Zap } from 'lucide-react';
 import { PricingPlan } from '@/types/pricing';
 import { useIsMounted } from '@/lib/useIsMounted';
+import { formatUSD } from '@/lib/format';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -126,7 +127,7 @@ export default function CheckoutModal({
               <p className="text-lg font-black text-[var(--color-ink)]">{plan.name}</p>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-black text-[var(--color-ink)] font-mono">${plan.price_usd}</p>
+              <p className="text-3xl font-black text-[var(--color-ink)] font-mono">{formatUSD(plan.price_usd)}</p>
               <p className="text-[11px] font-bold text-[var(--color-brand-dark)] uppercase">USD One-Time</p>
             </div>
           </div>
@@ -204,7 +205,7 @@ export default function CheckoutModal({
               ) : (
                 <>
                   <Zap className="w-4 h-4 fill-current" />
-                  <span>Pay ${plan.price_usd} USD</span>
+                  <span>Pay {formatUSD(plan.price_usd)} USD</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </>
               )}

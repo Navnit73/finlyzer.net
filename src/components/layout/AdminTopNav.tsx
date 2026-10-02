@@ -149,7 +149,7 @@ export default function AdminTopNav({
           {/* Engine Status Badge */}
           <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-bold text-[11px] border border-[var(--color-brand)]/20">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-dark)] animate-pulse"></span>
-            DeepSeek AI Active
+            AI Engine Active
           </span>
 
           {/* History Drawer Trigger */}

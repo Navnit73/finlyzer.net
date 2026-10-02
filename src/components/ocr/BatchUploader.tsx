@@ -21,6 +21,7 @@ import {
 import { BatchResponse } from '@/types/ocr';
 import FinancialMetricCard from './FinancialMetricCard';
 import AuthModal from '../auth/AuthModal';
+import { formatUSD } from '@/lib/format';
 
 interface BatchUploaderProps {
   onSelectExtraction?: (id: string) => void;
@@ -273,7 +274,7 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-[var(--color-ink)] flex items-center gap-2">
                   <span className="loading loading-spinner loading-xs text-[var(--color-brand)]"></span>
-                  Processing Multi-File Batch with DeepSeek AI...
+                  Processing Multi-File Batch with AI Financial Engine...
                 </span>
                 <span className="font-mono font-bold text-[var(--color-ink)]">{progress}%</span>
               </div>
@@ -346,17 +347,17 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <FinancialMetricCard
               title="Consolidated Total Inflow"
-              value={`$ ${(batchResult.consolidated_inflow || 0).toLocaleString()}`}
+              value={formatUSD(batchResult.consolidated_inflow || 0)}
               variant="brand"
             />
             <FinancialMetricCard
               title="Consolidated Total Outflow"
-              value={`$ ${(batchResult.consolidated_outflow || 0).toLocaleString()}`}
+              value={formatUSD(batchResult.consolidated_outflow || 0)}
               variant="pink"
             />
             <FinancialMetricCard
               title="Net Consolidated Balance"
-              value={`$ ${(batchResult.net_consolidated_savings || 0).toLocaleString()}`}
+              value={formatUSD(batchResult.net_consolidated_savings || 0)}
               variant="neutral"
             />
           </div>

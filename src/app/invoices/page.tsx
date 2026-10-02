@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { OrderRecord } from '@/types/pricing';
 import AuthModal from '@/components/auth/AuthModal';
+import { formatUSD } from '@/lib/format';
 
 export default function InvoicesBillingPage() {
   const { data: session, status } = useSession();
@@ -179,7 +180,7 @@ export default function InvoicesBillingPage() {
                 Total Amount Billed
               </span>
               <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                ${totalSpentUsd.toFixed(2)} USD
+                {formatUSD(totalSpentUsd)} USD
               </p>
             </div>
           </div>
@@ -236,7 +237,7 @@ export default function InvoicesBillingPage() {
                         +{order.pages_credited.toLocaleString()} Pages
                       </td>
                       <td className="font-bold text-[var(--color-ink)] font-mono">
-                        ${order.amount_usd} USD
+                        {formatUSD(order.amount_usd)} USD
                       </td>
                       <td className="capitalize font-medium">
                         {order.payment_gateway}
@@ -330,7 +331,7 @@ export default function InvoicesBillingPage() {
               </div>
               <div className="flex justify-between border-t border-[var(--color-border)] pt-2 text-sm">
                 <span className="font-bold text-[var(--color-ink)]">Total Paid:</span>
-                <span className="font-black text-[var(--color-ink)] font-mono">${selectedReceipt.amount_usd}.00 USD</span>
+                <span className="font-black text-[var(--color-ink)] font-mono">{formatUSD(selectedReceipt.amount_usd)} USD</span>
               </div>
             </div>
 

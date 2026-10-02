@@ -168,7 +168,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
     color: inkDark,
   });
 
-  page.drawText('High-Accuracy DeepSeek AI Financial Statement Extraction Pass', {
+  page.drawText('High-Accuracy AI Financial Statement Extraction Pass', {
     x: margin + 12,
     y: currentY - 32,
     size: 8,
