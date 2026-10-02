@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { LogOut, History, ChevronDown, User } from 'lucide-react';
+import { LogOut, History, ChevronDown, User, CreditCard } from 'lucide-react';
 import Image from 'next/image';
 import AuthModal from './AuthModal';
 
@@ -105,11 +105,22 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                 </div>
               </li>
 
+              {/* Dashboard & Credits Link */}
+              <li>
+                <a
+                  href="/dashboard"
+                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
+                >
+                  <CreditCard className="w-4 h-4 text-[var(--color-brand-dark)]" />
+                  <span>Dashboard & Credits</span>
+                </a>
+              </li>
+
               {onOpenHistory && (
                 <li>
                   <button
                     onClick={onOpenHistory}
-                    className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
+                    className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left cursor-pointer"
                   >
                     <History className="w-4 h-4 text-[var(--color-ink)]" />
                     <span>My Document History</span>

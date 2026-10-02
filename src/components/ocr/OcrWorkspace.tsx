@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ExtractionResponse } from '@/types/ocr';
 import OcrUploader from './OcrUploader';
+import BatchUploader from './BatchUploader';
 import BatchProcessingModal from './BatchProcessingModal';
 import HistoryDrawer from './HistoryDrawer';
-import { Layers, History } from 'lucide-react';
+import { Layers, History, Sparkles, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function OcrWorkspace() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'single' | 'batch'>('single');
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
 
@@ -20,7 +22,6 @@ export default function OcrWorkspace() {
     }
   };
 
-  // When user selects a document from History or Batch modal, route to that document's page
   const handleSelectDocument = (docId: string) => {
     setIsHistoryDrawerOpen(false);
     setIsBatchModalOpen(false);
@@ -29,28 +30,43 @@ export default function OcrWorkspace() {
 
   return (
     <div className="space-y-6">
-      {/* Workspace Header / Quick Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[var(--color-border)]">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-brand)] animate-pulse"></span>
-          <span className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            AI OCR Statement Studio
-          </span>
-        </div>
-
-        {/* Global Hub Action Buttons */}
-        <div className="flex items-center gap-2">
+      {/* Workspace Header & Segmented Tab Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border)]">
+        {/* Left: Tab Switcher */}
+        <div className="flex items-center p-1 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] w-full sm:w-auto">
           <button
-            onClick={() => setIsBatchModalOpen(true)}
-            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-xs transition-all hover:scale-[1.02]"
+            onClick={() => setActiveTab('single')}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'single'
+                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-xs border border-[var(--color-border)]'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+            }`}
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Bulk Batch Extraction</span>
+            <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'single' ? 'text-[var(--color-brand-dark)]' : ''}`} />
+            <span>Single Document OCR</span>
           </button>
 
           <button
+            onClick={() => setActiveTab('batch')}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'batch'
+                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-xs border border-[var(--color-border)]'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+            }`}
+          >
+            <Layers className={`w-3.5 h-3.5 ${activeTab === 'batch' ? 'text-[var(--media-violet)]' : ''}`} />
+            <span>Bulk Batch Processing</span>
+            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[var(--media-violet-soft)] text-[var(--media-violet)]">
+              Multi-file
+            </span>
+          </button>
+        </div>
+
+        {/* Right: History Drawer Trigger */}
+        <div className="flex items-center gap-2">
+          <button
             onClick={() => setIsHistoryDrawerOpen(true)}
-            className="btn btn-sm rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-xs transition-all hover:scale-[1.02]"
+            className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-none cursor-pointer"
           >
             <History className="w-3.5 h-3.5" />
             <span>Document History</span>
@@ -58,18 +74,17 @@ export default function OcrWorkspace() {
         </div>
       </div>
 
-      {/* Main Upload Dropzone Component */}
-      <OcrUploader
-        onExtractionComplete={handleExtractionComplete}
-        onOpenBatchModal={() => setIsBatchModalOpen(true)}
-      />
-
-      {/* Batch Processing Modal */}
-      <BatchProcessingModal
-        isOpen={isBatchModalOpen}
-        onClose={() => setIsBatchModalOpen(false)}
-        onSelectExtraction={handleSelectDocument}
-      />
+      {/* Active Tab Content */}
+      {activeTab === 'single' ? (
+        <OcrUploader
+          onExtractionComplete={handleExtractionComplete}
+          onOpenBatchModal={() => setActiveTab('batch')}
+        />
+      ) : (
+        <BatchUploader
+          onSelectExtraction={handleSelectDocument}
+        />
+      )}
 
       {/* Saved Documents History Drawer */}
       <HistoryDrawer

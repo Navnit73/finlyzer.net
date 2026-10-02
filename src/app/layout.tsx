@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import AppShell from "@/components/layout/AppShell";
 
 export default function RootLayout({
   children,
@@ -28,13 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased selection:bg-[var(--color-brand)] selection:text-[var(--color-on-brand)]">
+      <body className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased selection:bg-[var(--color-brand)] selection:text-[var(--color-on-brand)]">
         <AuthProvider>
-          <Header />
-          <div className="flex-1">
+          <AppShell>
             {children}
-          </div>
-          <Footer />
+          </AppShell>
         </AuthProvider>
       </body>
     </html>

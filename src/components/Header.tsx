@@ -33,6 +33,19 @@ export default function Header() {
               </Link>
             </div>
 
+            {/* Center / Left Navigation Links */}
+            <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
+              <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">
+                Converter
+              </Link>
+              <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors">
+                Pricing & Credits
+              </Link>
+              <Link href="/dashboard" className="hover:text-[var(--color-ink)] transition-colors">
+                Dashboard
+              </Link>
+            </div>
+
             {/* Account Actions & Single Sign In Button */}
             <div className="flex items-center gap-2 sm:gap-3">
               <UserMenu onOpenHistory={() => setIsHistoryOpen(true)} />
