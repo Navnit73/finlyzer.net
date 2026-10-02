@@ -45,18 +45,30 @@ export function useOCRJob() {
     }
   }, []);
 
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      cleanupListeners();
+    };
+  }, [cleanupListeners]);
+
   const fetchFinalResult = useCallback(async (docId: string, jobId?: string) => {
     try {
       const res = await fetch(`/api/documents/${docId}`);
       if (res.ok) {
         const data: ExtractionResponse = await res.json();
-        setJobState((prev) => ({
-          ...prev,
-          status: 'completed',
-          processingProgress: 100,
-          currentStage: 'completed',
-          result: data,
-        }));
+        if (isMountedRef.current) {
+          setJobState((prev) => ({
+            ...prev,
+            status: 'completed',
+            processingProgress: 100,
+            currentStage: 'completed',
+            result: data,
+          }));
+        }
         return;
       }
     } catch {
@@ -70,13 +82,15 @@ export function useOCRJob() {
         if (jobRes.ok) {
           const jobData = await jobRes.json();
           if (jobData.result) {
-            setJobState((prev) => ({
-              ...prev,
-              status: 'completed',
-              processingProgress: 100,
-              currentStage: 'completed',
-              result: jobData.result,
-            }));
+            if (isMountedRef.current) {
+              setJobState((prev) => ({
+                ...prev,
+                status: 'completed',
+                processingProgress: 100,
+                currentStage: 'completed',
+                result: jobData.result,
+              }));
+            }
             return;
           }
         }
@@ -85,12 +99,14 @@ export function useOCRJob() {
       }
     }
 
-    setJobState((prev) => ({
-      ...prev,
-      status: 'completed',
-      processingProgress: 100,
-      currentStage: 'completed',
-    }));
+    if (isMountedRef.current) {
+      setJobState((prev) => ({
+        ...prev,
+        status: 'completed',
+        processingProgress: 100,
+        currentStage: 'completed',
+      }));
+    }
   }, []);
 
   const startPolling = useCallback((jobId: string, docId: string) => {
@@ -102,6 +118,8 @@ export function useOCRJob() {
         if (!res.ok) return;
 
         const job = await res.json();
+        if (!isMountedRef.current) return;
+
         setJobState((prev) => ({
           ...prev,
           status: job.status,
@@ -115,27 +133,31 @@ export function useOCRJob() {
         if (job.status === 'completed') {
           cleanupListeners();
           if (job.result) {
-            setJobState((prev) => ({
-              ...prev,
-              status: 'completed',
-              processingProgress: 100,
-              result: job.result,
-            }));
+            if (isMountedRef.current) {
+              setJobState((prev) => ({
+                ...prev,
+                status: 'completed',
+                processingProgress: 100,
+                result: job.result,
+              }));
+            }
           } else {
             fetchFinalResult(docId, jobId);
           }
         } else if (job.status === 'failed' || job.status === 'cancelled') {
           cleanupListeners();
-          setJobState((prev) => ({
-            ...prev,
-            status: job.status,
-            error: job.error || (job.status === 'cancelled' ? 'Job was cancelled.' : 'Extraction failed.'),
-          }));
+          if (isMountedRef.current) {
+            setJobState((prev) => ({
+              ...prev,
+              status: job.status,
+              error: job.error || (job.status === 'cancelled' ? 'Job was cancelled.' : 'Extraction failed.'),
+            }));
+          }
         }
       } catch (e) {
         console.warn('[useOCRJob] Polling error:', e);
       }
-    }, 2000);
+    }, 2500);
   }, [cleanupListeners, fetchFinalResult]);
 
   const connectSSE = useCallback((jobId: string, docId: string) => {
@@ -147,6 +169,7 @@ export function useOCRJob() {
       eventSourceRef.current = es;
 
       es.addEventListener('connected', () => {
+        if (!isMountedRef.current) return;
         setJobState((prev) => ({
           ...prev,
           status: 'processing',
@@ -157,6 +180,7 @@ export function useOCRJob() {
       es.addEventListener('ocr.job.started', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
+          if (!isMountedRef.current) return;
           setJobState((prev) => ({
             ...prev,
             status: 'processing',
@@ -164,14 +188,13 @@ export function useOCRJob() {
             currentStage: data.current_stage || 'ocr_extraction',
             message: data.message || 'Processing started...',
           }));
-        } catch {
-          // Ignore
-        }
+        } catch {}
       });
 
       es.addEventListener('ocr.job.progress', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
+          if (!isMountedRef.current) return;
           setJobState((prev) => ({
             ...prev,
             status: 'processing',
@@ -181,16 +204,14 @@ export function useOCRJob() {
             processedPages: data.processed_pages ?? prev.processedPages,
             message: data.message || `Extracting page ${data.processed_pages || 0} of ${data.total_pages || 0}...`,
           }));
-        } catch {
-          // Ignore
-        }
+        } catch {}
       });
 
       es.addEventListener('ocr.job.completed', (event: MessageEvent) => {
         cleanupListeners();
         try {
           const data = JSON.parse(event.data);
-          if (data.result) {
+          if (data.result && isMountedRef.current) {
             setJobState((prev) => ({
               ...prev,
               status: 'completed',
@@ -209,24 +230,31 @@ export function useOCRJob() {
         cleanupListeners();
         try {
           const data = JSON.parse(event.data);
-          setJobState((prev) => ({
-            ...prev,
-            status: 'failed',
-            error: data.error || 'Document processing failed.',
-          }));
+          if (isMountedRef.current) {
+            setJobState((prev) => ({
+              ...prev,
+              status: 'failed',
+              error: data.error || 'Document processing failed.',
+            }));
+          }
         } catch {
-          setJobState((prev) => ({ ...prev, status: 'failed', error: 'Document processing failed.' }));
+          if (isMountedRef.current) {
+            setJobState((prev) => ({ ...prev, status: 'failed', error: 'Document processing failed.' }));
+          }
         }
       });
 
       es.onerror = () => {
-        // Fallback gracefully to polling if SSE disconnected
         es.close();
         eventSourceRef.current = null;
-        startPolling(jobId, docId);
+        if (isMountedRef.current) {
+          startPolling(jobId, docId);
+        }
       };
     } catch {
-      startPolling(jobId, docId);
+      if (isMountedRef.current) {
+        startPolling(jobId, docId);
+      }
     }
   }, [cleanupListeners, fetchFinalResult, startPolling]);
 

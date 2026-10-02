@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ExtractionResponse,
   BankStatementData,
   InvoiceData,
   ReceiptData,
+  InvoiceItem,
 } from '@/types/ocr';
 import FinancialMetricCard from './FinancialMetricCard';
 import TransactionsTable from './TransactionsTable';
@@ -51,7 +52,7 @@ export default function ExtractionViewer({
 
   const currency = bankData.currency || invoiceData.currency || receiptData.currency || 'USD';
   const transactions = bankData.transactions || [];
-  const items = invoiceData.items || receiptData.items || [];
+  const items: InvoiceItem[] = invoiceData.items || receiptData.items || [];
 
   // Calculate metrics
   const totalInflow = bankData.total_deposits ?? transactions.reduce((acc, t) => acc + (t.credit || 0), 0);
@@ -59,8 +60,42 @@ export default function ExtractionViewer({
   const netSavings = totalInflow - totalOutflow;
   const closingBalance = bankData.closing_balance ?? (bankData.opening_balance ? bankData.opening_balance + netSavings : 0);
 
+  const [rawTextPage, setRawTextPage] = useState(1);
+  const [itemsPage, setItemsPage] = useState(1);
+  const itemsPageSize = 25;
+
+  // Lazily compute formatted JSON only when needed
+  const formattedJson = useMemo(() => {
+    if (activeTab !== 'json') return '';
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch {
+      return '{"error": "Failed to serialize JSON payload"}';
+    }
+  }, [activeTab, data]);
+
+  // Chunk raw text into digestible 4,000-char blocks or page delimiters to prevent DOM reflow freezing
+  const rawTextChunks = useMemo(() => {
+    if (!data.raw_text) return [];
+    // Split by page marker if available e.g. "--- Page X ---" or chunk by 4000 characters
+    if (data.raw_text.includes('--- Page ') || data.raw_text.includes('=== Page ')) {
+      return data.raw_text.split(/(?=(?:---|===)\s*Page\s+\d+)/i);
+    }
+    const chunks: string[] = [];
+    const chunkSize = 4000;
+    for (let i = 0; i < data.raw_text.length; i += chunkSize) {
+      chunks.push(data.raw_text.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }, [data.raw_text]);
+
+  const paginatedItems = useMemo(() => {
+    return items.slice((itemsPage - 1) * itemsPageSize, itemsPage * itemsPageSize);
+  }, [items, itemsPage]);
+  const totalItemPages = Math.ceil(items.length / itemsPageSize) || 1;
+
   const copyJson = () => {
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    navigator.clipboard.writeText(formattedJson || JSON.stringify(data, null, 2));
     setCopiedJson(true);
     setTimeout(() => setCopiedJson(false), 2000);
   };
@@ -284,7 +319,7 @@ export default function ExtractionViewer({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
-                      {items.map((item, idx) => (
+                      {paginatedItems.map((item, idx) => (
                         <tr key={idx} className="hover:bg-[var(--color-surface-subtle)]">
                           <td className="font-semibold text-[var(--color-ink)] pl-5">
                             {item.description}
@@ -301,6 +336,35 @@ export default function ExtractionViewer({
                     </tbody>
                   </table>
                 </div>
+
+                {/* Line Items Pagination Controls (if > 25 items) */}
+                {totalItemPages > 1 && (
+                  <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] px-2 pt-1">
+                    <span>
+                      Showing {(itemsPage - 1) * itemsPageSize + 1} to{' '}
+                      {Math.min(itemsPage * itemsPageSize, items.length)} of {items.length} items
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setItemsPage((p) => Math.max(1, p - 1))}
+                        disabled={itemsPage === 1}
+                        className="px-2.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-1.5 font-bold text-[var(--color-ink)]">
+                        {itemsPage} / {totalItemPages}
+                      </span>
+                      <button
+                        onClick={() => setItemsPage((p) => Math.min(totalItemPages, p + 1))}
+                        disabled={itemsPage === totalItemPages}
+                        className="px-2.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Subtotal / Tax Summary footer */}
                 <div className="flex justify-end pt-2">
@@ -400,7 +464,7 @@ export default function ExtractionViewer({
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
                   Cleaned Statement Narrative
                 </span>
-                <pre className="p-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] font-mono whitespace-pre-wrap leading-relaxed">
+                <pre className="p-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] font-mono whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
                   {data.cleaned_text}
                 </pre>
               </div>
@@ -408,22 +472,54 @@ export default function ExtractionViewer({
           </div>
         )}
 
-        {/* Tab Content 3: Raw OCR Text */}
+        {/* Tab Content 3: Raw OCR Text (Chunked/Paginated for 100+ pages) */}
         {activeTab === 'raw_text' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-text-secondary)]">
               <span>Raw Optical Character Recognition Output ({data.metadata?.ocr_engine || 'PyMuPDF Engine'})</span>
-              <span className="badge badge-sm bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-[var(--color-ink)] font-mono">
-                {data.raw_text?.length || 0} characters
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="badge badge-sm bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-[var(--color-ink)] font-mono">
+                  {data.raw_text?.length || 0} chars
+                </span>
+                {rawTextChunks.length > 1 && (
+                  <span className="badge badge-sm bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-bold font-mono">
+                    Page {rawTextPage} of {rawTextChunks.length}
+                  </span>
+                )}
+              </div>
             </div>
+
+            {rawTextChunks.length > 1 && (
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
+                <span className="font-bold text-[var(--color-ink)]">
+                  Displaying Section {rawTextPage} of {rawTextChunks.length}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setRawTextPage((p) => Math.max(1, p - 1))}
+                    disabled={rawTextPage === 1}
+                    className="px-2.5 py-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setRawTextPage((p) => Math.min(rawTextChunks.length, p + 1))}
+                    disabled={rawTextPage === rawTextChunks.length}
+                    className="px-2.5 py-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+
             <pre className="p-5 rounded-lg bg-[var(--color-ink)] text-white text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed border border-[var(--color-ink-soft)]">
-              {data.raw_text || 'No raw text stream provided for this document.'}
+              {rawTextChunks.length > 0 ? rawTextChunks[rawTextPage - 1] : (data.raw_text || 'No raw text stream provided.')}
             </pre>
           </div>
         )}
 
-        {/* Tab Content 4: JSON Payload */}
+        {/* Tab Content 4: JSON Payload (Lazy Loaded) */}
         {activeTab === 'json' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -439,7 +535,7 @@ export default function ExtractionViewer({
               </button>
             </div>
             <pre className="p-5 rounded-lg bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-[var(--color-ink-soft)]">
-              {JSON.stringify(data, null, 2)}
+              {formattedJson}
             </pre>
           </div>
         )}

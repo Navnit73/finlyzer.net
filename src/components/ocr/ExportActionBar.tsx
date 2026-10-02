@@ -38,20 +38,20 @@ export default function ExportActionBar({
   const handleDownload = async (format: ExportFormat) => {
     setDownloadingFormat(format);
     setDownloadSuccess(null);
+    let downloadUrl: string | null = null;
 
     try {
       const response = await fetch(`/api/export/download/${documentId}?format=${format}`);
       if (!response.ok) throw new Error('Download failed');
 
       const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.setAttribute('download', `${documentTitle.replace(/\s+/g, '_')}_${documentId}.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(downloadUrl);
 
       setDownloadSuccess(format);
       setTimeout(() => setDownloadSuccess(null), 3000);
@@ -59,6 +59,9 @@ export default function ExportActionBar({
       console.warn('Export download failed:', (e as Error)?.message || 'Export error');
       alert('Failed to download export file. Please try again.');
     } finally {
+      if (downloadUrl) {
+        window.URL.revokeObjectURL(downloadUrl);
+      }
       setDownloadingFormat(null);
     }
   };

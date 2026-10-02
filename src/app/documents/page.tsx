@@ -69,10 +69,19 @@ export default function DocumentsVaultPage() {
     fetchDocuments();
   }, [fetchDocuments]);
 
-  // Re-fetch documents whenever active jobs complete
+  // Track completed job IDs to only re-fetch when a new job transitions to completed (prevents re-fetch storm during in-flight progress ticks)
+  const completedJobIdsRef = React.useRef<Set<string>>(new Set());
+
   useEffect(() => {
-    const hasCompletedJob = activeJobs.some((j) => j.status === 'completed');
-    if (hasCompletedJob) {
+    let hasNewCompletion = false;
+    activeJobs.forEach((j) => {
+      if (j.status === 'completed' && !completedJobIdsRef.current.has(j.jobId)) {
+        completedJobIdsRef.current.add(j.jobId);
+        hasNewCompletion = true;
+      }
+    });
+
+    if (hasNewCompletion) {
       fetchDocuments();
     }
   }, [activeJobs, fetchDocuments]);
@@ -97,23 +106,26 @@ export default function DocumentsVaultPage() {
 
   const handleDownload = async (e: React.MouseEvent, docId: string, format: ExportFormat = 'xlsx') => {
     e.stopPropagation();
+    let url: string | null = null;
     try {
       setDownloadingFormat({ id: docId, format });
       const res = await fetch(`/api/export/download/${docId}?format=${format}`);
       if (!res.ok) throw new Error('Download failed');
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `finlyzer_${docId}.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
     } catch (err) {
       console.warn('Document export error:', (err as Error)?.message || 'Export error');
       alert('Download failed. Document data could not be retrieved.');
     } finally {
+      if (url) {
+        window.URL.revokeObjectURL(url);
+      }
       setDownloadingFormat(null);
     }
   };

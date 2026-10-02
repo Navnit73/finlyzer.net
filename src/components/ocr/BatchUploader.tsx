@@ -119,6 +119,7 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
   };
 
   const handleDownloadConsolidatedExcel = async () => {
+    let url: string | null = null;
     try {
       const res = await fetch('/api/export/consolidate', {
         method: 'POST',
@@ -132,17 +133,20 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
 
       if (!res.ok) throw new Error('Consolidation export failed');
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `Batch_Consolidated_Master_${Date.now()}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
     } catch (e) {
       console.warn('Consolidated download failed:', (e as Error)?.message || 'Export error');
       alert('Failed to download master consolidated report.');
+    } finally {
+      if (url) {
+        window.URL.revokeObjectURL(url);
+      }
     }
   };
 

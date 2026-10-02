@@ -129,7 +129,7 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
 
     const handleExternalJobAdd = (e: Event) => {
       const customEvent = e as CustomEvent<Partial<ActiveJobItem> & { jobId: string; filename: string }>;
-      if (customEvent.detail && customEvent.detail.jobId) {
+      if (customEvent?.detail?.jobId) {
         addJob(customEvent.detail);
       }
     };
@@ -140,22 +140,31 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
     };
   }, [addJob]);
 
-  // 2. Save active jobs to localStorage when changed
+  // 2. Save active jobs to localStorage when changed (Sanitizing result payload to prevent 5MB storage quota overflow)
   useEffect(() => {
     if (!isInitialized.current) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(activeJobs));
+      const sanitized = activeJobs.slice(0, 20).map((job) => ({
+        ...job,
+        // Do not store massive 100-page raw_text/transactions arrays in localStorage
+        result: job.result ? { id: job.result.id, status: job.result.status, filename: job.result.filename, metadata: job.result.metadata } : null,
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
     } catch {
-      // Ignore
+      // Ignore quota errors gracefully
     }
   }, [activeJobs]);
 
-  // 3. Background Job Sync Worker Loop (Connects SSE and checks status for in-flight jobs)
+  // 3. Stable Background Job Sync: Connect SSE per active job ID without tearing down timers on every progress tick
+  const activeJobsRef = useRef(activeJobs);
+  activeJobsRef.current = activeJobs;
+
   useEffect(() => {
     const inFlightJobs = activeJobs.filter(
       (j) => j.status === 'queued' || j.status === 'processing'
     );
 
+    // Start SSE for newly in-flight jobs
     inFlightJobs.forEach((job) => {
       if (eventSourcesRef.current.has(job.jobId)) return;
 
@@ -225,13 +234,30 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
       } catch {}
     });
 
-    // Also poll every 3 seconds for fallback resilience
+    // Cleanup SSE for jobs that are no longer in-flight
+    const inFlightIds = new Set(inFlightJobs.map((j) => j.jobId));
+    eventSourcesRef.current.forEach((es, jobId) => {
+      if (!inFlightIds.has(jobId)) {
+        es.close();
+        eventSourcesRef.current.delete(jobId);
+      }
+    });
+  }, [activeJobs.map((j) => `${j.jobId}:${j.status}`).join(','), updateJob]);
+
+  // Fallback background polling (only runs when in-flight jobs exist and SSE is closed/missing)
+  useEffect(() => {
+    const hasInFlight = activeJobs.some((j) => j.status === 'queued' || j.status === 'processing');
+    if (!hasInFlight) return;
+
     const pollTimer = setInterval(async () => {
-      const currentInFlight = activeJobs.filter(
+      const currentInFlight = activeJobsRef.current.filter(
         (j) => j.status === 'queued' || j.status === 'processing'
       );
 
       for (const job of currentInFlight) {
+        // If SSE is connected, skip polling to avoid duplicate network load
+        if (eventSourcesRef.current.has(job.jobId)) continue;
+
         try {
           const res = await fetch(`/api/ocr/jobs/${job.jobId}`);
           if (res.ok) {
@@ -246,23 +272,15 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
               result: data.result || job.result,
               error: data.error,
             });
-
-            if (data.status === 'completed' || data.status === 'failed') {
-              const es = eventSourcesRef.current.get(job.jobId);
-              if (es) {
-                es.close();
-                eventSourcesRef.current.delete(job.jobId);
-              }
-            }
           }
         } catch {}
       }
-    }, 3500);
+    }, 4000);
 
     return () => {
       clearInterval(pollTimer);
     };
-  }, [activeJobs, updateJob]);
+  }, [activeJobs.some((j) => j.status === 'queued' || j.status === 'processing'), updateJob]);
 
   return (
     <ActiveJobsContext.Provider

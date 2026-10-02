@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useDeferredValue } from 'react';
 import { Transaction } from '@/types/ocr';
 import { Search, ArrowDownRight, ArrowUpRight, ArrowUpDown, Copy, Check } from 'lucide-react';
 
@@ -14,12 +14,13 @@ export default function TransactionsTable({
   currency = 'USD',
 }: TransactionsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearch = useDeferredValue(searchTerm);
   const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all');
   const [sortField, setSortField] = useState<'date' | 'amount' | 'description'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [copiedRef, setCopiedRef] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(15);
 
   const formatCurrency = (amount?: number | null) => {
     if (amount === undefined || amount === null) return '—';
@@ -37,31 +38,36 @@ export default function TransactionsTable({
   };
 
   const filteredTransactions = useMemo(() => {
+    const query = deferredSearch.trim().toLowerCase();
+
     return transactions.filter((t) => {
-      const matchesSearch =
-        t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (t.reference && t.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        t.date.includes(searchTerm);
+      if (filterType === 'credit' && (!t.credit || t.credit <= 0)) return false;
+      if (filterType === 'debit' && (!t.debit || t.debit <= 0)) return false;
 
-      if (!matchesSearch) return false;
+      if (!query) return true;
 
-      if (filterType === 'credit') return t.credit !== null && t.credit !== undefined && t.credit > 0;
-      if (filterType === 'debit') return t.debit !== null && t.debit !== undefined && t.debit > 0;
-      return true;
+      return (
+        (t.description && t.description.toLowerCase().includes(query)) ||
+        (t.reference && t.reference.toLowerCase().includes(query)) ||
+        (t.date && t.date.includes(query)) ||
+        (t.category && t.category.toLowerCase().includes(query))
+      );
     });
-  }, [transactions, searchTerm, filterType]);
+  }, [transactions, deferredSearch, filterType]);
 
   const sortedTransactions = useMemo(() => {
+    if (filteredTransactions.length <= 1) return filteredTransactions;
+
     return [...filteredTransactions].sort((a, b) => {
       if (sortField === 'date') {
         return sortOrder === 'asc'
-          ? a.date.localeCompare(b.date)
-          : b.date.localeCompare(a.date);
+          ? (a.date || '').localeCompare(b.date || '')
+          : (b.date || '').localeCompare(a.date || '');
       }
       if (sortField === 'description') {
         return sortOrder === 'asc'
-          ? a.description.localeCompare(b.description)
-          : b.description.localeCompare(a.description);
+          ? (a.description || '').localeCompare(b.description || '')
+          : (b.description || '').localeCompare(a.description || '');
       }
       if (sortField === 'amount') {
         const valA = (a.credit || 0) - (a.debit || 0);
@@ -73,10 +79,12 @@ export default function TransactionsTable({
   }, [filteredTransactions, sortField, sortOrder]);
 
   const totalPages = Math.ceil(sortedTransactions.length / pageSize) || 1;
-  const paginatedTransactions = sortedTransactions.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const paginatedTransactions = useMemo(() => {
+    return sortedTransactions.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize
+    );
+  }, [sortedTransactions, currentPage, pageSize]);
 
   const toggleSort = (field: 'date' | 'amount' | 'description') => {
     if (sortField === field) {
@@ -288,11 +296,26 @@ export default function TransactionsTable({
       {/* Pagination Bar */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 pt-1 text-xs text-[var(--color-text-secondary)]">
-          <span className="text-center sm:text-left">
-            Showing {(currentPage - 1) * pageSize + 1} to{' '}
-            {Math.min(currentPage * pageSize, sortedTransactions.length)} of{' '}
-            {sortedTransactions.length} entries
-          </span>
+          <div className="flex items-center gap-2">
+            <span>
+              Showing {(currentPage - 1) * pageSize + 1} to{' '}
+              {Math.min(currentPage * pageSize, sortedTransactions.length)} of{' '}
+              {sortedTransactions.length} entries
+            </span>
+            <span className="text-[var(--color-text-muted)]">&bull;</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="bg-[var(--color-surface-subtle)] border border-[var(--color-border)] rounded px-1.5 py-0.5 text-xs text-[var(--color-ink)]"
+            >
+              <option value={15}>15 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
+            </select>
+          </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}

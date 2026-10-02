@@ -134,21 +134,25 @@ export default function HistoryDrawer({
 
   const handleDownload = async (e: React.MouseEvent, docId: string, format: ExportFormat = 'xlsx') => {
     e.stopPropagation();
+    let url: string | null = null;
     try {
       const res = await fetch(`/api/export/download/${docId}?format=${format}`);
       if (!res.ok) throw new Error('Download failed');
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `document_${docId}.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
     } catch (e) {
       console.warn('Download error:', (e as Error)?.message || 'Export error');
       alert('Download failed. Document data could not be retrieved.');
+    } finally {
+      if (url) {
+        window.URL.revokeObjectURL(url);
+      }
     }
   };
 
