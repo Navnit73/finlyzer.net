@@ -381,7 +381,7 @@ export default function ExtractionViewer({
                     </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]">DeepSeek AI Cleaning</span>
+                    <span className="text-[var(--color-text-secondary)]"> AI Cleaning</span>
                     <span className="font-mono font-bold text-[var(--color-ink)]">
                       {data.metadata?.stage_timings_ms?.ai_cleaning || 480}ms
                     </span>

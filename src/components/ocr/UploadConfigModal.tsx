@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   FileText,
@@ -9,7 +10,6 @@ import {
   Globe,
   FileType,
   Lock,
-  CheckCircle2,
 } from 'lucide-react';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
 
@@ -48,17 +48,23 @@ export default function UploadConfigModal({
   onConfirm,
   onClose,
 }: UploadConfigModalProps) {
-  if (!isOpen || !file) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !file || !mounted) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onConfirm();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up"
+        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="upload-config-modal-title"
@@ -67,7 +73,7 @@ export default function UploadConfigModal({
         <button
           onClick={onClose}
           type="button"
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
@@ -230,4 +236,6 @@ export default function UploadConfigModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

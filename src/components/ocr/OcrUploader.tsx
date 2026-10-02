@@ -121,7 +121,7 @@ export default function OcrUploader({
 
     const stageTimer2 = setTimeout(() => {
       setProgress(85);
-      setProcessingStage('3. DeepSeek AI cleaning, reconciliation & formatting...');
+      setProcessingStage('3. AI cleaning, reconciliation & formatting...');
     }, 1400);
 
     try {
@@ -313,7 +313,7 @@ export default function OcrUploader({
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink)] font-semibold shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
-              <span>DeepSeek AI Reconciliation</span>
+              <span>AI Reconciliation</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />

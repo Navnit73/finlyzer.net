@@ -1,6 +1,5 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
 import {
   X,
@@ -39,6 +38,11 @@ export default function HistoryDrawer({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch logged-in user documents from MongoDB
   const fetchUserDocuments = async (pageNum = 1) => {
@@ -83,7 +87,7 @@ export default function HistoryDrawer({
     }
   }, [isOpen, session, docTypeFilter, searchTerm]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Filter guest items by search & type
   const filteredGuestItems = guestHistory.filter((item) => {
@@ -145,7 +149,7 @@ export default function HistoryDrawer({
     }
   };
 
-  return (
+  const drawerContent = (
     <>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fade-in">
         <div
@@ -407,4 +411,6 @@ export default function HistoryDrawer({
       />
     </>
   );
+
+  return createPortal(drawerContent, document.body);
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Lock, KeyRound, Eye, EyeOff, X, AlertCircle } from 'lucide-react';
 
 interface PdfPasswordModalProps {
@@ -22,8 +23,13 @@ export default function PdfPasswordModal({
 }: PdfPasswordModalProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +37,10 @@ export default function PdfPasswordModal({
     onSubmitPassword(password);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-2xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up"
+        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="password-modal-title"
@@ -42,7 +48,7 @@ export default function PdfPasswordModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
           aria-label="Close dialog"
           disabled={isLoading}
         >
@@ -51,7 +57,7 @@ export default function PdfPasswordModal({
 
         {/* Header Icon */}
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-soft)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--color-brand-soft)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
             <Lock className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
@@ -94,12 +100,12 @@ export default function PdfPasswordModal({
                 required
                 autoFocus
                 disabled={isLoading}
-                className="w-full pl-10 pr-10 py-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand-soft)] transition-all"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all font-mono"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)]"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] cursor-pointer"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -112,14 +118,14 @@ export default function PdfPasswordModal({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 py-3 px-4 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] transition-colors"
+              className="flex-1 py-3 px-4 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !password.trim()}
-              className="flex-1 py-3 px-4 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] text-sm font-bold hover:bg-[var(--color-brand-hover)] transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-4 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] text-sm font-bold hover:bg-[var(--color-brand-hover)] transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -135,4 +141,6 @@ export default function PdfPasswordModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

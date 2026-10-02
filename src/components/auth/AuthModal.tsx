@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { signIn } from 'next-auth/react';
 import { Sparkles, X, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 
@@ -18,8 +19,13 @@ export default function AuthModal({
   pageCount,
 }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -59,10 +65,10 @@ export default function AuthModal({
     general: 'Get instant access to automated DCF models, AI 10-K audit copilots, and multi-format financial exports.',
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up"
+        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -70,7 +76,7 @@ export default function AuthModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
           aria-label="Close modal"
           disabled={isLoading}
         >
@@ -97,7 +103,7 @@ export default function AuthModal({
         <div className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-2xl border border-[var(--color-border)]">
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
             <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
-            <span>Process up to 200 pages per statement with DeepSeek AI cleaning</span>
+            <span>Process up to 200 pages per statement with  AI cleaning</span>
           </div>
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
             <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
@@ -115,7 +121,7 @@ export default function AuthModal({
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full py-3.5 px-6 rounded-full bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-soft)] font-bold text-sm flex items-center justify-center gap-3 shadow-md hover:shadow-lg transition-all"
+            className="w-full py-3.5 px-6 rounded-full bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-soft)] font-bold text-sm flex items-center justify-center gap-3 shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -142,7 +148,7 @@ export default function AuthModal({
           <button
             onClick={handleDemoSignIn}
             disabled={isLoading}
-            className="w-full py-3 px-4 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="w-full py-3 px-4 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <Zap className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
             <span>Instant Demo Sign-In (1-Click Test)</span>
@@ -157,4 +163,6 @@ export default function AuthModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

@@ -1,6 +1,5 @@
-'use client';
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
 import {
   X,
@@ -35,9 +34,14 @@ export default function BatchProcessingModal({
   const [progress, setProgress] = useState(0);
   const [batchResult, setBatchResult] = useState<BatchResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -134,11 +138,11 @@ export default function BatchProcessingModal({
     }
   };
 
-  return (
+  const modalContent = (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in overflow-y-auto">
         <div
-          className="relative w-full max-w-4xl bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto"
+          className="relative w-full max-w-4xl bg-[var(--color-surface)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto my-auto"
           role="dialog"
           aria-modal="true"
         >
@@ -378,4 +382,6 @@ export default function BatchProcessingModal({
       />
     </>
   );
+
+  return createPortal(modalContent, document.body);
 }
