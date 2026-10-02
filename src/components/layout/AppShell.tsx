@@ -40,28 +40,18 @@ export default function AppShell({ children }: AppShellProps) {
     }
   }, [status, session]);
 
-  const isAdminRoute =
-    pathname === '/dashboard' ||
-    pathname.startsWith('/dashboard') ||
-    pathname === '/documents' ||
-    pathname === '/pricing' ||
-    pathname === '/invoices' ||
-    pathname.startsWith('/document/');
-
   // Determine if we should render the Admin Layout:
-  // 1. Authenticated session exists
-  // 2. Dedicated admin route is active (prevents flashing landing page header/footer on reload)
-  // 3. Initial loading state on root with cached login session
+  // ONLY render Admin Layout for authenticated logged-in users!
+  // Unauthenticated guests NEVER see the admin sidebar layout.
   const showAdminLayout =
     (status === 'authenticated' && !!session?.user) ||
-    isAdminRoute ||
     (status === 'loading' && cachedLoggedIn === true);
 
   if (showAdminLayout) {
     return <AdminShell>{children}</AdminShell>;
   }
 
-  // If still resolving session on root '/' and not cached as logged in, render neutral surface
+  // If still resolving session and not cached as logged in, render neutral loading surface
   if (status === 'loading' && cachedLoggedIn === null) {
     return (
       <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex items-center justify-center">

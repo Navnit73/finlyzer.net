@@ -9,7 +9,7 @@ import { useIsMounted } from '@/lib/useIsMounted';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  reason?: 'page_limit' | 'batch_upload' | 'save_history' | 'general';
+  reason?: 'page_limit' | 'batch_upload' | 'save_history' | 'dashboard' | 'pricing' | 'general';
   pageCount?: number;
 }
 
@@ -24,11 +24,16 @@ export default function AuthModal({
 
   if (!isOpen || !mounted) return null;
 
-
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn('google', { callbackUrl: window.location.href });
+      const destination =
+        reason === 'dashboard'
+          ? '/dashboard'
+          : reason === 'pricing'
+          ? '/pricing'
+          : window.location.href;
+      await signIn('google', { callbackUrl: destination });
     } catch (e) {
       console.warn('Google sign-in error:', e);
       setIsLoading(false);
@@ -39,6 +44,8 @@ export default function AuthModal({
     page_limit: `Unlock ${pageCount || 10}+ Page Processing`,
     batch_upload: 'Unlock Bulk Multi-File Processing',
     save_history: 'Sync & Save Extraction History',
+    dashboard: 'Sign In to Access Admin Dashboard',
+    pricing: 'Sign In to Purchase Page Credits',
     general: 'Sign in to Finlyzer Hub',
   };
 
@@ -46,7 +53,9 @@ export default function AuthModal({
     page_limit: `This document contains ${pageCount || 'over 10'} pages. Free guest sessions support up to 10 pages. Sign in with Google to process and save large statements.`,
     batch_upload: 'Batch processing allows you to concurrently extract up to 50 statements or .zip archives and merge their financial cash flows.',
     save_history: 'Create a free account to securely store all your parsed bank statements, invoices, and receipts in MongoDB across devices.',
-    general: 'Get instant access to automated DCF models, AI 10-K audit copilots, and multi-format financial exports.',
+    dashboard: 'Sign in with Google to view your account overview, processed statements history, credit balance, and official invoices.',
+    pricing: 'Sign in with Google to choose a flexible page credit package ($10 to $100) and top up your account balance.',
+    general: 'Get instant access to automated AI financial extraction, cloud statement vault, and multi-format financial exports.',
   };
 
   const modalContent = (

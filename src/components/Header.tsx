@@ -1,15 +1,27 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from "next/link";
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { TrendingUp } from "lucide-react";
-import UserMenu from "./auth/UserMenu";
-import HistoryDrawer from "./ocr/HistoryDrawer";
+import { useSession } from 'next-auth/react';
+import { TrendingUp, Sparkles, CreditCard, BarChart3 } from 'lucide-react';
+import UserMenu from './auth/UserMenu';
+import HistoryDrawer from './ocr/HistoryDrawer';
+import AuthModal from './auth/AuthModal';
 
 export default function Header() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authReason, setAuthReason] = useState<'general' | 'dashboard' | 'pricing'>('general');
+
+  const isLoggedIn = status === 'authenticated' && !!session?.user;
+
+  const handleOpenAuth = (reason: 'general' | 'dashboard' | 'pricing') => {
+    setAuthReason(reason);
+    setIsAuthModalOpen(true);
+  };
 
   return (
     <>
@@ -33,17 +45,44 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Center / Left Navigation Links */}
+            {/* Center / Navigation Links */}
             <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
-              <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">
-                Converter
+              <Link href="/" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" />
+                <span>OCR Converter</span>
               </Link>
-              <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors">
-                Pricing & Credits
-              </Link>
-              <Link href="/dashboard" className="hover:text-[var(--color-ink)] transition-colors">
-                Dashboard
-              </Link>
+
+              {/* Pricing & Credits: If not logged in, prompt login instead of routing to admin */}
+              {isLoggedIn ? (
+                <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                  <span>Pricing &amp; Credits</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleOpenAuth('pricing')}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                  <span>Pricing &amp; Credits</span>
+                </button>
+              )}
+
+              {/* Dashboard: If not logged in, prompt login instead of routing to admin */}
+              {isLoggedIn ? (
+                <Link href="/dashboard" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+                  <span>Dashboard</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleOpenAuth('dashboard')}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+                  <span>Dashboard</span>
+                </button>
+              )}
             </div>
 
             {/* Account Actions & Single Sign In Button */}
@@ -63,7 +102,13 @@ export default function Header() {
           router.push(`/document/${id}`);
         }}
       />
+
+      {/* Auth Modal for Guest Header Actions */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        reason={authReason}
+      />
     </>
   );
 }
-
