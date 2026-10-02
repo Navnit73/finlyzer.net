@@ -213,7 +213,7 @@ export default function ExtractionViewer({
       />
 
       {/* 3. Interactive Detail Tabs */}
-      <div className="bg-[var(--color-surface)] rounded-2xl sm:rounded-3xl border border-[var(--color-border)] p-4 sm:p-6 md:p-8 space-y-6 shadow-xs">
+      <div className="space-y-4 sm:space-y-6 bg-transparent sm:bg-[var(--color-surface)] sm:rounded-3xl sm:border sm:border-[var(--color-border)] p-0 sm:p-6 md:p-8 sm:shadow-xs">
         {/* Navigation Tabs (Horizontally Scrollable Segmented Bar on Mobile) */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-[var(--color-border)]">
           <button

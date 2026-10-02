@@ -4,9 +4,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[var(--color-surface)]">
       {/* Main Clean Workspace Hero Section */}
-      <div className="site-container py-6 sm:py-10">
+      <div className="site-container py-4 sm:py-10">
         {/* The Reusable OCR Studio Component */}
-        <div className="bg-[var(--color-surface)] rounded-2xl sm:rounded-3xl border border-[var(--color-border)] p-4 sm:p-8 shadow-xs">
+        <div className="bg-transparent sm:bg-[var(--color-surface)] sm:rounded-3xl sm:border sm:border-[var(--color-border)] p-0 sm:p-8 sm:shadow-xs">
           <OcrWorkspace />
         </div>
       </div>
