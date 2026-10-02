@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
       documentType,
       language,
       cleanWithAi,
+      userEmail,
     });
 
     // Save batch document items to MongoDB

@@ -22,8 +22,14 @@ export async function GET(
     // If job finished with extraction, ensure it is persisted in local MongoDB
     if (job.status === 'completed' && job.result) {
       try {
+        const effectiveUserEmail = (
+          userEmail ||
+          (job.metadata?.user_email as string) ||
+          'guest'
+        ).toLowerCase().trim();
+
         await saveDocumentExtraction(
-          userEmail || 'guest',
+          effectiveUserEmail,
           job.result,
           job.metadata?.filename || job.result.filename || 'statement.pdf'
         );

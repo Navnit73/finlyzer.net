@@ -85,7 +85,39 @@ export async function POST(req: NextRequest) {
       requestId: customRequestId,
       callbackUrl,
       callbackSecret: WEBHOOK_SECRET,
+      userEmail: userEmail || 'guest',
     });
+
+    // 5. Pre-record initial document state in MongoDB so it is visible immediately in Vault
+    if (jobResponse?.document_id) {
+      try {
+        const { getDatabase } = await import('@/lib/mongodb');
+        const db = await getDatabase();
+        if (db) {
+          const effectiveEmail = (userEmail || 'guest').toLowerCase().trim();
+          await db.collection('extractions').updateOne(
+            { id: jobResponse.document_id },
+            {
+              $set: {
+                id: jobResponse.document_id,
+                job_id: jobResponse.job_id,
+                user_email: effectiveEmail,
+                document_type: documentType,
+                filename: file.name,
+                pages: estimatedPages,
+                status: 'processing',
+                extraction: {},
+                metadata: { pages: estimatedPages, job_id: jobResponse.job_id },
+                created_at: new Date().toISOString(),
+              },
+            },
+            { upsert: true }
+          );
+        }
+      } catch (dbErr) {
+        console.warn('⚠️ Could not pre-record initial document state in MongoDB:', (dbErr as Error).message);
+      }
+    }
 
     return NextResponse.json(jobResponse, { status: 202 });
   } catch (err: unknown) {

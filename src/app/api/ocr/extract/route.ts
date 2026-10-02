@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
       language,
       cleanWithAi,
       password,
+      userEmail: userEmail || 'guest',
     });
 
     const actualPages = result.metadata?.pages || estimatedPages || 1;

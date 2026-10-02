@@ -25,6 +25,7 @@ export interface ExtractOptions {
   password?: string;
   callbackUrl?: string;
   callbackSecret?: string;
+  userEmail?: string;
 }
 
 /**
@@ -41,6 +42,7 @@ export async function extractDocument(
   formData.append('language', options.language || 'en');
   formData.append('clean_with_ai', options.cleanWithAi !== false ? 'true' : 'false');
 
+  if (options.userEmail) formData.append('user_email', options.userEmail);
   if (options.requestId) formData.append('request_id', options.requestId);
   if (options.password) formData.append('password', options.password);
   if (options.callbackUrl) formData.append('callback_url', options.callbackUrl);
@@ -95,6 +97,7 @@ export async function batchExtractDocuments(
   formData.append('document_type', options.documentType || 'auto');
   formData.append('language', options.language || 'en');
   formData.append('clean_with_ai', options.cleanWithAi !== false ? 'true' : 'false');
+  if (options.userEmail) formData.append('user_email', options.userEmail);
 
   const response = await fetch(`${API_BASE_URL}/ocr/batch`, {
     method: 'POST',
@@ -271,6 +274,7 @@ export async function uploadAsyncJob(
   formData.append('language', options.language || 'en');
   formData.append('clean_with_ai', options.cleanWithAi !== false ? 'true' : 'false');
 
+  if (options.userEmail) formData.append('user_email', options.userEmail);
   if (options.requestId) formData.append('request_id', options.requestId);
   if (options.password) formData.append('password', options.password);
   if (options.callbackUrl) formData.append('callback_url', options.callbackUrl);

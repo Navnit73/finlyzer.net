@@ -57,9 +57,16 @@ export async function POST(req: NextRequest) {
     // 3. Process Events
     if (event === 'ocr.job.completed') {
       const effectiveDocId = document_id || result?.id || job_id;
-      const userEmail = (metadata?.user_email as string) || 'guest';
+      const userEmail = (
+        (metadata?.user_email as string) ||
+        ((payload as unknown as Record<string, unknown>).user_email as string) ||
+        (result?.metadata as Record<string, unknown> | undefined)?.user_email as string ||
+        'guest'
+      ).toLowerCase().trim();
+      
       const filename = (metadata?.filename as string) || result?.filename || 'statement.pdf';
-      const pages = metadata?.total_pages || result?.metadata?.pages || 1;
+      const rawPages = metadata?.total_pages ?? result?.metadata?.pages ?? (metadata as unknown as Record<string, unknown>)?.pages ?? 1;
+      const pages = Math.max(1, typeof rawPages === 'number' ? rawPages : parseInt(String(rawPages), 10) || 1);
 
       let extractionData: ExtractionResponse | null = result || null;
 
@@ -78,13 +85,32 @@ export async function POST(req: NextRequest) {
           if (userEmail && userEmail !== 'guest') {
             await incrementUserPageCount(userEmail, pages);
           }
-          console.log(`💾 [OCR Webhook] Document ${effectiveDocId} saved for user ${userEmail} (${pages} pages)`);
+          console.log(`💾 [OCR Webhook] Document ${effectiveDocId} saved for user ${userEmail} (${pages} pages credited)`);
         } catch (dbErr) {
           console.error('[OCR Webhook] Failed to save extraction to database:', (dbErr as Error).message);
         }
       }
     } else if (event === 'ocr.job.failed') {
       console.warn(`⚠️ [OCR Webhook] Job ${job_id} reported failure:`, payload.error || 'Unknown error');
+      try {
+        const { getDatabase } = await import('@/lib/mongodb');
+        const db = await getDatabase();
+        if (db && (document_id || job_id)) {
+          const queryId = document_id || job_id;
+          await db.collection('extractions').updateOne(
+            { id: queryId },
+            {
+              $set: {
+                status: 'error',
+                'metadata.error': payload.error || 'OCR processing failed',
+                updated_at: new Date().toISOString(),
+              },
+            }
+          );
+        }
+      } catch (failErr) {
+        console.warn('[OCR Webhook] Could not update failed status in database:', (failErr as Error).message);
+      }
     }
 
     return NextResponse.json({

@@ -96,15 +96,15 @@ export async function getUserDocuments(
         .limit(pageSize)
         .toArray();
 
-      const items: StoredDocument[] = docs.map(d => ({
-        id: d.id,
-        document_type: d.document_type as StoredDocument['document_type'],
-        status: d.status,
-        created_at: d.created_at,
-        filename: d.filename,
-        pages: d.pages,
-        extraction: d.extraction as StoredDocument['extraction'],
-        metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+      const items: StoredDocument[] = docs.map((d: Record<string, unknown>) => ({
+        id: (d.id as string) || (d._id as { toString: () => string })?.toString() || '',
+        document_type: (d.document_type as StoredDocument['document_type']) || 'bank_statement',
+        status: (d.status as StoredDocument['status']) || 'success',
+        created_at: (d.created_at as string) || (d.updated_at ? new Date(d.updated_at as string).toISOString() : new Date().toISOString()),
+        filename: (d.filename as string) || (d.file_name as string) || 'statement.pdf',
+        pages: (d.pages as number) || (d.total_pages as number) || 1,
+        extraction: ((d.extraction || d.result || {}) as StoredDocument['extraction']),
+        metadata: ((d.metadata || { pages: (d.pages as number) || 1 }) as unknown as StoredDocument['metadata']),
       }));
 
       return {
@@ -174,15 +174,15 @@ export async function getDocumentsByIds(ids: string[], userEmail?: string): Prom
         .sort({ created_at: -1 })
         .toArray();
 
-      return docs.map(d => ({
-        id: d.id,
-        document_type: d.document_type as StoredDocument['document_type'],
-        status: d.status,
-        created_at: d.created_at,
-        filename: d.filename,
-        pages: d.pages,
-        extraction: d.extraction as StoredDocument['extraction'],
-        metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+      return docs.map((d: Record<string, unknown>) => ({
+        id: (d.id as string) || (d._id as { toString: () => string })?.toString() || '',
+        document_type: (d.document_type as StoredDocument['document_type']) || 'bank_statement',
+        status: (d.status as StoredDocument['status']) || 'success',
+        created_at: (d.created_at as string) || (d.updated_at ? new Date(d.updated_at as string).toISOString() : new Date().toISOString()),
+        filename: (d.filename as string) || (d.file_name as string) || 'statement.pdf',
+        pages: (d.pages as number) || (d.total_pages as number) || 1,
+        extraction: ((d.extraction || d.result || {}) as StoredDocument['extraction']),
+        metadata: ((d.metadata || { pages: (d.pages as number) || 1 }) as unknown as StoredDocument['metadata']),
       }));
     }
   } catch (err) {
