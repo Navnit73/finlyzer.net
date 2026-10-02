@@ -441,6 +441,7 @@ export default function DashboardOverviewPage() {
                       <th className="font-bold">Amount</th>
                       <th className="font-bold">Status</th>
                       <th className="font-bold">Date</th>
+                      <th className="font-bold text-right">Invoice PDF</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -449,13 +450,24 @@ export default function DashboardOverviewPage() {
                         <td className="font-mono font-bold text-[var(--color-ink)]">{order.order_id}</td>
                         <td className="font-semibold text-[var(--color-ink)]">{order.plan_name}</td>
                         <td className="font-mono font-bold text-[var(--color-brand-dark)]">+{order.pages_credited.toLocaleString()}</td>
-                        <td className="font-bold text-[var(--color-ink)]">${order.amount_usd} (₹{order.amount_inr})</td>
+                        <td className="font-bold text-[var(--color-ink)] font-mono">${order.amount_usd} USD</td>
                         <td>
                           <span className="badge badge-xs font-bold uppercase rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] border-none">
                             {order.status}
                           </span>
                         </td>
                         <td className="text-[var(--color-text-secondary)] font-mono">{new Date(order.created_at).toLocaleDateString()}</td>
+                        <td className="text-right">
+                          <a
+                            href={`/api/user/orders/${order.order_id}/receipt`}
+                            download={`Finlyzer_Invoice_${order.order_id}.pdf`}
+                            className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] inline-flex items-center gap-1"
+                            title="Download PDF Invoice"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>PDF</span>
+                          </a>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

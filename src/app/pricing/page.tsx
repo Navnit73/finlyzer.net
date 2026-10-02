@@ -83,8 +83,8 @@ export default function PricingPage() {
       a: 'No! All purchased page credits are permanent and never expire. You can use them whenever you need to process financial statements.',
     },
     {
-      q: 'Which payment methods does Razorpay accept?',
-      a: 'Razorpay supports Credit/Debit Cards (Visa, Mastercard, RuPay, Amex), UPI (Google Pay, PhonePe, Paytm), Net Banking across 50+ banks, and international cards.',
+      q: 'Which payment methods are accepted?',
+      a: 'We accept all major Credit/Debit Cards (Visa, Mastercard, American Express), international cards, and secure online checkout methods with 256-bit encryption.',
     },
     {
       q: 'What happens if a document fails to parse?',
@@ -185,11 +185,11 @@ export default function PricingPage() {
                       ${plan.price_usd}
                     </span>
                     <span className="text-xs text-[var(--color-text-secondary)] font-medium">
-                      / one-time
+                      USD
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)] mt-1">
-                    <span>~₹{plan.price_inr.toLocaleString()} INR</span>
+                    <span className="font-bold text-[var(--color-brand-dark)] uppercase text-[10px]">One-Time Pass</span>
                     <span className="font-bold text-[var(--color-ink)] font-mono">
                       {plan.pages === 1 ? '1 Single File' : `${plan.pages.toLocaleString()} Pages`}
                     </span>

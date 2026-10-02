@@ -346,17 +346,17 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <FinancialMetricCard
               title="Consolidated Total Inflow"
-              value={`INR ${(batchResult.consolidated_inflow || 0).toLocaleString()}`}
+              value={`$ ${(batchResult.consolidated_inflow || 0).toLocaleString()}`}
               variant="brand"
             />
             <FinancialMetricCard
               title="Consolidated Total Outflow"
-              value={`INR ${(batchResult.consolidated_outflow || 0).toLocaleString()}`}
+              value={`$ ${(batchResult.consolidated_outflow || 0).toLocaleString()}`}
               variant="pink"
             />
             <FinancialMetricCard
               title="Net Consolidated Balance"
-              value={`INR ${(batchResult.net_consolidated_savings || 0).toLocaleString()}`}
+              value={`$ ${(batchResult.net_consolidated_savings || 0).toLocaleString()}`}
               variant="neutral"
             />
           </div>

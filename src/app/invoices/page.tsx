@@ -72,6 +72,26 @@ export default function InvoicesBillingPage() {
     window.print();
   };
 
+  const handleDownloadPdf = async (e: React.MouseEvent, orderId: string) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`/api/user/orders/${orderId}/receipt`);
+      if (!res.ok) throw new Error('Failed to download invoice PDF');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Finlyzer_Invoice_${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate PDF receipt.');
+    }
+  };
+
   return (
     <div className="w-full space-y-8 pb-16">
       {/* Top Header */}
@@ -85,7 +105,7 @@ export default function InvoicesBillingPage() {
             Invoices & Credit Purchase History
           </h1>
           <p className="text-xs text-[var(--color-text-secondary)]">
-            Track all purchased page packages, Razorpay transaction references, and generate receipts.
+            Track all purchased page packages, download official PDF tax invoices, and verify transactions.
           </p>
         </div>
 
@@ -193,11 +213,11 @@ export default function InvoicesBillingPage() {
                     <th className="font-bold py-3">Order / Invoice ID</th>
                     <th className="font-bold">Package Name</th>
                     <th className="font-bold">Credits Added</th>
-                    <th className="font-bold">Amount</th>
+                    <th className="font-bold">Amount (USD)</th>
                     <th className="font-bold">Gateway</th>
                     <th className="font-bold">Status</th>
                     <th className="font-bold">Date</th>
-                    <th className="font-bold text-right">Actions</th>
+                    <th className="font-bold text-right">Receipt &amp; PDF</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -215,8 +235,8 @@ export default function InvoicesBillingPage() {
                       <td className="font-mono font-bold text-[var(--color-brand-dark)]">
                         +{order.pages_credited.toLocaleString()} Pages
                       </td>
-                      <td className="font-bold text-[var(--color-ink)]">
-                        ${order.amount_usd} <span className="text-[10px] text-[var(--color-text-muted)]">(₹{order.amount_inr})</span>
+                      <td className="font-bold text-[var(--color-ink)] font-mono">
+                        ${order.amount_usd} USD
                       </td>
                       <td className="capitalize font-medium">
                         {order.payment_gateway}
@@ -234,12 +254,23 @@ export default function InvoicesBillingPage() {
                         {new Date(order.created_at).toLocaleDateString()}
                       </td>
                       <td className="text-right">
-                        <button
-                          onClick={() => setSelectedReceipt(order)}
-                          className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] cursor-pointer"
-                        >
-                          View Receipt
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={(e) => handleDownloadPdf(e, order.order_id)}
+                            className="btn btn-xs rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold px-2.5 border border-[var(--color-brand)]/30 flex items-center gap-1 cursor-pointer"
+                            title="Download Official PDF Invoice"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>PDF</span>
+                          </button>
+
+                          <button
+                            onClick={() => setSelectedReceipt(order)}
+                            className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] cursor-pointer"
+                          >
+                            View
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -299,23 +330,31 @@ export default function InvoicesBillingPage() {
               </div>
               <div className="flex justify-between border-t border-[var(--color-border)] pt-2 text-sm">
                 <span className="font-bold text-[var(--color-ink)]">Total Paid:</span>
-                <span className="font-black text-[var(--color-ink)] font-mono">${selectedReceipt.amount_usd} USD (₹{selectedReceipt.amount_inr})</span>
+                <span className="font-black text-[var(--color-ink)] font-mono">${selectedReceipt.amount_usd}.00 USD</span>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="flex items-center justify-between gap-2.5 pt-2">
+              <button
+                onClick={(e) => handleDownloadPdf(e, selectedReceipt.order_id)}
+                className="btn-brand-primary !min-h-[40px] !h-[40px] !px-4 text-xs font-bold flex items-center gap-2 rounded-lg cursor-pointer shadow-xs"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download PDF Invoice</span>
+              </button>
+
               <button
                 onClick={handlePrintReceipt}
                 className="btn-brand-dark !min-h-[40px] !h-[40px] !px-4 text-xs font-bold flex items-center gap-2 rounded-lg cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print Invoice</span>
+                <span>Print</span>
               </button>
 
               <button
                 onClick={() => setSelectedReceipt(null)}
-                className="btn-brand-secondary !min-h-[40px] !h-[40px] !px-4 text-xs font-bold rounded-lg cursor-pointer"
+                className="btn-brand-secondary !min-h-[40px] !h-[40px] !px-3 text-xs font-bold rounded-lg cursor-pointer"
               >
                 Close
               </button>

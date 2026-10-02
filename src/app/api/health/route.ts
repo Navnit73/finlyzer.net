@@ -36,7 +36,7 @@ export async function GET() {
     const ocrStatus = await checkOcrHealth();
     result.ocr_backend = ocrStatus;
   } catch {
-    result.ocr_backend = { status: 'mock_active' };
+    result.ocr_backend = { status: 'offline' };
   }
 
   return NextResponse.json(result);

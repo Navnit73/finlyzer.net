@@ -2,7 +2,7 @@ export interface PricingPlan {
   id: 'single_10' | 'pack_25' | 'pack_50' | 'pack_100';
   name: string;
   price_usd: number;
-  price_inr: number;
+  price_inr?: number;
   pages: number;
   description: string;
   features: string[];
@@ -17,10 +17,10 @@ export interface OrderRecord {
   plan_id: 'single_10' | 'pack_25' | 'pack_50' | 'pack_100';
   plan_name: string;
   amount_usd: number;
-  amount_inr: number;
+  amount_inr?: number;
   pages_credited: number;
   status: 'created' | 'pending' | 'completed' | 'failed';
-  payment_gateway: 'razorpay' | 'manual' | 'test';
+  payment_gateway: 'razorpay' | 'manual' | 'test' | 'stripe';
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
   razorpay_signature?: string;
@@ -33,11 +33,10 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'single_10',
     name: 'Single Download',
     price_usd: 10,
-    price_inr: 830,
     pages: 1,
     description: 'Instant 1-document quick conversion pass with all export formats.',
     features: [
-      '1 Full Document Extraction',
+      '1 Full Document Extraction ($10/doc)',
       'All 6 Export Formats (.xlsx, .csv, .pdf, .qbo, .ofx, .qif)',
       'DeepSeek AI Reconciliation',
       'Encrypted PDF Support',
@@ -47,7 +46,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'pack_25',
     name: 'Starter 600',
     price_usd: 25,
-    price_inr: 2075,
     pages: 600,
     description: 'Ideal for small businesses and accountants processing monthly statements.',
     features: [
@@ -64,7 +62,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'pack_50',
     name: 'Pro 1000',
     price_usd: 50,
-    price_inr: 4150,
     pages: 1000,
     description: 'High-volume reconciliation for financial analysts and tax consultants.',
     features: [
@@ -79,7 +76,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'pack_100',
     name: 'Enterprise 5000',
     price_usd: 100,
-    price_inr: 8300,
     pages: 5000,
     description: 'Maximum scale package for auditing firms and corporate finance teams.',
     features: [

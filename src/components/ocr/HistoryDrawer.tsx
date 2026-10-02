@@ -342,7 +342,7 @@ export default function HistoryDrawer({
 
                       {item.closing_balance !== undefined && item.closing_balance !== null && (
                         <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
-                          ₹{item.closing_balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          ${item.closing_balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </span>
                       )}
                     </div>

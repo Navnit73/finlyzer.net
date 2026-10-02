@@ -126,8 +126,8 @@ export default function CheckoutModal({
               <p className="text-lg font-black text-[var(--color-ink)]">{plan.name}</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-black text-[var(--color-ink)]">${plan.price_usd}</p>
-              <p className="text-[11px] font-mono text-[var(--color-text-muted)]">~₹{plan.price_inr.toLocaleString()}</p>
+              <p className="text-3xl font-black text-[var(--color-ink)] font-mono">${plan.price_usd}</p>
+              <p className="text-[11px] font-bold text-[var(--color-brand-dark)] uppercase">USD One-Time</p>
             </div>
           </div>
 
@@ -141,8 +141,8 @@ export default function CheckoutModal({
               <span className="font-bold text-[var(--color-ink)] truncate max-w-[200px]">{userEmail || '—'}</span>
             </div>
             <div className="flex justify-between">
-              <span>Payment Gateway:</span>
-              <span className="font-bold text-[var(--color-ink)]">Razorpay Secure</span>
+              <span>Payment Processing:</span>
+              <span className="font-bold text-[var(--color-ink)]">Instant 256-Bit SSL Checkout</span>
             </div>
           </div>
         </div>
@@ -179,7 +179,10 @@ export default function CheckoutModal({
               </p>
             </div>
             <button
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                if (onSuccess) onSuccess();
+              }}
               className="btn-brand-primary !min-h-[40px] !h-[40px] text-xs font-bold w-full rounded-lg"
             >
               Continue to Workspace
@@ -196,12 +199,12 @@ export default function CheckoutModal({
               {isProcessing ? (
                 <>
                   <span className="loading loading-spinner loading-xs"></span>
-                  <span>Processing Payment...</span>
+                  <span>Processing Order...</span>
                 </>
               ) : (
                 <>
                   <Zap className="w-4 h-4 fill-current" />
-                  <span>Pay ${plan.price_usd} with Razorpay</span>
+                  <span>Pay ${plan.price_usd} USD</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </>
               )}
@@ -209,7 +212,7 @@ export default function CheckoutModal({
 
             <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--color-text-muted)]">
               <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" />
-              <span>Razorpay 256-Bit Encrypted &bull; Instant Page Credits Activation</span>
+              <span>256-Bit Encrypted &bull; Instant Page Credits Activation</span>
             </div>
           </div>
         )}

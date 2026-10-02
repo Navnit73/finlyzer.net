@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { downloadExportFile, generateExportDirect, generateFallbackExportBlob } from '@/lib/ocr-api';
+import { downloadExportFile, generateExportDirect } from '@/lib/ocr-api';
 import { getDocumentById } from '@/lib/models/Document';
 import { ExportFormat } from '@/types/ocr';
 
@@ -24,15 +24,24 @@ export async function GET(
     let blob: Blob;
 
     try {
-      // 1. First attempt direct binary stream from OCR API backend
+      // 1. First attempt direct binary stream from OCR API backend memory cache
       blob = await downloadExportFile(id, format);
     } catch {
-      // 2. If download by ID failed, check MongoDB stored extraction JSON
+      // 2. If memory cache missed, check MongoDB stored extraction JSON and generate direct export
       const storedDoc = await getDocumentById(id);
       if (storedDoc && storedDoc.extraction) {
-        blob = await generateExportDirect(format, storedDoc.extraction);
+        blob = await generateExportDirect(
+          format,
+          storedDoc.extraction as Record<string, unknown>,
+          storedDoc.id,
+          storedDoc.document_type || 'bank_statement',
+          storedDoc.raw_text || ''
+        );
       } else {
-        blob = generateFallbackExportBlob(format, id);
+        return NextResponse.json(
+          { error: 'Document extraction not found. Please re-upload the document to generate exports.' },
+          { status: 404 }
+        );
       }
     }
 

@@ -39,12 +39,29 @@ export async function findOrCreateUser(email: string, name?: string | null, imag
         };
         const result = await usersCollection.insertOne(newUser as unknown as import('mongodb').OptionalUnlessRequiredId<UserRecord>);
         user = { ...newUser, _id: result.insertedId.toString() };
-      } else if (user.purchased_pages === undefined || user.purchased_pages === null) {
-        user.purchased_pages = 0;
-        await usersCollection.updateOne(
-          { email: normalizedEmail },
-          { $set: { purchased_pages: 0, updated_at: new Date() } }
-        );
+      } else {
+        if (user.purchased_pages === undefined || user.purchased_pages === null) {
+          user.purchased_pages = 0;
+        }
+
+        // Auto-reconcile with completed orders in DB
+        try {
+          const orders = await db.collection('orders').find({ user_email: normalizedEmail, status: 'completed' }).toArray();
+          if (orders && orders.length > 0) {
+            const totalFromOrders = orders.reduce((sum, o) => sum + (o.pages_credited || 0), 0);
+            if (user.purchased_pages < totalFromOrders) {
+              user.purchased_pages = totalFromOrders;
+              const updatedTier = totalFromOrders >= 5000 ? 'enterprise' : totalFromOrders >= 1000 ? 'pro' : totalFromOrders > 0 ? 'starter' : user.tier;
+              user.tier = updatedTier;
+              await usersCollection.updateOne(
+                { email: normalizedEmail },
+                { $set: { purchased_pages: totalFromOrders, tier: updatedTier, updated_at: new Date() } }
+              );
+            }
+          }
+        } catch (orderErr) {
+          console.warn('Order reconciliation warning:', (orderErr as Error).message);
+        }
       }
 
       return user;

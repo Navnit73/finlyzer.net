@@ -22,7 +22,7 @@ export async function createOrder(
     plan_id: plan.id,
     plan_name: plan.name,
     amount_usd: plan.price_usd,
-    amount_inr: plan.price_inr,
+    amount_inr: plan.price_inr || plan.price_usd * 83,
     pages_credited: plan.pages,
     status: 'created',
     payment_gateway: gateway,

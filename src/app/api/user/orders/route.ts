@@ -37,11 +37,11 @@ export async function POST(req: NextRequest) {
     // 1. Create DB order record (initial status: created)
     const order = await createOrder(session.user.email, plan.id, gateway);
 
-    // Razorpay Payload / Order configuration
-    const razorpayPayload = {
+    // Order configuration payload
+    const orderPayload = {
       orderId: order.order_id,
-      amount: plan.price_inr * 100, // in paise
-      currency: 'INR',
+      amount: plan.price_usd,
+      currency: 'USD',
       amount_usd: plan.price_usd,
       plan_name: plan.name,
       pages_credited: plan.pages,
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       order,
-      razorpay: razorpayPayload,
+      payload: orderPayload,
     });
   } catch (err: unknown) {
     const error = err as { message?: string };
