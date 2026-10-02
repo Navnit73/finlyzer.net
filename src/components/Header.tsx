@@ -83,6 +83,12 @@ export default function Header() {
                   <span>Dashboard</span>
                 </button>
               )}
+
+              {/* SuperAdmin Link */}
+              <Link href="/superadmin" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5 text-[var(--color-brand-hover)]">
+                <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-pulse" />
+                <span>SuperAdmin</span>
+              </Link>
             </div>
 
             {/* Account Actions & Single Sign In Button */}

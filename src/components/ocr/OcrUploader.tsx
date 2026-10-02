@@ -13,16 +13,31 @@ import AuthModal from '../auth/AuthModal';
 import UploadConfigModal from './UploadConfigModal';
 import { saveToBrowserHistory } from '@/lib/browser-history';
 
+import { useOCRJob } from '@/hooks/useOCRJob';
+import AsyncJobProgressModal from './AsyncJobProgressModal';
+import { Cpu } from 'lucide-react';
+
 interface OcrUploaderProps {
   onExtractionComplete: (data: ExtractionResponse) => void;
   onOpenBatchModal: () => void;
+  onOpenLongDocModal?: () => void;
 }
 
 export default function OcrUploader({
   onExtractionComplete,
   onOpenBatchModal,
+  onOpenLongDocModal,
 }: OcrUploaderProps) {
   const { data: session } = useSession();
+  const {
+    jobState,
+    uploadAndProcess: uploadAsyncDoc,
+    cancelJob,
+    retryJob,
+    resetJob,
+  } = useOCRJob();
+
+  const [isAsyncModalOpen, setIsAsyncModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [estimatedPages, setEstimatedPages] = useState<number>(1);
@@ -59,7 +74,7 @@ export default function OcrUploader({
     setIsConfigModalOpen(true);
   };
 
-  const handleConfirmConfig = (password?: string) => {
+  const handleConfirmConfig = async (password?: string) => {
     if (!selectedFile) return;
 
     // Rule: If document > 10 pages and guest user, prompt Google Sign In!
@@ -72,7 +87,31 @@ export default function OcrUploader({
     }
 
     setIsConfigModalOpen(false);
-    // Trigger extraction with chosen options and password
+
+    // If file is large (>10 pages), automatically use the Asynchronous Webhook pipeline!
+    if (estimatedPages > 10) {
+      setIsAsyncModalOpen(true);
+      try {
+        await uploadAsyncDoc(selectedFile, {
+          documentType,
+          language,
+          cleanWithAi: true,
+          password,
+          pageCount: estimatedPages,
+        });
+      } catch (err: unknown) {
+        const error = err as { code?: string; message?: string };
+        if (error.code === 'PASSWORD_REQUIRED') {
+          setIsAsyncModalOpen(false);
+          setIsEncrypted(true);
+          setPasswordError('Password required for encrypted PDF');
+          setIsConfigModalOpen(true);
+        }
+      }
+      return;
+    }
+
+    // Otherwise standard synchronous extraction for quick 1-10 page files
     executeExtraction(selectedFile, password, estimatedPages);
   };
 
@@ -290,16 +329,27 @@ export default function OcrUploader({
           </div>
         )}
 
-        {/* Bulk Batch Upload CTA Button */}
-        <div className="flex items-center justify-center pt-1">
+        {/* Action CTAs: Bulk Batch & Long Document OCR */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <button
             type="button"
             onClick={onOpenBatchModal}
-            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet-text)] font-bold px-5 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet-text)] font-bold px-4 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
           >
             <Layers className="w-4 h-4 text-[var(--media-violet)]" />
-            <span>Bulk / Batch Upload</span>
+            <span>Bulk Batch Processing</span>
           </button>
+
+          {onOpenLongDocModal && (
+            <button
+              type="button"
+              onClick={onOpenLongDocModal}
+              className="btn btn-sm rounded-full border border-[var(--color-brand)]/40 bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand-hover)]/20 text-[var(--color-ink)] font-bold px-4 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+            >
+              <Cpu className="w-4 h-4 text-[var(--color-brand-hover)]" />
+              <span>Long Doc OCR (100–200 Pages)</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -316,6 +366,20 @@ export default function OcrUploader({
         onLanguageChange={setLanguage}
         onConfirm={handleConfirmConfig}
         onClose={handleCloseConfigModal}
+      />
+
+      {/* Real-time Asynchronous Job Progress Modal for 100-200 Page Documents */}
+      <AsyncJobProgressModal
+        isOpen={isAsyncModalOpen}
+        jobState={jobState}
+        filename={selectedFile?.name}
+        onCancel={cancelJob}
+        onRetry={retryJob}
+        onClose={() => {
+          setIsAsyncModalOpen(false);
+          resetJob();
+          setSelectedFile(null);
+        }}
       />
 
       {/* Auth Modal (Triggered when > 10 pages or batch upload) */}

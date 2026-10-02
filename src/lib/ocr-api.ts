@@ -7,10 +7,15 @@ import {
   ExportFormat,
   DocumentType,
   SupportedLanguage,
+  OCRJob,
+  OCRJobUploadResponse,
+  AdminStats,
+  AdminJobsResponse,
 } from '@/types/ocr';
 
 const API_BASE_URL = process.env.OCR_API_BASE_URL || 'http://localhost:8000/api/v1';
 const API_KEY = process.env.OCR_API_KEY || 'ocr_dev_key_secret_2026';
+const ADMIN_API_KEY = process.env.OCR_ADMIN_KEY || 'ocr_admin_secret_2026';
 
 export interface ExtractOptions {
   documentType?: DocumentType;
@@ -251,3 +256,164 @@ export async function checkOcrHealth(): Promise<{ status: string; api_version?: 
     return { status: 'offline' };
   }
 }
+
+/**
+ * 8. Asynchronously upload a long document (100–200 pages) for background processing
+ */
+export async function uploadAsyncJob(
+  file: File | Blob,
+  fileName: string,
+  options: ExtractOptions = {}
+): Promise<OCRJobUploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file, fileName);
+  formData.append('document_type', options.documentType || 'auto');
+  formData.append('language', options.language || 'en');
+  formData.append('clean_with_ai', options.cleanWithAi !== false ? 'true' : 'false');
+
+  if (options.requestId) formData.append('request_id', options.requestId);
+  if (options.password) formData.append('password', options.password);
+  if (options.callbackUrl) formData.append('callback_url', options.callbackUrl);
+  if (options.callbackSecret) formData.append('callback_secret', options.callbackSecret);
+
+  const response = await fetch(`${API_BASE_URL}/jobs/upload`, {
+    method: 'POST',
+    headers: {
+      'X-API-Key': API_KEY,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    if (response.status === 400 || response.status === 422 || response.status === 401) {
+      if (errorText.toLowerCase().includes('password') || errorText.toLowerCase().includes('encrypted')) {
+        const err = new Error('PDF is password protected. Please provide a password.');
+        (err as unknown as { code: string }).code = 'PASSWORD_REQUIRED';
+        throw err;
+      }
+    }
+    throw new Error(`Async upload failed (${response.status}): ${errorText}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * 9. Fetch async job progress status
+ */
+export async function fetchJobStatus(jobId: string): Promise<OCRJob> {
+  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
+    headers: {
+      'X-API-Key': API_KEY,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Fetch job status failed (${response.status}): ${errText}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * 10. Cancel an active or queued background job
+ */
+export async function cancelJob(jobId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/cancel`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+      },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 11. Retry a failed background job
+ */
+export async function retryJob(jobId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/retry`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+      },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 12. Get direct SSE URL for job events
+ */
+export function getJobEventsUrl(jobId: string): string {
+  return `${API_BASE_URL}/jobs/${jobId}/events`;
+}
+
+/**
+ * 13. Admin Dashboard & System Monitoring: Get real-time system metrics, worker health, and job statistics
+ */
+export async function fetchAdminStats(): Promise<AdminStats> {
+  const response = await fetch(`${API_BASE_URL}/admin/stats`, {
+    headers: {
+      'X-API-Key': ADMIN_API_KEY,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Fetch admin stats failed (${response.status}): ${errText}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * 14. Admin Dashboard: List and inspect all system background jobs (Admin View)
+ */
+export async function fetchAdminJobs(
+  page = 1,
+  pageSize = 20,
+  status = 'all',
+  search = ''
+): Promise<AdminJobsResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  if (status && status !== 'all') params.append('status', status);
+  if (search) params.append('search', search);
+
+  const response = await fetch(`${API_BASE_URL}/admin/jobs?${params.toString()}`, {
+    headers: {
+      'X-API-Key': ADMIN_API_KEY,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Fetch admin jobs failed (${response.status}): ${errText}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * 15. Admin Dashboard: Global SSE stream URL for real-time operations dashboard
+ */
+export function getAdminEventsUrl(): string {
+  return `${API_BASE_URL}/admin/events`;
+}
+
+

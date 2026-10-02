@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { LogOut, History, ChevronDown, User, CreditCard } from 'lucide-react';
+import { LogOut, History, ChevronDown, User, CreditCard, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 import AuthModal from './AuthModal';
 
@@ -124,6 +124,17 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                 >
                   <CreditCard className="w-4 h-4 text-[var(--color-brand-dark)]" />
                   <span>Dashboard & Credits</span>
+                </a>
+              </li>
+
+              {/* SuperAdmin System Operations Link */}
+              <li>
+                <a
+                  href="/superadmin"
+                  className="py-2 flex items-center gap-2 font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
+                >
+                  <ShieldAlert className="w-4 h-4 text-[var(--color-brand-hover)]" />
+                  <span>SuperAdmin Operations</span>
                 </a>
               </li>
 

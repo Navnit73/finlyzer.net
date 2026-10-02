@@ -171,3 +171,130 @@ export interface UserQuota {
   totalPagesProcessed: number;
   maxFreePages: number;
 }
+
+export type OCRJobStatus = 'idle' | 'uploading' | 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+
+export interface OCRJobUploadResponse {
+  job_id: string;
+  document_id: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  message: string;
+  status_url?: string;
+}
+
+export interface OCRJob {
+  job_id: string;
+  document_id: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  progress: number;
+  total_pages: number;
+  processed_pages: number;
+  current_stage: string;
+  message: string;
+  created_at: string;
+  updated_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  result?: ExtractionResponse | null;
+  result_url?: string | null;
+  error?: string | null;
+  retry_count?: number;
+  metadata?: {
+    filename?: string;
+    file_size_bytes?: number;
+    user_email?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface OCRWebhookPayload {
+  event: 'ocr.job.started' | 'ocr.job.progress' | 'ocr.job.completed' | 'ocr.job.failed';
+  event_id?: string;
+  job_id: string;
+  document_id?: string;
+  status: string;
+  timestamp: string;
+  progress?: number;
+  result_url?: string;
+  result?: ExtractionResponse;
+  error?: string;
+  metadata?: {
+    total_pages?: number;
+    processed_pages?: number;
+    processing_time_ms?: number;
+    user_email?: string;
+    filename?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface OCRJobState {
+  jobId: string | null;
+  documentId: string | null;
+  status: OCRJobStatus;
+  uploadProgress: number;
+  processingProgress: number;
+  currentStage: string;
+  totalPages: number;
+  processedPages: number;
+  message: string;
+  result: ExtractionResponse | null;
+  error: string | null;
+}
+
+export interface WorkerHealth {
+  mode: string;
+  active_workers: number;
+  concurrency_limit: number;
+  current_active_jobs: number;
+  queue_size: number;
+  celery_connected: boolean;
+  redis_connected: boolean;
+  mongodb_connected: boolean;
+  uptime_seconds: number;
+  cpu_percent: number;
+  memory_percent: number;
+}
+
+export interface RecentError {
+  job_id: string;
+  error: string;
+  timestamp: string;
+}
+
+export interface AdminStats {
+  total_jobs: number;
+  queued_jobs: number;
+  processing_jobs: number;
+  completed_jobs: number;
+  failed_jobs: number;
+  cancelled_jobs: number;
+  total_pages_processed: number;
+  average_processing_time_ms: number;
+  retry_count_total: number;
+  worker_health: WorkerHealth;
+  recent_errors?: RecentError[];
+}
+
+export interface AdminJobsResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  items: OCRJob[];
+}
+
+export interface AdminSystemEvent {
+  event: string;
+  job_id?: string;
+  document_id?: string;
+  timestamp: string;
+  message?: string;
+  status?: string;
+  progress?: number;
+  current_stage?: string;
+  error?: string;
+  metadata?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
