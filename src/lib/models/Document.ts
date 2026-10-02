@@ -39,21 +39,24 @@ export async function saveDocumentExtraction(
     created_at: new Date().toISOString(),
   };
 
-  const db = await getDatabase();
-  if (!db) {
-    const list = memoryDocs.get(normalizedEmail) || [];
-    list.unshift(docRecord);
-    memoryDocs.set(normalizedEmail, list);
-    return docRecord;
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<ExtractionDocument>('extractions');
+      await collection.updateOne(
+        { id: extraction.id },
+        { $set: docRecord },
+        { upsert: true }
+      );
+      return docRecord;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB save fallback to memory:', (err as Error).message);
   }
 
-  const collection = db.collection<ExtractionDocument>('extractions');
-  await collection.updateOne(
-    { id: extraction.id },
-    { $set: docRecord },
-    { upsert: true }
-  );
-
+  const list = memoryDocs.get(normalizedEmail) || [];
+  list.unshift(docRecord);
+  memoryDocs.set(normalizedEmail, list);
   return docRecord;
 }
 
@@ -65,69 +68,74 @@ export async function getUserDocuments(
   search = ''
 ): Promise<DocumentListResponse> {
   const normalizedEmail = userEmail.toLowerCase().trim();
-  const db = await getDatabase();
 
-  if (!db) {
-    let list = memoryDocs.get(normalizedEmail) || [];
-    if (documentType && documentType !== 'all') {
-      list = list.filter(d => d.document_type === documentType);
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<ExtractionDocument>('extractions');
+      const query: Record<string, unknown> = { user_email: normalizedEmail };
+
+      if (documentType && documentType !== 'all') {
+        query.document_type = documentType;
+      }
+
+      if (search) {
+        query.$or = [
+          { filename: { $regex: search, $options: 'i' } },
+          { id: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const total = await collection.countDocuments(query);
+      const totalPages = Math.ceil(total / pageSize) || 1;
+      const docs = await collection
+        .find(query)
+        .sort({ created_at: -1 })
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .toArray();
+
+      const items: StoredDocument[] = docs.map(d => ({
+        id: d.id,
+        document_type: d.document_type as StoredDocument['document_type'],
+        status: d.status,
+        created_at: d.created_at,
+        filename: d.filename,
+        pages: d.pages,
+        extraction: d.extraction as StoredDocument['extraction'],
+        metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+      }));
+
+      return {
+        total,
+        page,
+        page_size: pageSize,
+        total_pages: totalPages,
+        items,
+      };
     }
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(d => 
-        d.filename.toLowerCase().includes(q) ||
-        d.id.toLowerCase().includes(q) ||
-        JSON.stringify(d.extraction).toLowerCase().includes(q)
-      );
-    }
-
-    const total = list.length;
-    const totalPages = Math.ceil(total / pageSize) || 1;
-    const startIndex = (page - 1) * pageSize;
-    const items = list.slice(startIndex, startIndex + pageSize).map(d => ({
-      id: d.id,
-      document_type: d.document_type as StoredDocument['document_type'],
-      status: d.status,
-      created_at: d.created_at,
-      filename: d.filename,
-      pages: d.pages,
-      extraction: d.extraction as StoredDocument['extraction'],
-      metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
-    }));
-
-    return {
-      total,
-      page,
-      page_size: pageSize,
-      total_pages: totalPages,
-      items,
-    };
+  } catch (err) {
+    console.warn('⚠️ MongoDB list documents fallback to memory:', (err as Error).message);
   }
 
-  const collection = db.collection<ExtractionDocument>('extractions');
-  const query: Record<string, unknown> = { user_email: normalizedEmail };
-
+  // Memory fallback
+  let list = memoryDocs.get(normalizedEmail) || [];
   if (documentType && documentType !== 'all') {
-    query.document_type = documentType;
+    list = list.filter(d => d.document_type === documentType);
   }
-
   if (search) {
-    query.$or = [
-      { filename: { $regex: search, $options: 'i' } },
-      { id: { $regex: search, $options: 'i' } },
-    ];
+    const q = search.toLowerCase();
+    list = list.filter(d => 
+      d.filename.toLowerCase().includes(q) ||
+      d.id.toLowerCase().includes(q) ||
+      JSON.stringify(d.extraction).toLowerCase().includes(q)
+    );
   }
 
-  const total = await collection.countDocuments(query);
+  const total = list.length;
   const totalPages = Math.ceil(total / pageSize) || 1;
-  const docs = await collection
-    .find(query)
-    .sort({ created_at: -1 })
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .toArray();
-
-  const items: StoredDocument[] = docs.map(d => ({
+  const startIndex = (page - 1) * pageSize;
+  const items = list.slice(startIndex, startIndex + pageSize).map(d => ({
     id: d.id,
     document_type: d.document_type as StoredDocument['document_type'],
     status: d.status,
@@ -148,40 +156,49 @@ export async function getUserDocuments(
 }
 
 export async function getDocumentById(id: string, userEmail?: string): Promise<ExtractionDocument | null> {
-  const db = await getDatabase();
   const normalizedEmail = userEmail ? userEmail.toLowerCase().trim() : undefined;
 
-  if (!db) {
-    if (normalizedEmail) {
-      const list = memoryDocs.get(normalizedEmail) || [];
-      return list.find(d => d.id === id) || null;
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<ExtractionDocument>('extractions');
+      const query: Record<string, unknown> = { id };
+      if (normalizedEmail) {
+        query.user_email = normalizedEmail;
+      }
+      return await collection.findOne(query);
     }
-    for (const list of memoryDocs.values()) {
-      const found = list.find(d => d.id === id);
-      if (found) return found;
-    }
-    return null;
+  } catch (err) {
+    console.warn('⚠️ MongoDB getDocumentById fallback to memory:', (err as Error).message);
   }
 
-  const collection = db.collection<ExtractionDocument>('extractions');
-  const query: Record<string, unknown> = { id };
   if (normalizedEmail) {
-    query.user_email = normalizedEmail;
+    const list = memoryDocs.get(normalizedEmail) || [];
+    return list.find(d => d.id === id) || null;
   }
-  return collection.findOne(query);
+  for (const list of memoryDocs.values()) {
+    const found = list.find(d => d.id === id);
+    if (found) return found;
+  }
+  return null;
 }
 
 export async function deleteDocumentById(id: string, userEmail: string): Promise<boolean> {
   const normalizedEmail = userEmail.toLowerCase().trim();
-  const db = await getDatabase();
-  if (!db) {
-    const list = memoryDocs.get(normalizedEmail) || [];
-    const filtered = list.filter(d => d.id !== id);
-    memoryDocs.set(normalizedEmail, filtered);
-    return true;
+
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<ExtractionDocument>('extractions');
+      const result = await collection.deleteOne({ id, user_email: normalizedEmail });
+      return result.deletedCount > 0;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB delete fallback to memory:', (err as Error).message);
   }
 
-  const collection = db.collection<ExtractionDocument>('extractions');
-  const result = await collection.deleteOne({ id, user_email: normalizedEmail });
-  return result.deletedCount > 0;
+  const list = memoryDocs.get(normalizedEmail) || [];
+  const filtered = list.filter(d => d.id !== id);
+  memoryDocs.set(normalizedEmail, filtered);
+  return true;
 }
