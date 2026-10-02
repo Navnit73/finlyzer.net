@@ -271,7 +271,12 @@ export default function AdminTopNav({
 
               <li className="pt-1 border-t border-[var(--color-border)]">
                 <button
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    try {
+                      localStorage.removeItem('has_logged_in');
+                    } catch {}
+                    await signOut({ callbackUrl: '/' });
+                  }}
                   className="py-2 flex items-center gap-2 font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg w-full text-left cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />

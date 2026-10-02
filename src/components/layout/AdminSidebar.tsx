@@ -341,7 +341,12 @@ export default function AdminSidebar({
           </div>
 
           <button
-            onClick={() => signOut()}
+            onClick={async () => {
+              try {
+                localStorage.removeItem('has_logged_in');
+              } catch {}
+              await signOut({ callbackUrl: '/' });
+            }}
             className="p-1.5 rounded-lg text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer"
             title="Sign Out"
             aria-label="Sign Out"
