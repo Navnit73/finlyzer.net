@@ -36,9 +36,13 @@ export default function OcrWorkspace({ initialDocumentId }: OcrWorkspaceProps) {
           metadata: doc.metadata || { pages: doc.pages || 1 },
           created_at: doc.created_at,
         });
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to load document');
       }
     } catch (e) {
       console.error('Failed to load document:', e);
+      alert('Network error while retrieving document.');
     } finally {
       setIsLoadingDoc(false);
     }

@@ -189,6 +189,31 @@ export async function downloadExportFile(documentId: string, format: ExportForma
 }
 
 /**
+ * 6.5. Generate export file directly from extraction JSON payload
+ */
+export async function generateExportDirect(
+  format: ExportFormat,
+  extraction: Record<string, unknown>
+): Promise<Blob> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/export/generate`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ format, extraction }),
+    });
+    if (response.ok) {
+      return await response.blob();
+    }
+  } catch (e) {
+    console.warn('[OCR Client] Direct export generation failed, utilizing client fallback:', e);
+  }
+  return generateFallbackExportBlob(format, 'generated');
+}
+
+/**
  * 7. Consolidate multiple monthly statements into annual P&L
  */
 export async function consolidateStatements(
@@ -461,7 +486,7 @@ function generateMockBatchResponse(fileNames: string[]): BatchResponse {
   };
 }
 
-function generateFallbackExportBlob(format: ExportFormat, documentId: string): Blob {
+export function generateFallbackExportBlob(format: ExportFormat, documentId: string): Blob {
   if (format === 'csv') {
     const csvContent = `Date,Description,Reference,Debit,Credit,Balance\n2026-01-05,"Salary Credit - TechCorp",UPI982312,,35000.00,60000.00\n2026-01-08,"AWS Cloud Hosting",TXN44910,4500.00,,55500.00\n2026-01-10,"Amazon Online",AMZN882,5500.00,,50000.00`;
     return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

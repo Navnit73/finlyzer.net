@@ -1,41 +1,55 @@
 import { MongoClient, Db } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/finlyzer';
+const rawUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/finlyzer';
+// Ensure standard Atlas query parameters if not present
+const uri = rawUri.includes('?') ? rawUri : `${rawUri}?retryWrites=true&w=majority`;
+
 const options = {
-  serverSelectionTimeoutMS: 3000,
-  connectTimeoutMS: 3000,
+  maxPoolSize: 10,
+  minPoolSize: 1,
+  serverSelectionTimeoutMS: 8000,
+  connectTimeoutMS: 8000,
 };
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+let client: MongoClient | null = null;
+let clientPromise: Promise<MongoClient> | null = null;
 
 declare global {
   // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+function getClientPromise(): Promise<MongoClient> {
+  if (process.env.NODE_ENV === 'development') {
+    if (!global._mongoClientPromise) {
+      client = new MongoClient(uri, options);
+      global._mongoClientPromise = client.connect().catch((err) => {
+        // Reset cached promise on failure so subsequent calls can retry
+        global._mongoClientPromise = undefined;
+        throw err;
+      });
+    }
+    return global._mongoClientPromise;
+  } else {
+    if (!clientPromise) {
+      client = new MongoClient(uri, options);
+      clientPromise = client.connect().catch((err) => {
+        clientPromise = null;
+        throw err;
+      });
+    }
+    return clientPromise;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
 }
 
-export default clientPromise;
+export default getClientPromise;
 
 export async function getDatabase(dbName = 'finlyzer'): Promise<Db | null> {
   try {
-    const connectedClient = await clientPromise;
+    const connectedClient = await getClientPromise();
     return connectedClient.db(dbName);
   } catch (error) {
-    console.warn('⚠️ MongoDB connection warning (falling back to memory/local cache):', error);
+    console.warn('⚠️ MongoDB connection warning (falling back to memory cache):', (error as Error).message);
     return null;
   }
 }

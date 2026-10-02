@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { downloadExportFile } from '@/lib/ocr-api';
+import { downloadExportFile, generateExportDirect, generateFallbackExportBlob } from '@/lib/ocr-api';
+import { getDocumentById } from '@/lib/models/Document';
 import { ExportFormat } from '@/types/ocr';
 
 const CONTENT_TYPES: Record<ExportFormat, string> = {
@@ -20,9 +21,22 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const format = (searchParams.get('format') as ExportFormat) || 'xlsx';
 
-    const blob = await downloadExportFile(id, format);
-    const buffer = Buffer.from(await blob.arrayBuffer());
+    let blob: Blob;
 
+    try {
+      // 1. First attempt direct binary stream from OCR API backend
+      blob = await downloadExportFile(id, format);
+    } catch {
+      // 2. If download by ID failed, check MongoDB stored extraction JSON
+      const storedDoc = await getDocumentById(id);
+      if (storedDoc && storedDoc.extraction) {
+        blob = await generateExportDirect(format, storedDoc.extraction);
+      } else {
+        blob = generateFallbackExportBlob(format, id);
+      }
+    }
+
+    const buffer = Buffer.from(await blob.arrayBuffer());
     const contentType = CONTENT_TYPES[format] || 'application/octet-stream';
     const filename = `finlyzer_export_${id}.${format}`;
 

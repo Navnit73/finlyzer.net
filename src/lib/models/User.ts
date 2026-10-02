@@ -16,12 +16,13 @@ export interface UserRecord {
 const memoryUsers = new Map<string, UserRecord>();
 
 export async function findOrCreateUser(email: string, name?: string | null, image?: string | null): Promise<UserRecord> {
+  const normalizedEmail = email.toLowerCase().trim();
   const db = await getDatabase();
   
   if (!db) {
-    if (!memoryUsers.has(email)) {
-      memoryUsers.set(email, {
-        email,
+    if (!memoryUsers.has(normalizedEmail)) {
+      memoryUsers.set(normalizedEmail, {
+        email: normalizedEmail,
         name: name || 'Demo User',
         image: image || null,
         tier: 'free',
@@ -31,15 +32,15 @@ export async function findOrCreateUser(email: string, name?: string | null, imag
         updated_at: new Date(),
       });
     }
-    return memoryUsers.get(email)!;
+    return memoryUsers.get(normalizedEmail)!;
   }
 
   const usersCollection = db.collection<UserRecord>('users');
-  let user = await usersCollection.findOne({ email });
+  let user = await usersCollection.findOne({ email: normalizedEmail });
 
   if (!user) {
     const newUser: UserRecord = {
-      email,
+      email: normalizedEmail,
       name: name || null,
       image: image || null,
       tier: 'free',
@@ -72,7 +73,8 @@ export async function getUserQuota(email?: string | null): Promise<{
     };
   }
 
-  const user = await findOrCreateUser(email);
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await findOrCreateUser(normalizedEmail);
   const remaining = Math.max(0, user.free_pages_limit - user.pages_processed);
 
   return {
@@ -85,9 +87,10 @@ export async function getUserQuota(email?: string | null): Promise<{
 }
 
 export async function incrementUserPageCount(email: string, pageCount: number): Promise<void> {
+  const normalizedEmail = email.toLowerCase().trim();
   const db = await getDatabase();
   if (!db) {
-    const mem = memoryUsers.get(email);
+    const mem = memoryUsers.get(normalizedEmail);
     if (mem) {
       mem.pages_processed += pageCount;
       mem.updated_at = new Date();
@@ -97,7 +100,7 @@ export async function incrementUserPageCount(email: string, pageCount: number): 
 
   const usersCollection = db.collection<UserRecord>('users');
   await usersCollection.updateOne(
-    { email },
+    { email: normalizedEmail },
     {
       $inc: { pages_processed: pageCount },
       $set: { updated_at: new Date() }

@@ -24,9 +24,10 @@ export async function saveDocumentExtraction(
   extraction: ExtractionResponse,
   filename: string
 ): Promise<ExtractionDocument> {
+  const normalizedEmail = userEmail.toLowerCase().trim();
   const docRecord: ExtractionDocument = {
     id: extraction.id,
-    user_email: userEmail,
+    user_email: normalizedEmail,
     document_type: extraction.document_type || 'bank_statement',
     filename: filename || 'statement.pdf',
     pages: extraction.metadata?.pages || 1,
@@ -40,9 +41,9 @@ export async function saveDocumentExtraction(
 
   const db = await getDatabase();
   if (!db) {
-    const list = memoryDocs.get(userEmail) || [];
+    const list = memoryDocs.get(normalizedEmail) || [];
     list.unshift(docRecord);
-    memoryDocs.set(userEmail, list);
+    memoryDocs.set(normalizedEmail, list);
     return docRecord;
   }
 
@@ -63,10 +64,11 @@ export async function getUserDocuments(
   documentType = 'all',
   search = ''
 ): Promise<DocumentListResponse> {
+  const normalizedEmail = userEmail.toLowerCase().trim();
   const db = await getDatabase();
 
   if (!db) {
-    let list = memoryDocs.get(userEmail) || [];
+    let list = memoryDocs.get(normalizedEmail) || [];
     if (documentType && documentType !== 'all') {
       list = list.filter(d => d.document_type === documentType);
     }
@@ -103,7 +105,7 @@ export async function getUserDocuments(
   }
 
   const collection = db.collection<ExtractionDocument>('extractions');
-  const query: Record<string, unknown> = { user_email: userEmail };
+  const query: Record<string, unknown> = { user_email: normalizedEmail };
 
   if (documentType && documentType !== 'all') {
     query.document_type = documentType;
@@ -147,9 +149,11 @@ export async function getUserDocuments(
 
 export async function getDocumentById(id: string, userEmail?: string): Promise<ExtractionDocument | null> {
   const db = await getDatabase();
+  const normalizedEmail = userEmail ? userEmail.toLowerCase().trim() : undefined;
+
   if (!db) {
-    if (userEmail) {
-      const list = memoryDocs.get(userEmail) || [];
+    if (normalizedEmail) {
+      const list = memoryDocs.get(normalizedEmail) || [];
       return list.find(d => d.id === id) || null;
     }
     for (const list of memoryDocs.values()) {
@@ -161,22 +165,23 @@ export async function getDocumentById(id: string, userEmail?: string): Promise<E
 
   const collection = db.collection<ExtractionDocument>('extractions');
   const query: Record<string, unknown> = { id };
-  if (userEmail) {
-    query.user_email = userEmail;
+  if (normalizedEmail) {
+    query.user_email = normalizedEmail;
   }
   return collection.findOne(query);
 }
 
 export async function deleteDocumentById(id: string, userEmail: string): Promise<boolean> {
+  const normalizedEmail = userEmail.toLowerCase().trim();
   const db = await getDatabase();
   if (!db) {
-    const list = memoryDocs.get(userEmail) || [];
+    const list = memoryDocs.get(normalizedEmail) || [];
     const filtered = list.filter(d => d.id !== id);
-    memoryDocs.set(userEmail, filtered);
+    memoryDocs.set(normalizedEmail, filtered);
     return true;
   }
 
   const collection = db.collection<ExtractionDocument>('extractions');
-  const result = await collection.deleteOne({ id, user_email: userEmail });
+  const result = await collection.deleteOne({ id, user_email: normalizedEmail });
   return result.deletedCount > 0;
 }
