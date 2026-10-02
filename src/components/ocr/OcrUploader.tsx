@@ -4,22 +4,17 @@ import React, { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Upload,
-  FileText,
   Sparkles,
   Lock,
   Layers,
-  ArrowRight,
   AlertCircle,
   ShieldCheck,
-  CheckCircle2,
-  FileSpreadsheet,
-  Receipt,
-  FileCheck,
 } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
 import PdfPasswordModal from './PdfPasswordModal';
 import AuthModal from '../auth/AuthModal';
+import UploadConfigModal from './UploadConfigModal';
 
 interface OcrUploaderProps {
   onExtractionComplete: (data: ExtractionResponse) => void;
@@ -40,6 +35,7 @@ export default function OcrUploader({
   const [cleanWithAi, setCleanWithAi] = useState<boolean>(true);
 
   // Modal States
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -63,22 +59,38 @@ export default function OcrUploader({
     setEstimatedPages(inspection.pageCount);
     setIsEncrypted(inspection.isEncrypted);
 
+    // Open configuration popup to select Document Type & Language
+    setIsConfigModalOpen(true);
+  };
+
+  const handleConfirmConfig = () => {
+    setIsConfigModalOpen(false);
+    if (!selectedFile) return;
+
     // Rule: If document > 10 pages and guest user, prompt Google Sign In!
-    if (!session?.user && inspection.pageCount > 10) {
+    if (!session?.user && estimatedPages > 10) {
       setAuthReason('page_limit');
-      setAuthPageCount(inspection.pageCount);
+      setAuthPageCount(estimatedPages);
       setIsAuthModalOpen(true);
       return;
     }
 
     // Rule: If encrypted PDF, prompt Password Modal!
-    if (inspection.isEncrypted) {
+    if (isEncrypted) {
       setIsPasswordModalOpen(true);
       return;
     }
 
-    // Otherwise, auto-trigger extraction
-    executeExtraction(file, undefined, inspection.pageCount);
+    // Otherwise, trigger extraction with chosen options
+    executeExtraction(selectedFile, undefined, estimatedPages);
+  };
+
+  const handleCloseConfigModal = () => {
+    setIsConfigModalOpen(false);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -161,30 +173,15 @@ export default function OcrUploader({
       setErrorMessage(err.message || 'An error occurred while extracting the document.');
     } finally {
       setIsProcessing(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   const handlePasswordSubmit = (pwd: string) => {
     if (!selectedFile) return;
     executeExtraction(selectedFile, pwd, estimatedPages);
-  };
-
-  // Sample Demos for instant 1-Click test
-  const loadSample = async (type: 'bank' | 'invoice' | 'encrypted') => {
-    if (type === 'encrypted') {
-      const dummyEncryptedFile = new File(['%PDF-1.4 encrypted dummy'], 'SBI_Locked_Statement_Jan2026.pdf', {
-        type: 'application/pdf',
-      });
-      setSelectedFile(dummyEncryptedFile);
-      setIsEncrypted(true);
-      setIsPasswordModalOpen(true);
-      return;
-    }
-
-    const filename = type === 'bank' ? 'HDFC_Bank_Statement_Jan2026.pdf' : 'Cloud_Enterprise_Invoice_2026.pdf';
-    const dummyFile = new File(['%PDF-1.4 sample stream'], filename, { type: 'application/pdf' });
-    setSelectedFile(dummyFile);
-    executeExtraction(dummyFile, undefined, 1);
   };
 
   return (
@@ -288,109 +285,61 @@ export default function OcrUploader({
           </div>
         )}
 
-        {/* Extraction Settings & Options Bar */}
+        {/* Hub Bar: Feature Highlights & Bulk Batch Upload */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] text-xs">
-          {/* Document Type Dropdown */}
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[var(--color-ink)] uppercase tracking-wider text-[11px]">
-              Document Type:
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink)] font-semibold shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
+              <span>DeepSeek AI Reconciliation</span>
             </span>
-            <select
-              value={documentType}
-              onChange={(e) => setDocumentType(e.target.value as DocumentType)}
-              className="py-1.5 px-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
-            >
-              <option value="auto">Auto-Detect</option>
-              <option value="bank_statement">Bank Statement</option>
-              <option value="invoice">Invoice</option>
-              <option value="receipt">Receipt</option>
-              <option value="general">General Financial</option>
-            </select>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>100% In-Memory &amp; Private</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
+              <Lock className="w-3.5 h-3.5 text-amber-600" />
+              <span>Password-Protected Support</span>
+            </span>
           </div>
 
-          {/* Language Dropdown */}
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[var(--color-ink)] uppercase tracking-wider text-[11px]">
-              Language:
-            </span>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-              className="py-1.5 px-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
-            >
-              <option value="en">English (EN)</option>
-              <option value="hi">Hindi (HI)</option>
-              <option value="es">Spanish (ES)</option>
-              <option value="fr">French (FR)</option>
-              <option value="de">German (DE)</option>
-              <option value="auto">Auto Language</option>
-            </select>
-          </div>
-
-          {/* AI DeepSeek Clean Toggle */}
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={cleanWithAi}
-              onChange={(e) => setCleanWithAi(e.target.checked)}
-              className="checkbox checkbox-xs checkbox-success"
-            />
-            <span className="font-semibold text-[var(--color-ink)] flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-              DeepSeek AI Reconciliation
-            </span>
-          </label>
-
-          {/* Bulk Batch Trigger */}
           <button
             onClick={onOpenBatchModal}
-            className="btn btn-xs rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] font-bold px-3 py-1 flex items-center gap-1.5"
+            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] font-bold px-4 py-1.5 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Layers className="w-4 h-4" />
             <span>Bulk / Batch Upload</span>
           </button>
         </div>
-
-        {/* 1-Click Sample Previews for Quick Testing */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] font-medium">
-            <span>Try sample statement:</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => loadSample('bank')}
-              className="btn btn-xs rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-ink)] flex items-center gap-1.5 px-3"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Sample Bank Statement (1-Click)</span>
-            </button>
-
-            <button
-              onClick={() => loadSample('invoice')}
-              className="btn btn-xs rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-ink)] flex items-center gap-1.5 px-3"
-            >
-              <FileText className="w-3.5 h-3.5 text-blue-600" />
-              <span>Sample Cloud Invoice</span>
-            </button>
-
-            <button
-              onClick={() => loadSample('encrypted')}
-              className="btn btn-xs rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs font-semibold text-[var(--color-ink)] flex items-center gap-1.5 px-3"
-            >
-              <Lock className="w-3.5 h-3.5 text-amber-600" />
-              <span>Encrypted PDF Demo</span>
-            </button>
-          </div>
-        </div>
       </div>
+
+      {/* Upload Configuration Popup (Document Type & Language Selection) */}
+      <UploadConfigModal
+        isOpen={isConfigModalOpen}
+        file={selectedFile}
+        estimatedPages={estimatedPages}
+        isEncrypted={isEncrypted}
+        documentType={documentType}
+        language={language}
+        cleanWithAi={cleanWithAi}
+        onDocumentTypeChange={setDocumentType}
+        onLanguageChange={setLanguage}
+        onCleanWithAiChange={setCleanWithAi}
+        onConfirm={handleConfirmConfig}
+        onClose={handleCloseConfigModal}
+      />
 
       {/* PDF Password Modal */}
       <PdfPasswordModal
         isOpen={isPasswordModalOpen}
         filename={selectedFile?.name || 'Encrypted_Statement.pdf'}
         errorMessage={passwordError}
-        onClose={() => setIsPasswordModalOpen(false)}
+        onClose={() => {
+          setIsPasswordModalOpen(false);
+          setSelectedFile(null);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }}
         onSubmitPassword={handlePasswordSubmit}
         isLoading={isProcessing}
       />
