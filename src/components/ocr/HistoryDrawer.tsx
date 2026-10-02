@@ -10,10 +10,12 @@ import {
   Download,
   Trash2,
   Calendar,
-  Layers,
   Sparkles,
+  ExternalLink,
+  Laptop,
 } from 'lucide-react';
 import { DocumentListResponse, StoredDocument, ExportFormat } from '@/types/ocr';
+import { getBrowserHistory, removeFromBrowserHistory, BrowserHistoryItem } from '@/lib/browser-history';
 import AuthModal from '../auth/AuthModal';
 
 interface HistoryDrawerProps {
@@ -30,6 +32,7 @@ export default function HistoryDrawer({
   const { data: session } = useSession();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [documents, setDocuments] = useState<StoredDocument[]>([]);
+  const [guestHistory, setGuestHistory] = useState<BrowserHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [docTypeFilter, setDocTypeFilter] = useState('all');
@@ -37,13 +40,13 @@ export default function HistoryDrawer({
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDocuments = async (pageNum = 1) => {
-    if (!session?.user) return;
+  // Fetch logged-in user documents from MongoDB
+  const fetchUserDocuments = async (pageNum = 1) => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
         page: String(pageNum),
-        page_size: '10',
+        page_size: '15',
       });
       if (docTypeFilter !== 'all') params.append('document_type', docTypeFilter);
       if (searchTerm) params.append('search', searchTerm);
@@ -63,17 +66,53 @@ export default function HistoryDrawer({
     }
   };
 
+  // Load guest history from browser localStorage
+  const loadGuestHistory = () => {
+    const items = getBrowserHistory();
+    setGuestHistory(items);
+    setTotalCount(items.length);
+  };
+
   useEffect(() => {
-    if (isOpen && session?.user) {
-      fetchDocuments(1);
+    if (!isOpen) return;
+
+    if (session?.user) {
+      fetchUserDocuments(1);
+    } else {
+      loadGuestHistory();
     }
   }, [isOpen, session, docTypeFilter, searchTerm]);
 
   if (!isOpen) return null;
 
+  // Filter guest items by search & type
+  const filteredGuestItems = guestHistory.filter((item) => {
+    const matchesSearch =
+      !searchTerm ||
+      item.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType =
+      docTypeFilter === 'all' || item.document_type === docTypeFilter;
+    return matchesSearch && matchesType;
+  });
+
   const handleDelete = async (e: React.MouseEvent, docId: string) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this document extraction?')) return;
+    if (!confirm('Are you sure you want to remove this document from history?')) return;
+
+    if (!session?.user) {
+      // Guest: remove from browser storage
+      removeFromBrowserHistory(docId);
+      setGuestHistory((prev) => prev.filter((d) => d.id !== docId));
+      setTotalCount((c) => Math.max(0, c - 1));
+      // Proactively notify backend to cleanup if possible
+      try {
+        await fetch(`/api/documents/${docId}`, { method: 'DELETE' });
+      } catch {
+        // Ignored
+      }
+      return;
+    }
 
     try {
       const res = await fetch(`/api/documents/${docId}`, { method: 'DELETE' });
@@ -102,7 +141,7 @@ export default function HistoryDrawer({
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
-      alert('Download failed');
+      alert('Download failed. Document data could not be retrieved.');
     }
   };
 
@@ -110,7 +149,7 @@ export default function HistoryDrawer({
     <>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fade-in">
         <div
-          className="relative w-full max-w-xl h-full bg-[var(--color-surface)] shadow-2xl border-l border-[var(--color-border)] p-6 sm:p-8 flex flex-col justify-between space-y-6 animate-slide-left overflow-y-auto"
+          className="relative w-full max-w-xl h-full bg-[var(--color-surface)] shadow-2xl border-l border-[var(--color-border)] p-6 sm:p-8 flex flex-col justify-between space-y-5 animate-slide-left overflow-y-auto"
           role="dialog"
           aria-modal="true"
         >
@@ -126,7 +165,9 @@ export default function HistoryDrawer({
                     Extraction History
                   </h3>
                   <p className="text-xs text-[var(--color-text-secondary)]">
-                    {session?.user ? `${totalCount} Documents Saved in MongoDB` : 'Sign in to access saved documents'}
+                    {session?.user
+                      ? `${totalCount} Documents Saved in MongoDB`
+                      : `${totalCount} Document${totalCount === 1 ? '' : 's'} Stored in Browser`}
                   </p>
                 </div>
               </div>
@@ -139,68 +180,59 @@ export default function HistoryDrawer({
               </button>
             </div>
 
-            {/* Non-Logged In State */}
+            {/* Guest Info Banner (Shows for non-logged in users) */}
             {!session?.user && (
-              <div className="p-6 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] text-center space-y-4">
-                <div className="w-12 h-12 mx-auto rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center">
-                  <Sparkles className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-bold text-sm text-[var(--color-ink)]">
-                    Sign in to Sync &amp; Access Your History
-                  </p>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    Log in with Google to automatically save all your OCR parsed statements, export spreadsheets, and access past audit reports.
-                  </p>
+              <div className="p-3.5 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-[var(--color-ink)] font-medium">
+                  <Laptop className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Free guest storage (Saved in browser &amp; DB)</span>
                 </div>
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="btn-brand-primary !min-h-[44px] !py-0 !px-6 !text-xs font-bold w-full"
+                  className="btn btn-xs rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold border-none hover:bg-[var(--color-brand-hover)] shrink-0 px-3"
                 >
-                  Sign In with Google
+                  Sign In to Sync
                 </button>
               </div>
             )}
 
-            {/* Controls for Logged In User */}
-            {session?.user && (
-              <div className="space-y-3">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search past extractions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
-                  />
-                </div>
-
-                {/* Filter Tabs */}
-                <div className="flex flex-wrap gap-1 p-1 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)]">
-                  {['all', 'bank_statement', 'invoice', 'receipt'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setDocTypeFilter(type)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors ${
-                        docTypeFilter === type
-                          ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-                      }`}
-                    >
-                      {type === 'all' ? 'All' : type.replace('_', ' ')}
-                    </button>
-                  ))}
-                </div>
+            {/* Search and Filters */}
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search past extractions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+                />
               </div>
-            )}
+
+              {/* Filter Tabs */}
+              <div className="flex flex-wrap gap-1 p-1 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)]">
+                {['all', 'bank_statement', 'invoice', 'receipt'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setDocTypeFilter(type)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors ${
+                      docTypeFilter === type
+                        ? 'bg-[var(--color-ink)] text-white shadow-xs'
+                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                    }`}
+                  >
+                    {type === 'all' ? 'All' : type.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Documents List */}
-          {session?.user && (
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-[250px]">
-              {isLoading ? (
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-[250px]">
+            {session?.user ? (
+              /* Authenticated User Documents */
+              isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 text-xs text-[var(--color-text-secondary)] space-y-2">
                   <span className="loading loading-spinner loading-md text-[var(--color-brand)]"></span>
                   <span>Loading saved documents...</span>
@@ -238,7 +270,6 @@ export default function HistoryDrawer({
                           </div>
                         </div>
 
-                        {/* Amount Badge */}
                         {(balance !== undefined || total !== undefined) && (
                           <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
                             ${((balance ?? total) || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -246,7 +277,6 @@ export default function HistoryDrawer({
                         )}
                       </div>
 
-                      {/* Footer Info & Quick Actions */}
                       <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
                         <span className="flex items-center gap-1 font-mono">
                           <Calendar className="w-3 h-3" />
@@ -257,14 +287,14 @@ export default function HistoryDrawer({
                           <button
                             onClick={(e) => handleDownload(e, doc.id, 'xlsx')}
                             className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
-                            title="Download Excel"
+                            title="Download Excel (.xlsx)"
                           >
                             <Download className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={(e) => handleDelete(e, doc.id)}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--color-text-muted)] hover:text-red-600 transition-colors"
-                            title="Delete extraction"
+                            className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--color-text-secondary)] hover:text-red-600 transition-colors"
+                            title="Delete"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -274,43 +304,106 @@ export default function HistoryDrawer({
                   );
                 })
               ) : (
-                <div className="text-center py-16 text-xs text-[var(--color-text-secondary)] space-y-2">
-                  <Layers className="w-8 h-8 text-[var(--color-text-muted)] mx-auto opacity-50" />
-                  <p>No document extractions found.</p>
+                <div className="text-center py-16 space-y-2 text-[var(--color-text-secondary)]">
+                  <p className="font-bold text-sm text-[var(--color-ink)]">No documents found</p>
+                  <p className="text-xs">Upload your first bank statement or invoice to start building history.</p>
                 </div>
-              )}
-            </div>
-          )}
+              )
+            ) : (
+              /* Free Guest User Browser History */
+              filteredGuestItems.length > 0 ? (
+                filteredGuestItems.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      onSelectDocument(item.id);
+                      onClose();
+                    }}
+                    className="p-4 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 truncate">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
+                          <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <div className="truncate">
+                          <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-hover)] transition-colors">
+                            {item.filename}
+                          </p>
+                          <p className="text-[11px] text-[var(--color-text-secondary)] flex items-center gap-2 mt-0.5">
+                            <span className="capitalize">{item.document_type.replace('_', ' ')}</span>
+                            <span>&bull;</span>
+                            <span>{item.pages || 1} Page{item.pages !== 1 ? 's' : ''}</span>
+                          </p>
+                        </div>
+                      </div>
 
-          {/* Pagination */}
-          {session?.user && totalPages > 1 && (
-            <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)] text-xs text-[var(--color-text-secondary)]">
-              <span>Page {page} of {totalPages}</span>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => fetchDocuments(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1 rounded-lg border border-[var(--color-border)] disabled:opacity-40 font-semibold"
-                >
-                  Prev
-                </button>
-                <button
-                  onClick={() => fetchDocuments(Math.min(totalPages, page + 1))}
-                  disabled={page === totalPages}
-                  className="px-3 py-1 rounded-lg border border-[var(--color-border)] disabled:opacity-40 font-semibold"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+                      {item.closing_balance !== undefined && item.closing_balance !== null && (
+                        <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
+                          ₹{item.closing_balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
+                      <span className="flex items-center gap-1 font-mono">
+                        <Calendar className="w-3 h-3" />
+                        {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent'}
+                      </span>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => handleDownload(e, item.id, 'xlsx')}
+                          className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                          title="Download Excel (.xlsx)"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDelete(e, item.id)}
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--color-text-secondary)] hover:text-red-600 transition-colors"
+                          title="Remove from history"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-16 space-y-3 text-[var(--color-text-secondary)]">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)]">
+                    <History className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-bold text-sm text-[var(--color-ink)]">No documents in browser history</p>
+                    <p className="text-xs max-w-xs mx-auto">
+                      Any document you upload (up to 10 pages for free) will automatically be saved here so you can download or review it later.
+                    </p>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+
+          {/* Drawer Footer */}
+          <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+            <span>Powered by PyMuPDF &amp; DeepSeek AI</span>
+            <button
+              onClick={onClose}
+              className="font-bold text-[var(--color-ink)] hover:underline"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* Auth Modal for Guest Upgrades */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        reason="save_history"
+        reason="general"
       />
     </>
   );

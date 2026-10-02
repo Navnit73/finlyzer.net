@@ -15,6 +15,7 @@ import { inspectPdfFile } from '@/lib/pdf-helper';
 import PdfPasswordModal from './PdfPasswordModal';
 import AuthModal from '../auth/AuthModal';
 import UploadConfigModal from './UploadConfigModal';
+import { saveToBrowserHistory } from '@/lib/browser-history';
 
 interface OcrUploaderProps {
   onExtractionComplete: (data: ExtractionResponse) => void;
@@ -166,6 +167,28 @@ export default function OcrUploader({
 
       // Close password modal if open
       setIsPasswordModalOpen(false);
+
+      // Save summary to local browser history (available to free guest users as well)
+      saveToBrowserHistory({
+        id: data.id,
+        filename: file.name,
+        document_type: data.document_type || documentType,
+        pages: data.metadata?.pages || pageCount || 1,
+        created_at: new Date().toISOString(),
+        status: data.status || 'success',
+        closing_balance: (data.extraction as { closing_balance?: number })?.closing_balance,
+        currency: (data.extraction as { currency?: string })?.currency,
+      });
+
+      // Cache full payload in sessionStorage for instant page rendering
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('doc_' + data.id, JSON.stringify(data));
+        } catch {
+          // Ignore storage overflow
+        }
+      }
+
       // Callback to parent
       onExtractionComplete(data);
     } catch (e: unknown) {

@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 import { ChevronDown, TrendingUp, Sparkles } from "lucide-react";
 import UserMenu from "./auth/UserMenu";
 import HistoryDrawer from "./ocr/HistoryDrawer";
 
 export default function Header() {
+  const router = useRouter();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   return (
@@ -53,11 +55,9 @@ export default function Header() {
       <HistoryDrawer
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
-        onSelectDocument={() => {
+        onSelectDocument={(id) => {
           setIsHistoryOpen(false);
-          // scroll to ocr studio
-          const el = document.getElementById('ocr-studio');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          router.push(`/document/${id}`);
         }}
       />
     </>

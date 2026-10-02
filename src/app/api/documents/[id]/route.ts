@@ -33,13 +33,19 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
-    if (!userEmail) {
+    const doc = await getDocumentById(id);
+    if (!doc) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+
+    // Allow deleting if user owns it, or if it's a guest document
+    if (doc.user_email !== 'guest' && (!userEmail || doc.user_email !== userEmail.toLowerCase().trim())) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const deleted = await deleteDocumentById(id, userEmail);
+    const deleted = await deleteDocumentById(id, userEmail || undefined);
     if (!deleted) {
-      return NextResponse.json({ error: 'Document not found or delete failed' }, { status: 404 });
+      return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Document deleted successfully' });

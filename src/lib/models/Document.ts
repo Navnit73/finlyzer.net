@@ -24,7 +24,7 @@ export async function saveDocumentExtraction(
   extraction: ExtractionResponse,
   filename: string
 ): Promise<ExtractionDocument> {
-  const normalizedEmail = userEmail.toLowerCase().trim();
+  const normalizedEmail = (userEmail || 'guest').toLowerCase().trim();
   const docRecord: ExtractionDocument = {
     id: extraction.id,
     user_email: normalizedEmail,
@@ -67,7 +67,7 @@ export async function getUserDocuments(
   documentType = 'all',
   search = ''
 ): Promise<DocumentListResponse> {
-  const normalizedEmail = userEmail.toLowerCase().trim();
+  const normalizedEmail = (userEmail || 'guest').toLowerCase().trim();
 
   try {
     const db = await getDatabase();
@@ -155,8 +155,55 @@ export async function getUserDocuments(
   };
 }
 
+export async function getDocumentsByIds(ids: string[]): Promise<StoredDocument[]> {
+  if (!ids || ids.length === 0) return [];
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<ExtractionDocument>('extractions');
+      const docs = await collection
+        .find({ id: { $in: ids } })
+        .sort({ created_at: -1 })
+        .toArray();
+
+      return docs.map(d => ({
+        id: d.id,
+        document_type: d.document_type as StoredDocument['document_type'],
+        status: d.status,
+        created_at: d.created_at,
+        filename: d.filename,
+        pages: d.pages,
+        extraction: d.extraction as StoredDocument['extraction'],
+        metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+      }));
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB getDocumentsByIds fallback to memory:', (err as Error).message);
+  }
+
+  // Memory fallback
+  const results: StoredDocument[] = [];
+  for (const list of memoryDocs.values()) {
+    for (const d of list) {
+      if (ids.includes(d.id) && !results.some(r => r.id === d.id)) {
+        results.push({
+          id: d.id,
+          document_type: d.document_type as StoredDocument['document_type'],
+          status: d.status,
+          created_at: d.created_at,
+          filename: d.filename,
+          pages: d.pages,
+          extraction: d.extraction as StoredDocument['extraction'],
+          metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+        });
+      }
+    }
+  }
+  return results;
+}
+
 export async function getDocumentById(id: string, userEmail?: string): Promise<ExtractionDocument | null> {
-  const normalizedEmail = userEmail ? userEmail.toLowerCase().trim() : undefined;
+  const normalizedEmail = userEmail && userEmail !== 'guest' ? userEmail.toLowerCase().trim() : undefined;
 
   try {
     const db = await getDatabase();
@@ -183,22 +230,33 @@ export async function getDocumentById(id: string, userEmail?: string): Promise<E
   return null;
 }
 
-export async function deleteDocumentById(id: string, userEmail: string): Promise<boolean> {
-  const normalizedEmail = userEmail.toLowerCase().trim();
+export async function deleteDocumentById(id: string, userEmail?: string): Promise<boolean> {
+  const normalizedEmail = userEmail && userEmail !== 'guest' ? userEmail.toLowerCase().trim() : undefined;
 
   try {
     const db = await getDatabase();
     if (db) {
       const collection = db.collection<ExtractionDocument>('extractions');
-      const result = await collection.deleteOne({ id, user_email: normalizedEmail });
+      const query: Record<string, unknown> = { id };
+      if (normalizedEmail) {
+        query.user_email = normalizedEmail;
+      }
+      const result = await collection.deleteOne(query);
       return result.deletedCount > 0;
     }
   } catch (err) {
     console.warn('⚠️ MongoDB delete fallback to memory:', (err as Error).message);
   }
 
-  const list = memoryDocs.get(normalizedEmail) || [];
-  const filtered = list.filter(d => d.id !== id);
-  memoryDocs.set(normalizedEmail, filtered);
+  if (normalizedEmail) {
+    const list = memoryDocs.get(normalizedEmail) || [];
+    const filtered = list.filter(d => d.id !== id);
+    memoryDocs.set(normalizedEmail, filtered);
+    return true;
+  }
+  for (const [key, list] of memoryDocs.entries()) {
+    const filtered = list.filter(d => d.id !== id);
+    memoryDocs.set(key, filtered);
+  }
   return true;
 }

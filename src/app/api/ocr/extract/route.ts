@@ -73,14 +73,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If user is logged in, save extraction & increment page quota in MongoDB
-    if (userEmail) {
-      try {
-        await saveDocumentExtraction(userEmail, result, file.name);
+    // Always persist extraction to MongoDB (both for authenticated users and free guest users up to 10 pages)
+    try {
+      const effectiveEmail = userEmail || 'guest';
+      await saveDocumentExtraction(effectiveEmail, result, file.name);
+      if (userEmail) {
         await incrementUserPageCount(userEmail, actualPages);
-      } catch (dbErr) {
-        console.warn('Could not save extraction to database:', dbErr);
       }
+    } catch (dbErr) {
+      console.warn('Could not save extraction to database:', dbErr);
     }
 
     return NextResponse.json(result);
