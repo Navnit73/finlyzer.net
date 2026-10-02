@@ -66,62 +66,62 @@ export default function ExtractionViewer({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 sm:space-y-6 animate-fade-in">
       {/* 1. Top Summary Banner */}
-      <div className="card bg-[var(--color-ink)] text-white shadow-xl border border-white/10 rounded-3xl overflow-hidden">
-        <div className="card-body p-6 sm:p-8 space-y-6">
+      <div className="card bg-[var(--color-ink)] text-white shadow-xl border border-white/10 rounded-2xl sm:rounded-3xl overflow-hidden">
+        <div className="card-body p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
           {/* Header row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="badge bg-[var(--color-brand)] text-[var(--color-on-brand)] font-extrabold text-xs px-3 py-1 border-none tracking-wider uppercase">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-white/10">
+            <div className="space-y-2.5">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <span className="badge bg-[var(--color-brand)] text-[var(--color-on-brand)] font-extrabold text-[11px] sm:text-xs px-2.5 sm:px-3 py-1 border-none tracking-wider uppercase">
                   {docType.replace('_', ' ')}
                 </span>
-                <span className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
+                <span className="text-[11px] sm:text-xs text-[var(--color-text-muted)] flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-[var(--color-brand)]" />
                   {data.metadata?.processing_time_ms ? `${data.metadata.processing_time_ms}ms` : '1,150ms'}
                 </span>
-                <span className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
+                <span className="text-[11px] sm:text-xs text-[var(--color-text-muted)] flex items-center gap-1">
                   <Cpu className="w-3.5 h-3.5 text-[var(--media-blue)]" />
                   {data.metadata?.ai_model || 'DeepSeek AI Model'}
                 </span>
-                <span className="badge badge-sm bg-white/10 text-white border-none font-semibold">
+                <span className="badge badge-sm bg-white/10 text-white border-none font-semibold text-[10px] sm:text-xs">
                   {data.metadata?.pages || 1} Page{data.metadata?.pages !== 1 ? 's' : ''}
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight break-words">
                 {bankData.bank_name || invoiceData.vendor_name || receiptData.merchant_name || data.filename || 'Financial Extraction'}
               </h2>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--color-text-muted)] pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-[var(--color-text-muted)] pt-0.5">
                 {bankData.account_holder && (
                   <span className="flex items-center gap-1.5 text-white/90">
                     <User className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-                    {bankData.account_holder}
+                    <span className="truncate max-w-[220px]">{bankData.account_holder}</span>
                   </span>
                 )}
                 {bankData.account_number_masked && (
                   <span className="flex items-center gap-1.5 font-mono">
                     <CreditCard className="w-3.5 h-3.5 text-[var(--media-blue)]" />
-                    {bankData.account_number_masked}
+                    <span>{bankData.account_number_masked}</span>
                   </span>
                 )}
                 {bankData.statement_period && (
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-[var(--media-violet)]" />
-                    {bankData.statement_period}
+                    <span className="truncate">{bankData.statement_period}</span>
                   </span>
                 )}
               </div>
             </div>
 
             {/* Quick Actions */}
-            <div className="flex items-center gap-2 self-start md:self-auto">
+            <div className="flex items-center gap-2 self-stretch sm:self-start md:self-auto">
               {onNewScan && (
                 <button
                   onClick={onNewScan}
-                  className="btn btn-sm rounded-full bg-white/10 hover:bg-white/20 text-white border-white/15 text-xs font-semibold"
+                  className="btn btn-sm rounded-full bg-white/10 hover:bg-white/20 text-white border-white/15 text-xs font-semibold w-full sm:w-auto cursor-pointer"
                 >
                   Scan Another File
                 </button>
@@ -130,7 +130,7 @@ export default function ExtractionViewer({
           </div>
 
           {/* Key Metrics Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {docType === 'bank_statement' ? (
               <>
                 <FinancialMetricCard
@@ -213,58 +213,57 @@ export default function ExtractionViewer({
       />
 
       {/* 3. Interactive Detail Tabs */}
-      <div className="bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 shadow-xs">
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-border)] pb-4">
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveTab('structured')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-colors ${
-                activeTab === 'structured'
-                  ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                  : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Structured Data ({docType === 'bank_statement' ? `${transactions.length} Transactions` : `${items.length} Items`})</span>
-            </button>
+      <div className="bg-[var(--color-surface)] rounded-2xl sm:rounded-3xl border border-[var(--color-border)] p-4 sm:p-6 md:p-8 space-y-6 shadow-xs">
+        {/* Navigation Tabs (Horizontally Scrollable Segmented Bar on Mobile) */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-[var(--color-border)]">
+          <button
+            onClick={() => setActiveTab('structured')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+              activeTab === 'structured'
+                ? 'bg-[var(--color-ink)] text-white shadow-xs'
+                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+            }`}
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Structured Data ({docType === 'bank_statement' ? `${transactions.length} Rows` : `${items.length} Items`})</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('ai_summary')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-colors ${
-                activeTab === 'ai_summary'
-                  ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                  : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 text-[var(--color-brand)]" />
-              <span>AI Insights &amp; Audit</span>
-            </button>
+          <button
+            onClick={() => setActiveTab('ai_summary')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+              activeTab === 'ai_summary'
+                ? 'bg-[var(--color-ink)] text-white shadow-xs'
+                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-[var(--color-brand)]" />
+            <span>AI Insights &amp; Audit</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('raw_text')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-colors ${
-                activeTab === 'raw_text'
-                  ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                  : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <FileCode className="w-4 h-4" />
-              <span>OCR Raw Text</span>
-            </button>
+          <button
+            onClick={() => setActiveTab('raw_text')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+              activeTab === 'raw_text'
+                ? 'bg-[var(--color-ink)] text-white shadow-xs'
+                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+            }`}
+          >
+            <FileCode className="w-4 h-4" />
+            <span>OCR Raw Text</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('json')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-colors ${
-                activeTab === 'json'
-                  ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                  : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <span>{`{ JSON Payload }`}</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('json')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+              activeTab === 'json'
+                ? 'bg-[var(--color-ink)] text-white shadow-xs'
+                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+            }`}
+          >
+            <span>{`{ JSON Payload }`}</span>
+          </button>
         </div>
+
 
         {/* Tab Content 1: Structured Transactions / Invoice Items */}
         {activeTab === 'structured' && (

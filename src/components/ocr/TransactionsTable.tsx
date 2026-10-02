@@ -19,7 +19,7 @@ export default function TransactionsTable({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [copiedRef, setCopiedRef] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 8;
+  const pageSize = 10;
 
   const formatCurrency = (amount?: number | null) => {
     if (amount === undefined || amount === null) return '—';
@@ -104,7 +104,7 @@ export default function TransactionsTable({
           <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search description, reference..."
+            placeholder="Search description, ref, date..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -115,13 +115,13 @@ export default function TransactionsTable({
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-1.5 p-1 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)] self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)] overflow-x-auto no-scrollbar">
           <button
             onClick={() => {
               setFilterType('all');
               setCurrentPage(1);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
               filterType === 'all'
                 ? 'bg-[var(--color-ink)] text-white shadow-xs'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -134,65 +134,65 @@ export default function TransactionsTable({
               setFilterType('credit');
               setCurrentPage(1);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
               filterType === 'credit'
                 ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)] shadow-xs'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
           >
-            Credits / Inflow
+            Credits (+)
           </button>
           <button
             onClick={() => {
               setFilterType('debit');
               setCurrentPage(1);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
               filterType === 'debit'
                 ? 'bg-[var(--media-pink)] text-white shadow-xs'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
           >
-            Debits / Outflow
+            Debits (-)
           </button>
         </div>
       </div>
 
-      {/* Desktop Table Container */}
-      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs">
-        <table className="table w-full text-xs sm:text-sm">
-          <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-b border-[var(--color-border)] text-[11px] uppercase tracking-wider font-bold">
+      {/* Single Unified Table View with Smooth Horizontal Scroll on Mobile */}
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs -webkit-overflow-scrolling-touch">
+        <table className="w-full text-left text-xs sm:text-sm min-w-[680px]">
+          <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-b border-[var(--color-border)] text-[11px] uppercase tracking-wider font-bold select-none">
             <tr>
               <th
                 onClick={() => toggleSort('date')}
-                className="cursor-pointer hover:text-[var(--color-ink)] py-3.5 pl-5"
+                className="cursor-pointer hover:text-[var(--color-ink)] py-3 sm:py-3.5 pl-4 sm:pl-5 whitespace-nowrap"
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <span>Date</span>
-                  <ArrowUpDown className="w-3 h-3" />
+                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" />
                 </div>
               </th>
               <th
                 onClick={() => toggleSort('description')}
-                className="cursor-pointer hover:text-[var(--color-ink)] py-3.5"
+                className="cursor-pointer hover:text-[var(--color-ink)] py-3 sm:py-3.5 px-3 whitespace-nowrap"
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <span>Description &amp; Reference</span>
-                  <ArrowUpDown className="w-3 h-3" />
+                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" />
                 </div>
               </th>
-              <th className="py-3.5">Category</th>
+              <th className="py-3 sm:py-3.5 px-3 whitespace-nowrap">Category</th>
               <th
                 onClick={() => toggleSort('amount')}
-                className="cursor-pointer hover:text-[var(--color-ink)] py-3.5 text-right"
+                className="cursor-pointer hover:text-[var(--color-ink)] py-3 sm:py-3.5 px-3 text-right whitespace-nowrap"
               >
-                <div className="flex items-center justify-end gap-1">
+                <div className="flex items-center justify-end gap-1.5">
                   <span>Debit (-)</span>
-                  <ArrowUpDown className="w-3 h-3" />
+                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" />
                 </div>
               </th>
-              <th className="py-3.5 text-right">Credit (+)</th>
-              <th className="py-3.5 text-right pr-5">Running Balance</th>
+              <th className="py-3 sm:py-3.5 px-3 text-right whitespace-nowrap">Credit (+)</th>
+              <th className="py-3 sm:py-3.5 pr-4 sm:pr-5 text-right whitespace-nowrap">Running Balance</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
@@ -202,30 +202,34 @@ export default function TransactionsTable({
                 return (
                   <tr
                     key={`${t.date}-${index}`}
-                    className="hover:bg-[var(--color-surface-subtle)] transition-colors"
+                    className="hover:bg-[var(--color-surface-subtle)]/70 transition-colors"
                   >
                     {/* Date */}
-                    <td className="font-mono text-xs font-medium text-[var(--color-text-secondary)] pl-5 whitespace-nowrap">
+                    <td className="font-mono text-xs font-medium text-[var(--color-text-secondary)] pl-4 sm:pl-5 py-3 sm:py-3.5 whitespace-nowrap align-middle">
                       {t.date}
                     </td>
 
                     {/* Description & Reference */}
-                    <td className="max-w-[280px]">
-                      <p className="font-semibold text-[var(--color-ink)] leading-snug">
+                    <td className="min-w-[220px] max-w-[340px] px-3 py-3 sm:py-3.5 align-middle">
+                      <p className="font-semibold text-[var(--color-ink)] leading-snug break-words">
                         {t.description}
                       </p>
                       {t.reference && (
-                        <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)] mt-0.5">
-                          <span className="font-mono">{t.reference}</span>
+                        <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)] mt-1">
+                          <span className="font-mono text-[10px] sm:text-[11px] truncate max-w-[200px]">
+                            {t.reference}
+                          </span>
                           <button
+                            type="button"
                             onClick={() => handleCopy(t.reference!)}
-                            className="hover:text-[var(--color-ink)] transition-colors"
+                            className="hover:text-[var(--color-ink)] transition-colors p-0.5 rounded cursor-pointer"
                             title="Copy reference number"
+                            aria-label="Copy reference number"
                           >
                             {copiedRef === t.reference ? (
                               <Check className="w-3 h-3 text-[var(--color-brand-hover)]" />
                             ) : (
-                              <Copy className="w-3 h-3" />
+                              <Copy className="w-3 h-3 text-[var(--color-text-muted)] hover:text-[var(--color-ink)]" />
                             )}
                           </button>
                         </div>
@@ -233,17 +237,17 @@ export default function TransactionsTable({
                     </td>
 
                     {/* Category Chip */}
-                    <td>
+                    <td className="px-3 py-3 sm:py-3.5 whitespace-nowrap align-middle">
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-[var(--color-ink)]">
                         {t.category || (isCredit ? 'Income' : 'Expense')}
                       </span>
                     </td>
 
                     {/* Debit */}
-                    <td className="text-right font-mono font-bold whitespace-nowrap text-red-600">
+                    <td className="text-right font-mono font-bold whitespace-nowrap text-red-600 px-3 py-3 sm:py-3.5 align-middle">
                       {t.debit ? (
-                        <span className="inline-flex items-center gap-0.5">
-                          <ArrowDownRight className="w-3.5 h-3.5 text-red-500" />
+                        <span className="inline-flex items-center justify-end gap-1">
+                          <ArrowDownRight className="w-3.5 h-3.5 text-red-500 shrink-0" />
                           -{formatCurrency(t.debit)}
                         </span>
                       ) : (
@@ -252,10 +256,10 @@ export default function TransactionsTable({
                     </td>
 
                     {/* Credit */}
-                    <td className="text-right font-mono font-bold whitespace-nowrap text-emerald-600">
+                    <td className="text-right font-mono font-bold whitespace-nowrap text-emerald-600 px-3 py-3 sm:py-3.5 align-middle">
                       {t.credit ? (
-                        <span className="inline-flex items-center gap-0.5">
-                          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="inline-flex items-center justify-end gap-1">
+                          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                           +{formatCurrency(t.credit)}
                         </span>
                       ) : (
@@ -264,7 +268,7 @@ export default function TransactionsTable({
                     </td>
 
                     {/* Balance */}
-                    <td className="text-right font-mono font-bold text-[var(--color-ink)] pr-5 whitespace-nowrap">
+                    <td className="text-right font-mono font-bold text-[var(--color-ink)] pr-4 sm:pr-5 py-3 sm:py-3.5 whitespace-nowrap align-middle">
                       {formatCurrency(t.balance)}
                     </td>
                   </tr>
@@ -272,7 +276,7 @@ export default function TransactionsTable({
               })
             ) : (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-xs text-[var(--color-text-secondary)]">
+                <td colSpan={6} className="text-center py-10 text-xs text-[var(--color-text-secondary)]">
                   No matching transactions found for &quot;{searchTerm}&quot;.
                 </td>
               </tr>
@@ -283,17 +287,17 @@ export default function TransactionsTable({
 
       {/* Pagination Bar */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-2 pt-1 text-xs text-[var(--color-text-secondary)]">
-          <span>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 pt-1 text-xs text-[var(--color-text-secondary)]">
+          <span className="text-center sm:text-left">
             Showing {(currentPage - 1) * pageSize + 1} to{' '}
             {Math.min(currentPage * pageSize, sortedTransactions.length)} of{' '}
             {sortedTransactions.length} entries
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] disabled:opacity-40 font-semibold"
+              className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] disabled:opacity-40 font-semibold cursor-pointer"
             >
               Previous
             </button>
@@ -303,7 +307,7 @@ export default function TransactionsTable({
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] disabled:opacity-40 font-semibold"
+              className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] disabled:opacity-40 font-semibold cursor-pointer"
             >
               Next
             </button>
@@ -313,3 +317,4 @@ export default function TransactionsTable({
     </div>
   );
 }
+

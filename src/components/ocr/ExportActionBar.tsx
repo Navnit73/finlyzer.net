@@ -7,7 +7,6 @@ import {
   FileText,
   FileCode,
   Layers,
-  ChevronDown,
   Check,
 } from 'lucide-react';
 import { ExportFormat } from '@/types/ocr';
@@ -16,6 +15,16 @@ interface ExportActionBarProps {
   documentId: string;
   documentTitle?: string;
   onConsolidateClick?: () => void;
+}
+
+interface FormatOption {
+  format: ExportFormat;
+  name: string;
+  ext: string;
+  subtitle: string;
+  icon: React.ElementType;
+  badgeColor: string;
+  isPrimary?: boolean;
 }
 
 export default function ExportActionBar({
@@ -54,127 +63,149 @@ export default function ExportActionBar({
     }
   };
 
+  const formatOptions: FormatOption[] = [
+    {
+      format: 'xlsx',
+      name: 'Excel Workbook',
+      ext: '.xlsx',
+      subtitle: 'Formulas & Charts',
+      icon: FileSpreadsheet,
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      isPrimary: true,
+    },
+    {
+      format: 'csv',
+      name: 'CSV Spreadsheet',
+      ext: '.csv',
+      subtitle: 'Universal Raw Data',
+      icon: FileText,
+      badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
+    },
+    {
+      format: 'pdf',
+      name: 'PDF Statement',
+      ext: '.pdf',
+      subtitle: 'Formatted Document',
+      icon: FileText,
+      badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
+    },
+    {
+      format: 'qbo',
+      name: 'QuickBooks',
+      ext: '.qbo',
+      subtitle: 'Intuit Bank Feed',
+      icon: FileCode,
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    },
+    {
+      format: 'ofx',
+      name: 'Xero / OFX',
+      ext: '.ofx',
+      subtitle: 'Zoho / Tally / Xero',
+      icon: FileCode,
+      badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
+    },
+    {
+      format: 'qif',
+      name: 'Quicken',
+      ext: '.qif',
+      subtitle: 'Desktop Finance',
+      icon: FileCode,
+      badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
+    },
+  ];
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)]">
-      {/* Title / Format info */}
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold">
-          <Download className="w-4 h-4" />
-        </div>
-        <div>
-          <h4 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Export Financial Models
-          </h4>
-          <p className="text-[11px] text-[var(--color-text-secondary)]">
-            Instant compatibility with Excel, QuickBooks, Xero &amp; Zoho
-          </p>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Primary 1-Click Excel Download */}
-        <button
-          onClick={() => handleDownload('xlsx')}
-          disabled={downloadingFormat !== null}
-          className="btn-brand-primary !min-h-[42px] !py-0 !px-4 !text-xs sm:!text-sm shadow-xs"
-        >
-          {downloadingFormat === 'xlsx' ? (
-            <span className="loading loading-spinner loading-xs"></span>
-          ) : downloadSuccess === 'xlsx' ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <FileSpreadsheet className="w-4 h-4" />
-          )}
-          <span>Download Excel (.xlsx)</span>
-        </button>
-
-        {/* CSV Quick Download */}
-        <button
-          onClick={() => handleDownload('csv')}
-          disabled={downloadingFormat !== null}
-          className="btn-brand-secondary !min-h-[42px] !py-0 !px-3 !text-xs font-bold flex items-center gap-1.5"
-        >
-          {downloadingFormat === 'csv' ? (
-            <span className="loading loading-spinner loading-xs"></span>
-          ) : (
-            <FileText className="w-4 h-4 text-[var(--color-text-secondary)]" />
-          )}
-          <span>CSV</span>
-        </button>
-
-        {/* More Formats Dropdown */}
-        <div className="dropdown dropdown-end">
-          <div
-            tabIndex={0}
-            role="button"
-            className="btn btn-sm btn-ghost rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-xs font-bold text-[var(--color-ink)] flex items-center gap-1 h-[42px] px-3"
-          >
-            <span>More Formats</span>
-            <ChevronDown className="w-3.5 h-3.5" />
+    <div className="bg-[var(--color-surface)] rounded-2xl sm:rounded-3xl border border-[var(--color-border)] p-4 sm:p-6 space-y-4 shadow-xs">
+      {/* Header Info Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold shrink-0">
+            <Download className="w-4 h-4" />
           </div>
-          <ul
-            tabIndex={0}
-            className="dropdown-content z-50 menu p-2 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl w-56 text-xs space-y-1 mt-1"
-          >
-            <li>
-              <button
-                onClick={() => handleDownload('pdf')}
-                className="py-2 flex items-center justify-between font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-red-500" />
-                  <span>PDF Document (.pdf)</span>
-                </div>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleDownload('qbo')}
-                className="py-2 flex items-center justify-between font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <FileCode className="w-4 h-4 text-emerald-600" />
-                  <span>QuickBooks Online (.qbo)</span>
-                </div>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleDownload('ofx')}
-                className="py-2 flex items-center justify-between font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <FileCode className="w-4 h-4 text-blue-600" />
-                  <span>Xero / Zoho / Tally (.ofx)</span>
-                </div>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleDownload('qif')}
-                className="py-2 flex items-center justify-between font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <FileCode className="w-4 h-4 text-violet-600" />
-                  <span>Quicken Desktop (.qif)</span>
-                </div>
-              </button>
-            </li>
-          </ul>
+          <div>
+            <h3 className="text-xs sm:text-sm font-black text-[var(--color-ink)] uppercase tracking-wider flex items-center gap-2">
+              <span>Export Reconciled Statement</span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
+                6 Formats
+              </span>
+            </h3>
+            <p className="text-[11px] text-[var(--color-text-secondary)]">
+              Direct 1-click downloads with automatic account structure and formulas
+            </p>
+          </div>
         </div>
 
-        {/* Consolidate statements button (if provided) */}
         {onConsolidateClick && (
           <button
             onClick={onConsolidateClick}
-            className="btn btn-sm btn-ghost rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#E9E0FC] text-xs font-bold text-[var(--media-violet)] flex items-center gap-1.5 h-[42px] px-3"
+            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto shadow-2xs cursor-pointer"
+            title="Consolidate multiple statements into unified P&L"
           >
-            <Layers className="w-4 h-4" />
-            <span className="hidden sm:inline">Consolidate Annual P&amp;L</span>
+            <Layers className="w-3.5 h-3.5" />
+            <span>Consolidate P&amp;L</span>
           </button>
         )}
+      </div>
+
+      {/* Visible 1-Click Download Grid for ALL Formats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+        {formatOptions.map((opt) => {
+          const isDownloading = downloadingFormat === opt.format;
+          const isSuccess = downloadSuccess === opt.format;
+          const Icon = opt.icon;
+
+          return (
+            <button
+              key={opt.format}
+              onClick={() => handleDownload(opt.format)}
+              disabled={downloadingFormat !== null}
+              className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between space-y-2 cursor-pointer group active:scale-95 disabled:opacity-50 ${
+                opt.isPrimary
+                  ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50 hover:bg-[var(--color-brand-soft)] shadow-xs'
+                  : 'bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border-[var(--color-border)] hover:border-[var(--color-ink)]/20 shadow-2xs'
+              }`}
+            >
+              {/* Top Row: Icon & Extension Badge */}
+              <div className="flex items-center justify-between gap-1">
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    opt.isPrimary
+                      ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
+                      : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink)]'
+                  }`}
+                >
+                  {isDownloading ? (
+                    <span className="loading loading-spinner loading-xs"></span>
+                  ) : isSuccess ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                  ) : (
+                    <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                  )}
+                </div>
+
+                <span
+                  className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md border ${opt.badgeColor}`}
+                >
+                  {opt.ext}
+                </span>
+              </div>
+
+              {/* Bottom Row: Name & Subtitle */}
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[var(--color-ink)] truncate group-hover:text-[var(--color-ink-soft)]">
+                  {opt.name}
+                </p>
+                <p className="text-[10px] text-[var(--color-text-secondary)] truncate">
+                  {isSuccess ? 'Downloaded!' : opt.subtitle}
+                </p>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+

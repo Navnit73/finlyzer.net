@@ -30,26 +30,26 @@ export default function FinancialMetricCard({
 
   const variantStyles = {
     brand: {
-      bg: 'bg-[var(--color-brand-soft)]/50',
-      border: 'border-[var(--color-brand)]/40',
+      bg: 'bg-[var(--color-brand-soft)]/70',
+      border: 'border-[var(--color-brand)]/50',
       accent: 'text-[var(--color-ink)]',
       iconBg: 'bg-[var(--color-brand)] text-[var(--color-on-brand)]',
     },
     blue: {
       bg: 'bg-[#EBF5FC]',
-      border: 'border-[var(--media-blue)]/50',
+      border: 'border-[var(--media-blue)]/60',
       accent: 'text-[#1D6399]',
       iconBg: 'bg-[var(--media-blue)] text-white',
     },
     violet: {
       bg: 'bg-[#F2EDFD]',
-      border: 'border-[var(--media-violet)]/40',
+      border: 'border-[var(--media-violet)]/50',
       accent: 'text-[var(--media-violet)]',
       iconBg: 'bg-[var(--media-violet)] text-white',
     },
     pink: {
       bg: 'bg-[#FDF0F5]',
-      border: 'border-[var(--media-pink)]/40',
+      border: 'border-[var(--media-pink)]/50',
       accent: 'text-[var(--media-pink)]',
       iconBg: 'bg-[var(--media-pink)] text-white',
     },
@@ -65,25 +65,28 @@ export default function FinancialMetricCard({
 
   return (
     <div
-      className={`p-4 sm:p-5 rounded-2xl border ${style.border} ${style.bg} shadow-sm flex flex-col justify-between space-y-3 transition-all hover:shadow-md`}
+      className={`p-3.5 sm:p-4.5 rounded-2xl border ${style.border} ${style.bg} shadow-xs flex flex-col justify-between space-y-2 sm:space-y-3 transition-all min-w-0 overflow-hidden`}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]/70 truncate">
           {title}
         </span>
         {Icon && (
-          <div className={`w-8 h-8 rounded-lg ${style.iconBg} flex items-center justify-center shrink-0 shadow-xs`}>
-            <Icon className="w-4 h-4 stroke-[2.5]" />
+          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${style.iconBg} flex items-center justify-center shrink-0 shadow-xs`}>
+            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
           </div>
         )}
       </div>
 
-      <div>
-        <p className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+      <div className="min-w-0">
+        <p
+          className="text-lg sm:text-2xl lg:text-3xl font-black text-[var(--color-ink)] tracking-tight truncate"
+          title={String(formattedValue)}
+        >
           {formattedValue || '—'}
         </p>
         {subtitle && (
-          <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-medium truncate">
+          <p className="text-[10px] sm:text-xs text-[var(--color-ink)]/60 mt-0.5 font-medium truncate">
             {subtitle}
           </p>
         )}
@@ -91,3 +94,4 @@ export default function FinancialMetricCard({
     </div>
   );
 }
+

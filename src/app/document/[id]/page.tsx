@@ -108,47 +108,54 @@ export default function DocumentPage({ params }: DocumentPageProps) {
 
   return (
     <main className="min-h-screen bg-[var(--color-surface)]">
-      <div className="site-container py-6 sm:py-10 space-y-6">
+      <div className="site-container py-4 sm:py-8 space-y-5 sm:space-y-6">
         {/* Top Control Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--color-border)]">
+          {/* Left: Back button + Document Name */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <Link
               href="/"
-              className="btn btn-sm btn-ghost rounded-full border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] flex items-center gap-1.5 px-3.5"
+              className="btn btn-sm btn-ghost rounded-full border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] flex items-center gap-1.5 px-3 shrink-0 h-9 cursor-pointer"
+              aria-label="Back to Upload"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Upload</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back</span>
             </Link>
 
-            <span className="hidden sm:inline-block w-px h-5 bg-[var(--color-border)]"></span>
+            <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block"></span>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-text-secondary)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-pulse"></span>
-              <span className="truncate max-w-[200px] sm:max-w-xs text-[var(--color-ink)]">
-                {documentData?.filename || `Document #${docId.slice(0, 8)}`}
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-secondary)] min-w-0 truncate">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] shrink-0 animate-pulse"></span>
+              <span className="truncate text-[var(--color-ink)] font-bold text-xs">
+                {documentData?.filename || `Doc #${docId.slice(0, 8)}`}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setIsBatchModalOpen(true)}
-              className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-xs"
+              className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[#F2EDFD] hover:bg-[#EAE1FB] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 shadow-2xs cursor-pointer"
+              title="Bulk Batch Extraction"
             >
               <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Bulk Batch Extraction</span>
-              <span className="sm:hidden">Batch</span>
+              <span className="hidden sm:inline">Bulk Batch</span>
+              <span className="sm:hidden text-[11px]">Batch</span>
             </button>
 
             <button
               onClick={() => setIsHistoryDrawerOpen(true)}
-              className="btn btn-sm rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-xs"
+              className="btn btn-sm rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 shadow-2xs cursor-pointer"
+              title="Document History"
             >
               <History className="w-3.5 h-3.5" />
-              <span>History</span>
+              <span className="hidden sm:inline">History</span>
             </button>
           </div>
         </div>
+
+
 
         {/* Content Area */}
         {isLoading ? (
