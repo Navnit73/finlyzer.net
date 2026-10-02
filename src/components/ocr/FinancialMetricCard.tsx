@@ -65,7 +65,7 @@ export default function FinancialMetricCard({
 
   return (
     <div
-      className={`p-3.5 sm:p-4.5 rounded-2xl border ${style.border} ${style.bg} flex flex-col justify-between space-y-2 sm:space-y-3 transition-colors min-w-0 overflow-hidden shadow-none`}
+      className={`p-3.5 sm:p-4.5 rounded-lg border ${style.border} ${style.bg} flex flex-col justify-between space-y-2 sm:space-y-3 transition-colors min-w-0 overflow-hidden shadow-none`}
     >
       <div className="flex items-center justify-between gap-1">
         <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]/70 truncate">

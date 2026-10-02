@@ -174,7 +174,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           </div>
         ) : errorMessage ? (
           <div className="max-w-lg mx-auto py-16 text-center space-y-6">
-            <div className="w-16 h-16 mx-auto rounded-3xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)] flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)] flex items-center justify-center">
               <AlertCircle className="w-8 h-8" />
             </div>
             <div className="space-y-2">

@@ -116,11 +116,11 @@ export default function ExportActionBar({
   ];
 
   return (
-    <div className="bg-[var(--color-surface)] rounded-2xl sm:rounded-3xl border border-[var(--color-border)] p-4 sm:p-6 space-y-4 shadow-xs">
+    <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-4 sm:p-6 space-y-4 shadow-xs">
       {/* Header Info Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold shrink-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold shrink-0">
             <Download className="w-4 h-4" />
           </div>
           <div>
@@ -160,7 +160,7 @@ export default function ExportActionBar({
               key={opt.format}
               onClick={() => handleDownload(opt.format)}
               disabled={downloadingFormat !== null}
-              className={`p-3 rounded-2xl border transition-colors text-left flex flex-col justify-between space-y-2 cursor-pointer group active:scale-95 disabled:opacity-50 shadow-none ${
+              className={`p-3 rounded-lg border transition-colors text-left flex flex-col justify-between space-y-2 cursor-pointer group active:scale-95 disabled:opacity-50 shadow-none ${
                 opt.isPrimary
                   ? 'bg-[var(--color-brand-soft)] border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]'
                   : 'bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border-[var(--color-border)] hover:border-[var(--color-border-hover)]'

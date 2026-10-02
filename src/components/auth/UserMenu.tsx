@@ -89,7 +89,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
             <ul
               tabIndex={0}
               role="menu"
-              className="dropdown-content z-50 menu p-3 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl w-64 text-xs space-y-1.5 mt-2"
+              className="dropdown-content z-50 menu p-3 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg w-64 text-xs space-y-1.5 mt-2"
             >
               {/* Profile Header */}
               <li className="p-2 border-b border-[var(--color-border)] pb-3">
@@ -109,7 +109,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                 <li>
                   <button
                     onClick={onOpenHistory}
-                    className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl w-full text-left"
+                    className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
                   >
                     <History className="w-4 h-4 text-[var(--color-ink)]" />
                     <span>My Document History</span>
@@ -120,7 +120,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               <li>
                 <button
                   onClick={() => signOut()}
-                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-xl w-full text-left cursor-pointer"
+                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg w-full text-left cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>

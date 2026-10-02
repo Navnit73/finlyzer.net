@@ -89,7 +89,7 @@ export default function TransactionsTable({
 
   if (transactions.length === 0) {
     return (
-      <div className="p-8 text-center bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] text-sm text-[var(--color-text-secondary)]">
+      <div className="p-8 text-center bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] text-sm text-[var(--color-text-secondary)]">
         No transaction rows extracted for this document.
       </div>
     );
@@ -110,12 +110,12 @@ export default function TransactionsTable({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs sm:text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs sm:text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
           />
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-1.5 p-1 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)] overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 p-1 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] overflow-x-auto no-scrollbar">
           <button
             onClick={() => {
               setFilterType('all');
@@ -159,7 +159,7 @@ export default function TransactionsTable({
       </div>
 
       {/* Single Unified Table View with Smooth Horizontal Scroll on Mobile */}
-      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs -webkit-overflow-scrolling-touch">
+      <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs -webkit-overflow-scrolling-touch">
         <table className="w-full text-left text-xs sm:text-sm min-w-[680px]">
           <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-b border-[var(--color-border)] text-[11px] uppercase tracking-wider font-bold select-none">
             <tr>

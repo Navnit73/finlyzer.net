@@ -52,7 +52,7 @@ export default function AuthModal({
   const modalContent = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -84,7 +84,7 @@ export default function AuthModal({
         </div>
 
         {/* Value Points */}
-        <div className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-2xl border border-[var(--color-border)]">
+        <div className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-lg border border-[var(--color-border)]">
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
             <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
             <span>Process up to 200 pages per statement with AI cleaning</span>

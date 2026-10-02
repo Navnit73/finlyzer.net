@@ -68,7 +68,7 @@ export default function ExtractionViewer({
   return (
     <div className="space-y-5 sm:space-y-6 animate-fade-in">
       {/* 1. Top Summary Banner — Flat Solid Theme */}
-      <div className="card bg-[var(--color-ink)] text-white border border-[var(--color-ink-soft)] rounded-2xl sm:rounded-3xl overflow-hidden shadow-none">
+      <div className="card bg-[var(--color-ink)] text-white border border-[var(--color-ink-soft)] rounded-lg overflow-hidden shadow-none">
         <div className="card-body p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
           {/* Header row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-[var(--color-ink-soft)]">
@@ -213,12 +213,12 @@ export default function ExtractionViewer({
       />
 
       {/* 3. Interactive Detail Tabs */}
-      <div className="space-y-4 sm:space-y-6 bg-transparent sm:bg-[var(--color-surface)] sm:rounded-3xl sm:border sm:border-[var(--color-border)] p-0 sm:p-6 md:p-8 sm:shadow-xs">
+      <div className="space-y-4 sm:space-y-6 bg-transparent sm:bg-[var(--color-surface)] sm:rounded-lg sm:border sm:border-[var(--color-border)] p-0 sm:p-6 md:p-8 sm:shadow-xs">
         {/* Navigation Tabs (Horizontally Scrollable Segmented Bar on Mobile) */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-[var(--color-border)]">
           <button
             onClick={() => setActiveTab('structured')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'structured'
                 ? 'bg-[var(--color-ink)] text-white shadow-xs'
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -230,7 +230,7 @@ export default function ExtractionViewer({
 
           <button
             onClick={() => setActiveTab('ai_summary')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'ai_summary'
                 ? 'bg-[var(--color-ink)] text-white shadow-xs'
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -242,7 +242,7 @@ export default function ExtractionViewer({
 
           <button
             onClick={() => setActiveTab('raw_text')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'raw_text'
                 ? 'bg-[var(--color-ink)] text-white shadow-xs'
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -254,7 +254,7 @@ export default function ExtractionViewer({
 
           <button
             onClick={() => setActiveTab('json')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'json'
                 ? 'bg-[var(--color-ink)] text-white shadow-xs'
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -273,7 +273,7 @@ export default function ExtractionViewer({
             ) : (
               /* Invoice / Receipt Line Items Table */
               <div className="space-y-4">
-                <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)]">
+                <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
                   <table className="table w-full text-xs sm:text-sm">
                     <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] text-[11px] uppercase font-bold">
                       <tr>
@@ -304,7 +304,7 @@ export default function ExtractionViewer({
 
                 {/* Subtotal / Tax Summary footer */}
                 <div className="flex justify-end pt-2">
-                  <div className="w-72 bg-[var(--color-surface-subtle)] p-4 rounded-2xl border border-[var(--color-border)] space-y-2 text-xs">
+                  <div className="w-72 bg-[var(--color-surface-subtle)] p-4 rounded-lg border border-[var(--color-border)] space-y-2 text-xs">
                     <div className="flex justify-between text-[var(--color-text-secondary)]">
                       <span>Subtotal</span>
                       <span className="font-bold text-[var(--color-ink)] font-mono">
@@ -333,7 +333,7 @@ export default function ExtractionViewer({
         {/* Tab Content 2: AI Insights & Cleaned Summary */}
         {activeTab === 'ai_summary' && (
           <div className="space-y-6">
-            <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-2xl p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
+            <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
               <Sparkles className="w-5 h-5 text-[var(--color-brand-hover)] shrink-0 mt-0.5" />
               <div className="space-y-1 text-xs">
                 <p className="font-bold text-sm">DeepSeek AI Reconciliation Verified</p>
@@ -344,7 +344,7 @@ export default function ExtractionViewer({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
+              <div className="p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)] flex items-center gap-2">
                   <Building className="w-4 h-4 text-[var(--color-brand)]" />
                   Entity Verification
@@ -367,7 +367,7 @@ export default function ExtractionViewer({
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
+              <div className="p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)] flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[var(--media-violet)]" />
                   Stage Timings
@@ -400,7 +400,7 @@ export default function ExtractionViewer({
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
                   Cleaned Statement Narrative
                 </span>
-                <pre className="p-4 rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] font-mono whitespace-pre-wrap leading-relaxed">
+                <pre className="p-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] font-mono whitespace-pre-wrap leading-relaxed">
                   {data.cleaned_text}
                 </pre>
               </div>
@@ -417,7 +417,7 @@ export default function ExtractionViewer({
                 {data.raw_text?.length || 0} characters
               </span>
             </div>
-            <pre className="p-5 rounded-2xl bg-[var(--color-ink)] text-white text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed border border-[var(--color-ink-soft)]">
+            <pre className="p-5 rounded-lg bg-[var(--color-ink)] text-white text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed border border-[var(--color-ink-soft)]">
               {data.raw_text || 'No raw text stream provided for this document.'}
             </pre>
           </div>
@@ -438,7 +438,7 @@ export default function ExtractionViewer({
                 <span>{copiedJson ? 'Copied' : 'Copy JSON'}</span>
               </button>
             </div>
-            <pre className="p-5 rounded-2xl bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-[var(--color-ink-soft)]">
+            <pre className="p-5 rounded-lg bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-[var(--color-ink-soft)]">
               {JSON.stringify(data, null, 2)}
             </pre>
           </div>

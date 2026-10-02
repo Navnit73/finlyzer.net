@@ -3,12 +3,9 @@
 import React, { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import {
-  Upload,
-  Sparkles,
   Lock,
   Layers,
   AlertCircle,
-  ShieldCheck,
 } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
@@ -206,7 +203,7 @@ export default function OcrUploader({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => !isProcessing && fileInputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none ${
+          className={`relative border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none ${
             isDragging
               ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
               : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-subtle)]'
@@ -252,9 +249,7 @@ export default function OcrUploader({
           ) : (
             /* Default Dropzone Content */
             <div className="space-y-5 max-w-lg mx-auto">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
-                <Upload className="w-8 h-8 sm:w-10 sm:h-10 stroke-[2.2]" />
-              </div>
+             
 
               <div className="space-y-2">
                 <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
@@ -286,7 +281,7 @@ export default function OcrUploader({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-2xl text-xs text-[var(--color-danger)] flex items-start gap-3">
+          <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-3">
             <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-bold">Extraction Notice</p>
@@ -295,28 +290,14 @@ export default function OcrUploader({
           </div>
         )}
 
-        {/* Hub Bar: Feature Highlights & Bulk Batch Upload */}
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink)] font-semibold shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
-              <span>AI Reconciliation</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-success)]" />
-              <span>100% In-Memory &amp; Private</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] font-medium">
-              <Lock className="w-3.5 h-3.5 text-[var(--color-warning)]" />
-              <span>Password-Protected Support</span>
-            </span>
-          </div>
-
+        {/* Bulk Batch Upload CTA Button */}
+        <div className="flex items-center justify-center pt-1">
           <button
+            type="button"
             onClick={onOpenBatchModal}
-            className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] font-bold px-4 py-1.5 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet-text)] font-bold px-5 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
           >
-            <Layers className="w-4 h-4" />
+            <Layers className="w-4 h-4 text-[var(--media-violet)]" />
             <span>Bulk / Batch Upload</span>
           </button>
         </div>

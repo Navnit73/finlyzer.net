@@ -38,7 +38,7 @@ export default function PdfPasswordModal({
   const modalContent = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="password-modal-title"
@@ -55,7 +55,7 @@ export default function PdfPasswordModal({
 
         {/* Header Icon */}
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--color-brand-soft)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
+          <div className="w-12 h-12 rounded-lg bg-[var(--color-brand-soft)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
             <Lock className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
@@ -74,7 +74,7 @@ export default function PdfPasswordModal({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-xl text-xs text-[var(--color-danger)] flex items-start gap-2">
+          <div className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
@@ -98,7 +98,7 @@ export default function PdfPasswordModal({
                 required
                 autoFocus
                 disabled={isLoading}
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all font-mono"
+                className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all font-mono"
               />
               <button
                 type="button"

@@ -60,7 +60,7 @@ function UploadConfigModalDialog({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3.5 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-2xl sm:rounded-3xl border border-[var(--color-border)] p-5 sm:p-7 space-y-5 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-5 sm:p-7 space-y-5 animate-scale-up my-auto shadow-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="upload-config-modal-title"
@@ -77,20 +77,16 @@ function UploadConfigModalDialog({
         </button>
 
         {/* Modal Header */}
-        <div className="space-y-1 pr-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" />
-              Document Setup
+        <div className="flex flex-wrap items-center gap-2 pr-6">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+            Document Setup
+          </span>
+          {isEncrypted && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
+              <Lock className="w-3 h-3" /> Password Protected
             </span>
-            {isEncrypted && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
-                <Lock className="w-3 h-3" /> Password Protected
-              </span>
-            )}
-          </div>
-       
-        
+          )}
         </div>
 
         {/* Form Selection Fields */}
@@ -113,7 +109,7 @@ function UploadConfigModalDialog({
                 value={documentType}
                 disabled={isLoading}
                 onChange={(e) => onDocumentTypeChange(e.target.value as DocumentType)}
-                className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all cursor-pointer"
+                className="w-full py-2.5 px-3.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all cursor-pointer"
               >
                 <option value="auto">Auto-Detect (Smart Classification)</option>
                 <option value="bank_statement">Bank Statement</option>
@@ -143,7 +139,7 @@ function UploadConfigModalDialog({
                 value={language}
                 disabled={isLoading}
                 onChange={(e) => onLanguageChange(e.target.value as SupportedLanguage)}
-                className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all cursor-pointer"
+                className="w-full py-2.5 px-3.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all cursor-pointer"
               >
                 <option value="en">English (EN)</option>
                 <option value="hi">Hindi (HI)</option>
@@ -185,7 +181,7 @@ function UploadConfigModalDialog({
                   required
                   autoFocus
                   disabled={isLoading}
-                  className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[var(--color-surface)] border-2 border-[var(--color-success)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] placeholder:font-normal focus:outline-none focus:border-[var(--color-success-hover)] focus:ring-2 focus:ring-[var(--color-success)]/20 transition-all font-mono"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-[var(--color-surface)] border-2 border-[var(--color-success)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] placeholder:font-normal focus:outline-none focus:border-[var(--color-success-hover)] focus:ring-2 focus:ring-[var(--color-success)]/20 transition-all font-mono"
                 />
                 <button
                   type="button"

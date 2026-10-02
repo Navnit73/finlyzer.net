@@ -142,7 +142,7 @@ export default function BatchProcessingModal({
     <>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
         <div
-          className="relative w-full max-w-4xl bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto my-auto shadow-none"
+          className="relative w-full max-w-4xl bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto my-auto shadow-none"
           role="dialog"
           aria-modal="true"
         >
@@ -175,7 +175,7 @@ export default function BatchProcessingModal({
           {/* Dropzone Area */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-subtle)] rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all hover:bg-[var(--color-surface-muted)] group"
+            className="border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-subtle)] rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-all hover:bg-[var(--color-surface-muted)] group"
           >
             <input
               ref={fileInputRef}
@@ -186,7 +186,7 @@ export default function BatchProcessingModal({
               onChange={handleFileChange}
               disabled={isProcessing}
             />
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center group-hover:scale-105 transition-transform mb-3">
+            <div className="w-14 h-14 mx-auto rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center group-hover:scale-105 transition-transform mb-3">
               <Upload className="w-7 h-7 stroke-[2.5]" />
             </div>
             <p className="font-bold text-sm text-[var(--color-ink)]">
@@ -199,7 +199,7 @@ export default function BatchProcessingModal({
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-2xl text-xs text-[var(--color-danger)] flex items-start gap-2.5">
+            <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -225,7 +225,7 @@ export default function BatchProcessingModal({
                 {selectedFiles.map((file, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between p-2.5 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)] text-xs"
+                    className="flex items-center justify-between p-2.5 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] text-xs"
                   >
                     <div className="flex items-center gap-2 truncate pr-2">
                       <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-hover)] shrink-0" />
@@ -301,7 +301,7 @@ export default function BatchProcessingModal({
               </div>
 
               {/* Master Download CTA */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-2xl">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg">
                 <div className="text-xs text-[var(--color-on-brand)]">
                   <p className="font-bold text-sm">12-Month Master Consolidated P&amp;L Ready</p>
                   <p className="text-[var(--color-text-secondary)]">
@@ -326,7 +326,7 @@ export default function BatchProcessingModal({
                   {batchResult.items.map((item) => (
                     <div
                       key={item.id}
-                      className="p-3 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs"
+                      className="p-3 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />

@@ -159,7 +159,7 @@ export default function HistoryDrawer({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold">
                   <History className="w-5 h-5 stroke-[2.5]" />
                 </div>
                 <div>
@@ -184,7 +184,7 @@ export default function HistoryDrawer({
 
             {/* Guest Info Banner (Shows for non-logged in users) */}
             {!session?.user && (
-              <div className="p-3.5 bg-[var(--color-surface-subtle)] rounded-2xl border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs">
+              <div className="p-3.5 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2 text-[var(--color-ink)] font-medium">
                   <Laptop className="w-4 h-4 text-[var(--color-success)] shrink-0" />
                   <span>Free guest storage (Saved in browser &amp; DB)</span>
@@ -207,12 +207,12 @@ export default function HistoryDrawer({
                   placeholder="Search past extractions..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
                 />
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex flex-wrap gap-1 p-1 bg-[var(--color-surface-subtle)] rounded-xl border border-[var(--color-border)]">
+              <div className="flex flex-wrap gap-1 p-1 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)]">
                 {['all', 'bank_statement', 'invoice', 'receipt'].map((type) => (
                   <button
                     key={type}
@@ -253,11 +253,11 @@ export default function HistoryDrawer({
                         onSelectDocument(doc.id);
                         onClose();
                       }}
-                      className="p-4 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
+                      className="p-4 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 truncate">
-                          <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
+                          <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
                             <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-hover)]" />
                           </div>
                           <div className="truncate">
@@ -321,11 +321,11 @@ export default function HistoryDrawer({
                       onSelectDocument(item.id);
                       onClose();
                     }}
-                    className="p-4 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
+                    className="p-4 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 truncate">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
+                        <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
                           <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)]" />
                         </div>
                         <div className="truncate">
