@@ -30,26 +30,26 @@ export default function FinancialMetricCard({
 
   const variantStyles = {
     brand: {
-      bg: 'bg-[var(--color-brand-soft)]/70',
-      border: 'border-[var(--color-brand)]/50',
+      bg: 'bg-[var(--color-brand-soft)]',
+      border: 'border-[var(--color-brand)]',
       accent: 'text-[var(--color-ink)]',
       iconBg: 'bg-[var(--color-brand)] text-[var(--color-on-brand)]',
     },
     blue: {
       bg: 'bg-[var(--media-blue-soft)]',
-      border: 'border-[var(--media-blue)]/60',
+      border: 'border-[var(--media-blue-border)]',
       accent: 'text-[var(--media-blue-text)]',
       iconBg: 'bg-[var(--media-blue)] text-white',
     },
     violet: {
       bg: 'bg-[var(--media-violet-soft)]',
-      border: 'border-[var(--media-violet)]/50',
+      border: 'border-[var(--media-violet-border)]',
       accent: 'text-[var(--media-violet)]',
       iconBg: 'bg-[var(--media-violet)] text-white',
     },
     pink: {
       bg: 'bg-[var(--media-pink-soft)]',
-      border: 'border-[var(--media-pink)]/50',
+      border: 'border-[var(--media-pink-border)]',
       accent: 'text-[var(--media-pink)]',
       iconBg: 'bg-[var(--media-pink)] text-white',
     },
@@ -65,7 +65,7 @@ export default function FinancialMetricCard({
 
   return (
     <div
-      className={`p-3.5 sm:p-4.5 rounded-2xl border ${style.border} ${style.bg} shadow-xs flex flex-col justify-between space-y-2 sm:space-y-3 transition-all min-w-0 overflow-hidden`}
+      className={`p-3.5 sm:p-4.5 rounded-2xl border ${style.border} ${style.bg} flex flex-col justify-between space-y-2 sm:space-y-3 transition-colors min-w-0 overflow-hidden shadow-none`}
     >
       <div className="flex items-center justify-between gap-1">
         <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]/70 truncate">

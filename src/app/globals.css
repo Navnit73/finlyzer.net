@@ -134,13 +134,13 @@
   --media-orange-border: #ffccbe;
   --media-deep-purple: #52106b;
 
-  /* Layout and Transition Tokens */
+  /* Layout and Flat Design Tokens */
   --container-max: 1440px;
   --page-gutter: clamp(20px, 7.5vw, 150px);
-  --shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.04);
-  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-  --shadow-dark-card: 0 8px 30px rgba(0, 0, 0, 0.4);
-  --transition-fast: 180ms ease-out;
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: none;
+  --shadow-dark-card: none;
+  --transition-fast: 150ms ease-out;
 
   /* DaisyUI Default (Light Mode Canvas) */
   --color-primary: #70f000;
@@ -173,7 +173,7 @@
 }
 
 /* ==========================================================================
-   GLOBAL BASE STYLES
+   GLOBAL BASE STYLES — FLAT UI
    ========================================================================== */
 
 body {
@@ -194,109 +194,114 @@ body {
 }
 
 /* ==========================================================================
-   PRIMARY BUTTONS & CONTROLS (design.md Section 9)
+   PRIMARY FLAT BUTTONS & CONTROLS
    ========================================================================== */
 
-/* Primary Lime Action Button */
+/* Primary Flat Lime Action Button */
 .btn-brand-primary {
   background-color: var(--color-brand);
   color: var(--color-on-brand);
-  border: none;
+  border: 1px solid var(--color-brand);
   border-radius: var(--radius-pill);
-  min-height: 60px;
-  padding: 0 36px;
-  font-size: 17px;
-  font-weight: 600;
+  min-height: 52px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: none;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-brand-primary:hover {
   background-color: var(--color-brand-hover);
-  transform: translateY(-1px);
+  border-color: var(--color-brand-hover);
 }
 
 .btn-brand-primary:active {
-  transform: translateY(0);
+  background-color: var(--color-brand-hover);
 }
 
 .btn-brand-primary:focus-visible {
-  outline: 3px solid var(--color-ink);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }
 
-/* Secondary Button */
+/* Secondary Flat Button */
 .btn-brand-secondary {
   background-color: var(--color-surface-subtle);
   color: var(--color-ink);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
-  min-height: 60px;
-  padding: 0 32px;
-  font-size: 17px;
+  min-height: 52px;
+  padding: 0 28px;
+  font-size: 16px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
+  box-shadow: none;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-brand-secondary:hover {
   background-color: var(--color-surface-muted);
-  border-color: #d8d8d8;
+  border-color: var(--color-border-hover);
 }
 
 .btn-brand-secondary:focus-visible {
-  outline: 3px solid var(--color-ink);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }
 
-/* Dark Pill Button (Header / Signup / Low-frequency CTA) */
+/* Dark Flat Pill Button */
 .btn-brand-dark {
   background-color: var(--color-ink);
   color: #ffffff;
-  border: none;
+  border: 1px solid var(--color-ink);
   border-radius: var(--radius-pill);
-  min-height: 48px;
-  padding: 0 24px;
-  font-size: 15px;
+  min-height: 44px;
+  padding: 0 22px;
+  font-size: 14px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  box-shadow: none;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-brand-dark:hover {
   background-color: var(--color-ink-soft);
+  border-color: var(--color-ink-soft);
 }
 
 .btn-brand-dark:focus-visible {
-  outline: 3px solid var(--color-brand);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
 }
 
 /* ==========================================================================
-   CARDS & PANELS (design.md Section 7B & 10)
+   FLAT CARDS & PANELS
    ========================================================================== */
 
-/* Text-led Intro Panel */
+/* Flat Intro Panel */
 .intro-panel {
   background-color: var(--color-surface-subtle);
   border-radius: var(--radius-xl);
-  padding: clamp(28px, 4vw, 56px);
+  padding: clamp(24px, 4vw, 48px);
   border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
-/* Dark Editorial Section & Cards */
+/* Flat Dark Editorial Section & Cards */
 .dark-editorial-section {
   background-color: #111111;
   color: #ffffff;
@@ -305,31 +310,29 @@ body {
 .dark-editorial-card {
   background-color: var(--color-ink-soft);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--shadow-dark-card);
-  transition: transform var(--transition-fast), border-color var(--transition-fast);
+  border: 1px solid #383838;
+  box-shadow: none;
+  transition: border-color var(--transition-fast);
 }
 
 .dark-editorial-card:hover {
-  border-color: rgba(112, 240, 0, 0.4);
-  transform: translateY(-2px);
+  border-color: var(--color-brand);
 }
 
-/* Light Content Card */
+/* Flat Light Content Card */
 .light-content-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-subtle);
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: none;
+  transition: border-color var(--transition-fast);
 }
 
 .light-content-card:hover {
-  box-shadow: var(--shadow-card);
-  border-color: #d1d1d1;
+  border-color: var(--color-border-hover);
 }
 
-/* Feature Badge */
+/* Flat Feature Badge */
 .feature-badge {
   display: inline-flex;
   align-items: center;
@@ -341,6 +344,7 @@ body {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  border: 1px solid var(--color-brand-soft);
 }
 
 

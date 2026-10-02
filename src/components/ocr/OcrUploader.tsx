@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
-import PdfPasswordModal from './PdfPasswordModal';
 import AuthModal from '../auth/AuthModal';
 import UploadConfigModal from './UploadConfigModal';
 import { saveToBrowserHistory } from '@/lib/browser-history';
@@ -33,11 +32,9 @@ export default function OcrUploader({
   const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
   const [documentType, setDocumentType] = useState<DocumentType>('auto');
   const [language, setLanguage] = useState<SupportedLanguage>('en');
-  const [cleanWithAi, setCleanWithAi] = useState<boolean>(true);
 
   // Modal States
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authReason, setAuthReason] = useState<'page_limit' | 'batch_upload' | 'general'>('general');
@@ -53,6 +50,7 @@ export default function OcrUploader({
 
   const handleFileSelect = async (file: File) => {
     setErrorMessage(null);
+    setPasswordError(null);
     setSelectedFile(file);
 
     // Client-side PDF Inspection (Page count and password protection)
@@ -60,35 +58,31 @@ export default function OcrUploader({
     setEstimatedPages(inspection.pageCount);
     setIsEncrypted(inspection.isEncrypted);
 
-    // Open configuration popup to select Document Type & Language
+    // Open configuration popup to select Document Type & Language & Password
     setIsConfigModalOpen(true);
   };
 
-  const handleConfirmConfig = () => {
-    setIsConfigModalOpen(false);
+  const handleConfirmConfig = (password?: string) => {
     if (!selectedFile) return;
 
     // Rule: If document > 10 pages and guest user, prompt Google Sign In!
     if (!session?.user && estimatedPages > 10) {
+      setIsConfigModalOpen(false);
       setAuthReason('page_limit');
       setAuthPageCount(estimatedPages);
       setIsAuthModalOpen(true);
       return;
     }
 
-    // Rule: If encrypted PDF, prompt Password Modal!
-    if (isEncrypted) {
-      setIsPasswordModalOpen(true);
-      return;
-    }
-
-    // Otherwise, trigger extraction with chosen options
-    executeExtraction(selectedFile, undefined, estimatedPages);
+    setIsConfigModalOpen(false);
+    // Trigger extraction with chosen options and password
+    executeExtraction(selectedFile, password, estimatedPages);
   };
 
   const handleCloseConfigModal = () => {
     setIsConfigModalOpen(false);
     setSelectedFile(null);
+    setPasswordError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -129,7 +123,7 @@ export default function OcrUploader({
       formData.append('file', file);
       formData.append('document_type', documentType);
       formData.append('language', language);
-      formData.append('clean_with_ai', cleanWithAi ? 'true' : 'false');
+      formData.append('clean_with_ai', 'true');
       formData.append('page_count', String(pageCount));
       if (password) {
         formData.append('password', password);
@@ -148,8 +142,9 @@ export default function OcrUploader({
 
       if (!res.ok) {
         if (data.code === 'PASSWORD_REQUIRED') {
-          setIsPasswordModalOpen(true);
-          setPasswordError('Invalid password or password required. Please try again.');
+          setIsEncrypted(true);
+          setPasswordError(data.error || 'Password required or incorrect. Please enter the valid password.');
+          setIsConfigModalOpen(true);
           setIsProcessing(false);
           return;
         }
@@ -164,9 +159,6 @@ export default function OcrUploader({
 
         throw new Error(data.error || 'Extraction failed');
       }
-
-      // Close password modal if open
-      setIsPasswordModalOpen(false);
 
       // Save summary to local browser history (available to free guest users as well)
       saveToBrowserHistory({
@@ -202,11 +194,6 @@ export default function OcrUploader({
     }
   };
 
-  const handlePasswordSubmit = (pwd: string) => {
-    if (!selectedFile) return;
-    executeExtraction(selectedFile, pwd, estimatedPages);
-  };
-
   return (
     <>
       <div className="space-y-6">
@@ -219,9 +206,9 @@ export default function OcrUploader({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => !isProcessing && fileInputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-all cursor-pointer bg-[var(--color-surface)] shadow-xs ${
+          className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none ${
             isDragging
-              ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]/20 scale-[1.01]'
+              ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
               : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-subtle)]'
           } ${isProcessing ? 'pointer-events-none opacity-90' : ''}`}
         >
@@ -335,36 +322,19 @@ export default function OcrUploader({
         </div>
       </div>
 
-      {/* Upload Configuration Popup (Document Type & Language Selection) */}
+      {/* Upload Configuration & Password Popup */}
       <UploadConfigModal
         isOpen={isConfigModalOpen}
         file={selectedFile}
-        estimatedPages={estimatedPages}
         isEncrypted={isEncrypted}
         documentType={documentType}
         language={language}
-        cleanWithAi={cleanWithAi}
+        passwordError={passwordError}
+        isLoading={isProcessing}
         onDocumentTypeChange={setDocumentType}
         onLanguageChange={setLanguage}
-        onCleanWithAiChange={setCleanWithAi}
         onConfirm={handleConfirmConfig}
         onClose={handleCloseConfigModal}
-      />
-
-      {/* PDF Password Modal */}
-      <PdfPasswordModal
-        isOpen={isPasswordModalOpen}
-        filename={selectedFile?.name || 'Encrypted_Statement.pdf'}
-        errorMessage={passwordError}
-        onClose={() => {
-          setIsPasswordModalOpen(false);
-          setSelectedFile(null);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-        }}
-        onSubmitPassword={handlePasswordSubmit}
-        isLoading={isProcessing}
       />
 
       {/* Auth Modal (Triggered when > 10 pages or batch upload) */}

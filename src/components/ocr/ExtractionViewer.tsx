@@ -67,11 +67,11 @@ export default function ExtractionViewer({
 
   return (
     <div className="space-y-5 sm:space-y-6 animate-fade-in">
-      {/* 1. Top Summary Banner */}
-      <div className="card bg-[var(--color-ink)] text-white shadow-xl border border-white/10 rounded-2xl sm:rounded-3xl overflow-hidden">
+      {/* 1. Top Summary Banner — Flat Solid Theme */}
+      <div className="card bg-[var(--color-ink)] text-white border border-[var(--color-ink-soft)] rounded-2xl sm:rounded-3xl overflow-hidden shadow-none">
         <div className="card-body p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
           {/* Header row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-white/10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-[var(--color-ink-soft)]">
             <div className="space-y-2.5">
               <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <span className="badge bg-[var(--color-brand)] text-[var(--color-on-brand)] font-extrabold text-[11px] sm:text-xs px-2.5 sm:px-3 py-1 border-none tracking-wider uppercase">
@@ -85,7 +85,7 @@ export default function ExtractionViewer({
                   <Cpu className="w-3.5 h-3.5 text-[var(--media-blue)]" />
                   {data.metadata?.ai_model || 'DeepSeek AI Model'}
                 </span>
-                <span className="badge badge-sm bg-white/10 text-white border-none font-semibold text-[10px] sm:text-xs">
+                <span className="badge badge-sm bg-[var(--color-ink-soft)] text-white border border-[#444444] font-semibold text-[10px] sm:text-xs">
                   {data.metadata?.pages || 1} Page{data.metadata?.pages !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -96,7 +96,7 @@ export default function ExtractionViewer({
 
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-[var(--color-text-muted)] pt-0.5">
                 {bankData.account_holder && (
-                  <span className="flex items-center gap-1.5 text-white/90">
+                  <span className="flex items-center gap-1.5 text-white">
                     <User className="w-3.5 h-3.5 text-[var(--color-brand)]" />
                     <span className="truncate max-w-[220px]">{bankData.account_holder}</span>
                   </span>
@@ -121,7 +121,7 @@ export default function ExtractionViewer({
               {onNewScan && (
                 <button
                   onClick={onNewScan}
-                  className="btn btn-sm rounded-full bg-white/10 hover:bg-white/20 text-white border-white/15 text-xs font-semibold w-full sm:w-auto cursor-pointer"
+                  className="btn btn-sm rounded-full bg-[var(--color-ink-soft)] hover:bg-[#3d3d3d] text-white border border-[#444444] text-xs font-semibold w-full sm:w-auto cursor-pointer transition-colors shadow-none"
                 >
                   Scan Another File
                 </button>
@@ -417,7 +417,7 @@ export default function ExtractionViewer({
                 {data.raw_text?.length || 0} characters
               </span>
             </div>
-            <pre className="p-5 rounded-2xl bg-[var(--color-ink)] text-white text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed border border-white/10">
+            <pre className="p-5 rounded-2xl bg-[var(--color-ink)] text-white text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed border border-[var(--color-ink-soft)]">
               {data.raw_text || 'No raw text stream provided for this document.'}
             </pre>
           </div>
@@ -438,7 +438,7 @@ export default function ExtractionViewer({
                 <span>{copiedJson ? 'Copied' : 'Copy JSON'}</span>
               </button>
             </div>
-            <pre className="p-5 rounded-2xl bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-white/10">
+            <pre className="p-5 rounded-2xl bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-[var(--color-ink-soft)]">
               {JSON.stringify(data, null, 2)}
             </pre>
           </div>

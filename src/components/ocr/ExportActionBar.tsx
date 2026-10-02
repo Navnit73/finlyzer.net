@@ -160,10 +160,10 @@ export default function ExportActionBar({
               key={opt.format}
               onClick={() => handleDownload(opt.format)}
               disabled={downloadingFormat !== null}
-              className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between space-y-2 cursor-pointer group active:scale-95 disabled:opacity-50 ${
+              className={`p-3 rounded-2xl border transition-colors text-left flex flex-col justify-between space-y-2 cursor-pointer group active:scale-95 disabled:opacity-50 shadow-none ${
                 opt.isPrimary
-                  ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50 hover:bg-[var(--color-brand-soft)] shadow-xs'
-                  : 'bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border-[var(--color-border)] hover:border-[var(--color-ink)]/20 shadow-2xs'
+                  ? 'bg-[var(--color-brand-soft)] border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]'
+                  : 'bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
               }`}
             >
               {/* Top Row: Icon & Extension Badge */}

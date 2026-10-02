@@ -149,9 +149,9 @@ export default function HistoryDrawer({
 
   const drawerContent = (
     <>
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-fade-in">
         <div
-          className="relative w-full max-w-xl h-full bg-[var(--color-surface)] shadow-2xl border-l border-[var(--color-border)] p-6 sm:p-8 flex flex-col justify-between space-y-5 animate-slide-left overflow-y-auto"
+          className="relative w-full max-w-xl h-full bg-[var(--color-surface)] border-l border-[var(--color-border)] p-6 sm:p-8 flex flex-col justify-between space-y-5 animate-slide-left overflow-y-auto shadow-none"
           role="dialog"
           aria-modal="true"
         >

@@ -13,8 +13,8 @@ export default function Header() {
 
   return (
     <>
-      {/* Global Sticky Header */}
-      <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/95 backdrop-blur-md border-b border-[var(--color-border)] transition-all">
+      {/* Global Flat Header */}
+      <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)] transition-colors">
         <div className="site-container">
           <nav className="flex items-center justify-between h-16 sm:h-20" aria-label="Main Navigation">
             {/* Brand Logo */}
