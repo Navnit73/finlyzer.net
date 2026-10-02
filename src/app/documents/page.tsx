@@ -19,13 +19,17 @@ import {
   Receipt,
   FileCheck2,
   AlertCircle,
-  Filter,
+  CheckCircle2,
+  Cpu,
+  ArrowRight,
 } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 import { StoredDocument, ExportFormat } from '@/types/ocr';
+import { useActiveJobs } from '@/context/ActiveJobsContext';
 
 export default function DocumentsVaultPage() {
   const { data: session, status } = useSession();
+  const { activeJobs, removeJob } = useActiveJobs();
   const [documents, setDocuments] = useState<StoredDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +68,14 @@ export default function DocumentsVaultPage() {
   useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
+
+  // Re-fetch documents whenever active jobs complete
+  useEffect(() => {
+    const hasCompletedJob = activeJobs.some((j) => j.status === 'completed');
+    if (hasCompletedJob) {
+      fetchDocuments();
+    }
+  }, [activeJobs, fetchDocuments]);
 
   const handleDelete = async (id: string, filename: string) => {
     if (!confirm(`Are you sure you want to permanently delete "${filename}"? This action cannot be undone.`)) {
@@ -173,6 +185,101 @@ export default function DocumentsVaultPage() {
 
       {isLoggedIn && (
         <>
+          {/* Active In-Flight Background Jobs Banner */}
+          {activeJobs.length > 0 && (
+            <div className="p-5 rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-brand)] shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0">
+                    <Cpu className="w-4 h-4 animate-spin" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-[var(--color-ink)] flex items-center gap-2">
+                      <span>Active Background OCR Tasks</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)] uppercase">
+                        {activeJobs.length} In Progress
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-[var(--color-text-secondary)]">
+                      Large documents (100–200 pages) keep processing automatically even when you browse or switch tabs.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                {activeJobs.map((job) => {
+                  const isDone = job.status === 'completed';
+                  const isErr = job.status === 'failed';
+                  const docTargetId = job.documentId || job.result?.id || job.jobId;
+
+                  return (
+                    <div
+                      key={job.jobId}
+                      className={`p-4 rounded-xl border transition-all ${
+                        isDone
+                          ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300'
+                          : isErr
+                          ? 'bg-red-50 dark:bg-red-950/20 border-red-300'
+                          : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[var(--color-ink)] truncate">
+                            {job.filename}
+                          </p>
+                          <p className="text-[10px] text-[var(--color-text-secondary)]">
+                            {job.message || `${job.processedPages}/${job.totalPages} pages processed`}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="font-mono text-xs font-black text-[var(--color-ink)]">
+                            {job.processingProgress}%
+                          </span>
+                          <button
+                            onClick={() => removeJob(job.jobId)}
+                            className="text-[10px] text-[var(--color-text-muted)] hover:text-red-600 px-1 py-0.5"
+                            title="Dismiss"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden mb-2">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            isDone ? 'bg-emerald-500' : 'bg-[var(--color-brand)]'
+                          }`}
+                          style={{ width: `${job.processingProgress}%` }}
+                        />
+                      </div>
+
+                      {/* Completed Action */}
+                      {isDone && (
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Ready in Vault
+                          </span>
+                          <Link
+                            href={`/document/${docTargetId}`}
+                            className="btn btn-xs rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center gap-1 px-2.5"
+                          >
+                            <span>Open</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">

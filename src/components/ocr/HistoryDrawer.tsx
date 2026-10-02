@@ -12,10 +12,13 @@ import {
   Trash2,
   Calendar,
   Laptop,
+  Cpu,
+  CheckCircle2,
 } from 'lucide-react';
 import { DocumentListResponse, StoredDocument, ExportFormat } from '@/types/ocr';
 import { getBrowserHistory, removeFromBrowserHistory, BrowserHistoryItem } from '@/lib/browser-history';
 import { useIsMounted } from '@/lib/useIsMounted';
+import { useActiveJobs } from '@/context/ActiveJobsContext';
 import AuthModal from '../auth/AuthModal';
 import { formatUSD } from '@/lib/format';
 
@@ -31,6 +34,7 @@ export default function HistoryDrawer({
   onSelectDocument,
 }: HistoryDrawerProps) {
   const { data: session } = useSession();
+  const { activeJobs, removeJob } = useActiveJobs();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [documents, setDocuments] = useState<StoredDocument[]>([]);
   const [guestHistory, setGuestHistory] = useState<BrowserHistoryItem[]>([]);
@@ -233,6 +237,74 @@ export default function HistoryDrawer({
 
           {/* Documents List */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-[250px]">
+            {/* Active In-Flight Background Jobs */}
+            {activeJobs.length > 0 && (
+              <div className="space-y-2 pb-2 border-b border-[var(--color-border)]">
+                <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-brand-hover)] flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 animate-spin" />
+                  <span>In-Flight Async Processing ({activeJobs.length})</span>
+                </p>
+                {activeJobs.map((job) => {
+                  const isDone = job.status === 'completed';
+                  const docTargetId = job.documentId || job.result?.id || job.jobId;
+                  return (
+                    <div
+                      key={job.jobId}
+                      onClick={() => {
+                        if (isDone && docTargetId) {
+                          onSelectDocument(docTargetId);
+                          onClose();
+                        }
+                      }}
+                      className={`p-3 rounded-lg border text-xs space-y-2 transition-all ${
+                        isDone
+                          ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 cursor-pointer'
+                          : 'bg-[var(--color-surface-subtle)] border-[var(--color-brand)]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[var(--color-ink)] truncate max-w-[200px]">
+                          {job.filename}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-[10px] text-[var(--color-brand-hover)]">
+                            {job.processingProgress}%
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeJob(job.jobId);
+                            }}
+                            className="text-[var(--color-text-muted)] hover:text-red-600 px-1"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            isDone ? 'bg-emerald-500' : 'bg-[var(--color-brand)]'
+                          }`}
+                          style={{ width: `${job.processingProgress}%` }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] text-[var(--color-text-secondary)]">
+                        <span>{job.message || `${job.processedPages}/${job.totalPages} pages`}</span>
+                        {isDone && (
+                          <span className="font-bold text-emerald-700 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Ready &bull; Click to open
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {session?.user ? (
               /* Authenticated User Documents */
               isLoading ? (

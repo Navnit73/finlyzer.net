@@ -18,6 +18,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { useOCRJob } from '@/hooks/useOCRJob';
+import { useActiveJobs } from '@/context/ActiveJobsContext';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
 import AuthModal from '../auth/AuthModal';
@@ -25,6 +26,7 @@ import AuthModal from '../auth/AuthModal';
 export default function AsyncDocumentProcessor() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { activeJobs, removeJob } = useActiveJobs();
   const { jobState, uploadAndProcess, cancelJob, retryJob, resetJob } = useOCRJob();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -110,6 +112,98 @@ export default function AsyncDocumentProcessor() {
           </div>
         </div>
       </div>
+
+      {/* In-Flight Active Background Jobs Banner */}
+      {!isBusy && activeJobs.length > 0 && (
+        <div className="p-5 rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-brand)] shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0">
+                <Cpu className="w-4 h-4 animate-spin" />
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-[var(--color-ink)] uppercase tracking-wider flex items-center gap-2">
+                  <span>Active Background Processing ({activeJobs.length})</span>
+                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
+                    In Progress
+                  </span>
+                </h4>
+                <p className="text-[11px] text-[var(--color-text-secondary)]">
+                  Your files are actively being processed by background Celery workers.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            {activeJobs.map((job) => {
+              const isDone = job.status === 'completed';
+              const isErr = job.status === 'failed';
+              const targetDocId = job.documentId || job.result?.id || job.jobId;
+
+              return (
+                <div
+                  key={job.jobId}
+                  className={`p-3.5 rounded-xl border text-xs space-y-2 ${
+                    isDone
+                      ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300'
+                      : isErr
+                      ? 'bg-red-50 dark:bg-red-950/20 border-red-300'
+                      : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-bold text-[var(--color-ink)] truncate">{job.filename}</p>
+                      <p className="text-[10px] text-[var(--color-text-secondary)]">
+                        {job.message || `Extracting page ${job.processedPages} of ${job.totalPages}...`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="font-mono font-bold text-[11px] text-[var(--color-ink)]">
+                        {job.processingProgress}%
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeJob(job.jobId)}
+                        className="text-[var(--color-text-muted)] hover:text-red-600 px-1"
+                        title="Dismiss"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        isDone ? 'bg-emerald-500' : 'bg-[var(--color-brand)]'
+                      }`}
+                      style={{ width: `${job.processingProgress}%` }}
+                    />
+                  </div>
+
+                  {isDone && (
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Ready
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/document/${targetDocId}`)}
+                        className="btn btn-xs rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center gap-1 px-2.5 shadow-xs cursor-pointer"
+                      >
+                        <span>Open Document</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Main Upload / State Container */}
       {!isBusy && !isCompleted && !isFailed ? (

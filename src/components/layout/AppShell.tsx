@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AdminShell from './AdminShell';
+import { ActiveJobsProvider } from '@/context/ActiveJobsContext';
+import ActiveJobFloatingTracker from '@/components/ocr/ActiveJobFloatingTracker';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -48,7 +50,12 @@ export default function AppShell({ children }: AppShellProps) {
     (status === 'loading' && cachedLoggedIn === true);
 
   if (showAdminLayout) {
-    return <AdminShell>{children}</AdminShell>;
+    return (
+      <ActiveJobsProvider>
+        <AdminShell>{children}</AdminShell>
+        <ActiveJobFloatingTracker />
+      </ActiveJobsProvider>
+    );
   }
 
   // If still resolving session and not cached as logged in, render neutral loading surface
@@ -65,12 +72,15 @@ export default function AppShell({ children }: AppShellProps) {
 
   // Public Guest Layout
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)]">
-      <Header />
-      <div className="flex-1">
-        {children}
+    <ActiveJobsProvider>
+      <div className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)]">
+        <Header />
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
+        <ActiveJobFloatingTracker />
       </div>
-      <Footer />
-    </div>
+    </ActiveJobsProvider>
   );
 }

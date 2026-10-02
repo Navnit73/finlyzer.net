@@ -308,6 +308,26 @@ export function useOCRJob() {
               status: 'processing',
             });
 
+            // Dispatch global event for persistent background tracking across route changes
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(
+                new CustomEvent('finlyzer:job_added', {
+                  detail: {
+                    jobId: job_id,
+                    documentId: document_id,
+                    filename: file.name,
+                    status: 'queued',
+                    uploadProgress: 100,
+                    processingProgress: 0,
+                    currentStage: 'queued',
+                    totalPages: pageCount,
+                    processedPages: 0,
+                    message: 'Document queued. Asynchronous workers processing...',
+                  },
+                })
+              );
+            }
+
             // Connect real-time Server-Sent Events stream
             connectSSE(job_id, document_id);
             resolve({ job_id, document_id });

@@ -129,6 +129,19 @@ export default function AdminSidebar({
         },
       ],
     },
+    {
+      title: 'SYSTEM & OPS',
+      items: [
+        {
+          name: 'SuperAdmin Monitoring',
+          shortName: 'SuperAdmin',
+          href: '/superadmin',
+          icon: ShieldCheck,
+          active: pathname === '/superadmin' || pathname === '/admin',
+          badge: 'Live',
+        },
+      ],
+    },
   ];
 
   const totalCredits = quota.tier === 'enterprise' ? 99999 : (quota.freePagesRemaining ?? 10);
