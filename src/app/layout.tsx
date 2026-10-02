@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "High-contrast, AI-powered financial tool hub for DCF modeling, statement analysis, ratio auditing, and portfolio intelligence.",
 };
 
+import { AuthProvider } from "@/components/auth/AuthProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,11 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased selection:bg-[var(--color-brand)] selection:text-[var(--color-on-brand)]">
-        <Header />
-        <div className="flex-1">
-          {children}
-        </div>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
