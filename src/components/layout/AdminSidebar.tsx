@@ -65,8 +65,20 @@ export default function AdminSidebar({
         console.warn('Failed to load quota in sidebar:', err);
       }
     }
+
     loadQuota();
-  }, []);
+
+    const handleUpdate = () => {
+      loadQuota();
+    };
+
+    window.addEventListener('finlyzer:quota_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+    return () => {
+      window.removeEventListener('finlyzer:quota_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
+  }, [pathname]);
 
   const navSections = [
     {
@@ -118,7 +130,7 @@ export default function AdminSidebar({
     },
   ];
 
-  const totalCredits = (quota.freePagesRemaining || 0) + (quota.purchasedPages || 0);
+  const totalCredits = quota.tier === 'enterprise' ? 99999 : (quota.freePagesRemaining ?? 10);
 
   return (
     <aside

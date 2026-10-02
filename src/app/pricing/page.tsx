@@ -24,8 +24,49 @@ export default function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [quota, setQuota] = useState<{
+    tier: string;
+    freePagesRemaining: number;
+    purchasedPages: number;
+    totalAvailablePages: number;
+    totalPagesProcessed: number;
+  }>({
+    tier: 'free',
+    freePagesRemaining: 10,
+    purchasedPages: 0,
+    totalAvailablePages: 10,
+    totalPagesProcessed: 0,
+  });
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
+
+  const fetchQuota = React.useCallback(async () => {
+    if (!isLoggedIn) return;
+    try {
+      const res = await fetch('/api/user/quota');
+      if (res.ok) {
+        const data = await res.json();
+        setQuota(data);
+      }
+    } catch (e) {
+      console.warn('Failed to load quota:', e);
+    }
+  }, [isLoggedIn]);
+
+  React.useEffect(() => {
+    fetchQuota();
+
+    const handleUpdate = () => {
+      fetchQuota();
+    };
+
+    window.addEventListener('finlyzer:quota_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+    return () => {
+      window.removeEventListener('finlyzer:quota_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
+  }, [fetchQuota]);
 
   const handleSelectPlan = (plan: PricingPlan) => {
     if (!isLoggedIn) {
@@ -55,6 +96,8 @@ export default function PricingPage() {
     },
   ];
 
+  const totalBalance = quota.tier === 'enterprise' ? 99999 : (quota.freePagesRemaining ?? 10);
+
   return (
     <div className="w-full space-y-12 pb-16">
       {/* Header Section */}
@@ -69,6 +112,29 @@ export default function PricingPage() {
         <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
           No monthly lock-ins or recurring commitments. Buy page credits when you need them, processed with high-accuracy DeepSeek AI and PyMuPDF.
         </p>
+
+        {/* Live Active Balance Strip if Logged In */}
+        {isLoggedIn && (
+          <div className="pt-2">
+            <div className="inline-flex flex-wrap items-center justify-center gap-3 p-2.5 px-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-xs text-[var(--color-ink)]">
+              <span className="flex items-center gap-1.5 font-bold">
+                <Zap className="w-4 h-4 text-[var(--color-brand-dark)]" />
+                <span>Current Balance:</span>
+              </span>
+              <span className="font-mono font-black text-sm text-[var(--color-ink)] bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] px-2 py-0.5 rounded-md">
+                {totalBalance === 99999 ? 'Unlimited' : `${totalBalance.toLocaleString()} Pages`}
+              </span>
+              <span className="text-[var(--color-text-muted)]">&bull;</span>
+              <span className="font-semibold text-[var(--color-text-secondary)]">
+                Tier: <span className="font-bold text-[var(--color-ink)] uppercase">{quota.tier}</span>
+              </span>
+              <span className="text-[var(--color-text-muted)]">&bull;</span>
+              <span className="text-[var(--color-text-secondary)] font-mono">
+                {quota.totalPagesProcessed} pages processed lifetime
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Pricing Cards Grid */}
@@ -269,6 +335,7 @@ export default function PricingPage() {
         plan={selectedPlan}
         userEmail={session?.user?.email || ''}
         onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={() => fetchQuota()}
       />
 
       {/* Auth Modal */}

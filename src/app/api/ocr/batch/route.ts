@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { batchExtractDocuments } from '@/lib/ocr-api';
 import { saveDocumentExtraction } from '@/lib/models/Document';
-import { incrementUserPageCount } from '@/lib/models/User';
+import { incrementUserPageCount, getUserQuota } from '@/lib/models/User';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
 
 export async function POST(req: NextRequest) {
@@ -30,6 +30,19 @@ export async function POST(req: NextRequest) {
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided for batch processing' }, { status: 400 });
+    }
+
+    const quota = await getUserQuota(userEmail);
+    if (quota.tier !== 'enterprise' && files.length > quota.freePagesRemaining) {
+      return NextResponse.json(
+        {
+          error: `Insufficient page credits. This batch has ${files.length} documents, but your account only has ${quota.freePagesRemaining} remaining credits. Please top up your package.`,
+          code: 'QUOTA_EXCEEDED',
+          freePagesRemaining: quota.freePagesRemaining,
+          requiredPages: files.length,
+        },
+        { status: 403 }
+      );
     }
 
     const fileNames = files.map(f => f.name);

@@ -36,6 +36,17 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
       }
     }
     fetchQuota();
+
+    const handleUpdate = () => {
+      fetchQuota();
+    };
+
+    window.addEventListener('finlyzer:quota_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+    return () => {
+      window.removeEventListener('finlyzer:quota_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
   }, [session]);
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
@@ -99,8 +110,8 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                   <span className="badge badge-sm bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold border-none uppercase text-[10px]">
                     {quota.tier} Plan
                   </span>
-                  <span className="text-[11px] text-[var(--color-text-secondary)]">
-                    {quota.tier === 'pro' ? 'Unlimited' : `${quota.freePagesRemaining} Free Pages Left`}
+                  <span className="text-[11px] text-[var(--color-text-secondary)] font-mono font-bold">
+                    {quota.tier === 'enterprise' ? 'Unlimited Pages' : `${quota.freePagesRemaining} Pages Remaining`}
                   </span>
                 </div>
               </li>

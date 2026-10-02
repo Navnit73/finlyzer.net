@@ -45,6 +45,45 @@ export async function createOrder(
   return orderRecord;
 }
 
+export async function updateOrderStatus(
+  orderId: string,
+  status: OrderRecord['status'],
+  paymentDetails?: {
+    razorpay_order_id?: string;
+    razorpay_payment_id?: string;
+    razorpay_signature?: string;
+  }
+): Promise<OrderRecord | null> {
+  const updateFields: Partial<OrderRecord> = {
+    status,
+    updated_at: new Date().toISOString(),
+    ...(paymentDetails || {}),
+  };
+
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<OrderRecord>('orders');
+      const result = await collection.findOneAndUpdate(
+        { order_id: orderId },
+        { $set: updateFields },
+        { returnDocument: 'after' }
+      );
+      if (result) return result as unknown as OrderRecord;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB updateOrderStatus fallback to memory:', (err as Error).message);
+  }
+
+  const existing = memoryOrders.get(orderId);
+  if (existing) {
+    const updated = { ...existing, ...updateFields };
+    memoryOrders.set(orderId, updated);
+    return updated;
+  }
+  return null;
+}
+
 export async function getUserOrders(userEmail: string): Promise<OrderRecord[]> {
   const normalizedEmail = userEmail.toLowerCase().trim();
   try {

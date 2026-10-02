@@ -107,53 +107,52 @@ export default function DocumentPage({ params }: DocumentPageProps) {
 
 
   return (
-    <main className="min-h-screen bg-[var(--color-surface)]">
-      <div className="site-container py-4 sm:py-8 space-y-5 sm:space-y-6">
-        {/* Top Control Bar */}
-        <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--color-border)]">
-          {/* Left: Back button + Document Name */}
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Link
-              href="/"
-              className="btn btn-sm btn-ghost rounded-full border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] flex items-center gap-1.5 px-3 shrink-0 h-9 cursor-pointer"
-              aria-label="Back to Upload"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back</span>
-            </Link>
+    <div className="w-full space-y-6 pb-12">
+      {/* Top Control Bar */}
+      <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--color-border)]">
+        {/* Left: Back button + Document Name */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Link
+            href="/documents"
+            className="btn btn-sm btn-ghost rounded-lg border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] flex items-center gap-1.5 px-3 shrink-0 h-9 cursor-pointer"
+            aria-label="Back to Documents Vault"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Vault</span>
+          </Link>
 
-            <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block"></span>
+          <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block"></span>
 
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-secondary)] min-w-0 truncate">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] shrink-0 animate-pulse"></span>
-              <span className="truncate text-[var(--color-ink)] font-bold text-xs">
-                {documentData?.filename || `Doc #${docId.slice(0, 8)}`}
-              </span>
-            </div>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={() => setIsBatchModalOpen(true)}
-              className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 shadow-2xs cursor-pointer"
-              title="Bulk Batch Extraction"
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Bulk Batch</span>
-              <span className="sm:hidden text-[11px]">Batch</span>
-            </button>
-
-            <button
-              onClick={() => setIsHistoryDrawerOpen(true)}
-              className="btn btn-sm rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 shadow-2xs cursor-pointer"
-              title="Document History"
-            >
-              <History className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">History</span>
-            </button>
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-secondary)] min-w-0 truncate">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] shrink-0 animate-pulse"></span>
+            <span className="truncate text-[var(--color-ink)] font-bold text-xs">
+              {documentData?.filename || `Doc #${docId.slice(0, 8)}`}
+            </span>
           </div>
         </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => setIsBatchModalOpen(true)}
+            className="btn btn-sm rounded-lg border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
+            title="Bulk Batch Extraction"
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Bulk Batch</span>
+            <span className="sm:hidden text-[11px]">Batch</span>
+          </button>
+
+          <button
+            onClick={() => setIsHistoryDrawerOpen(true)}
+            className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
+            title="Document History"
+          >
+            <History className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">History</span>
+          </button>
+        </div>
+      </div>
 
 
 
@@ -203,7 +202,6 @@ export default function DocumentPage({ params }: DocumentPageProps) {
             />
           </div>
         ) : null}
-      </div>
 
       {/* Batch Processing Modal */}
       <BatchProcessingModal
@@ -221,6 +219,6 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           router.push(`/document/${selectedId}`);
         }}
       />
-    </main>
+    </div>
   );
 }

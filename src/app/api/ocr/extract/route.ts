@@ -38,13 +38,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If logged in free tier and exceeds free pages limit
-    if (userEmail && quota.tier === 'free' && estimatedPages > quota.freePagesRemaining && quota.freePagesRemaining <= 0) {
+    // Page Credits Quota Check
+    if (userEmail && quota.tier !== 'enterprise' && estimatedPages > quota.freePagesRemaining) {
       return NextResponse.json(
         {
-          error: 'You have reached your 10 free pages quota. Please upgrade to Pro for unlimited document processing.',
+          error: `Insufficient page credits. This document requires ${estimatedPages} page credits, but your account only has ${quota.freePagesRemaining} remaining. Please top up your balance.`,
           code: 'QUOTA_EXCEEDED',
           freePagesRemaining: quota.freePagesRemaining,
+          requiredPages: estimatedPages,
         },
         { status: 403 }
       );

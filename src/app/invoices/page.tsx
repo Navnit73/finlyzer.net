@@ -52,6 +52,17 @@ export default function InvoicesBillingPage() {
 
   useEffect(() => {
     fetchOrders();
+
+    const handleUpdate = () => {
+      fetchOrders();
+    };
+
+    window.addEventListener('finlyzer:quota_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+    return () => {
+      window.removeEventListener('finlyzer:quota_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
   }, [fetchOrders]);
 
   const totalSpentUsd = orders.reduce((sum, o) => sum + (o.status === 'completed' || o.status === 'created' ? o.amount_usd : 0), 0);

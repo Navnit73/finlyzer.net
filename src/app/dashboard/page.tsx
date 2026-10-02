@@ -93,6 +93,17 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     fetchDashboardData();
+
+    const handleUpdate = () => {
+      fetchDashboardData();
+    };
+
+    window.addEventListener('finlyzer:quota_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+    return () => {
+      window.removeEventListener('finlyzer:quota_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
   }, [fetchDashboardData]);
 
   const handleDownload = async (e: React.MouseEvent, docId: string, format: ExportFormat = 'xlsx') => {

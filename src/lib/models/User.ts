@@ -39,9 +39,12 @@ export async function findOrCreateUser(email: string, name?: string | null, imag
         };
         const result = await usersCollection.insertOne(newUser as unknown as import('mongodb').OptionalUnlessRequiredId<UserRecord>);
         user = { ...newUser, _id: result.insertedId.toString() };
-      } else if (user.purchased_pages === undefined) {
-        // Upgrade existing records
+      } else if (user.purchased_pages === undefined || user.purchased_pages === null) {
         user.purchased_pages = 0;
+        await usersCollection.updateOne(
+          { email: normalizedEmail },
+          { $set: { purchased_pages: 0, updated_at: new Date() } }
+        );
       }
 
       return user;
@@ -91,16 +94,18 @@ export async function getUserQuota(email?: string | null): Promise<{
   try {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await findOrCreateUser(normalizedEmail);
-    const purchased = user.purchased_pages || 0;
-    const totalAllowed = (user.free_pages_limit || 10) + purchased;
-    const remaining = Math.max(0, totalAllowed - (user.pages_processed || 0));
+    const purchased = typeof user.purchased_pages === 'number' ? user.purchased_pages : 0;
+    const freeLimit = typeof user.free_pages_limit === 'number' ? user.free_pages_limit : 10;
+    const processed = typeof user.pages_processed === 'number' ? user.pages_processed : 0;
+    const totalAllowed = freeLimit + purchased;
+    const remaining = Math.max(0, totalAllowed - processed);
 
     return {
       isLoggedIn: true,
-      tier: user.tier,
+      tier: user.tier || 'free',
       freePagesRemaining: user.tier === 'enterprise' ? 99999 : remaining,
-      totalPagesProcessed: user.pages_processed || 0,
-      maxFreePages: user.free_pages_limit || 10,
+      totalPagesProcessed: processed,
+      maxFreePages: freeLimit,
       purchasedPages: purchased,
       totalAvailablePages: totalAllowed,
     };
@@ -142,16 +147,17 @@ export async function getUserStats(email: string): Promise<{
     console.warn('⚠️ MongoDB countDocuments fallback:', (err as Error).message);
   }
 
-  const purchased = user.purchased_pages || 0;
-  const freeLimit = user.free_pages_limit || 10;
+  const purchased = typeof user.purchased_pages === 'number' ? user.purchased_pages : 0;
+  const freeLimit = typeof user.free_pages_limit === 'number' ? user.free_pages_limit : 10;
+  const processed = typeof user.pages_processed === 'number' ? user.pages_processed : 0;
   const totalAllowed = freeLimit + purchased;
-  const remaining = user.tier === 'enterprise' ? 99999 : Math.max(0, totalAllowed - (user.pages_processed || 0));
+  const remaining = user.tier === 'enterprise' ? 99999 : Math.max(0, totalAllowed - processed);
 
   return {
     user,
     stats: {
       totalDocuments,
-      totalPagesProcessed: user.pages_processed || 0,
+      totalPagesProcessed: processed,
       creditsRemaining: remaining,
       totalAvailableCredits: totalAllowed,
       purchasedCredits: purchased,
@@ -184,36 +190,52 @@ export async function incrementUserPageCount(email: string, pageCount: number): 
 
   const mem = memoryUsers.get(normalizedEmail);
   if (mem) {
-    mem.pages_processed += pageCount;
+    mem.pages_processed = (mem.pages_processed || 0) + pageCount;
     mem.updated_at = new Date();
   }
 }
 
-export async function addPurchasedPages(email: string, pageCount: number, newTier?: UserRecord['tier']): Promise<void> {
+export async function addPurchasedPages(
+  email: string,
+  pageCount: number,
+  newTier?: UserRecord['tier']
+): Promise<UserRecord> {
   const normalizedEmail = email.toLowerCase().trim();
-  
+  const existingUser = await findOrCreateUser(normalizedEmail);
+  const currentPurchased = typeof existingUser.purchased_pages === 'number' ? existingUser.purchased_pages : 0;
+  const updatedTier = newTier || (existingUser.tier === 'free' ? 'starter' : existingUser.tier);
+
   try {
     const db = await getDatabase();
     if (db) {
       const usersCollection = db.collection<UserRecord>('users');
-      const updateDoc: Record<string, unknown> = {
-        $inc: { purchased_pages: pageCount },
-        $set: { updated_at: new Date() },
-      };
-      if (newTier) {
-        (updateDoc.$set as Record<string, unknown>).tier = newTier;
+      await usersCollection.updateOne(
+        { email: normalizedEmail },
+        {
+          $inc: { purchased_pages: pageCount },
+          $set: {
+            tier: updatedTier,
+            updated_at: new Date(),
+          },
+        },
+        { upsert: true }
+      );
+      const freshUser = await usersCollection.findOne({ email: normalizedEmail });
+      if (freshUser) {
+        memoryUsers.set(normalizedEmail, freshUser);
+        return freshUser;
       }
-      await usersCollection.updateOne({ email: normalizedEmail }, updateDoc, { upsert: true });
-      return;
     }
   } catch (err) {
     console.warn('⚠️ MongoDB addPurchasedPages fallback to memory:', (err as Error).message);
   }
 
-  const mem = memoryUsers.get(normalizedEmail);
-  if (mem) {
-    mem.purchased_pages = (mem.purchased_pages || 0) + pageCount;
-    if (newTier) mem.tier = newTier;
-    mem.updated_at = new Date();
-  }
+  const mem: UserRecord = {
+    ...existingUser,
+    purchased_pages: currentPurchased + pageCount,
+    tier: updatedTier,
+    updated_at: new Date(),
+  };
+  memoryUsers.set(normalizedEmail, mem);
+  return mem;
 }
