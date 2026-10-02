@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
         try {
           await findOrCreateUser(user.email, user.name, user.image);
         } catch (e) {
-          console.warn('Could not persist user to MongoDB:', e);
+          console.warn('Could not persist user record to database:', (e as Error)?.message || 'DB Error');
         }
       }
       return true;
@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET || 'finlyzer_super_secret_session_jwt_2026',
+  secret: process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV === 'production' ? (() => { console.error('FATAL: NEXTAUTH_SECRET environment variable is missing in production!'); return 'finlyzer_super_secret_session_jwt_2026'; })() : 'finlyzer_dev_jwt_secret_2026'),
 };
 
 const handler = NextAuth(authOptions);

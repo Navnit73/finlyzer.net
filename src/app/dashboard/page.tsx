@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import {
   FileText,
   CreditCard,
@@ -22,6 +22,7 @@ import {
   Receipt,
   BarChart3,
   Clock,
+  AlertTriangle,
 } from 'lucide-react';
 import { StoredDocument, ExportFormat } from '@/types/ocr';
 import { OrderRecord } from '@/types/pricing';
@@ -54,8 +55,32 @@ export default function DashboardOverviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [downloadingFormat, setDownloadingFormat] = useState<{ id: string; format: ExportFormat } | null>(null);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
+
+  const handleDeleteAccount = async () => {
+    const confirmation = window.prompt(
+      'Are you sure you want to permanently delete your Finlyzer account and all stored documents/invoices? Type "DELETE" to confirm:'
+    );
+    if (confirmation !== 'DELETE') return;
+
+    try {
+      setIsDeletingAccount(true);
+      const res = await fetch('/api/user/account', { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete account');
+      try {
+        localStorage.removeItem('has_logged_in');
+      } catch {}
+      alert('Your account and all associated documents and personal data have been permanently deleted.');
+      await signOut({ callbackUrl: '/' });
+    } catch (e) {
+      console.error(e);
+      alert('Account deletion failed. Please try again.');
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
 
   const fetchDashboardData = useCallback(async () => {
     if (!isLoggedIn) {
@@ -476,6 +501,36 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
           )}
+
+          {/* Privacy & Account Data Deletion (GDPR / Right to be Forgotten) */}
+          <div className="p-6 rounded-lg bg-[var(--color-surface)] border border-[var(--color-danger-border)]/50 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-[var(--color-danger)]" />
+                  <h3 className="font-bold text-sm text-[var(--color-ink)]">
+                    Privacy &amp; Data Erasure (Right to be Forgotten)
+                  </h3>
+                </div>
+                <p className="text-xs text-[var(--color-text-secondary)] max-w-xl">
+                  Permanently wipe your account profile, all converted financial statements, OCR extractions, and order history from our servers.
+                </p>
+              </div>
+
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+                className="btn btn-sm rounded-lg bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger)] text-[var(--color-danger)] hover:text-white font-bold border border-[var(--color-danger-border)] px-4 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 transition-colors"
+              >
+                {isDeletingAccount ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                <span>Delete Account &amp; All Data</span>
+              </button>
+            </div>
+          </div>
         </>
       )}
 

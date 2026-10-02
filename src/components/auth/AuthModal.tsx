@@ -35,7 +35,7 @@ export default function AuthModal({
           : window.location.href;
       await signIn('google', { callbackUrl: destination });
     } catch (e) {
-      console.warn('Google sign-in error:', e);
+      console.warn('Google sign-in error:', (e as Error)?.message || 'Sign in error');
       setIsLoading(false);
     }
   };

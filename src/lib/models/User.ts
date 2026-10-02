@@ -256,3 +256,22 @@ export async function addPurchasedPages(
   memoryUsers.set(normalizedEmail, mem);
   return mem;
 }
+
+export async function deleteUserAccount(email: string): Promise<boolean> {
+  const normalizedEmail = email.toLowerCase().trim();
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const usersCollection = db.collection<UserRecord>('users');
+      const result = await usersCollection.deleteOne({ email: normalizedEmail });
+      memoryUsers.delete(normalizedEmail);
+      return result.deletedCount > 0;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB deleteUserAccount fallback to memory:', (err as Error).message);
+  }
+
+  const existed = memoryUsers.has(normalizedEmail);
+  memoryUsers.delete(normalizedEmail);
+  return existed;
+}

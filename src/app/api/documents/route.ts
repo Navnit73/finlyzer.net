@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     // If request supplies IDs (e.g. from guest local browser history), return matching documents from DB
     if (idsParam) {
       const ids = idsParam.split(',').map((s) => s.trim()).filter(Boolean);
-      const docs = await getDocumentsByIds(ids);
+      const docs = await getDocumentsByIds(ids, userEmail || undefined);
       return NextResponse.json({
         total: docs.length,
         page: 1,

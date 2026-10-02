@@ -76,7 +76,7 @@ export default function DocumentsVaultPage() {
       if (!res.ok) throw new Error('Delete failed');
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
-      console.error(err);
+      console.warn('Document delete error:', (err as Error)?.message || 'Delete error');
       alert('Failed to delete document.');
     } finally {
       setDeletingId(null);
@@ -99,7 +99,7 @@ export default function DocumentsVaultPage() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error(err);
+      console.warn('Document export error:', (err as Error)?.message || 'Export error');
       alert('Download failed. Document data could not be retrieved.');
     } finally {
       setDownloadingFormat(null);

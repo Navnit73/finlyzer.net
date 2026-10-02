@@ -141,7 +141,7 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      console.error(e);
+      console.warn('Consolidated download failed:', (e as Error)?.message || 'Export error');
       alert('Failed to download master consolidated report.');
     }
   };

@@ -80,9 +80,10 @@ export async function getUserDocuments(
       }
 
       if (search) {
+        const sanitizedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         query.$or = [
-          { filename: { $regex: search, $options: 'i' } },
-          { id: { $regex: search, $options: 'i' } },
+          { filename: { $regex: sanitizedSearch, $options: 'i' } },
+          { id: { $regex: sanitizedSearch, $options: 'i' } },
         ];
       }
 
@@ -155,14 +156,21 @@ export async function getUserDocuments(
   };
 }
 
-export async function getDocumentsByIds(ids: string[]): Promise<StoredDocument[]> {
+export async function getDocumentsByIds(ids: string[], userEmail?: string): Promise<StoredDocument[]> {
   if (!ids || ids.length === 0) return [];
+  const normalizedEmail = userEmail && userEmail !== 'guest' ? userEmail.toLowerCase().trim() : undefined;
+
   try {
     const db = await getDatabase();
     if (db) {
       const collection = db.collection<ExtractionDocument>('extractions');
+      const query: Record<string, unknown> = {
+        id: { $in: ids },
+        // If authenticated user, allow their docs or guest docs; if guest, ONLY allow guest docs
+        user_email: normalizedEmail ? { $in: [normalizedEmail, 'guest'] } : 'guest',
+      };
       const docs = await collection
-        .find({ id: { $in: ids } })
+        .find(query)
         .sort({ created_at: -1 })
         .toArray();
 
@@ -183,7 +191,9 @@ export async function getDocumentsByIds(ids: string[]): Promise<StoredDocument[]
 
   // Memory fallback
   const results: StoredDocument[] = [];
-  for (const list of memoryDocs.values()) {
+  const allowedKeys = normalizedEmail ? [normalizedEmail, 'guest'] : ['guest'];
+  for (const key of allowedKeys) {
+    const list = memoryDocs.get(key) || [];
     for (const d of list) {
       if (ids.includes(d.id) && !results.some(r => r.id === d.id)) {
         results.push({
@@ -209,10 +219,11 @@ export async function getDocumentById(id: string, userEmail?: string): Promise<E
     const db = await getDatabase();
     if (db) {
       const collection = db.collection<ExtractionDocument>('extractions');
-      const query: Record<string, unknown> = { id };
-      if (normalizedEmail) {
-        query.user_email = normalizedEmail;
-      }
+      // If user is authenticated, search their email or guest docs; if guest, ONLY search guest docs
+      const query: Record<string, unknown> = {
+        id,
+        user_email: normalizedEmail ? { $in: [normalizedEmail, 'guest'] } : 'guest',
+      };
       return await collection.findOne(query);
     }
   } catch (err) {
@@ -220,14 +231,12 @@ export async function getDocumentById(id: string, userEmail?: string): Promise<E
   }
 
   if (normalizedEmail) {
-    const list = memoryDocs.get(normalizedEmail) || [];
-    return list.find(d => d.id === id) || null;
+    const userList = memoryDocs.get(normalizedEmail) || [];
+    const foundUserDoc = userList.find(d => d.id === id);
+    if (foundUserDoc) return foundUserDoc;
   }
-  for (const list of memoryDocs.values()) {
-    const found = list.find(d => d.id === id);
-    if (found) return found;
-  }
-  return null;
+  const guestList = memoryDocs.get('guest') || [];
+  return guestList.find(d => d.id === id) || null;
 }
 
 export async function deleteDocumentById(id: string, userEmail?: string): Promise<boolean> {
@@ -237,10 +246,10 @@ export async function deleteDocumentById(id: string, userEmail?: string): Promis
     const db = await getDatabase();
     if (db) {
       const collection = db.collection<ExtractionDocument>('extractions');
-      const query: Record<string, unknown> = { id };
-      if (normalizedEmail) {
-        query.user_email = normalizedEmail;
-      }
+      const query: Record<string, unknown> = {
+        id,
+        user_email: normalizedEmail ? normalizedEmail : 'guest',
+      };
       const result = await collection.deleteOne(query);
       return result.deletedCount > 0;
     }
@@ -248,15 +257,28 @@ export async function deleteDocumentById(id: string, userEmail?: string): Promis
     console.warn('⚠️ MongoDB delete fallback to memory:', (err as Error).message);
   }
 
-  if (normalizedEmail) {
-    const list = memoryDocs.get(normalizedEmail) || [];
-    const filtered = list.filter(d => d.id !== id);
-    memoryDocs.set(normalizedEmail, filtered);
-    return true;
-  }
-  for (const [key, list] of memoryDocs.entries()) {
-    const filtered = list.filter(d => d.id !== id);
-    memoryDocs.set(key, filtered);
-  }
+  const targetKey = normalizedEmail || 'guest';
+  const list = memoryDocs.get(targetKey) || [];
+  const filtered = list.filter(d => d.id !== id);
+  memoryDocs.set(targetKey, filtered);
   return true;
+}
+
+export async function deleteAllUserDocuments(userEmail: string): Promise<number> {
+  const normalizedEmail = userEmail.toLowerCase().trim();
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<ExtractionDocument>('extractions');
+      const result = await collection.deleteMany({ user_email: normalizedEmail });
+      return result.deletedCount;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB deleteAllUserDocuments fallback to memory:', (err as Error).message);
+  }
+
+  const list = memoryDocs.get(normalizedEmail) || [];
+  const count = list.length;
+  memoryDocs.delete(normalizedEmail);
+  return count;
 }

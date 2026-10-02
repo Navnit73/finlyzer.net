@@ -56,7 +56,7 @@ export default function ExportActionBar({
       setDownloadSuccess(format);
       setTimeout(() => setDownloadSuccess(null), 3000);
     } catch (e) {
-      console.error('Export download failed:', e);
+      console.warn('Export download failed:', (e as Error)?.message || 'Export error');
       alert('Failed to download export file. Please try again.');
     } finally {
       setDownloadingFormat(null);

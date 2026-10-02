@@ -19,7 +19,7 @@ export function getBrowserHistory(): BrowserHistoryItem[] {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
-    console.warn('Failed to read browser history:', e);
+    console.warn('Failed to read browser history:', (e as Error)?.message || 'Storage error');
     return [];
   }
 }
@@ -34,7 +34,7 @@ export function saveToBrowserHistory(item: BrowserHistoryItem): void {
     // Keep up to 50 recent documents in browser storage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered.slice(0, 50)));
   } catch (e) {
-    console.warn('Failed to save to browser history:', e);
+    console.warn('Failed to save to browser history:', (e as Error)?.message || 'Storage error');
   }
 }
 
@@ -45,7 +45,7 @@ export function removeFromBrowserHistory(id: string): void {
     const filtered = history.filter((h) => h.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   } catch (e) {
-    console.warn('Failed to remove from browser history:', e);
+    console.warn('Failed to remove from browser history:', (e as Error)?.message || 'Storage error');
   }
 }
 
@@ -54,6 +54,6 @@ export function clearBrowserHistory(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (e) {
-    console.warn('Failed to clear browser history:', e);
+    console.warn('Failed to clear browser history:', (e as Error)?.message || 'Storage error');
   }
 }

@@ -62,7 +62,7 @@ export default function HistoryDrawer({
           }
         })
         .catch((err) => {
-          console.error('History fetch failed:', err);
+          console.warn('History fetch failed:', (err as Error)?.message || 'Fetch error');
         })
         .finally(() => {
           if (!ignore) setIsLoading(false);
@@ -124,7 +124,7 @@ export default function HistoryDrawer({
         setTotalCount((c) => Math.max(0, c - 1));
       }
     } catch (e) {
-      console.error('Delete failed:', e);
+      console.warn('Delete failed:', (e as Error)?.message || 'Delete error');
     }
   };
 
@@ -143,7 +143,7 @@ export default function HistoryDrawer({
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      console.error(e);
+      console.warn('Download error:', (e as Error)?.message || 'Export error');
       alert('Download failed. Document data could not be retrieved.');
     }
   };

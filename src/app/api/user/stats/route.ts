@@ -13,11 +13,15 @@ export async function GET() {
     const statsData = await getUserStats(session.user.email);
 
     return NextResponse.json({
-      ...statsData,
+      stats: statsData.stats,
       user: {
-        ...statsData.user,
-        name: session.user.name || statsData.user.name,
-        image: session.user.image || statsData.user.image,
+        email: session.user.email,
+        name: session.user.name || statsData.user.name || null,
+        image: session.user.image || statsData.user.image || null,
+        tier: statsData.user.tier || 'free',
+        pages_processed: statsData.user.pages_processed || 0,
+        free_pages_limit: statsData.user.free_pages_limit || 10,
+        purchased_pages: statsData.user.purchased_pages || 0,
       },
     });
   } catch (err: unknown) {

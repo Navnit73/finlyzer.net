@@ -133,7 +133,7 @@ export default function BatchProcessingModal({
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      console.error(e);
+      console.warn('Consolidation export error:', (e as Error)?.message || 'Export error');
       alert('Failed to download consolidated Excel file.');
     }
   };

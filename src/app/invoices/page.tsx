@@ -88,7 +88,7 @@ export default function InvoicesBillingPage() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error(err);
+      console.warn('PDF receipt download error:', (err as Error)?.message || 'Receipt error');
       alert('Failed to generate PDF receipt.');
     }
   };

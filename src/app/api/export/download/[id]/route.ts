@@ -3,6 +3,9 @@ import { downloadExportFile, generateExportDirect } from '@/lib/ocr-api';
 import { getDocumentById } from '@/lib/models/Document';
 import { ExportFormat } from '@/types/ocr';
 
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+
 const CONTENT_TYPES: Record<ExportFormat, string> = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   pdf: 'application/pdf',
@@ -21,6 +24,18 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const format = (searchParams.get('format') as ExportFormat) || 'xlsx';
 
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email;
+
+    // Check document ownership first
+    const storedDoc = await getDocumentById(id, userEmail || undefined);
+    if (!storedDoc) {
+      return NextResponse.json(
+        { error: 'Document extraction not found or access denied.' },
+        { status: 404 }
+      );
+    }
+
     let blob: Blob;
 
     try {
@@ -28,8 +43,7 @@ export async function GET(
       blob = await downloadExportFile(id, format);
     } catch {
       // 2. If memory cache missed, check MongoDB stored extraction JSON and generate direct export
-      const storedDoc = await getDocumentById(id);
-      if (storedDoc && storedDoc.extraction) {
+      if (storedDoc.extraction) {
         blob = await generateExportDirect(
           format,
           storedDoc.extraction as Record<string, unknown>,

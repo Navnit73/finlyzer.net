@@ -84,6 +84,22 @@ export async function updateOrderStatus(
   return null;
 }
 
+export async function getOrderById(orderId: string): Promise<OrderRecord | null> {
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<OrderRecord>('orders');
+      const order = await collection.findOne({ order_id: orderId });
+      if (order) return order as unknown as OrderRecord;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB getOrderById fallback to memory:', (err as Error).message);
+  }
+
+  return memoryOrders.get(orderId) || null;
+}
+
+
 export async function getUserOrders(userEmail: string): Promise<OrderRecord[]> {
   const normalizedEmail = userEmail.toLowerCase().trim();
   try {
@@ -106,4 +122,27 @@ export async function getUserOrders(userEmail: string): Promise<OrderRecord[]> {
     }
   }
   return results.sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
+export async function deleteAllUserOrders(userEmail: string): Promise<number> {
+  const normalizedEmail = userEmail.toLowerCase().trim();
+  try {
+    const db = await getDatabase();
+    if (db) {
+      const collection = db.collection<OrderRecord>('orders');
+      const result = await collection.deleteMany({ user_email: normalizedEmail });
+      return result.deletedCount;
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB deleteAllUserOrders fallback to memory:', (err as Error).message);
+  }
+
+  let count = 0;
+  for (const [orderId, order] of memoryOrders.entries()) {
+    if (order.user_email === normalizedEmail) {
+      memoryOrders.delete(orderId);
+      count++;
+    }
+  }
+  return count;
 }

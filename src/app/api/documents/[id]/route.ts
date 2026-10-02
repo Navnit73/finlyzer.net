@@ -17,7 +17,9 @@ export async function GET(
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    return NextResponse.json(doc);
+    // Strip internal _id if present
+    const { _id, ...safeDoc } = doc as unknown as { _id?: unknown };
+    return NextResponse.json(safeDoc);
   } catch (err: unknown) {
     const error = err as { message?: string };
     return NextResponse.json({ error: error.message || 'Failed to fetch document' }, { status: 500 });
@@ -33,7 +35,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
-    const doc = await getDocumentById(id);
+    const doc = await getDocumentById(id, userEmail || undefined);
     if (!doc) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }

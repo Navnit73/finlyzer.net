@@ -23,6 +23,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Server-Side File Size Limit (Max 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'File exceeds maximum upload size of 50MB' },
+        { status: 413 }
+      );
+    }
+
+    // Server-Side MIME Type & Extension Whitelist
+    const ALLOWED_MIME = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/tiff'];
+    const ALLOWED_EXTS = ['.pdf', '.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff'];
+    const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase() : '';
+
+    if (!ALLOWED_EXTS.includes(ext) && file.type && !ALLOWED_MIME.includes(file.type.toLowerCase())) {
+      return NextResponse.json(
+        { error: `Unsupported file format. Please upload a PDF, PNG, JPG, WEBP, or TIFF document.` },
+        { status: 415 }
+      );
+    }
+
     // 10-Page Free Tier Policy Check
     const quota = await getUserQuota(userEmail);
 
@@ -82,7 +103,7 @@ export async function POST(req: NextRequest) {
         await incrementUserPageCount(userEmail, actualPages);
       }
     } catch (dbErr) {
-      console.warn('Could not save extraction to database:', dbErr);
+      console.warn('Could not save extraction to database:', (dbErr as Error)?.message || 'DB Error');
     }
 
     return NextResponse.json(result);

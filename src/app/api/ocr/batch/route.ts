@@ -32,6 +32,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No files provided for batch processing' }, { status: 400 });
     }
 
+    // Limit maximum batch size (max 50 files)
+    if (files.length > 50) {
+      return NextResponse.json(
+        { error: 'Batch upload limit exceeded. Maximum 50 documents per batch.' },
+        { status: 400 }
+      );
+    }
+
+    // Server-Side File Size Limit (Max 50MB per file) & Format Whitelist
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    const ALLOWED_MIME = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/tiff', 'application/zip', 'application/x-zip-compressed'];
+    const ALLOWED_EXTS = ['.pdf', '.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff', '.zip'];
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `File "${file.name}" exceeds maximum upload size of 50MB.` },
+          { status: 413 }
+        );
+      }
+      const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase() : '';
+      if (!ALLOWED_EXTS.includes(ext) && file.type && !ALLOWED_MIME.includes(file.type.toLowerCase())) {
+        return NextResponse.json(
+          { error: `File "${file.name}" has an unsupported format. Please upload PDF, PNG, JPG, WEBP, TIFF, or ZIP files.` },
+          { status: 415 }
+        );
+      }
+    }
+
     const quota = await getUserQuota(userEmail);
     if (quota.tier !== 'enterprise' && files.length > quota.freePagesRemaining) {
       return NextResponse.json(
@@ -66,7 +95,7 @@ export async function POST(req: NextRequest) {
               metadata: { pages: 1, processing_time_ms: item.processing_time_ms },
             }, item.filename);
           } catch (e) {
-            console.warn('Batch item save failed:', e);
+            console.warn('Batch item save failed:', (e as Error)?.message || 'DB Error');
           }
         }
       }
