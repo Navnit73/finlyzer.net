@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
+
 import {
   X,
   FileText,
@@ -12,6 +13,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
+import { useIsMounted } from '@/lib/useIsMounted';
 
 interface UploadConfigModalProps {
   isOpen: boolean;
@@ -48,13 +50,10 @@ export default function UploadConfigModal({
   onConfirm,
   onClose,
 }: UploadConfigModalProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsMounted();
 
   if (!isOpen || !file || !mounted) return null;
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

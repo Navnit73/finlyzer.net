@@ -42,16 +42,17 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
 
   return (
     <>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Document History Trigger Button */}
         {onOpenHistory && (
           <button
             onClick={onOpenHistory}
-            className="btn btn-ghost btn-sm text-xs font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-full px-3 py-1.5 flex items-center gap-1.5 border border-[var(--color-border)]"
+            className="btn btn-ghost btn-sm text-xs font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-full px-3 py-1.5 flex items-center gap-1.5 border border-[var(--color-border)] cursor-pointer"
             title="View Stored Documents & History"
+            aria-label="View Document History"
           >
             <History className="w-3.5 h-3.5 text-[var(--color-ink)]" />
-            <span className="hidden md:inline">History</span>
+            <span className="hidden sm:inline">History</span>
           </button>
         )}
 
@@ -61,6 +62,8 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
             <div
               tabIndex={0}
               role="button"
+              aria-label="User account menu"
+              aria-haspopup="menu"
               className="flex items-center gap-2 p-1.5 rounded-full hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors border border-[var(--color-border)]"
             >
               {session.user?.image ? (
@@ -85,6 +88,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
 
             <ul
               tabIndex={0}
+              role="menu"
               className="dropdown-content z-50 menu p-3 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl w-64 text-xs space-y-1.5 mt-2"
             >
               {/* Profile Header */}
@@ -103,7 +107,10 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
 
               {onOpenHistory && (
                 <li>
-                  <button onClick={onOpenHistory} className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl">
+                  <button
+                    onClick={onOpenHistory}
+                    className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-xl w-full text-left"
+                  >
                     <History className="w-4 h-4 text-[var(--color-ink)]" />
                     <span>My Document History</span>
                   </button>
@@ -113,7 +120,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               <li>
                 <button
                   onClick={() => signOut()}
-                  className="py-2 flex items-center gap-2 font-semibold text-red-600 hover:bg-red-50 rounded-xl"
+                  className="py-2 flex items-center gap-2 font-semibold text-red-600 hover:bg-red-50 rounded-xl w-full text-left"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>
@@ -122,26 +129,21 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
             </ul>
           </div>
         ) : (
-          /* Guest State: Quota Badge & Sign In Trigger */
+          /* Single Clean Sign In CTA across all viewports */
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* 10-Page Quota Pill */}
-            <div className="hidden lg:flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-xs font-bold">
+            {/* 10-Page Quota Pill on Desktop */}
+            <div className="hidden md:flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-xs font-bold border border-[var(--color-brand)]/20">
               <span>10 Free Pages</span>
             </div>
 
+            {/* Exactly ONE Sign In Button */}
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="btn btn-ghost btn-sm text-[14px] font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-full"
+              className="btn-brand-dark flex items-center gap-2 !min-h-[38px] !h-[38px] !py-0 !px-4 !text-xs sm:!text-sm font-semibold rounded-full shadow-xs cursor-pointer transition-transform active:scale-95"
+              aria-label="Sign In with Google"
             >
-              <User className="w-4 h-4 sm:hidden" />
-              <span className="hidden sm:inline">Sign In</span>
-            </button>
-
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="btn-brand-dark !min-h-[40px] !py-0 !px-4 !text-xs sm:!text-sm"
-            >
-              Sign Up Free
+              <User className="w-3.5 h-3.5" />
+              <span>Sign In</span>
             </button>
           </div>
         )}
@@ -155,3 +157,4 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
     </>
   );
 }
+

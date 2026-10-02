@@ -9,8 +9,6 @@ import {
   History,
   AlertCircle,
   Upload,
-  Sparkles,
-  FileText,
 } from 'lucide-react';
 import ExtractionViewer from '@/components/ocr/ExtractionViewer';
 import BatchProcessingModal from '@/components/ocr/BatchProcessingModal';
@@ -59,11 +57,8 @@ export default function DocumentPage({ params }: DocumentPageProps) {
       try {
         const res = await fetch(`/api/documents/${docId}`);
         if (!res.ok) {
-          if (!documentData) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || 'Document not found or session expired');
-          }
-          return;
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Document not found or session expired');
         }
 
         const doc = await res.json();
@@ -95,7 +90,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           }
         }
       } catch (err: unknown) {
-        if (isMounted && !documentData) {
+        if (isMounted) {
           const e = err as { message?: string };
           setErrorMessage(e.message || 'Failed to load document extraction.');
           setIsLoading(false);
@@ -109,6 +104,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
       isMounted = false;
     };
   }, [docId]);
+
 
   return (
     <main className="min-h-screen bg-[var(--color-surface)]">

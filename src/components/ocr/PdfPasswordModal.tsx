@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Lock, KeyRound, Eye, EyeOff, X, AlertCircle } from 'lucide-react';
+import { useIsMounted } from '@/lib/useIsMounted';
 
 interface PdfPasswordModalProps {
   isOpen: boolean;
@@ -23,13 +24,10 @@ export default function PdfPasswordModal({
 }: PdfPasswordModalProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsMounted();
 
   if (!isOpen || !mounted) return null;
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

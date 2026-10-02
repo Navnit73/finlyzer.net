@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
@@ -9,12 +11,11 @@ import {
   Download,
   Trash2,
   Calendar,
-  Sparkles,
-  ExternalLink,
   Laptop,
 } from 'lucide-react';
 import { DocumentListResponse, StoredDocument, ExportFormat } from '@/types/ocr';
 import { getBrowserHistory, removeFromBrowserHistory, BrowserHistoryItem } from '@/lib/browser-history';
+import { useIsMounted } from '@/lib/useIsMounted';
 import AuthModal from '../auth/AuthModal';
 
 interface HistoryDrawerProps {
@@ -35,59 +36,56 @@ export default function HistoryDrawer({
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [docTypeFilter, setDocTypeFilter] = useState('all');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Fetch logged-in user documents from MongoDB
-  const fetchUserDocuments = async (pageNum = 1) => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: String(pageNum),
-        page_size: '15',
-      });
-      if (docTypeFilter !== 'all') params.append('document_type', docTypeFilter);
-      if (searchTerm) params.append('search', searchTerm);
-
-      const res = await fetch(`/api/documents?${params.toString()}`);
-      if (res.ok) {
-        const data: DocumentListResponse = await res.json();
-        setDocuments(data.items || []);
-        setTotalPages(data.total_pages || 1);
-        setTotalCount(data.total || 0);
-        setPage(data.page || 1);
-      }
-    } catch (e) {
-      console.error('History fetch failed:', e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load guest history from browser localStorage
-  const loadGuestHistory = () => {
-    const items = getBrowserHistory();
-    setGuestHistory(items);
-    setTotalCount(items.length);
-  };
+  const mounted = useIsMounted();
 
   useEffect(() => {
     if (!isOpen) return;
 
+    let ignore = false;
+
     if (session?.user) {
-      fetchUserDocuments(1);
+      const params = new URLSearchParams({
+        page: '1',
+        page_size: '20',
+      });
+      if (docTypeFilter !== 'all') params.append('document_type', docTypeFilter);
+      if (searchTerm) params.append('search', searchTerm);
+
+      fetch(`/api/documents?${params.toString()}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data: DocumentListResponse | null) => {
+          if (!ignore && data) {
+            setDocuments(data.items || []);
+            setTotalCount(data.total || 0);
+          }
+        })
+        .catch((err) => {
+          console.error('History fetch failed:', err);
+        })
+        .finally(() => {
+          if (!ignore) setIsLoading(false);
+        });
     } else {
-      loadGuestHistory();
+      setTimeout(() => {
+        if (!ignore) {
+          const items = getBrowserHistory();
+          setGuestHistory(items);
+          setTotalCount(items.length);
+        }
+      }, 0);
     }
+
+
+    return () => {
+      ignore = true;
+    };
   }, [isOpen, session, docTypeFilter, searchTerm]);
 
+
   if (!isOpen || !mounted) return null;
+
+
 
   // Filter guest items by search & type
   const filteredGuestItems = guestHistory.filter((item) => {

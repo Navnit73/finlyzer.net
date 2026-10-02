@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { signIn } from 'next-auth/react';
-import { Sparkles, X, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
+import { Sparkles, X, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useIsMounted } from '@/lib/useIsMounted';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,13 +20,10 @@ export default function AuthModal({
   pageCount,
 }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsMounted();
 
   if (!isOpen || !mounted) return null;
+
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -33,20 +31,6 @@ export default function AuthModal({
       await signIn('google', { callbackUrl: window.location.href });
     } catch (e) {
       console.warn('Google sign-in error:', e);
-      setIsLoading(false);
-    }
-  };
-
-  const handleDemoSignIn = async () => {
-    setIsLoading(true);
-    try {
-      await signIn('google-demo', {
-        email: 'analyst.pro@finlyzer.net',
-        name: 'Financial Analyst',
-        callbackUrl: window.location.href,
-      });
-    } catch (e) {
-      console.error('Demo sign-in error:', e);
       setIsLoading(false);
     }
   };
@@ -103,7 +87,7 @@ export default function AuthModal({
         <div className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-2xl border border-[var(--color-border)]">
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
             <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
-            <span>Process up to 200 pages per statement with  AI cleaning</span>
+            <span>Process up to 200 pages per statement with AI cleaning</span>
           </div>
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
             <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
@@ -142,16 +126,6 @@ export default function AuthModal({
               />
             </svg>
             <span>Continue with Google</span>
-          </button>
-
-          {/* Quick Demo Login (for development testing) */}
-          <button
-            onClick={handleDemoSignIn}
-            disabled={isLoading}
-            className="w-full py-3 px-4 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <Zap className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
-            <span>Instant Demo Sign-In (1-Click Test)</span>
           </button>
         </div>
 

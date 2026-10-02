@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+'use client';
+
+import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
 import {
@@ -15,6 +17,7 @@ import {
 import { BatchResponse } from '@/types/ocr';
 import FinancialMetricCard from './FinancialMetricCard';
 import AuthModal from '../auth/AuthModal';
+import { useIsMounted } from '@/lib/useIsMounted';
 
 interface BatchProcessingModalProps {
   isOpen: boolean;
@@ -34,14 +37,11 @@ export default function BatchProcessingModal({
   const [progress, setProgress] = useState(0);
   const [batchResult, setBatchResult] = useState<BatchResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsMounted();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   if (!isOpen || !mounted) return null;
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { ChevronDown, TrendingUp, Sparkles } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import UserMenu from "./auth/UserMenu";
 import HistoryDrawer from "./ocr/HistoryDrawer";
 
@@ -13,41 +13,31 @@ export default function Header() {
 
   return (
     <>
-    
-
-      {/* 2. Global Sticky Header with DaisyUI Navbar */}
-      <header className="sticky top-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur-md border-b border-[var(--color-border)]">
+      {/* Global Sticky Header */}
+      <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/95 backdrop-blur-md border-b border-[var(--color-border)] transition-all">
         <div className="site-container">
-          <div className="navbar p-0 h-20">
-            <div className="navbar-start gap-3">
-            
-
-              {/* Brand Logo */}
-              <Link href="/" className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
-                <span className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-sm">
+          <nav className="flex items-center justify-between h-16 sm:h-20" aria-label="Main Navigation">
+            {/* Brand Logo */}
+            <div className="flex items-center">
+              <Link
+                href="/"
+                className="flex items-center gap-2.5 text-xl sm:text-2xl font-black tracking-tight text-[var(--color-ink)] hover:opacity-90 transition-opacity"
+                aria-label="Finlyzer - Home"
+              >
+                <span className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-xs">
                   <TrendingUp className="w-5 h-5 stroke-[2.5]" />
                 </span>
-                <span>
+                <span className="flex items-center">
                   Fin<span className="text-[var(--color-ink)]">lyzer</span>
                 </span>
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="navbar-center hidden lg:flex">
-              <ul className="menu menu-horizontal px-1 font-medium gap-1 text-[15px]">
-              
-                
-               
-                
-              </ul>
-            </div>
-
-            {/* Account Actions & User Menu */}
-            <div className="navbar-end gap-3 sm:gap-4">
+            {/* Account Actions & Single Sign In Button */}
+            <div className="flex items-center gap-2 sm:gap-3">
               <UserMenu onOpenHistory={() => setIsHistoryOpen(true)} />
             </div>
-          </div>
+          </nav>
         </div>
       </header>
 
@@ -63,3 +53,4 @@ export default function Header() {
     </>
   );
 }
+
