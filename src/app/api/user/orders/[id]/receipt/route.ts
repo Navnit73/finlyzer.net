@@ -19,11 +19,11 @@ export async function GET(
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
-    // Retrieve user orders from MongoDB
-    const orders = await getUserOrders(session.user.email);
-    const order = orders.find((o) => o.order_id === orderId);
+    // Retrieve specific order directly via indexed lookup
+    const { getOrderById } = await import('@/lib/models/Order');
+    const order = await getOrderById(orderId);
 
-    if (!order) {
+    if (!order || order.user_email !== session.user.email.toLowerCase().trim()) {
       return NextResponse.json({ error: 'Invoice record not found' }, { status: 404 });
     }
 

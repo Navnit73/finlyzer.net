@@ -1,4 +1,5 @@
 import { getDatabase } from '../mongodb';
+import { measureDbQuery } from '../db-logger';
 
 export interface UserRecord {
   _id?: string;
@@ -16,75 +17,105 @@ export interface UserRecord {
 // In-memory fallback if MongoDB is not running locally during development
 const memoryUsers = new Map<string, UserRecord>();
 
-export async function findOrCreateUser(email: string, name?: string | null, image?: string | null): Promise<UserRecord> {
+export async function findOrCreateUser(
+  email: string,
+  name?: string | null,
+  image?: string | null
+): Promise<UserRecord> {
   const normalizedEmail = email.toLowerCase().trim();
-  
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const usersCollection = db.collection<UserRecord>('users');
-      let user = await usersCollection.findOne({ email: normalizedEmail });
 
-      if (!user) {
-        const newUser: UserRecord = {
-          email: normalizedEmail,
-          name: name || null,
-          image: image || null,
-          tier: 'free',
-          pages_processed: 0,
-          free_pages_limit: 10,
-          purchased_pages: 0,
-          created_at: new Date(),
-          updated_at: new Date(),
-        };
-        const result = await usersCollection.insertOne(newUser as unknown as import('mongodb').OptionalUnlessRequiredId<UserRecord>);
-        user = { ...newUser, _id: result.insertedId.toString() };
-      } else {
-        if (user.purchased_pages === undefined || user.purchased_pages === null) {
-          user.purchased_pages = 0;
-        }
+  return await measureDbQuery('findOrCreateUser', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const usersCollection = db.collection<UserRecord>('users');
+        let user = await usersCollection.findOne({ email: normalizedEmail });
 
-        // Auto-reconcile with completed orders in DB
-        try {
-          const orders = await db.collection('orders').find({ user_email: normalizedEmail, status: 'completed' }).toArray();
-          if (orders && orders.length > 0) {
-            const totalFromOrders = orders.reduce((sum, o) => sum + (o.pages_credited || 0), 0);
+        if (!user) {
+          const now = new Date();
+          const newUser: UserRecord = {
+            email: normalizedEmail,
+            name: name || null,
+            image: image || null,
+            tier: 'free',
+            pages_processed: 0,
+            free_pages_limit: 10,
+            purchased_pages: 0,
+            created_at: now,
+            updated_at: now,
+          };
+          const result = await usersCollection.insertOne(
+            newUser as unknown as import('mongodb').OptionalUnlessRequiredId<UserRecord>
+          );
+          user = { ...newUser, _id: result.insertedId.toString() };
+        } else {
+          if (user.purchased_pages === undefined || user.purchased_pages === null) {
+            user.purchased_pages = 0;
+          }
+
+          // Auto-reconcile with completed orders in DB using optimized aggregation
+          try {
+            const orderAggregation = await db
+              .collection('orders')
+              .aggregate([
+                { $match: { user_email: normalizedEmail, status: 'completed' } },
+                { $group: { _id: null, total: { $sum: '$pages_credited' } } },
+              ])
+              .toArray();
+
+            const totalFromOrders = (orderAggregation[0]?.total as number) || 0;
             if (user.purchased_pages < totalFromOrders) {
+              const updatedTier: UserRecord['tier'] =
+                totalFromOrders >= 5000
+                  ? 'enterprise'
+                  : totalFromOrders >= 1000
+                  ? 'pro'
+                  : totalFromOrders > 0
+                  ? 'starter'
+                  : user.tier;
+
               user.purchased_pages = totalFromOrders;
-              const updatedTier = totalFromOrders >= 5000 ? 'enterprise' : totalFromOrders >= 1000 ? 'pro' : totalFromOrders > 0 ? 'starter' : user.tier;
               user.tier = updatedTier;
+
               await usersCollection.updateOne(
                 { email: normalizedEmail },
-                { $set: { purchased_pages: totalFromOrders, tier: updatedTier, updated_at: new Date() } }
+                {
+                  $set: {
+                    purchased_pages: totalFromOrders,
+                    tier: updatedTier,
+                    updated_at: new Date(),
+                  },
+                }
               );
             }
+          } catch (orderErr) {
+            console.warn('Order reconciliation warning:', (orderErr as Error).message);
           }
-        } catch (orderErr) {
-          console.warn('Order reconciliation warning:', (orderErr as Error).message);
         }
+
+        return user;
       }
-
-      return user;
+    } catch (err) {
+      console.warn('⚠️ MongoDB User lookup fallback to memory:', (err as Error).message);
     }
-  } catch (err) {
-    console.warn('⚠️ MongoDB User lookup fallback to memory:', (err as Error).message);
-  }
 
-  // Memory fallback
-  if (!memoryUsers.has(normalizedEmail)) {
-    memoryUsers.set(normalizedEmail, {
-      email: normalizedEmail,
-      name: name || 'User',
-      image: image || null,
-      tier: 'free',
-      pages_processed: 0,
-      free_pages_limit: 10,
-      purchased_pages: 0,
-      created_at: new Date(),
-      updated_at: new Date(),
-    });
-  }
-  return memoryUsers.get(normalizedEmail)!;
+    // Memory fallback
+    if (!memoryUsers.has(normalizedEmail)) {
+      const now = new Date();
+      memoryUsers.set(normalizedEmail, {
+        email: normalizedEmail,
+        name: name || 'User',
+        image: image || null,
+        tier: 'free',
+        pages_processed: 0,
+        free_pages_limit: 10,
+        purchased_pages: 0,
+        created_at: now,
+        updated_at: now,
+      });
+    }
+    return memoryUsers.get(normalizedEmail)!;
+  }, { email: normalizedEmail });
 }
 
 export async function getUserQuota(email?: string | null): Promise<{
@@ -152,64 +183,84 @@ export async function getUserStats(email: string): Promise<{
   };
 }> {
   const normalizedEmail = email.toLowerCase().trim();
-  const user = await findOrCreateUser(normalizedEmail);
 
-  let totalDocuments = 0;
-  try {
-    const db = await getDatabase();
-    if (db) {
-      totalDocuments = await db.collection('extractions').countDocuments({ user_email: normalizedEmail });
-    }
-  } catch (err) {
-    console.warn('⚠️ MongoDB countDocuments fallback:', (err as Error).message);
-  }
+  return await measureDbQuery('getUserStats', async () => {
+    // Run user lookup and count query concurrently
+    const [user, totalDocuments] = await Promise.all([
+      findOrCreateUser(normalizedEmail),
+      (async () => {
+        try {
+          const db = await getDatabase();
+          if (db) {
+            return await db.collection('extractions').countDocuments({ user_email: normalizedEmail });
+          }
+        } catch (err) {
+          console.warn('⚠️ MongoDB countDocuments fallback:', (err as Error).message);
+        }
+        const { getMemoryDocumentCount } = await import('./Document');
+        return getMemoryDocumentCount(normalizedEmail);
+      })(),
+    ]);
 
-  const purchased = typeof user.purchased_pages === 'number' ? user.purchased_pages : 0;
-  const freeLimit = typeof user.free_pages_limit === 'number' ? user.free_pages_limit : 10;
-  const processed = typeof user.pages_processed === 'number' ? user.pages_processed : 0;
-  const totalAllowed = freeLimit + purchased;
-  const remaining = user.tier === 'enterprise' ? 99999 : Math.max(0, totalAllowed - processed);
+    const purchased = typeof user.purchased_pages === 'number' ? user.purchased_pages : 0;
+    const freeLimit = typeof user.free_pages_limit === 'number' ? user.free_pages_limit : 10;
+    const processed = typeof user.pages_processed === 'number' ? user.pages_processed : 0;
+    const totalAllowed = freeLimit + purchased;
+    const remaining = user.tier === 'enterprise' ? 99999 : Math.max(0, totalAllowed - processed);
 
-  return {
-    user,
-    stats: {
-      totalDocuments,
-      totalPagesProcessed: processed,
-      creditsRemaining: remaining,
-      totalAvailableCredits: totalAllowed,
-      purchasedCredits: purchased,
-      freeCredits: freeLimit,
-      tier: user.tier || 'free',
-    },
-  };
+    return {
+      user,
+      stats: {
+        totalDocuments,
+        totalPagesProcessed: processed,
+        creditsRemaining: remaining,
+        totalAvailableCredits: totalAllowed,
+        purchasedCredits: purchased,
+        freeCredits: freeLimit,
+        tier: user.tier || 'free',
+      },
+    };
+  }, { email: normalizedEmail });
 }
 
 export async function incrementUserPageCount(email: string, pageCount: number): Promise<void> {
   const normalizedEmail = email.toLowerCase().trim();
-  
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const usersCollection = db.collection<UserRecord>('users');
-      await usersCollection.updateOne(
-        { email: normalizedEmail },
-        {
-          $inc: { pages_processed: pageCount },
-          $set: { updated_at: new Date() }
-        },
-        { upsert: true }
-      );
-      return;
-    }
-  } catch (err) {
-    console.warn('⚠️ MongoDB increment fallback to memory:', (err as Error).message);
-  }
 
-  const mem = memoryUsers.get(normalizedEmail);
-  if (mem) {
-    mem.pages_processed = (mem.pages_processed || 0) + pageCount;
-    mem.updated_at = new Date();
-  }
+  await measureDbQuery('incrementUserPageCount', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const usersCollection = db.collection<UserRecord>('users');
+        const now = new Date();
+        await usersCollection.updateOne(
+          { email: normalizedEmail },
+          {
+            $inc: { pages_processed: pageCount },
+            $set: { updated_at: now },
+            $setOnInsert: {
+              email: normalizedEmail,
+              name: null,
+              image: null,
+              tier: 'free',
+              free_pages_limit: 10,
+              purchased_pages: 0,
+              created_at: now,
+            },
+          },
+          { upsert: true }
+        );
+        return;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB increment fallback to memory:', (err as Error).message);
+    }
+
+    const mem = memoryUsers.get(normalizedEmail);
+    if (mem) {
+      mem.pages_processed = (mem.pages_processed || 0) + pageCount;
+      mem.updated_at = new Date();
+    }
+  }, { email: normalizedEmail, pageCount });
 }
 
 export async function addPurchasedPages(
@@ -218,60 +269,68 @@ export async function addPurchasedPages(
   newTier?: UserRecord['tier']
 ): Promise<UserRecord> {
   const normalizedEmail = email.toLowerCase().trim();
-  const existingUser = await findOrCreateUser(normalizedEmail);
-  const currentPurchased = typeof existingUser.purchased_pages === 'number' ? existingUser.purchased_pages : 0;
-  const updatedTier = newTier || (existingUser.tier === 'free' ? 'starter' : existingUser.tier);
 
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const usersCollection = db.collection<UserRecord>('users');
-      await usersCollection.updateOne(
-        { email: normalizedEmail },
-        {
-          $inc: { purchased_pages: pageCount },
-          $set: {
-            tier: updatedTier,
-            updated_at: new Date(),
+  return await measureDbQuery('addPurchasedPages', async () => {
+    const existingUser = await findOrCreateUser(normalizedEmail);
+    const updatedTier = newTier || (existingUser.tier === 'free' ? 'starter' : existingUser.tier);
+
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const usersCollection = db.collection<UserRecord>('users');
+        const now = new Date();
+        const updated = await usersCollection.findOneAndUpdate(
+          { email: normalizedEmail },
+          {
+            $inc: { purchased_pages: pageCount },
+            $set: {
+              tier: updatedTier,
+              updated_at: now,
+            },
           },
-        },
-        { upsert: true }
-      );
-      const freshUser = await usersCollection.findOne({ email: normalizedEmail });
-      if (freshUser) {
-        memoryUsers.set(normalizedEmail, freshUser);
-        return freshUser;
-      }
-    }
-  } catch (err) {
-    console.warn('⚠️ MongoDB addPurchasedPages fallback to memory:', (err as Error).message);
-  }
+          { returnDocument: 'after', upsert: true }
+        );
 
-  const mem: UserRecord = {
-    ...existingUser,
-    purchased_pages: currentPurchased + pageCount,
-    tier: updatedTier,
-    updated_at: new Date(),
-  };
-  memoryUsers.set(normalizedEmail, mem);
-  return mem;
+        if (updated) {
+          const freshUser = updated as unknown as UserRecord;
+          memoryUsers.set(normalizedEmail, freshUser);
+          return freshUser;
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB addPurchasedPages fallback to memory:', (err as Error).message);
+    }
+
+    const currentPurchased = typeof existingUser.purchased_pages === 'number' ? existingUser.purchased_pages : 0;
+    const mem: UserRecord = {
+      ...existingUser,
+      purchased_pages: currentPurchased + pageCount,
+      tier: updatedTier,
+      updated_at: new Date(),
+    };
+    memoryUsers.set(normalizedEmail, mem);
+    return mem;
+  }, { email: normalizedEmail, pageCount });
 }
 
 export async function deleteUserAccount(email: string): Promise<boolean> {
   const normalizedEmail = email.toLowerCase().trim();
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const usersCollection = db.collection<UserRecord>('users');
-      const result = await usersCollection.deleteOne({ email: normalizedEmail });
-      memoryUsers.delete(normalizedEmail);
-      return result.deletedCount > 0;
-    }
-  } catch (err) {
-    console.warn('⚠️ MongoDB deleteUserAccount fallback to memory:', (err as Error).message);
-  }
 
-  const existed = memoryUsers.has(normalizedEmail);
-  memoryUsers.delete(normalizedEmail);
-  return existed;
+  return await measureDbQuery('deleteUserAccount', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const usersCollection = db.collection<UserRecord>('users');
+        const result = await usersCollection.deleteOne({ email: normalizedEmail });
+        memoryUsers.delete(normalizedEmail);
+        return result.deletedCount > 0;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB deleteUserAccount fallback to memory:', (err as Error).message);
+    }
+
+    const existed = memoryUsers.has(normalizedEmail);
+    memoryUsers.delete(normalizedEmail);
+    return existed;
+  }, { email: normalizedEmail });
 }

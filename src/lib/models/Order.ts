@@ -1,5 +1,7 @@
+import crypto from 'crypto';
 import { getDatabase } from '../mongodb';
 import { PricingPlan, OrderRecord, PRICING_PLANS } from '@/types/pricing';
+import { measureDbQuery } from '../db-logger';
 
 export type { PricingPlan, OrderRecord };
 export { PRICING_PLANS };
@@ -15,7 +17,10 @@ export async function createOrder(
   const normalizedEmail = userEmail.toLowerCase().trim();
   const plan = PRICING_PLANS.find((p) => p.id === planId) || PRICING_PLANS[0];
 
-  const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  const uniqueSuffix = crypto.randomBytes(6).toString('hex');
+  const orderId = `order_${Date.now()}_${uniqueSuffix}`;
+  const now = new Date().toISOString();
+
   const orderRecord: OrderRecord = {
     order_id: orderId,
     user_email: normalizedEmail,
@@ -26,23 +31,27 @@ export async function createOrder(
     pages_credited: plan.pages,
     status: 'created',
     payment_gateway: gateway,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: now,
+    updated_at: now,
   };
 
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const collection = db.collection<OrderRecord>('orders');
-      await collection.insertOne(orderRecord as unknown as import('mongodb').OptionalUnlessRequiredId<OrderRecord>);
-      return orderRecord;
+  return await measureDbQuery('createOrder', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const collection = db.collection<OrderRecord>('orders');
+        await collection.insertOne(
+          orderRecord as unknown as import('mongodb').OptionalUnlessRequiredId<OrderRecord>
+        );
+        return orderRecord;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB createOrder fallback to memory:', (err as Error).message);
     }
-  } catch (err) {
-    console.warn('⚠️ MongoDB createOrder fallback to memory:', (err as Error).message);
-  }
 
-  memoryOrders.set(orderId, orderRecord);
-  return orderRecord;
+    memoryOrders.set(orderId, orderRecord);
+    return orderRecord;
+  }, { order_id: orderId, user_email: normalizedEmail, plan_id: plan.id });
 }
 
 export async function updateOrderStatus(
@@ -60,89 +69,98 @@ export async function updateOrderStatus(
     ...(paymentDetails || {}),
   };
 
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const collection = db.collection<OrderRecord>('orders');
-      const result = await collection.findOneAndUpdate(
-        { order_id: orderId },
-        { $set: updateFields },
-        { returnDocument: 'after' }
-      );
-      if (result) return result as unknown as OrderRecord;
+  return await measureDbQuery('updateOrderStatus', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const collection = db.collection<OrderRecord>('orders');
+        const result = await collection.findOneAndUpdate(
+          { order_id: orderId },
+          { $set: updateFields },
+          { returnDocument: 'after' }
+        );
+        if (result) return result as unknown as OrderRecord;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB updateOrderStatus fallback to memory:', (err as Error).message);
     }
-  } catch (err) {
-    console.warn('⚠️ MongoDB updateOrderStatus fallback to memory:', (err as Error).message);
-  }
 
-  const existing = memoryOrders.get(orderId);
-  if (existing) {
-    const updated = { ...existing, ...updateFields };
-    memoryOrders.set(orderId, updated);
-    return updated;
-  }
-  return null;
+    const existing = memoryOrders.get(orderId);
+    if (existing) {
+      const updated = { ...existing, ...updateFields };
+      memoryOrders.set(orderId, updated);
+      return updated;
+    }
+    return null;
+  }, { order_id: orderId, status });
 }
 
 export async function getOrderById(orderId: string): Promise<OrderRecord | null> {
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const collection = db.collection<OrderRecord>('orders');
-      const order = await collection.findOne({ order_id: orderId });
-      if (order) return order as unknown as OrderRecord;
+  return await measureDbQuery('getOrderById', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const collection = db.collection<OrderRecord>('orders');
+        const order = await collection.findOne({ order_id: orderId });
+        if (order) return order as unknown as OrderRecord;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB getOrderById fallback to memory:', (err as Error).message);
     }
-  } catch (err) {
-    console.warn('⚠️ MongoDB getOrderById fallback to memory:', (err as Error).message);
-  }
 
-  return memoryOrders.get(orderId) || null;
+    return memoryOrders.get(orderId) || null;
+  }, { order_id: orderId });
 }
-
 
 export async function getUserOrders(userEmail: string): Promise<OrderRecord[]> {
   const normalizedEmail = userEmail.toLowerCase().trim();
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const collection = db.collection<OrderRecord>('orders');
-      return await collection
-        .find({ user_email: normalizedEmail })
-        .sort({ created_at: -1 })
-        .toArray();
-    }
-  } catch (err) {
-    console.warn('⚠️ MongoDB getUserOrders fallback to memory:', (err as Error).message);
-  }
 
-  const results: OrderRecord[] = [];
-  for (const order of memoryOrders.values()) {
-    if (order.user_email === normalizedEmail) {
-      results.push(order);
+  return await measureDbQuery('getUserOrders', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const collection = db.collection<OrderRecord>('orders');
+        return await collection
+          .find({ user_email: normalizedEmail })
+          .sort({ created_at: -1 })
+          .toArray();
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB getUserOrders fallback to memory:', (err as Error).message);
     }
-  }
-  return results.sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+    const results: OrderRecord[] = [];
+    for (const order of memoryOrders.values()) {
+      if (order.user_email === normalizedEmail) {
+        results.push(order);
+      }
+    }
+    return results.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }, { user_email: normalizedEmail });
 }
 
 export async function deleteAllUserOrders(userEmail: string): Promise<number> {
   const normalizedEmail = userEmail.toLowerCase().trim();
-  try {
-    const db = await getDatabase();
-    if (db) {
-      const collection = db.collection<OrderRecord>('orders');
-      const result = await collection.deleteMany({ user_email: normalizedEmail });
-      return result.deletedCount;
-    }
-  } catch (err) {
-    console.warn('⚠️ MongoDB deleteAllUserOrders fallback to memory:', (err as Error).message);
-  }
 
-  let count = 0;
-  for (const [orderId, order] of memoryOrders.entries()) {
-    if (order.user_email === normalizedEmail) {
-      memoryOrders.delete(orderId);
-      count++;
+  return await measureDbQuery('deleteAllUserOrders', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const collection = db.collection<OrderRecord>('orders');
+        const result = await collection.deleteMany({ user_email: normalizedEmail });
+        return result.deletedCount;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB deleteAllUserOrders fallback to memory:', (err as Error).message);
     }
-  }
-  return count;
+
+    let count = 0;
+    for (const [orderId, order] of memoryOrders.entries()) {
+      if (order.user_email === normalizedEmail) {
+        memoryOrders.delete(orderId);
+        count++;
+      }
+    }
+    return count;
+  }, { user_email: normalizedEmail });
 }

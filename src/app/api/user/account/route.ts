@@ -19,14 +19,12 @@ export async function DELETE() {
 
     const email = session.user.email;
 
-    // 1. Delete all user documents & extractions
-    const deletedDocsCount = await deleteAllUserDocuments(email);
-
-    // 2. Delete all orders & transaction history
-    const deletedOrdersCount = await deleteAllUserOrders(email);
-
-    // 3. Delete user account record
-    await deleteUserAccount(email);
+    // Concurrently delete all user documents, orders, and user account record
+    const [deletedDocsCount, deletedOrdersCount] = await Promise.all([
+      deleteAllUserDocuments(email),
+      deleteAllUserOrders(email),
+      deleteUserAccount(email),
+    ]);
 
     return NextResponse.json({
       success: true,
