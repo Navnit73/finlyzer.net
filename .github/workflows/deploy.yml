@@ -41,20 +41,30 @@ jobs:
 
       - name: Prepare deployment package
         run: |
+          set -e
+
           rm -rf deploy
           mkdir -p deploy/.next
 
+          # Copy Next.js standalone build
           cp -a .next/standalone/. deploy/
 
+          # Copy static assets
           cp -a .next/static deploy/.next/
 
+          # Copy public directory when available
           if [ -d public ]; then
             cp -a public deploy/
           fi
 
       - name: Create deployment archive
         run: |
+          set -e
+
           tar -czf frontend.tar.gz -C deploy .
+
+          echo "Deployment archive created:"
+          ls -lh frontend.tar.gz
 
       - name: Upload to VPS
         uses: appleboy/scp-action@v1
@@ -63,7 +73,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "frontend.tar.gz"
-          target: "/tmp/finlyzer-frontend-${{ github.sha }}.tar.gz"
+          target: "/tmp/finlyzer-frontend-${{ github.sha }}"
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
@@ -77,29 +87,68 @@ jobs:
           script: |
             set -e
 
-            RELEASE="/var/www/finlyzer/releases/${SHA}/frontend"
-            ARCHIVE="/tmp/finlyzer-frontend-${SHA}.tar.gz"
+            APP_ROOT="/var/www/finlyzer"
+            RELEASE="$APP_ROOT/releases/$SHA/frontend"
+            ARCHIVE="/tmp/finlyzer-frontend-$SHA/frontend.tar.gz"
 
+            echo "=========================================="
+            echo "Deploying Finlyzer Frontend"
+            echo "SHA: $SHA"
+            echo "=========================================="
+
+            # Verify uploaded archive exists
+            if [ ! -f "$ARCHIVE" ]; then
+              echo "ERROR: Deployment archive not found:"
+              echo "$ARCHIVE"
+
+              echo "Available files:"
+              ls -lah "/tmp/finlyzer-frontend-$SHA" || true
+
+              exit 1
+            fi
+
+            # Create release directory
             mkdir -p "$RELEASE"
 
+            # Extract deployment package
+            echo "Extracting deployment package..."
             tar -xzf "$ARCHIVE" -C "$RELEASE"
 
+            # Verify standalone server exists
+            if [ ! -f "$RELEASE/server.js" ]; then
+              echo "ERROR: server.js not found in release"
+              find "$RELEASE" -maxdepth 2 -type f | head -50
+              exit 1
+            fi
+
+            # Connect production environment
             ln -sfn \
-              /var/www/finlyzer/shared/frontend.env \
+              "$APP_ROOT/shared/frontend.env" \
               "$RELEASE/.env.production"
 
+            # Update current release symlink
             ln -sfn \
               "$RELEASE" \
-              /var/www/finlyzer/current-frontend
+              "$APP_ROOT/current-frontend"
 
-            cd /var/www/finlyzer
-
+            # Reload PM2 application
+            echo "Reloading PM2..."
             pm2 reload finlyzer-frontend --update-env
 
+            # Save PM2 process list
             pm2 save
 
-            rm -f "$ARCHIVE"
+            # Cleanup uploaded archive
+            rm -rf "/tmp/finlyzer-frontend-$SHA"
 
-            echo "Frontend deployed successfully: $SHA"
+            # Remove old releases, keep latest 5
+            cd "$APP_ROOT/releases"
+
+            ls -1dt */ 2>/dev/null | tail -n +6 | xargs -r rm -rf
+
+            echo "=========================================="
+            echo "Frontend deployed successfully"
+            echo "Release: $RELEASE"
+            echo "=========================================="
 
             pm2 status
