@@ -104,7 +104,7 @@ export default function AdminJobInspectModal({
           </div>
         </div>
 
-        {/* Tab Switcherh*/}
+        {/* Tab Switcher*/}
         <div className="px-6 pt-3 border-b border-[var(--color-border)] flex items-center gap-4 text-xs font-bold">
           <button
             onClick={() => setActiveTab('extraction')}
