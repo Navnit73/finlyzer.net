@@ -6,7 +6,7 @@ This setup uses **GitHub Actions** to build, test, and bundle your Next.js stand
 
 ---
 
-## 🏗️ Architecture & Fail-Safe Strategy
+## 🏗️ Architecture & Fail-Safe Strategyy
 
 ```
 [ Git Push to main ]
