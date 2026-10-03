@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://finlyzer.net'),
   title: "Finlyzer — Financial Analysis & Valuation Tools Hub",
   description: "High-contrast, AI-powered financial tool hub for DCF modeling, statement analysis, ratio auditing, and portfolio intelligence.",
 };

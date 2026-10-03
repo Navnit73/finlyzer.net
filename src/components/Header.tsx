@@ -37,6 +37,20 @@ export default function Header() {
               </Link>
             </div>
 
+            {/* Center / Navigation Links (Guest) */}
+            {!isLoggedIn && (
+              <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
+                <Link href="/convert" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
+                  <span>All Bank Converters</span>
+                </Link>
+                <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                  <span>Pricing</span>
+                </Link>
+              </div>
+            )}
+
             {/* Center / Navigation Links (Authenticated Only) */}
             {isLoggedIn && (
               <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
@@ -45,9 +59,9 @@ export default function Header() {
                   <span>Dashboard</span>
                 </Link>
 
-                <Link href="/" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" />
-                  <span>OCR Converter</span>
+                <Link href="/convert" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
+                  <span>Converters Hub</span>
                 </Link>
 
                 <Link href="/documents" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
