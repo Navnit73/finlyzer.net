@@ -23,6 +23,7 @@ import {
   PanelLeftOpen,
   X,
 } from 'lucide-react';
+import BrandLogo from '../BrandLogo';
 
 interface AdminSidebarProps {
   isCollapsed?: boolean;
@@ -157,24 +158,13 @@ export default function AdminSidebar({
         <div className={`h-16 flex items-center border-b border-[var(--color-border)] px-4 shrink-0 ${
           isCollapsed ? 'justify-center' : 'justify-between'
         }`}>
-          <Link
-            href="/"
+          <BrandLogo
+            size="md"
+            showText={!isCollapsed}
+            tag="Admin"
             onClick={onCloseMobile}
-            className="flex items-center gap-2.5 text-lg font-black tracking-tight text-[var(--color-ink)] hover:opacity-90 transition-opacity"
-            title="Finlyzer Admin"
-          >
-            <span className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-xs shrink-0">
-              <TrendingUp className="w-4 h-4 stroke-[2.5]" />
-            </span>
-            {!isCollapsed && (
-              <span className="flex items-center truncate">
-                Fin<span className="text-[var(--color-ink)]">lyzer</span>
-                <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] rounded-md">
-                  Admin
-                </span>
-              </span>
-            )}
-          </Link>
+            textClassName="!text-lg"
+          />
 
           {/* Desktop Collapse Button */}
           {onToggleCollapse && !onCloseMobile && (

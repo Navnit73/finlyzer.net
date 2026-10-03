@@ -440,8 +440,9 @@ export default function DashboardOverviewPage() {
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <h2 className="text-lg font-black text-[var(--color-ink)] tracking-tight">
-                    Recent Billing Invoices
+                  <h2 className="text-lg font-black text-[var(--color-ink)] tracking-tight flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-[var(--media-pink)]" />
+                    <span>Recent Billing Invoices</span>
                   </h2>
                   <p className="text-xs text-[var(--color-text-secondary)]">
                     Latest page package purchases.

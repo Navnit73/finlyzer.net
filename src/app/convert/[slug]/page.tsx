@@ -63,10 +63,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: 'website',
       images: [
         {
-          url: '/og-image.png',
+          url: '/og_image.webp',
           width: 1200,
           height: 630,
           alt: page.title,
+          type: 'image/webp',
         },
       ],
     },
@@ -74,6 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: 'summary_large_image',
       title: page.metaTitle,
       description: page.metaDescription,
+      images: ['/og_image.webp'],
     },
   };
 }

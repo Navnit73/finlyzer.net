@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { TrendingUp, ShieldCheck, Sparkles, Lock } from "lucide-react";
+import { ShieldCheck, Sparkles, Lock } from "lucide-react";
+import BrandLogo from "./BrandLogo";
 
 export default function Footer() {
   return (
@@ -9,16 +10,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Col 1: Brand Info */}
           <div className="space-y-3">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-lg font-black text-[var(--color-ink)] hover:opacity-90 transition-opacity"
-              aria-label="Finlyzer Home"
-            >
-              <span className="w-7 h-7 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-xs">
-                <TrendingUp className="w-4 h-4 stroke-[2.5]" />
-              </span>
-              <span>Finlyzer</span>
-            </Link>
+            <BrandLogo size="sm" textClassName="!text-lg" />
             <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
               AI-powered financial statement extraction, bank statement OCR, and balance reconciliation engine. Built for accountants, SMBs, and financial analysts.
             </p>

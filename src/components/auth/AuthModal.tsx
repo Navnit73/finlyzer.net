@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { signIn } from 'next-auth/react';
 import { Sparkles, X, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useIsMounted } from '@/lib/useIsMounted';
+import BrandLogo from '../BrandLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -77,7 +78,7 @@ export default function AuthModal({
   const modalContent = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -92,10 +93,13 @@ export default function AuthModal({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Top Feature Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-xs font-bold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>FREE INSTANT ACCESS</span>
+        {/* Top Header: Brand Logo & Pill */}
+        <div className="flex items-center justify-between gap-3 pr-8">
+          <BrandLogo size="sm" href={null} />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-[11px] font-bold">
+            <Sparkles className="w-3 h-3" />
+            <span>FREE ACCESS</span>
+          </div>
         </div>
 
         {/* Title & Description */}

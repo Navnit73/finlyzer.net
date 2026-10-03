@@ -21,6 +21,7 @@ import {
 import { OrderRecord } from '@/types/pricing';
 import AuthModal from '@/components/auth/AuthModal';
 import { formatUSD } from '@/lib/format';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function InvoicesBillingPage() {
   const { data: session, status } = useSession();
@@ -295,16 +296,21 @@ export default function InvoicesBillingPage() {
             </button>
 
             {/* Receipt Header */}
-            <div className="space-y-1">
-              <span className="badge badge-sm bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-black text-[10px] rounded-lg">
-                Official Payment Receipt
-              </span>
-              <h3 className="text-xl font-black text-[var(--color-ink)]">
-                Finlyzer Invoice Summary
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary)] font-mono">
-                Order Reference: {selectedReceipt.order_id}
-              </p>
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] pb-4">
+              <div className="space-y-1">
+                <span className="badge badge-sm bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-black text-[10px] rounded-lg">
+                  Official Payment Receipt
+                </span>
+                <h3 className="text-xl font-black text-[var(--color-ink)]">
+                  Payment Receipt
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary)] font-mono">
+                  Order Reference: {selectedReceipt.order_id}
+                </p>
+              </div>
+              <div className="shrink-0 pr-6">
+                <BrandLogo size="sm" showText={false} href={null} />
+              </div>
             </div>
 
             {/* Receipt Body */}

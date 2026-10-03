@@ -18,12 +18,22 @@ export const metadata: Metadata = {
     siteName: 'Finlyzer',
     type: 'website',
     locale: 'en_US',
+    images: [
+      {
+        url: '/og_image.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Finlyzer — Turn Bank Statements into Clean Data (Excel, CSV, QuickBooks)',
+        type: 'image/webp',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzer',
     description:
       'Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero with instant running-balance audit.',
+    images: ['/og_image.webp'],
   },
 };
 
@@ -48,7 +58,7 @@ const jsonLdGraph = {
       '@id': 'https://finlyzers.com/#organization',
       name: 'Finlyzer',
       url: 'https://finlyzers.com',
-      logo: 'https://finlyzers.com/favicon.ico',
+      logo: 'https://finlyzers.com/logo.png',
       description: 'Automated financial document OCR and bank statement conversion platform.',
     },
     {

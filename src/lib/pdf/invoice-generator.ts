@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { OrderRecord } from '@/types/pricing';
 
@@ -36,8 +38,27 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   currentY -= 32;
 
   // 2. Header: Company Logo & Document Title
+  let logoOffset = 0;
+  try {
+    const logoPath = path.join(process.cwd(), 'public', 'logo.png');
+    if (fs.existsSync(logoPath)) {
+      const logoBytes = fs.readFileSync(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoSize = 30;
+      page.drawImage(logoImage, {
+        x: margin,
+        y: currentY - 4,
+        width: logoSize,
+        height: logoSize,
+      });
+      logoOffset = logoSize + 10;
+    }
+  } catch {
+    logoOffset = 0;
+  }
+
   page.drawText('Finlyzer', {
-    x: margin,
+    x: margin + logoOffset,
     y: currentY,
     size: 24,
     font: boldFont,
@@ -45,7 +66,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   });
 
   page.drawText('.net', {
-    x: margin + 92,
+    x: margin + logoOffset + 92,
     y: currentY,
     size: 24,
     font: regularFont,

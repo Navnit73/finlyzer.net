@@ -336,19 +336,25 @@ export default function DocumentsVaultPage() {
                 <button
                   key={type}
                   onClick={() => setActiveFilter(type)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                     activeFilter === type
                       ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
                       : 'bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[var(--color-border)] border border-[var(--color-border)]'
                   }`}
                 >
-                  {type === 'all'
-                    ? `All (${documents.length})`
-                    : type === 'bank_statement'
-                    ? `Bank Statements (${totalBankStatements})`
-                    : type === 'invoice'
-                    ? `Invoices (${totalInvoices})`
-                    : `Receipts (${totalReceipts})`}
+                  {type === 'bank_statement' && <Building className="w-3.5 h-3.5" />}
+                  {type === 'invoice' && <Receipt className="w-3.5 h-3.5" />}
+                  {type === 'receipt' && <FileCheck2 className="w-3.5 h-3.5" />}
+                  {type === 'all' && <Layers className="w-3.5 h-3.5" />}
+                  <span>
+                    {type === 'all'
+                      ? `All (${documents.length})`
+                      : type === 'bank_statement'
+                      ? `Bank Statements (${totalBankStatements})`
+                      : type === 'invoice'
+                      ? `Invoices (${totalInvoices})`
+                      : `Receipts (${totalReceipts})`}
+                  </span>
                 </button>
               ))}
             </div>
@@ -408,14 +414,17 @@ export default function DocumentsVaultPage() {
                           <span className="font-black text-sm text-[var(--color-ink)]">
                             {doc.filename}
                           </span>
-                          <span className={`badge badge-sm font-bold uppercase text-[9px] rounded-lg border-none ${
+                          <span className={`badge badge-sm font-bold uppercase text-[9px] rounded-lg inline-flex items-center gap-1 ${
                             isBank
                               ? 'bg-[var(--media-blue)]/20 text-[var(--color-ink)] border border-[var(--media-blue)]/40'
                               : isInvoice
                               ? 'bg-[var(--media-violet)]/20 text-[var(--color-ink)] border border-[var(--media-violet)]/40'
                               : 'bg-[var(--media-pink)]/20 text-[var(--color-ink)] border border-[var(--media-pink)]/40'
                           }`}>
-                            {doc.document_type.replace('_', ' ')}
+                            {isBank && <Building className="w-2.5 h-2.5" />}
+                            {isInvoice && <Receipt className="w-2.5 h-2.5" />}
+                            {!isBank && !isInvoice && <FileCheck2 className="w-2.5 h-2.5" />}
+                            <span>{doc.document_type.replace('_', ' ')}</span>
                           </span>
                           <span className="text-[11px] text-[var(--color-text-secondary)] font-mono">
                             {doc.pages || 1} {doc.pages === 1 ? 'page' : 'pages'}

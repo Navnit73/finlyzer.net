@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
@@ -23,6 +24,7 @@ import {
 import UserMenu from './auth/UserMenu';
 import HistoryDrawer from './ocr/HistoryDrawer';
 import AuthModal from './auth/AuthModal';
+import BrandLogo from './BrandLogo';
 
 export default function Header() {
   const router = useRouter();
@@ -59,18 +61,7 @@ export default function Header() {
           <nav className="flex items-center justify-between h-16 sm:h-20" aria-label="Main Navigation">
             {/* Brand Logo */}
             <div className="flex items-center">
-              <Link
-                href="/"
-                className="flex items-center gap-2.5 text-xl sm:text-2xl font-black tracking-tight text-[var(--color-ink)] hover:opacity-90 transition-opacity"
-                aria-label="Finlyzer - Home"
-              >
-                <span className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-xs">
-                  <TrendingUp className="w-5 h-5 stroke-[2.5]" />
-                </span>
-                <span className="flex items-center">
-                  Fin<span className="text-[var(--color-ink)]">lyzer</span>
-                </span>
-              </Link>
+              <BrandLogo size="lg" priority />
             </div>
 
             {/* Center / Navigation Links (Guest Desktop) */}
@@ -101,10 +92,12 @@ export default function Header() {
                 </Link>
 
                 <Link href="/documents" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <FolderLock className="w-3.5 h-3.5 text-[var(--media-blue)]" />
                   <span>Document Vault</span>
                 </Link>
 
                 <Link href="/invoices" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <Receipt className="w-3.5 h-3.5 text-[var(--media-pink)]" />
                   <span>Invoices</span>
                 </Link>
 
@@ -158,8 +151,8 @@ export default function Header() {
                       className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-bold text-sm transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center">
-                          <TrendingUp className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-[var(--color-surface)] border border-[var(--color-border)] p-1 flex items-center justify-center">
+                          <Image src="/logo.png" alt="Finlyzer Logo" width={24} height={24} className="w-full h-full object-contain" />
                         </div>
                         <span>Home &amp; Instant Extractor</span>
                       </div>

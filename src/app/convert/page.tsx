@@ -21,6 +21,31 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://finlyzers.com/convert',
   },
+  openGraph: {
+    title: 'Financial PDF & Bank Statement Converters Directory | Finlyzer',
+    description:
+      'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
+    url: 'https://finlyzers.com/convert',
+    siteName: 'Finlyzer',
+    type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/og_image.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Finlyzer Bank Converters Directory',
+        type: 'image/webp',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Financial PDF & Bank Statement Converters Directory | Finlyzer',
+    description:
+      'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
+    images: ['/og_image.webp'],
+  },
 };
 
 export default function ConvertersDirectoryPage() {

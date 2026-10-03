@@ -63,15 +63,30 @@ export const metadata: Metadata = {
     title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
     description:
       "Convert PDF bank statements to Excel, CSV, QuickBooks QBO, and Xero OFX with 99.8% precision, OCR, and automated balance reconciliation.",
+    images: [
+      {
+        url: "/og_image.webp",
+        width: 1200,
+        height: 630,
+        alt: "Finlyzer — AI Bank Statement to Excel, CSV & QuickBooks Converter",
+        type: "image/webp",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
     description:
       "Convert PDF bank statements to Excel, CSV, QuickBooks QBO, and Xero OFX with 99.8% precision, OCR, and automated balance reconciliation.",
+    images: ["/og_image.webp"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
 };
 
