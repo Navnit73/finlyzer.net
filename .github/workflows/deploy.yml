@@ -15,18 +15,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ---------------------------------------------------------
+      # CHECKOUT
+      # ---------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ---------------------------------------------------------
+      # NODE
+      # ---------------------------------------------------------
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
+      # ---------------------------------------------------------
+      # INSTALL
+      # ---------------------------------------------------------
       - name: Install dependencies
         run: npm ci --include=dev
 
+      # ---------------------------------------------------------
+      # BUILD
+      # ---------------------------------------------------------
       - name: Build
         env:
           NODE_ENV: production
@@ -39,42 +51,114 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: npm run build
 
+      # ---------------------------------------------------------
+      # PREPARE NEXT.JS STANDALONE DEPLOYMENT
+      # ---------------------------------------------------------
       - name: Prepare deployment package
         run: |
           set -e
 
+          echo "Preparing deployment package..."
+
           rm -rf deploy
           mkdir -p deploy/.next
 
-          # Copy Next.js standalone build
+          # Next.js standalone output
           cp -a .next/standalone/. deploy/
 
-          # Copy static assets
+          # Static files
           cp -a .next/static deploy/.next/
 
-          # Copy public directory when available
+          # Public assets
           if [ -d public ]; then
             cp -a public deploy/
           fi
 
+          echo ""
+          echo "=========================================="
+          echo "Deployment directory size"
+          echo "=========================================="
+
+          du -sh deploy
+
+          echo ""
+          echo "Largest directories/files:"
+          du -ah deploy | sort -hr | head -30
+
+      # ---------------------------------------------------------
+      # VERIFY SERVER.JS BEFORE CREATING ARCHIVE
+      # ---------------------------------------------------------
+      - name: Verify Next.js standalone build
+        run: |
+          set -e
+
+          if [ ! -f "deploy/server.js" ]; then
+            echo "ERROR: deploy/server.js was not found."
+            echo ""
+            echo "Deployment directory:"
+            find deploy -maxdepth 3 -type f | head -100
+            exit 1
+          fi
+
+          echo "server.js found:"
+          ls -lh deploy/server.js
+
+      # ---------------------------------------------------------
+      # CREATE ARCHIVE
+      # ---------------------------------------------------------
       - name: Create deployment archive
         run: |
           set -e
 
+          rm -f frontend.tar.gz
+
           tar -czf frontend.tar.gz -C deploy .
 
-          echo "Deployment archive created:"
+          echo ""
+          echo "=========================================="
+          echo "Deployment archive"
+          echo "=========================================="
+
           ls -lh frontend.tar.gz
 
+          ARCHIVE_SIZE=$(stat -c%s frontend.tar.gz)
+
+          echo "Archive size: ${ARCHIVE_SIZE} bytes"
+
+          # Safety check: fail if archive is larger than 1 GB
+          if [ "$ARCHIVE_SIZE" -gt 1073741824 ]; then
+            echo "ERROR: frontend.tar.gz is larger than 1 GB."
+            echo "Reduce the deployment package before uploading."
+            exit 1
+          fi
+
+      # ---------------------------------------------------------
+      # UPLOAD TO VPS
+      # ---------------------------------------------------------
       - name: Upload to VPS
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+
           source: "frontend.tar.gz"
+
+          # IMPORTANT:
+          # scp-action target MUST be a directory.
           target: "/tmp/finlyzer-frontend-${{ github.sha }}"
 
+          # SSH connection timeout
+          timeout: 60s
+
+          # Maximum SCP execution time
+          command_timeout: 10m
+
+          debug: true
+
+      # ---------------------------------------------------------
+      # DEPLOY ON VPS
+      # ---------------------------------------------------------
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         env:
@@ -83,72 +167,206 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+
           envs: SHA
+
+          timeout: 60s
+          command_timeout: 10m
+
+          debug: true
+
           script: |
             set -e
 
             APP_ROOT="/var/www/finlyzer"
+
             RELEASE="$APP_ROOT/releases/$SHA/frontend"
-            ARCHIVE="/tmp/finlyzer-frontend-$SHA/frontend.tar.gz"
 
+            UPLOAD_DIR="/tmp/finlyzer-frontend-$SHA"
+
+            ARCHIVE="$UPLOAD_DIR/frontend.tar.gz"
+
+            echo ""
             echo "=========================================="
-            echo "Deploying Finlyzer Frontend"
-            echo "SHA: $SHA"
+            echo "FINLYZER FRONTEND DEPLOYMENT"
             echo "=========================================="
 
-            # Verify uploaded archive exists
+            echo "SHA:"
+            echo "$SHA"
+
+            echo ""
+            echo "Upload directory:"
+            echo "$UPLOAD_DIR"
+
+            echo ""
+            echo "Release directory:"
+            echo "$RELEASE"
+
+            # ---------------------------------------------------
+            # VERIFY UPLOAD DIRECTORY
+            # ---------------------------------------------------
+
+            if [ ! -d "$UPLOAD_DIR" ]; then
+              echo "ERROR: Upload directory does not exist:"
+              echo "$UPLOAD_DIR"
+
+              echo ""
+              echo "Current /tmp contents:"
+              ls -lah /tmp
+
+              exit 1
+            fi
+
+            # ---------------------------------------------------
+            # VERIFY ARCHIVE
+            # ---------------------------------------------------
+
             if [ ! -f "$ARCHIVE" ]; then
-              echo "ERROR: Deployment archive not found:"
+              echo "ERROR: Deployment archive does not exist:"
               echo "$ARCHIVE"
 
-              echo "Available files:"
-              ls -lah "/tmp/finlyzer-frontend-$SHA" || true
+              echo ""
+              echo "Upload directory contents:"
+              ls -lah "$UPLOAD_DIR"
 
               exit 1
             fi
 
-            # Create release directory
+            echo ""
+            echo "Archive found:"
+            ls -lh "$ARCHIVE"
+
+            # ---------------------------------------------------
+            # CREATE RELEASE DIRECTORY
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Creating release directory..."
+
             mkdir -p "$RELEASE"
 
-            # Extract deployment package
-            echo "Extracting deployment package..."
+            # ---------------------------------------------------
+            # EXTRACT
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Extracting deployment archive..."
+
             tar -xzf "$ARCHIVE" -C "$RELEASE"
 
-            # Verify standalone server exists
+            # ---------------------------------------------------
+            # VERIFY SERVER.JS
+            # ---------------------------------------------------
+
             if [ ! -f "$RELEASE/server.js" ]; then
-              echo "ERROR: server.js not found in release"
-              find "$RELEASE" -maxdepth 2 -type f | head -50
+              echo "ERROR: server.js not found after extraction."
+
+              echo ""
+              echo "Release contents:"
+              find "$RELEASE" -maxdepth 3 -type f | head -100
+
               exit 1
             fi
 
-            # Connect production environment
+            echo ""
+            echo "server.js verified:"
+            ls -lh "$RELEASE/server.js"
+
+            # ---------------------------------------------------
+            # VERIFY SHARED ENV
+            # ---------------------------------------------------
+
+            if [ ! -f "$APP_ROOT/shared/frontend.env" ]; then
+              echo "ERROR: Missing shared frontend environment file:"
+              echo "$APP_ROOT/shared/frontend.env"
+
+              exit 1
+            fi
+
+            # ---------------------------------------------------
+            # LINK ENVIRONMENT
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Linking production environment..."
+
             ln -sfn \
               "$APP_ROOT/shared/frontend.env" \
               "$RELEASE/.env.production"
 
-            # Update current release symlink
+            # ---------------------------------------------------
+            # UPDATE CURRENT RELEASE
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Updating current-frontend symlink..."
+
             ln -sfn \
               "$RELEASE" \
               "$APP_ROOT/current-frontend"
 
-            # Reload PM2 application
+            # ---------------------------------------------------
+            # VERIFY SYMLINK
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Current frontend:"
+            readlink -f "$APP_ROOT/current-frontend"
+
+            # ---------------------------------------------------
+            # PM2
+            # ---------------------------------------------------
+
+            echo ""
             echo "Reloading PM2..."
+
             pm2 reload finlyzer-frontend --update-env
 
-            # Save PM2 process list
+            # ---------------------------------------------------
+            # SAVE PM2
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Saving PM2 process list..."
+
             pm2 save
 
-            # Cleanup uploaded archive
-            rm -rf "/tmp/finlyzer-frontend-$SHA"
+            # ---------------------------------------------------
+            # CLEAN TEMP UPLOAD
+            # ---------------------------------------------------
 
-            # Remove old releases, keep latest 5
+            echo ""
+            echo "Cleaning temporary upload..."
+
+            rm -rf "$UPLOAD_DIR"
+
+            # ---------------------------------------------------
+            # KEEP ONLY 5 RELEASES
+            # ---------------------------------------------------
+
+            echo ""
+            echo "Cleaning old releases..."
+
             cd "$APP_ROOT/releases"
 
             ls -1dt */ 2>/dev/null | tail -n +6 | xargs -r rm -rf
 
+            # ---------------------------------------------------
+            # FINAL STATUS
+            # ---------------------------------------------------
+
+            echo ""
             echo "=========================================="
-            echo "Frontend deployed successfully"
-            echo "Release: $RELEASE"
+            echo "DEPLOYMENT SUCCESSFUL"
             echo "=========================================="
 
+            echo "Release:"
+            echo "$RELEASE"
+
+            echo ""
+            echo "Current:"
+            readlink -f "$APP_ROOT/current-frontend"
+
+            echo ""
+            echo "PM2 status:"
             pm2 status
