@@ -1,35 +1,38 @@
-# Finlyzer VPS CI/CD Deployment Guide
+# Finlyzers VPS CI/CD Deployment Guide (PM2 Standalone)
 
-This guide details how your application is automatically built on GitHub Actions and deployed to your VPS with zero VPS build overhead, fast rollouts, and **automated fail-safe rollback**.
+This setup uses **GitHub Actions** to build, test, and bundle your Next.js standalone application in the cloud, then transfers only the pre-built bundle to your VPS where **PM2** runs it.
+
+**Zero building happens on the VPS**, saving CPU and RAM.
 
 ---
 
 ## 🏗️ Architecture & Fail-Safe Strategy
 
 ```
-[ Git Push (main) ]
+[ Git Push to main ]
          │
          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. GitHub Actions Cloud Runner (Build Stage)                │
 │    - Runs `npm ci`                                          │
-│    - Runs `npm run lint`                                    │
+│    - Runs `npm run lint` & `npx tsc --noEmit`               │
 │    - Runs `npm run build` (Next.js Standalone Build)        │
-│    - Multi-stage Docker packaging                          │
+│    - Packages `release.tar.gz` (standalone + static assets) │
 └────────────────────────┬────────────────────────────────────┘
                          │
         ┌────────────────┴────────────────┐
    [Build Fails]                     [Build Passes]
         │                                 │
         ▼                                 ▼
-⛔ Workflow STOPS IMMEDIATELY!      Pushes image to GHCR (ghcr.io)
+⛔ Workflow STOPS IMMEDIATELY!      Uploads `release.tar.gz` to VPS
 VPS is NEVER touched.                     │
 Previous version on VPS remains live!     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 2. VPS Deployment via SSH                                   │
-│    - Pulls new pre-built image (zero build load on VPS CPU) │
-│    - Restarts container with `docker compose up -d`         │
-│    - Executes automated Health Check against `/api/health`   │
+│ 2. VPS Deployment via SSH (Zero Build Load)                 │
+│    - Extracts to `/var/www/finlyzers/releases/release-<sha>`│
+│    - Switches `/var/www/finlyzers/current` symlink          │
+│    - Reloads PM2 (`pm2 reload finlyzers`)                   │
+│    - Runs Automated Health Check on `/api/health`           │
 └────────────────────────┬────────────────────────────────────┘
                          │
         ┌────────────────┴────────────────┐
@@ -37,8 +40,8 @@ Previous version on VPS remains live!     ▼
         │                                 │
         ▼                                 ▼
 🔄 AUTOMATIC ROLLBACK               ✅ Deployment Complete!
-Rolls back to previous container     Prunes old images.
-image and sends failure alert.
+Reverts symlink to previous          Keeps latest 5 releases.
+working release and reloads PM2.
 ```
 
 ---
@@ -48,55 +51,44 @@ image and sends failure alert.
 Go to your GitHub Repository:
 `Settings` ➔ `Secrets and variables` ➔ `Actions` ➔ `New repository secret`
 
-Add the following 4 secrets:
+Add these 4 secrets:
 
 | Secret Name   | Description                             | Example                                   |
 | :------------ | :-------------------------------------- | :---------------------------------------- |
 | `VPS_HOST`    | IP address or domain of your VPS        | `194.163.150.22`                          |
-| `VPS_USER`    | SSH user (typically `root` or `ubuntu`) | `root`                                    |
+| `VPS_USER`    | SSH user (e.g. `root` or `ubuntu`)      | `root`                                    |
 | `VPS_SSH_KEY` | Private SSH Key (OpenSSH format)        | `-----BEGIN OPENSSH PRIVATE KEY----- ...` |
 | `VPS_PORT`    | SSH Port (default: 22)                  | `22`                                      |
 
-> [!TIP]
-> **Generating a dedicated Deploy SSH Key on your local machine:**
->
-> ```bash
-> ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github_deploy
-> ```
->
-> - Add the **Public Key** (`~/.ssh/github_deploy.pub`) to your VPS: `~/.ssh/authorized_keys`
-> - Add the **Private Key** (`~/.ssh/github_deploy`) content as the GitHub Secret `VPS_SSH_KEY`.
-
 ---
 
-## 🖥️ Step 2: One-Time VPS Setup
+## 🖥️ Step 2: One-Time VPS Setup (Node.js + PM2)
 
-Run these commands on your VPS (Ubuntu/Debian) to prepare Docker and the deploy directory:
+Run these commands on your VPS (Ubuntu/Debian):
 
-### 1. Install Docker & Docker Compose Plugin
-
+### 1. Install Node.js 20 & PM2
 ```bash
-# Update and install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+# Install Node.js 20 LTS
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
 
-# Verify Docker is running
-docker --version
-docker compose version
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Enable PM2 to auto-start on server boot
+pm2 startup
 ```
 
-### 2. Create the Deployment Directory & Environment File
-
+### 2. Create the App Directory & `.env`
 ```bash
-sudo mkdir -p /var/www/finlyzer
-cd /var/www/finlyzer
+sudo mkdir -p /var/www/finlyzers/releases
+cd /var/www/finlyzers
 
-# Create your production .env file
+# Create your production environment file
 sudo nano .env
 ```
 
-Paste your production environment variables into `/var/www/finlyzer/.env`:
-
+Paste your production environment variables into `/var/www/finlyzers/.env`:
 ```env
 PORT=3000
 NODE_ENV=production
@@ -119,19 +111,14 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 
 ## 🌐 Step 3: Nginx & SSL Setup (Reverse Proxy to Port 3000)
 
-To serve `https://finlyzers.com` with automatic SSL certificates:
-
 ### 1. Install Nginx and Certbot
-
 ```bash
 sudo apt update
 sudo apt install -y nginx certbot python3-certbot-nginx
 ```
 
 ### 2. Configure Nginx
-
-Create `/etc/nginx/sites-available/finlyzer`:
-
+Create `/etc/nginx/sites-available/finlyzers`:
 ```nginx
 server {
     server_name finlyzers.com www.finlyzers.com;
@@ -148,21 +135,19 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Increase upload size for PDF / Statement uploads (e.g. 50MB)
+    # Support up to 50MB statement uploads
     client_max_body_size 50M;
 }
 ```
 
 Enable site and restart Nginx:
-
 ```bash
-sudo ln -s /etc/nginx/sites-available/finlyzer /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/finlyzers /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
 ### 3. Generate Free SSL Certificate
-
 ```bash
 sudo certbot --nginx -d finlyzers.com -d www.finlyzers.com
 ```
@@ -171,15 +156,14 @@ sudo certbot --nginx -d finlyzers.com -d www.finlyzers.com
 
 ## 🚀 Step 4: How Deployment Works
 
-Every time you push code to `main`:
-
+Every time you push code:
 ```bash
 git add .
-git commit -m "feat: updates"
+git commit -m "feat: new updates"
 git push origin main
 ```
 
-1. GitHub Actions runs `.github/workflows/deploy.yml`.
-2. All compilation, linting, and Docker packaging executes on GitHub's free runners.
-3. If successful, GitHub connects to your VPS and restarts the container safely.
-4. The workflow verifies `/api/health`. If it fails, it rolls back automatically and notifies you in GitHub Actions!
+1. GitHub Actions runs linting, type checks, and standalone compilation in GitHub's cloud.
+2. If build fails, GitHub Actions stops immediately and your live server is not touched.
+3. If build succeeds, it sends `release.tar.gz` to your VPS, switches the symlink `/var/www/finlyzers/current`, and reloads PM2.
+4. If health check fails on VPS, it automatically reverts to the previous release.
