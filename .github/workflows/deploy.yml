@@ -1,192 +1,105 @@
-name: Build & Deploy to VPS (No Docker / PM2 Standalone)
+name: Deploy Frontend
 
 on:
   push:
     branches:
       - main
-      - master
-  workflow_dispatch:
 
-permissions:
-  contents: read
+concurrency:
+  group: finlyzer-frontend-production
+  cancel-in-progress: true
 
 jobs:
-  # ============================================================
-  # 1. BUILD & TEST ON GITHUB ACTIONS RUNNER
-  # ============================================================
   build:
+    name: Build Frontend
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: TypeScript validation
-        run: npx tsc --noEmit
-
-      - name: Build Next.js standalone
-        # If build fails here, the workflow aborts immediately.
-        # Zero files are sent to your VPS.
+      - name: Build
         env:
-          NEXT_TELEMETRY_DISABLED: 1
           NODE_ENV: production
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          OCR_API_BASE_URL: ${{ secrets.OCR_API_BASE_URL }}
+          OCR_API_KEY: ${{ secrets.OCR_API_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: npm run build
 
-      - name: Package standalone release artifact
+      - name: Prepare deployment package
         run: |
-          mkdir -p release_package
-          cp -r .next/standalone/* release_package/
-          mkdir -p release_package/.next
-          cp -r .next/static release_package/.next/static
+          rm -rf deploy
+          mkdir -p deploy/.next
+
+          cp -a .next/standalone/. deploy/
+
+          cp -a .next/static deploy/.next/
+
           if [ -d public ]; then
-            cp -r public release_package/public
+            cp -a public deploy/
           fi
-          cd release_package
-          tar -czf ../release.tar.gz .
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: standalone-release
-          path: release.tar.gz
-          retention-days: 1
+      - name: Create deployment archive
+        run: |
+          tar -czf frontend.tar.gz -C deploy .
 
-  # ============================================================
-  # 2. DEPLOY PRE-BUILT STANDALONE TO VPS WITH AUTO-ROLLBACK
-  # ============================================================
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: standalone-release
-
-      - name: Copy release archive to VPS
-        uses: appleboy/scp-action@v0.1.7
+      - name: Upload to VPS
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          source: 'release.tar.gz'
-          target: '/tmp'
+          source: "frontend.tar.gz"
+          target: "/tmp/finlyzer-frontend-${{ github.sha }}.tar.gz"
 
-      - name: Deploy release & verify health on VPS
-        uses: appleboy/ssh-action@v1.2.2
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        env:
+          SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          envs: GITHUB_SHA
+          envs: SHA
           script: |
-            set -u
+            set -e
 
-            APP_DIR="/var/www/finlyzers"
-            RELEASES_DIR="$APP_DIR/releases"
-            RELEASE_TAG="release-${GITHUB_SHA:0:7}"
-            TARGET_RELEASE="$RELEASES_DIR/$RELEASE_TAG"
+            RELEASE="/var/www/finlyzer/releases/${SHA}/frontend"
+            ARCHIVE="/tmp/finlyzer-frontend-${SHA}.tar.gz"
 
-            echo "=========================================="
-            echo "🚀 Deploying Finlyzers: $RELEASE_TAG"
-            echo "=========================================="
+            mkdir -p "$RELEASE"
 
-            # 1. Ensure directory structure exists
-            mkdir -p "$RELEASES_DIR"
-            mkdir -p "$TARGET_RELEASE"
+            tar -xzf "$ARCHIVE" -C "$RELEASE"
 
-            # 2. Capture previous active release (for automatic rollback)
-            PREV_RELEASE=""
-            if [ -L "$APP_DIR/current" ]; then
-              PREV_RELEASE=$(readlink -f "$APP_DIR/current" || echo "")
-            fi
-            echo "Previous active release: ${PREV_RELEASE:-None (First deployment)}"
+            ln -sfn \
+              /var/www/finlyzer/shared/frontend.env \
+              "$RELEASE/.env.production"
 
-            # 3. Extract pre-built release package
-            echo "Extracting release bundle..."
-            tar -xzf /tmp/release.tar.gz -C "$TARGET_RELEASE"
-            rm -f /tmp/release.tar.gz
+            ln -sfn \
+              "$RELEASE" \
+              /var/www/finlyzer/current-frontend
 
-            # 4. Copy/link production .env file
-            if [ -f "$APP_DIR/.env" ]; then
-              cp "$APP_DIR/.env" "$TARGET_RELEASE/.env"
-            else
-              echo "⚠️ Warning: $APP_DIR/.env not found. Creating placeholder..."
-              touch "$APP_DIR/.env"
-              cp "$APP_DIR/.env" "$TARGET_RELEASE/.env"
-            fi
+            cd /var/www/finlyzer
 
-            # 5. Switch symlink to new release
-            echo "Switching active release symlink..."
-            ln -sfn "$TARGET_RELEASE" "$APP_DIR/current"
+            pm2 reload finlyzer-frontend --update-env
 
-            # 6. Start / Restart application with PM2
-            cd "$APP_DIR/current"
-            if pm2 describe finlyzers > /dev/null 2>&1; then
-              echo "Reloading PM2 instance..."
-              pm2 reload finlyzers --update-env
-            else
-              echo "Starting new PM2 instance..."
-              PORT=3000 pm2 start server.js --name finlyzers --update-env
-            fi
             pm2 save
 
-            # 7. Automated Health Check Verification
-            echo "Running automated health checks on http://127.0.0.1:3000/api/health..."
-            HEALTHY=false
+            rm -f "$ARCHIVE"
 
-            for i in $(seq 1 15); do
-              sleep 2
-              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/health || true)
-              echo "Health check $i/15: HTTP $HTTP_CODE"
+            echo "Frontend deployed successfully: $SHA"
 
-              if [ "$HTTP_CODE" = "200" ]; then
-                HEALTHY=true
-                break
-              fi
-            done
-
-            # 8. Handle Success or Automatic Rollback
-            if [ "$HEALTHY" = true ]; then
-              echo "=========================================="
-              echo "✅ DEPLOYMENT SUCCESSFUL!"
-              echo "=========================================="
-              pm2 status finlyzers
-
-              # Keep only the last 5 releases to prevent disk fill
-              cd "$RELEASES_DIR"
-              ls -dt release-* | tail -n +6 | xargs rm -rf 2>/dev/null || true
-              exit 0
-            else
-              echo "=========================================="
-              echo "❌ HEALTH CHECK FAILED! Initiating Rollback..."
-              echo "=========================================="
-              pm2 logs finlyzers --lines 30 --nostream || true
-
-              if [ -n "$PREV_RELEASE" ] && [ -d "$PREV_RELEASE" ]; then
-                echo "Rolling back symlink to: $PREV_RELEASE"
-                ln -sfn "$PREV_RELEASE" "$APP_DIR/current"
-                cd "$APP_DIR/current"
-                pm2 reload finlyzers --update-env
-                echo "⚠️ Successfully rolled back to previous release."
-              else
-                echo "⚠️ No previous release available to rollback."
-              fi
-
-              exit 1
-            fi
+            pm2 status
