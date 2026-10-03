@@ -34,8 +34,8 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'guest_doc_unlock',
     name: 'Guest Document Download Unlock',
-    price_usd: 4.99,
-    price_inr: 415,
+    price_usd: 10,
+    price_inr: 830,
     pages: 30,
     description: '1-time instant unlock to export statements between 11 and 30 pages.',
     features: [

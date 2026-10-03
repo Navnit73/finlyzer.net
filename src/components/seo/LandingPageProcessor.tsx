@@ -108,6 +108,7 @@ export default function LandingPageProcessor({ pageData }: LandingPageProcessorP
       formData.append('document_type', 'bank_statement');
       formData.append('language', 'en');
       formData.append('clean_with_ai', 'true');
+      formData.append('page_count', estimatedPages.toString());
 
       const pass = customPassword || pendingPassword;
       if (pass) {
@@ -124,14 +125,14 @@ export default function LandingPageProcessor({ pageData }: LandingPageProcessorP
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.requires_password) {
+        if (data.code === 'PASSWORD_REQUIRED' || data.requires_password) {
           setIsPasswordModalOpen(true);
           setIsUploading(false);
           setProgressStage('');
           return;
         }
 
-        if (res.status === 401 || data.auth_required) {
+        if (data.code === 'LOGIN_REQUIRED') {
           setIsAuthModalOpen(true);
           setIsUploading(false);
           setProgressStage('');
@@ -141,7 +142,20 @@ export default function LandingPageProcessor({ pageData }: LandingPageProcessorP
         throw new Error(data.detail || data.error || 'Failed to extract financial data');
       }
 
+      setProgressStage('Reconciliation complete! Redirecting to statement viewer...');
+
+      // Save to instant sessionStorage for fast initial render
+      if (data?.id && typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('doc_' + data.id, JSON.stringify(data));
+        } catch {}
+      }
+
       setCompletedResult(data);
+
+      if (data?.id) {
+        router.push(`/document/${data.id}`);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Extraction error. Please try again.';
       setErrorMessage(message);

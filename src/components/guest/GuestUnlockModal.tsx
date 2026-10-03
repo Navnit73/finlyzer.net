@@ -173,7 +173,7 @@ export default function GuestUnlockModal({
             <p className="text-[11px] text-[var(--color-text-secondary)] font-mono">{pageCount} pages parsed &bull; AI Reconciled</p>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-lg font-black text-[var(--color-ink)] font-mono">$4.99</span>
+            <span className="text-lg font-black text-[var(--color-ink)] font-mono">$10</span>
             <span className="text-[10px] text-[var(--color-text-secondary)] block">One-time fee</span>
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function GuestUnlockModal({
             ) : (
               <Lock className="w-4 h-4" />
             )}
-            <span>Pay $4.99 &amp; Unlock All Formats</span>
+            <span>Pay $10 &amp; Unlock All Formats</span>
             <ArrowRight className="w-4 h-4 ml-1" />
           </button>
         </div>

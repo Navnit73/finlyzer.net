@@ -48,7 +48,7 @@ export async function GET(
 
     // Guest Flow Download Policy Enforcements:
     // 1-10 pages: Free download
-    // 11-30 pages: Must be paid before downloading ($4.99 unlock)
+    // 11-30 pages: Must be paid before downloading ($10 unlock)
     // >30 pages: Requires registered account
     if (isGuestDoc) {
       const docPages = storedDoc.pages || 1;
@@ -62,13 +62,13 @@ export async function GET(
 
       if (docPages > 10 && !storedDoc.is_paid) {
         return errorResponse(
-          'Payment required to download statements with 11–30 pages ($4.99). Please unlock downloads to continue.',
+          'Payment required to download statements with 11–30 pages ($10). Please unlock downloads to continue.',
           402,
           'PAYMENT_REQUIRED',
           {
             document_id: storedDoc.id,
             pages: docPages,
-            price_usd: 4.99,
+            price_usd: 10,
           }
         );
       }

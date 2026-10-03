@@ -194,9 +194,7 @@ export default function GuestWorkspace() {
               100% Free Processing &amp; Instant Multi-Format Downloads.
             </p>
           </div>
-        </div>
-
-        {/* Tier 2: 11-30 Pages */}
+        </div>        {/* Tier 2: 11–30 Pages */}
         <div className="p-3.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-wider text-[var(--color-ink)] bg-[var(--color-surface-muted)] px-2 py-0.5 rounded-full border border-[var(--color-border)]">
@@ -207,7 +205,7 @@ export default function GuestWorkspace() {
           <div>
             <h4 className="text-xs sm:text-sm font-black text-[var(--color-ink)]">11–30 Pages</h4>
             <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5 leading-snug">
-              Free AI Reconciliation Preview. Unlock all 6 formats for $4.99.
+              Free AI Reconciliation Preview. Unlock all 6 formats for $10.
             </p>
           </div>
         </div>
@@ -326,9 +324,9 @@ export default function GuestWorkspace() {
               <div className="p-3.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center gap-3 text-xs text-[var(--color-ink)]">
                 <Lock className="w-5 h-5 text-[var(--color-ink)] shrink-0" />
                 <div>
-                  <p className="font-bold">11–30 Page Document — Free Preview &amp; $4.99 to Unlock Exports</p>
+                  <p className="font-bold">11–30 Page Document — Free Preview &amp; $10 to Unlock Exports</p>
                   <p className="text-[11px] text-[var(--color-text-secondary)]">
-                    You can process and preview full metrics for free. A $4.99 unlock pass enables all 6 download formats.
+                    You can process and preview full metrics for free. A $10 unlock pass enables all 6 download formats.
                   </p>
                 </div>
               </div>

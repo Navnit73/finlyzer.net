@@ -116,7 +116,7 @@ async function runGuestAuthFlowTests() {
   await test('Guest can create an unlock checkout order for 11-30 page document', async () => {
     const order = await createOrder('guest', 'guest_doc_unlock', 'razorpay');
     assert.ok(order.order_id);
-    assert.strictEqual(order.amount_usd, 4.99);
+    assert.strictEqual(order.amount_usd, 10);
     assert.strictEqual(order.status, 'created');
     unlockOrderId = order.order_id;
   });

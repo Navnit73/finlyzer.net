@@ -159,7 +159,7 @@ export default function ExportActionBar({
                 <span>Export Reconciled Statement</span>
                 {requiresUnlock ? (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-surface-muted)] text-[var(--color-ink)] border border-[var(--color-border)]">
-                    $4.99 Unlock Required
+                    $10 Unlock Required
                   </span>
                 ) : (
                   <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
@@ -169,7 +169,7 @@ export default function ExportActionBar({
               </h3>
               <p className="text-[11px] text-[var(--color-text-secondary)]">
                 {requiresUnlock
-                  ? 'This 11–30 page statement requires a $4.99 one-time unlock pass to export all 6 formats'
+                  ? 'This 11–30 page statement requires a $10 one-time unlock pass to export all 6 formats'
                   : 'Direct 1-click downloads with automatic account structure and formulas'}
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function ExportActionBar({
                 onClick={() => setIsUnlockModalOpen(true)}
                 className="btn-brand-primary !min-h-[32px] !h-[32px] !px-3.5 text-xs font-bold flex items-center gap-1.5 rounded-lg shadow-xs cursor-pointer"
               >
-                <span>Unlock All Exports ($4.99)</span>
+                <span>Unlock All Exports ($10)</span>
               </button>
             )}
 
@@ -251,7 +251,7 @@ export default function ExportActionBar({
                     {opt.name}
                   </p>
                   <p className="text-[10px] text-[var(--color-text-secondary)] truncate">
-                    {requiresUnlock ? 'Click to Unlock ($4.99)' : isSuccess ? 'Downloaded!' : opt.subtitle}
+                    {requiresUnlock ? 'Click to Unlock ($10)' : isSuccess ? 'Downloaded!' : opt.subtitle}
                   </p>
                 </div>
               </button>

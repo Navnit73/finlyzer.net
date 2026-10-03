@@ -6,7 +6,7 @@ import { errorResponse, successResponse, safeParseJson } from '@/lib/api-utils';
 
 /**
  * POST /api/guest/orders
- * Creates an instant guest unlock checkout order ($4.99) for an 11-30 page document.
+ * Creates an instant guest unlock checkout order ($10) for an 11-30 page document.
  */
 export async function POST(req: NextRequest) {
   try {
