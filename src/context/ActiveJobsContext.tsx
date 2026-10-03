@@ -84,12 +84,12 @@ export function ActiveJobsProvider({ children }: { children: React.ReactNode }) 
           saveToBrowserHistory({
             id: updated.documentId || updated.jobId,
             filename: updated.filename,
-            document_type: (updated.result?.document_type as any) || 'bank_statement',
+            document_type: (updated.result?.document_type as string) || 'bank_statement',
             pages: updated.totalPages || updated.result?.metadata?.pages || 1,
             created_at: updated.createdAt,
             status: 'success',
-            closing_balance: (updated.result?.extraction as any)?.closing_balance,
-            currency: (updated.result?.extraction as any)?.currency,
+            closing_balance: (updated.result?.extraction as Record<string, unknown>)?.closing_balance as number | undefined,
+            currency: (updated.result?.extraction as Record<string, unknown>)?.currency as string | undefined,
           });
         }
 

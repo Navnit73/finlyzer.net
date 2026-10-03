@@ -196,7 +196,7 @@ export default function InvoicesBillingPage() {
               <Receipt className="w-12 h-12 text-[var(--color-text-secondary)] mx-auto opacity-50" />
               <p className="font-bold text-sm text-[var(--color-ink)]">No Billing Invoices Found</p>
               <p className="text-xs text-[var(--color-text-secondary)] max-w-sm mx-auto">
-                You haven't purchased any credit packages yet. Top up your account starting from $10.
+                You haven&apos;t purchased any credit packages yet. Top up your account starting from $10.
               </p>
               <Link
                 href="/pricing"
