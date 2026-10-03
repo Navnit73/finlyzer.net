@@ -1,0 +1,179 @@
+name: Build & Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # =========================================================================
+  # 1. BUILD & TEST ON GITHUB (VPS does zero building)
+  # =========================================================================
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Test Next.js Build
+        # This guarantees that if the build fails, the pipeline aborts immediately
+        # and nothing is ever sent to the VPS.
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_ENV: production
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # =========================================================================
+  # 2. ROBUST DEPLOYMENT WITH AUTOMATIC ROLLBACK ON VPS
+  # =========================================================================
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: GITHUB_ACTOR,GITHUB_TOKEN,REGISTRY,IMAGE_NAME,GITHUB_SHA
+        # 1. Back up previous running image
+        # 2. Pull new container built on GitHub
+        # 3. Start container
+        # 4. Run automated health check loop
+        # 5. If health check fails -> Rollback to previous version automatically
+          script: |
+            set -e
+            DEPLOY_DIR="/var/www/finlyzer"
+            mkdir -p $DEPLOY_DIR
+            cd $DEPLOY_DIR
+
+            echo "=== Step 1: Logging in to GHCR on VPS ==="
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            echo "=== Step 2: Capturing Current Image (for rollback) ==="
+            PREV_IMAGE=$(docker inspect --format='{{.Config.Image}}' finlyzer-app 2>/dev/null || echo "")
+            echo "Current running image: ${PREV_IMAGE:-None (Initial deploy)}"
+
+            echo "=== Step 3: Pulling New Image ==="
+            NEW_IMAGE="ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA::7}"
+            docker pull $NEW_IMAGE || docker pull "ghcr.io/${{ github.repository }}:latest"
+
+            # Ensure docker-compose.yml exists in deployment dir
+            cat << 'EOF' > docker-compose.yml
+            services:
+              web:
+                image: ${IMAGE_NAME}
+                container_name: finlyzer-app
+                restart: unless-stopped
+                ports:
+                  - "${PORT:-3000}:3000"
+                env_file:
+                  - .env
+                environment:
+                  - NODE_ENV=production
+                  - PORT=3000
+                healthcheck:
+                  test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+                  interval: 5s
+                  timeout: 3s
+                  retries: 5
+                  start_period: 5s
+            EOF
+
+            # Ensure .env exists (create placeholder if first run)
+            if [ ! -f .env ]; then
+              echo "Creating initial .env placeholder..."
+              touch .env
+            fi
+
+            echo "=== Step 4: Starting New Version ==="
+            export IMAGE_NAME=$NEW_IMAGE
+            docker compose up -d --remove-orphans
+
+            echo "=== Step 5: Verifying Health Check (Automated Safe Switch) ==="
+            HEALTHY=false
+            for i in $(seq 1 12); do
+              sleep 3
+              CONTAINER_STATUS=$(docker inspect --format='{{json .State.Health.Status}}' finlyzer-app 2>/dev/null || echo '"unknown"')
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/health || true)
+              
+              echo "Check $i/12: Container health: $CONTAINER_STATUS | HTTP status: $HTTP_CODE"
+              
+              if [ "$HTTP_CODE" = "200" ] || [ "$CONTAINER_STATUS" = '"healthy"' ]; then
+                HEALTHY=true
+                break
+              fi
+            done
+
+            if [ "$HEALTHY" = true ]; then
+              echo "✅ Deployment Successful! New version is healthy and serving traffic."
+              docker image prune -f
+            else
+              echo "❌ Health check FAILED! Initiating automatic rollback..."
+              if [ -n "$PREV_IMAGE" ]; then
+                echo "Rolling back to previous working image: $PREV_IMAGE"
+                export IMAGE_NAME=$PREV_IMAGE
+                docker compose up -d --remove-orphans
+                echo "⚠️ Successfully restored previous working version."
+              else
+                echo "⚠️ No previous image to rollback to. Check container logs:"
+                docker logs --tail 50 finlyzer-app
+              fi
+              exit 1
+            fi

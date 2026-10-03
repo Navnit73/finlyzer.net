@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       plan_name: 'Guest 11–30 Page Unlock',
       prefill: {
         name: 'Guest User',
-        email: 'guest@finlyzer.net',
+        email: 'guest@finlyzers.com',
       },
       theme: {
         color: '#70F000',

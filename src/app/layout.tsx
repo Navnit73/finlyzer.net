@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://finlyzer.net'),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://finlyzers.com'),
   title: {
     default: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
     template: "%s | Finlyzer",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     "Wells Fargo statement to Excel",
     "HDFC bank statement to Excel",
   ],
-  authors: [{ name: "Finlyzer Team", url: "https://finlyzer.net" }],
+  authors: [{ name: "Finlyzer Team", url: "https://finlyzers.com" }],
   creator: "Finlyzer",
   publisher: "Finlyzer",
   formatDetection: {
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://finlyzer.net",
+    url: "https://finlyzers.com",
     siteName: "Finlyzer",
     title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
     description:

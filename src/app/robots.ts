@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/', '/superadmin/', '/dashboard/', '/invoices/'],
       },
     ],
-    sitemap: 'https://finlyzer.net/sitemap.xml',
+    sitemap: `${process.env.NEXTAUTH_URL || 'https://finlyzers.com'}/sitemap.xml`,
   };
 }

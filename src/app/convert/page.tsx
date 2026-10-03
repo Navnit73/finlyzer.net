@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description:
     'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
   alternates: {
-    canonical: 'https://finlyzer.net/convert',
+    canonical: 'https://finlyzers.com/convert',
   },
 };
 

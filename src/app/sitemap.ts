@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllLandingPages } from '@/lib/seo-markdown';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://finlyzer.net';
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://finlyzers.com';
   const pages = getAllLandingPages();
 
   const staticRoutes: MetadataRoute.Sitemap = [

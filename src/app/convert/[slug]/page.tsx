@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const canonicalUrl = `https://finlyzer.net/convert/${page.slug}`;
+  const canonicalUrl = `https://finlyzers.comm/convert/${page.slug}`;
 
   return {
     title: page.metaTitle,
@@ -94,9 +94,9 @@ export default async function SEOConverterPage({ params }: PageProps) {
     '@graph': [
       {
         '@type': 'WebApplication',
-        '@id': `https://finlyzer.net/convert/${page.slug}#app`,
+        '@id': `https://finlyzers.comm/convert/${page.slug}#app`,
         name: page.title,
-        url: `https://finlyzer.net/convert/${page.slug}`,
+        url: `https://finlyzers.comm/convert/${page.slug}`,
         description: page.metaDescription,
         applicationCategory: 'FinanceApplication',
         operatingSystem: 'All (Web Browser)',
@@ -156,19 +156,19 @@ export default async function SEOConverterPage({ params }: PageProps) {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://finlyzer.net',
+            item: 'https://finlyzers.comm',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: 'Converters',
-            item: 'https://finlyzer.net/convert',
+            item: 'https://finlyzers.comm/convert',
           },
           {
             '@type': 'ListItem',
             position: 3,
             name: page.title,
-            item: `https://finlyzer.net/convert/${page.slug}`,
+            item: `https://finlyzers.comm/convert/${page.slug}`,
           },
         ],
       },

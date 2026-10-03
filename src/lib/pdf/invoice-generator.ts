@@ -284,7 +284,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   });
 
   currentY -= 12;
-  page.drawText('Website: https://finlyzer.net  |  Email: billing@finlyzer.net  |  Security: 256-Bit SSL Encrypted', {
+  page.drawText('Website: https://finlyzers.com  |  Email: billing@finlyzers.com  |  Security: 256-Bit SSL Encrypted', {
     x: margin,
     y: currentY,
     size: 8,
