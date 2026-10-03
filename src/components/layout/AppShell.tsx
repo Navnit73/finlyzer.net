@@ -49,24 +49,13 @@ export default function AppShell({ children }: AppShellProps) {
     (status === 'authenticated' && !!session?.user) ||
     (status === 'loading' && cachedLoggedIn === true);
 
+  // For authenticated logged-in users, render AdminShell
   if (showAdminLayout) {
     return (
       <ActiveJobsProvider>
         <AdminShell>{children}</AdminShell>
         <ActiveJobFloatingTracker />
       </ActiveJobsProvider>
-    );
-  }
-
-  // If still resolving session and not cached as logged in, render neutral loading surface
-  if (status === 'loading' && cachedLoggedIn === null) {
-    return (
-      <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2.5">
-          <span className="loading loading-spinner loading-md text-[var(--color-brand)]"></span>
-          <span className="text-xs font-semibold text-[var(--color-text-secondary)]">Loading workspace...</span>
-        </div>
-      </div>
     );
   }
 

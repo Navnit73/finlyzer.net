@@ -16,8 +16,63 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://finlyzer.net'),
-  title: "Finlyzer — Financial Analysis & Valuation Tools Hub",
-  description: "High-contrast, AI-powered financial tool hub for DCF modeling, statement analysis, ratio auditing, and portfolio intelligence.",
+  title: {
+    default: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
+    template: "%s | Finlyzer",
+  },
+  description:
+    "Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX) with 99.8% precision, OCR, and automated balance reconciliation.",
+  keywords: [
+    "bank statement converter",
+    "convert PDF bank statement to Excel",
+    "bank statement to CSV",
+    "PDF to Excel converter",
+    "bank statement to QuickBooks",
+    "bank statement to QBO",
+    "bank statement to Xero OFX",
+    "scanned bank statement OCR",
+    "Chase bank statement to Excel",
+    "Bank of America statement to CSV",
+    "Wells Fargo statement to Excel",
+    "HDFC bank statement to Excel",
+  ],
+  authors: [{ name: "Finlyzer Team", url: "https://finlyzer.net" }],
+  creator: "Finlyzer",
+  publisher: "Finlyzer",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://finlyzer.net",
+    siteName: "Finlyzer",
+    title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
+    description:
+      "Convert PDF bank statements to Excel, CSV, QuickBooks QBO, and Xero OFX with 99.8% precision, OCR, and automated balance reconciliation.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
+    description:
+      "Convert PDF bank statements to Excel, CSV, QuickBooks QBO, and Xero OFX with 99.8% precision, OCR, and automated balance reconciliation.",
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 import { AuthProvider } from "@/components/auth/AuthProvider";

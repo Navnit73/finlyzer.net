@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
   CreditCard,
@@ -19,8 +20,10 @@ import { PRICING_PLANS, PricingPlan } from '@/types/pricing';
 import CheckoutModal from '@/components/dashboard/CheckoutModal';
 import AuthModal from '@/components/auth/AuthModal';
 
-export default function PricingPage() {
+function PricingContent() {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -40,7 +43,7 @@ export default function PricingPage() {
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
 
-  const fetchQuota = React.useCallback(async () => {
+  const fetchQuota = useCallback(async () => {
     if (!isLoggedIn) return;
     try {
       const res = await fetch('/api/user/quota');
@@ -53,7 +56,7 @@ export default function PricingPage() {
     }
   }, [isLoggedIn]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchQuota();
 
     const handleUpdate = () => {
@@ -68,12 +71,51 @@ export default function PricingPage() {
     };
   }, [fetchQuota]);
 
+  // Handle plan restoration after login redirect or search param
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
+    let targetPlanId = searchParams.get('plan');
+    if (!targetPlanId && typeof window !== 'undefined') {
+      targetPlanId =
+        localStorage.getItem('finlyzer_pending_plan') ||
+        sessionStorage.getItem('finlyzer_pending_plan');
+    }
+
+    if (targetPlanId) {
+      const matchedPlan = PRICING_PLANS.find((p) => p.id === targetPlanId);
+      if (matchedPlan) {
+        setSelectedPlan(matchedPlan);
+        setIsCheckoutOpen(true);
+      }
+
+      // Clear pending plan after successful recovery
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('finlyzer_pending_plan');
+          sessionStorage.removeItem('finlyzer_pending_plan');
+          const url = new URL(window.location.href);
+          url.searchParams.delete('plan');
+          url.searchParams.delete('checkout');
+          window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+        } catch {}
+      }
+    }
+  }, [status, searchParams]);
+
   const handleSelectPlan = (plan: PricingPlan) => {
+    setSelectedPlan(plan);
     if (!isLoggedIn) {
+      // Persist chosen plan so it restores seamlessly right after Google OAuth login
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('finlyzer_pending_plan', plan.id);
+          sessionStorage.setItem('finlyzer_pending_plan', plan.id);
+        } catch {}
+      }
       setIsAuthModalOpen(true);
       return;
     }
-    setSelectedPlan(plan);
     setIsCheckoutOpen(true);
   };
 
@@ -142,12 +184,15 @@ export default function PricingPage() {
         {PRICING_PLANS.map((plan) => {
           const isPopular = plan.popular;
           const isEnterprise = plan.id === 'pack_100';
+          const isCurrentlySelected = selectedPlan?.id === plan.id;
 
           return (
             <div
               key={plan.id}
               className={`relative p-6 rounded-lg bg-[var(--color-surface)] border flex flex-col justify-between transition-all duration-200 shadow-none ${
-                isPopular
+                isCurrentlySelected
+                  ? 'border-2 border-[var(--color-brand)] ring-2 ring-[var(--color-brand)]/50 bg-[var(--color-brand-soft)]/20'
+                  : isPopular
                   ? 'border-2 border-[var(--color-brand)] ring-1 ring-[var(--color-brand)]/30'
                   : isEnterprise
                   ? 'border-[var(--media-violet)]/40 bg-[var(--color-surface)]'
@@ -155,14 +200,16 @@ export default function PricingPage() {
               }`}
             >
               {/* Badge */}
-              {plan.badge && (
+              {(plan.badge || isCurrentlySelected) && (
                 <div className="absolute -top-3 left-6">
                   <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                    isPopular
+                    isCurrentlySelected
+                      ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
+                      : isPopular
                       ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
                       : 'bg-[var(--media-violet)] text-white'
                   }`}>
-                    {plan.badge}
+                    {isCurrentlySelected ? 'SELECTED' : plan.badge}
                   </span>
                 </div>
               )}
@@ -212,13 +259,15 @@ export default function PricingPage() {
                 <button
                   onClick={() => handleSelectPlan(plan)}
                   className={`w-full !min-h-[42px] !h-[42px] text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95 rounded-lg ${
-                    isPopular
+                    isCurrentlySelected || isPopular
                       ? 'btn-brand-primary'
                       : 'btn-brand-dark'
                   }`}
                 >
                   <span>
-                    {plan.id === 'single_10'
+                    {isCurrentlySelected && isLoggedIn
+                      ? `Proceed to Checkout ($${plan.price_usd})`
+                      : plan.id === 'single_10'
                       ? 'Get Single Pass ($10)'
                       : `Get ${plan.pages.toLocaleString()} Pages ($${plan.price_usd})`}
                   </span>
@@ -338,12 +387,28 @@ export default function PricingPage() {
         onSuccess={() => fetchQuota()}
       />
 
-      {/* Auth Modal */}
+      {/* Auth Modal with Plan Recovery */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        reason="general"
+        reason="pricing"
+        planId={selectedPlan?.id}
+        redirectUrl={selectedPlan ? `/pricing?plan=${selectedPlan.id}&checkout=true` : '/pricing'}
       />
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-6xl mx-auto w-full py-16 flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg text-[var(--color-ink)]"></span>
+        </div>
+      }
+    >
+      <PricingContent />
+    </Suspense>
   );
 }

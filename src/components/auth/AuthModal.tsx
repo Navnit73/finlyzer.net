@@ -11,6 +11,8 @@ interface AuthModalProps {
   onClose: () => void;
   reason?: 'page_limit' | 'batch_upload' | 'save_history' | 'dashboard' | 'pricing' | 'general';
   pageCount?: number;
+  planId?: string;
+  redirectUrl?: string;
 }
 
 export default function AuthModal({
@@ -18,6 +20,8 @@ export default function AuthModal({
   onClose,
   reason = 'general',
   pageCount,
+  planId,
+  redirectUrl,
 }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const mounted = useIsMounted();
@@ -27,12 +31,24 @@ export default function AuthModal({
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const destination =
-        reason === 'dashboard'
-          ? '/dashboard'
-          : reason === 'pricing'
-          ? '/pricing'
-          : window.location.href;
+      if (planId && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('finlyzer_pending_plan', planId);
+          sessionStorage.setItem('finlyzer_pending_plan', planId);
+        } catch {}
+      }
+
+      let destination = redirectUrl;
+      if (!destination) {
+        if (reason === 'dashboard') {
+          destination = '/dashboard';
+        } else if (reason === 'pricing') {
+          destination = planId ? `/pricing?plan=${planId}&checkout=true` : '/pricing';
+        } else {
+          destination = window.location.href;
+        }
+      }
+
       await signIn('google', { callbackUrl: destination });
     } catch (e) {
       console.warn('Google sign-in error:', (e as Error)?.message || 'Sign in error');
