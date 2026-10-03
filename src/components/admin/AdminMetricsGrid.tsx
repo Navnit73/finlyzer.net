@@ -98,10 +98,10 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
       {/* 3. Success & Completion Rate */}
       <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs hover:border-emerald-500 transition-all">
         <div className="flex items-center justify-between mb-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-brand-hover)]">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)] border border-[var(--color-brand)]/30 uppercase tracking-wider">
             {successRate}% Success
           </span>
         </div>

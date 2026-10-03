@@ -377,7 +377,9 @@ export default function OcrUploader({
         onRetry={retryJob}
         onClose={() => {
           setIsAsyncModalOpen(false);
-          resetJob();
+          if (jobState.status === 'completed' || jobState.status === 'failed' || jobState.status === 'cancelled') {
+            resetJob();
+          }
           setSelectedFile(null);
         }}
       />

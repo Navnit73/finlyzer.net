@@ -262,8 +262,8 @@ export default function HistoryDrawer({
                       }}
                       className={`p-3 rounded-lg border text-xs space-y-2 transition-all ${
                         isDone
-                          ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 cursor-pointer'
-                          : 'bg-[var(--color-surface-subtle)] border-[var(--color-brand)]'
+                          ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50 cursor-pointer'
+                          : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
                       }`}
                     >
                       <div className="flex items-center justify-between">

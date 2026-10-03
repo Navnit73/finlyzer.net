@@ -41,7 +41,7 @@ export default function AuthModal({
   };
 
   const titles = {
-    page_limit: `Unlock ${pageCount || 10}+ Page Processing`,
+    page_limit: `Unlock ${pageCount || 30}+ Page Processing`,
     batch_upload: 'Unlock Bulk Multi-File Processing',
     save_history: 'Sync & Save Extraction History',
     dashboard: 'Sign In to Access Admin Dashboard',
@@ -50,7 +50,7 @@ export default function AuthModal({
   };
 
   const descriptions = {
-    page_limit: `This document contains ${pageCount || 'over 10'} pages. Free guest sessions support up to 10 pages. Sign in with Google to process and save large statements.`,
+    page_limit: `This document contains ${pageCount || 'over 30'} pages. Free guest sessions support documents up to 30 pages. Sign in with Google to process long statements up to 200 pages.`,
     batch_upload: 'Batch processing allows you to concurrently extract up to 50 statements or .zip archives and merge their financial cash flows.',
     save_history: 'Create a free account to securely store all your parsed bank statements, invoices, and receipts in MongoDB across devices.',
     dashboard: 'Sign in with Google to view your account overview, processed statements history, credit balance, and official invoices.',

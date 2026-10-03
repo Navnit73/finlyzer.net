@@ -146,9 +146,9 @@ export default function AsyncDocumentProcessor() {
                   key={job.jobId}
                   className={`p-3.5 rounded-xl border text-xs space-y-2 ${
                     isDone
-                      ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300'
+                      ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50'
                       : isErr
-                      ? 'bg-red-50 dark:bg-red-950/20 border-red-300'
+                      ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-border)]'
                       : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
                   }`}
                 >
@@ -345,12 +345,26 @@ export default function AsyncDocumentProcessor() {
               </div>
             </div>
 
-            <button
-              onClick={cancelJob}
-              className="px-3.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition cursor-pointer"
-            >
-              Cancel Job
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  resetJob();
+                  setSelectedFile(null);
+                }}
+                className="btn btn-sm btn-brand-secondary text-xs font-bold flex items-center gap-1.5 border border-[var(--color-border)] cursor-pointer"
+                title="Process another document while this job runs in the background"
+              >
+                <span>Upload Another Doc</span>
+              </button>
+
+              <button
+                onClick={cancelJob}
+                className="px-3.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition cursor-pointer"
+              >
+                Cancel Job
+              </button>
+            </div>
           </div>
 
           {/* Progress Bar */}
@@ -403,43 +417,45 @@ export default function AsyncDocumentProcessor() {
       ) : isCompleted ? (
         /* Completed View */
         <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-6">
-          <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-start gap-4">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="p-5 rounded-2xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-white/90 border border-[var(--color-brand)]/60 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
+            </div>
             <div className="space-y-1">
-              <h4 className="text-base font-black text-emerald-900 dark:text-emerald-300">
+              <h4 className="text-base font-extrabold text-[var(--color-ink)]">
                 Large Document Extracted Successfully!
               </h4>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400">
+              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
                 All {jobState.totalPages || jobState.result?.metadata?.pages || 1} pages have been converted into structured accounting transactions.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             {docId && (
               <button
                 onClick={() => router.push(`/document/${docId}`)}
-                className="btn btn-brand-primary flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="w-full sm:flex-1 btn-brand-primary !min-h-[46px] !h-[46px] !px-5 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer transition-transform active:scale-95"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 shrink-0" />
                 <span>Inspect in Financial Viewer</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
             )}
 
             {docId && (
               <a
                 href={`/api/export/download/${docId}?format=xlsx`}
-                className="btn btn-brand-secondary py-3 px-6 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer border border-[var(--color-border)]"
+                className="w-full sm:w-auto btn-brand-secondary !min-h-[46px] !h-[46px] !px-6 text-xs font-bold rounded-xl flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
               >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)] shrink-0" />
                 <span>Download Master Excel</span>
               </a>
             )}
 
             <button
               onClick={resetJob}
-              className="btn btn-brand-secondary py-3 px-5 text-xs font-bold border border-[var(--color-border)] cursor-pointer"
+              className="w-full sm:w-auto btn-brand-secondary !min-h-[46px] !h-[46px] !px-5 text-xs font-bold rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] cursor-pointer"
             >
               Process Another File
             </button>
@@ -448,13 +464,15 @@ export default function AsyncDocumentProcessor() {
       ) : (
         /* Failed View */
         <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-6">
-          <div className="p-5 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+          <div className="p-5 rounded-2xl bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-white/90 border border-[var(--color-danger-border)] flex items-center justify-center text-[var(--color-danger)] shrink-0 mt-0.5 shadow-xs">
+              <AlertCircle className="w-5 h-5 text-[var(--color-danger)]" />
+            </div>
             <div className="space-y-1">
-              <h4 className="text-base font-black text-red-900 dark:text-red-300">
+              <h4 className="text-base font-extrabold text-[var(--color-danger)]">
                 Processing Error
               </h4>
-              <p className="text-xs text-red-700 dark:text-red-400">
+              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
                 {jobState.error || 'The asynchronous OCR worker encountered an issue.'}
               </p>
             </div>
@@ -463,13 +481,13 @@ export default function AsyncDocumentProcessor() {
           <div className="flex justify-end gap-3">
             <button
               onClick={resetJob}
-              className="btn btn-brand-secondary px-5 py-2.5 text-xs font-bold border border-[var(--color-border)] cursor-pointer"
+              className="btn-brand-secondary !min-h-[42px] !h-[42px] !px-5 text-xs font-bold rounded-xl border border-[var(--color-border)] cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={retryJob}
-              className="btn btn-brand-primary px-6 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer"
+              className="btn-brand-primary !min-h-[42px] !h-[42px] !px-6 text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
             >
               <RotateCw className="w-4 h-4" />
               <span>Retry Task</span>

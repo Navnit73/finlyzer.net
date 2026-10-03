@@ -230,9 +230,9 @@ export default function DocumentsVaultPage() {
                       key={job.jobId}
                       className={`p-4 rounded-xl border transition-all ${
                         isDone
-                          ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300'
+                          ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50'
                           : isErr
-                          ? 'bg-red-50 dark:bg-red-950/20 border-red-300'
+                          ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-border)]'
                           : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
                       }`}
                     >

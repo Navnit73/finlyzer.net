@@ -103,6 +103,20 @@ export default function ExtractionViewer({
     setTimeout(() => setCopiedJson(false), 2000);
   };
 
+  const handleUnlockSuccess = () => {
+    setIsPaid(true);
+    if (typeof window !== 'undefined' && data?.id) {
+      try {
+        const cached = sessionStorage.getItem('doc_' + data.id);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          parsed.is_paid = true;
+          sessionStorage.setItem('doc_' + data.id, JSON.stringify(parsed));
+        }
+      } catch {}
+    }
+  };
+
   return (
     <div className="space-y-5 sm:space-y-6 animate-fade-in">
       {/* 1. Top Summary Banner — Flat Solid Theme */}
@@ -251,7 +265,7 @@ export default function ExtractionViewer({
         isGuest={isGuest}
         isPaid={isPaid}
         onConsolidateClick={onConsolidateClick}
-        onUnlockSuccess={() => setIsPaid(true)}
+        onUnlockSuccess={handleUnlockSuccess}
       />
 
       {/* 3. Interactive Detail Tabs */}

@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Receipt,
   Layers,
+  X,
 } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import AuthModal from '@/components/auth/AuthModal';
@@ -77,6 +78,17 @@ export default function GuestWorkspace() {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileChange(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleClearFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    setEstimatedPages(1);
+    setErrorMessage(null);
+    setPendingPassword(undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -251,7 +263,7 @@ export default function GuestWorkspace() {
           </div>
 
           {selectedFile ? (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <p className="text-sm sm:text-base font-black text-[var(--color-ink)] truncate max-w-md">
                 {selectedFile.name}
               </p>
@@ -263,6 +275,16 @@ export default function GuestWorkspace() {
                 <span className="font-bold text-[var(--color-ink)]">
                   {isDetectingPages ? 'Detecting pages...' : `${estimatedPages} page(s) detected`}
                 </span>
+              </div>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={handleClearFile}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-surface)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] border border-[var(--color-border)] cursor-pointer transition-colors shadow-2xs"
+                >
+                  <X className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
+                  <span>Choose different file</span>
+                </button>
               </div>
             </div>
           ) : (

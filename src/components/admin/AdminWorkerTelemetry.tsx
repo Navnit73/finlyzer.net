@@ -171,23 +171,23 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
 
         <div className="space-y-2.5 max-h-[190px] overflow-y-auto pr-1">
           {recentErrors.length === 0 ? (
-            <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center text-xs text-emerald-700">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+            <div className="p-4 rounded-xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 text-center text-xs text-[var(--color-ink)]">
+              <ShieldCheck className="w-5 h-5 text-[var(--color-brand-hover)] mx-auto mb-1" />
               <span>Zero recent worker exceptions reported.</span>
             </div>
           ) : (
             recentErrors.map((err, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-xs text-red-900 dark:text-red-300 space-y-1"
+                className="p-3 rounded-xl bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] text-xs text-[var(--color-ink)] space-y-1"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-[11px] text-red-700">{err.job_id}</span>
+                  <span className="font-mono font-bold text-[11px] text-[var(--color-danger)]">{err.job_id}</span>
                   <span className="text-[10px] text-[var(--color-text-muted)]">
                     {new Date(err.timestamp).toLocaleTimeString()}
                   </span>
                 </div>
-                <p className="text-[11px] text-red-800 dark:text-red-400 font-medium truncate">
+                <p className="text-[11px] text-[var(--color-text-secondary)] font-medium truncate">
                   {err.error}
                 </p>
               </div>

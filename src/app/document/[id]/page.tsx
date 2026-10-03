@@ -65,6 +65,10 @@ export default function DocumentPage({ params }: DocumentPageProps) {
         }
 
         const doc = await res.json();
+        const docPages = doc.pages || (doc.metadata?.pages) || 1;
+        const isGuestDoc = doc.is_guest !== undefined ? doc.is_guest : (doc.user_email === 'guest' || !session?.user);
+        const isPaidDoc = doc.is_paid !== undefined ? doc.is_paid : (docPages <= 10 || !isGuestDoc);
+
         const formatted: ExtractionResponse = {
           id: doc.id,
           status: doc.status || 'success',
@@ -74,10 +78,10 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           raw_text: doc.raw_text,
           cleaned_text: doc.cleaned_text,
           pages: (doc.extraction as { pages?: unknown[] })?.pages as ExtractionResponse['pages'],
-          metadata: (doc.metadata || { pages: doc.pages || 1 }) as ExtractionMetadata,
+          metadata: (doc.metadata || { pages: docPages }) as ExtractionMetadata,
           created_at: doc.created_at,
-          is_paid: doc.is_paid,
-          is_guest: doc.is_guest,
+          is_paid: isPaidDoc,
+          is_guest: isGuestDoc,
           guest_session_id: doc.guest_session_id,
         };
 
