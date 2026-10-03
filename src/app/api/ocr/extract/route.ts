@@ -43,20 +43,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 10-Page Free Tier Policy Check
+    // 2. Guest vs Authenticated User Policy Check
     const quota = await getUserQuota(userEmail);
 
-    // If guest (not logged in) and document is more than 10 pages -> prompt login
-    if (!userEmail && estimatedPages > 10) {
+    // If guest (not logged in) and document is > 30 pages -> require login/account
+    if (!userEmail && estimatedPages > 30) {
       return errorResponse(
-        'Documents larger than 10 pages require a free account. Please log in with Google to continue.',
+        'Documents over 30 pages require a registered account. Please sign in with Google to process up to 200 pages.',
         403,
         'LOGIN_REQUIRED',
-        { pageCount: estimatedPages }
+        { pageCount: estimatedPages, maxGuestPages: 30 }
       );
     }
 
-    // Page Credits Quota Check
+    // Page Credits Quota Check for Authenticated Users
     if (userEmail && quota.tier !== 'enterprise' && estimatedPages > quota.freePagesRemaining) {
       return errorResponse(
         `Insufficient page credits. This document requires ${estimatedPages} page credits, but your account only has ${quota.freePagesRemaining} remaining. Please top up your balance.`,
@@ -80,23 +80,35 @@ export async function POST(req: NextRequest) {
 
     const actualPages = result.metadata?.pages || estimatedPages || 1;
 
-    // Check if result has more than 10 pages and user is not logged in
-    if (!userEmail && actualPages > 10) {
+    // If guest and actual parsed pages > 30 -> enforce login requirement
+    if (!userEmail && actualPages > 30) {
       return errorResponse(
-        `Document has ${actualPages} pages (Free guest limit is 10 pages). Please log in with Google to view and save full results.`,
+        `This document contains ${actualPages} pages. Documents over 30 pages require a registered account. Please log in with Google.`,
         403,
         'LOGIN_REQUIRED',
         {
           pageCount: actualPages,
           previewId: result.id,
+          maxGuestPages: 30,
         }
       );
     }
 
-    // Persist extraction to MongoDB and increment page count
+    const isGuest = !userEmail;
+    // For guests: 1-10 pages = free download (isPaid=true); 11-30 pages = pay to download (isPaid=false)
+    const isPaid = isGuest ? actualPages <= 10 : true;
+
+    result.is_paid = isPaid;
+    result.is_guest = isGuest;
+
+    // Persist extraction to MongoDB and increment page count if authenticated
     try {
       const effectiveEmail = userEmail || 'guest';
-      await saveDocumentExtraction(effectiveEmail, result, file.name);
+      await saveDocumentExtraction(effectiveEmail, result, file.name, {
+        isGuest,
+        isPaid,
+      });
+
       if (userEmail) {
         await incrementUserPageCount(userEmail, actualPages);
       }
@@ -104,7 +116,13 @@ export async function POST(req: NextRequest) {
       console.warn('Could not save extraction to database:', (dbErr as Error)?.message || 'DB Error');
     }
 
-    return successResponse(result);
+    return successResponse({
+      ...result,
+      is_paid: isPaid,
+      is_guest: isGuest,
+      download_eligible: isPaid,
+      requires_payment_to_download: isGuest && !isPaid,
+    });
   } catch (err: unknown) {
     const error = err as { code?: string; message?: string };
     if (error.code === 'PASSWORD_REQUIRED') {

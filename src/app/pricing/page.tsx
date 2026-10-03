@@ -99,7 +99,7 @@ export default function PricingPage() {
   const totalBalance = quota.tier === 'enterprise' ? 99999 : (quota.freePagesRemaining ?? 10);
 
   return (
-    <div className="w-full space-y-12 pb-16">
+    <div className="max-w-6xl mx-auto w-full space-y-12 pb-16">
       {/* Header Section */}
       <div className="text-center space-y-3 max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">

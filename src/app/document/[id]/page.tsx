@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -23,6 +24,8 @@ export default function DocumentPage({ params }: DocumentPageProps) {
   const router = useRouter();
   const resolvedParams = use(params);
   const docId = resolvedParams.id;
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === 'authenticated' && !!session?.user;
 
   const [documentData, setDocumentData] = useState<ExtractionResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -73,6 +76,9 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           pages: (doc.extraction as { pages?: unknown[] })?.pages as ExtractionResponse['pages'],
           metadata: (doc.metadata || { pages: doc.pages || 1 }) as ExtractionMetadata,
           created_at: doc.created_at,
+          is_paid: doc.is_paid,
+          is_guest: doc.is_guest,
+          guest_session_id: doc.guest_session_id,
         };
 
         if (isMounted) {
@@ -105,20 +111,19 @@ export default function DocumentPage({ params }: DocumentPageProps) {
     };
   }, [docId]);
 
-
   return (
-    <div className="w-full space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
       {/* Top Control Bar */}
       <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--color-border)]">
         {/* Left: Back button + Document Name */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <Link
-            href="/documents"
+            href={isLoggedIn ? "/documents" : "/"}
             className="btn btn-sm btn-ghost rounded-lg border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] flex items-center gap-1.5 px-3 shrink-0 h-9 cursor-pointer"
-            aria-label="Back to Documents Vault"
+            aria-label={isLoggedIn ? "Back to Documents Vault" : "Back to Free Converter"}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Vault</span>
+            <span>{isLoggedIn ? "Vault" : "Back to Converter"}</span>
           </Link>
 
           <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block"></span>
@@ -131,27 +136,29 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => setIsBatchModalOpen(true)}
-            className="btn btn-sm rounded-lg border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
-            title="Bulk Batch Extraction"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Bulk Batch</span>
-            <span className="sm:hidden text-[11px]">Batch</span>
-          </button>
+        {/* Right: Actions (Authenticated Only) */}
+        {isLoggedIn && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => setIsBatchModalOpen(true)}
+              className="btn btn-sm rounded-lg border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
+              title="Bulk Batch Extraction"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Bulk Batch</span>
+              <span className="sm:hidden text-[11px]">Batch</span>
+            </button>
 
-          <button
-            onClick={() => setIsHistoryDrawerOpen(true)}
-            className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
-            title="Document History"
-          >
-            <History className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">History</span>
-          </button>
-        </div>
+            <button
+              onClick={() => setIsHistoryDrawerOpen(true)}
+              className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
+              title="Document History"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">History</span>
+            </button>
+          </div>
+        )}
       </div>
 
 

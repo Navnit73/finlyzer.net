@@ -75,9 +75,9 @@ export default function AppShell({ children }: AppShellProps) {
     <ActiveJobsProvider>
       <div className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)]">
         <Header />
-        <div className="flex-1">
+        <main className="flex-1 w-full site-container py-6 sm:py-10">
           {children}
-        </div>
+        </main>
         <Footer />
         <ActiveJobFloatingTracker />
       </div>

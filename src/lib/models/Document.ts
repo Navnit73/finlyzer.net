@@ -15,6 +15,10 @@ export interface ExtractionDocument {
   cleaned_text?: string;
   metadata: Record<string, unknown>;
   created_at: string;
+  is_paid?: boolean;
+  is_guest?: boolean;
+  guest_session_id?: string;
+  payment_order_id?: string;
 }
 
 // In-memory fallback if MongoDB is not reachable
@@ -29,21 +33,33 @@ export function getMemoryDocumentCount(userEmail: string): number {
 export async function saveDocumentExtraction(
   userEmail: string,
   extraction: ExtractionResponse,
-  filename: string
+  filename: string,
+  options?: {
+    isGuest?: boolean;
+    guestSessionId?: string;
+    isPaid?: boolean;
+  }
 ): Promise<ExtractionDocument> {
-  const normalizedEmail = (userEmail || 'guest').toLowerCase().trim();
+  const isGuest = options?.isGuest ?? (!userEmail || userEmail === 'guest');
+  const normalizedEmail = isGuest ? 'guest' : userEmail.toLowerCase().trim();
+  const pages = extraction.metadata?.pages || 1;
+  const isPaid = options?.isPaid ?? (isGuest ? pages <= 10 : true);
+
   const docRecord: ExtractionDocument = {
     id: extraction.id,
     user_email: normalizedEmail,
     document_type: extraction.document_type || 'bank_statement',
     filename: filename || 'statement.pdf',
-    pages: extraction.metadata?.pages || 1,
+    pages,
     status: extraction.status || 'success',
     extraction: extraction.extraction || {},
     raw_text: extraction.raw_text,
     cleaned_text: extraction.cleaned_text,
     metadata: (extraction.metadata || {}) as unknown as Record<string, unknown>,
     created_at: new Date().toISOString(),
+    is_paid: isPaid,
+    is_guest: isGuest,
+    guest_session_id: options?.guestSessionId,
   };
 
   return await measureDbQuery('saveDocumentExtraction', async () => {
@@ -66,7 +82,41 @@ export async function saveDocumentExtraction(
     list.unshift(docRecord);
     memoryDocs.set(normalizedEmail, list);
     return docRecord;
-  }, { id: extraction.id, user_email: normalizedEmail });
+  }, { id: extraction.id, user_email: normalizedEmail, is_paid: isPaid, is_guest: isGuest });
+}
+
+export async function unlockGuestDocument(documentId: string, orderId: string): Promise<ExtractionDocument | null> {
+  return await measureDbQuery('unlockGuestDocument', async () => {
+    try {
+      const db = await getDatabase();
+      if (db) {
+        const collection = db.collection<ExtractionDocument>('extractions');
+        const result = await collection.findOneAndUpdate(
+          { id: documentId },
+          {
+            $set: {
+              is_paid: true,
+              payment_order_id: orderId,
+              updated_at: new Date().toISOString(),
+            },
+          },
+          { returnDocument: 'after' }
+        );
+        if (result) return result as unknown as ExtractionDocument;
+      }
+    } catch (err) {
+      console.warn('⚠️ MongoDB unlockGuestDocument fallback to memory:', (err as Error).message);
+    }
+
+    const guestList = memoryDocs.get('guest') || [];
+    const doc = guestList.find(d => d.id === documentId);
+    if (doc) {
+      doc.is_paid = true;
+      doc.payment_order_id = orderId;
+      return doc;
+    }
+    return null;
+  }, { id: documentId, order_id: orderId });
 }
 
 export async function getUserDocuments(
@@ -126,6 +176,8 @@ export async function getUserDocuments(
           pages: (d.pages as number) || (d.total_pages as number) || 1,
           extraction: ((d.extraction || d.result || {}) as StoredDocument['extraction']),
           metadata: ((d.metadata || { pages: (d.pages as number) || 1 }) as unknown as StoredDocument['metadata']),
+          is_paid: d.is_paid as boolean | undefined,
+          is_guest: d.is_guest as boolean | undefined,
         }));
 
         return {
@@ -166,6 +218,8 @@ export async function getUserDocuments(
       pages: d.pages,
       extraction: d.extraction as StoredDocument['extraction'],
       metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+      is_paid: d.is_paid,
+      is_guest: d.is_guest,
     }));
 
     return {
@@ -212,6 +266,8 @@ export async function getDocumentsByIds(ids: string[], userEmail?: string): Prom
           pages: (d.pages as number) || (d.total_pages as number) || 1,
           extraction: ((d.extraction || d.result || {}) as StoredDocument['extraction']),
           metadata: ((d.metadata || { pages: (d.pages as number) || 1 }) as unknown as StoredDocument['metadata']),
+          is_paid: d.is_paid as boolean | undefined,
+          is_guest: d.is_guest as boolean | undefined,
         }));
       }
     } catch (err) {
@@ -234,6 +290,8 @@ export async function getDocumentsByIds(ids: string[], userEmail?: string): Prom
             pages: d.pages,
             extraction: d.extraction as StoredDocument['extraction'],
             metadata: (d.metadata || { pages: d.pages }) as unknown as StoredDocument['metadata'],
+            is_paid: d.is_paid,
+            is_guest: d.is_guest,
           });
         }
       }

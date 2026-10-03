@@ -33,10 +33,45 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const userEmail = session?.user?.email;
 
-    // Check document ownership first
+    // Check document ownership & permissions
     const storedDoc = await getDocumentById(id.trim(), userEmail || undefined);
     if (!storedDoc) {
       return errorResponse('Document extraction not found or access denied.', 404, 'NOT_FOUND');
+    }
+
+    const isGuestDoc = storedDoc.is_guest || storedDoc.user_email === 'guest';
+
+    // If authenticated document, verify ownership
+    if (!isGuestDoc && (!userEmail || storedDoc.user_email !== userEmail.toLowerCase().trim())) {
+      return errorResponse('Unauthorized: You do not have permission to download this document.', 403, 'FORBIDDEN');
+    }
+
+    // Guest Flow Download Policy Enforcements:
+    // 1-10 pages: Free download
+    // 11-30 pages: Must be paid before downloading ($4.99 unlock)
+    // >30 pages: Requires registered account
+    if (isGuestDoc) {
+      const docPages = storedDoc.pages || 1;
+      if (docPages > 30) {
+        return errorResponse(
+          'Documents over 30 pages require a registered account to download. Please sign in with Google.',
+          403,
+          'LOGIN_REQUIRED'
+        );
+      }
+
+      if (docPages > 10 && !storedDoc.is_paid) {
+        return errorResponse(
+          'Payment required to download statements with 11–30 pages ($4.99). Please unlock downloads to continue.',
+          402,
+          'PAYMENT_REQUIRED',
+          {
+            document_id: storedDoc.id,
+            pages: docPages,
+            price_usd: 4.99,
+          }
+        );
+      }
     }
 
     let blob: Blob;

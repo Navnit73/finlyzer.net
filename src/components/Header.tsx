@@ -7,21 +7,13 @@ import { useSession } from 'next-auth/react';
 import { TrendingUp, Sparkles, CreditCard, BarChart3 } from 'lucide-react';
 import UserMenu from './auth/UserMenu';
 import HistoryDrawer from './ocr/HistoryDrawer';
-import AuthModal from './auth/AuthModal';
 
 export default function Header() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authReason, setAuthReason] = useState<'general' | 'dashboard' | 'pricing'>('general');
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
-
-  const handleOpenAuth = (reason: 'general' | 'dashboard' | 'pricing') => {
-    setAuthReason(reason);
-    setIsAuthModalOpen(true);
-  };
 
   return (
     <>
@@ -45,76 +37,59 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Center / Navigation Links */}
-            <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
-              <Link href="/" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" />
-                <span>OCR Converter</span>
-              </Link>
-
-              {/* Pricing & Credits: If not logged in, prompt login instead of routing to admin */}
-              {isLoggedIn ? (
-                <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
-                  <span>Pricing &amp; Credits</span>
-                </Link>
-              ) : (
-                <button
-                  onClick={() => handleOpenAuth('pricing')}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
-                  <span>Pricing &amp; Credits</span>
-                </button>
-              )}
-
-              {/* Dashboard: If not logged in, prompt login instead of routing to admin */}
-              {isLoggedIn ? (
+            {/* Center / Navigation Links (Authenticated Only) */}
+            {isLoggedIn && (
+              <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
                 <Link href="/dashboard" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
                   <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" />
                   <span>Dashboard</span>
                 </Link>
-              ) : (
-                <button
-                  onClick={() => handleOpenAuth('dashboard')}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" />
-                  <span>Dashboard</span>
-                </button>
-              )}
 
-              {/* SuperAdmin Link */}
-              <Link href="/superadmin" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5 text-[var(--color-brand-hover)]">
-                <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-pulse" />
-                <span>SuperAdmin</span>
-              </Link>
-            </div>
+                <Link href="/" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" />
+                  <span>OCR Converter</span>
+                </Link>
 
-            {/* Account Actions & Single Sign In Button */}
+                <Link href="/documents" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <span>Document Vault</span>
+                </Link>
+
+                <Link href="/invoices" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <span>Invoices</span>
+                </Link>
+
+                <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                  <span>Pricing &amp; Credits</span>
+                </Link>
+
+                {/* SuperAdmin Link */}
+                <Link href="/superadmin" className="hover:text-[var(--color-ink)] text-[var(--color-text-secondary)] transition-colors flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-hover)]" />
+                  <span>SuperAdmin</span>
+                </Link>
+              </div>
+            )}
+
+            {/* Account Actions & User Menu */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <UserMenu onOpenHistory={() => setIsHistoryOpen(true)} />
+              <UserMenu onOpenHistory={isLoggedIn ? () => setIsHistoryOpen(true) : undefined} />
             </div>
           </nav>
         </div>
       </header>
 
-      {/* Global History Drawer */}
-      <HistoryDrawer
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        onSelectDocument={(id) => {
-          setIsHistoryOpen(false);
-          router.push(`/document/${id}`);
-        }}
-      />
-
-      {/* Auth Modal for Guest Header Actions */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        reason={authReason}
-      />
+      {/* Global History Drawer (Only for Authenticated Users) */}
+      {isLoggedIn && (
+        <HistoryDrawer
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+          onSelectDocument={(id) => {
+            setIsHistoryOpen(false);
+            router.push(`/document/${id}`);
+          }}
+        />
+      )}
     </>
   );
 }

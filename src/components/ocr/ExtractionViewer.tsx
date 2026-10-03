@@ -43,6 +43,7 @@ export default function ExtractionViewer({
 }: ExtractionViewerProps) {
   const [activeTab, setActiveTab] = useState<'structured' | 'ai_summary' | 'raw_text' | 'json'>('structured');
   const [copiedJson, setCopiedJson] = useState(false);
+  const [isPaid, setIsPaid] = useState<boolean>(data.is_paid ?? true);
 
   const docType = data.document_type || 'bank_statement';
   const extraction = data.extraction || {};
@@ -53,6 +54,8 @@ export default function ExtractionViewer({
   const currency = bankData.currency || invoiceData.currency || receiptData.currency || 'USD';
   const transactions = bankData.transactions || [];
   const items: InvoiceItem[] = invoiceData.items || receiptData.items || [];
+  const pageCount = data.metadata?.pages || data.pages?.length || 1;
+  const isGuest = data.is_guest ?? false;
 
   // Calculate metrics
   const totalInflow = bankData.total_deposits ?? transactions.reduce((acc, t) => acc + (t.credit || 0), 0);
@@ -244,7 +247,11 @@ export default function ExtractionViewer({
       <ExportActionBar
         documentId={data.id}
         documentTitle={bankData.bank_name || invoiceData.vendor_name || 'Statement'}
+        pages={pageCount}
+        isGuest={isGuest}
+        isPaid={isPaid}
         onConsolidateClick={onConsolidateClick}
+        onUnlockSuccess={() => setIsPaid(true)}
       />
 
       {/* 3. Interactive Detail Tabs */}

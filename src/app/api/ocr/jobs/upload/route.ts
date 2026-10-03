@@ -48,15 +48,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. User Quota & Login Verification for Long Documents (>10 pages)
+    // 2. User Quota & Login Verification for Long Documents
     const quota = await getUserQuota(userEmail);
 
-    if (!userEmail && estimatedPages > 10) {
+    if (!userEmail && estimatedPages > 30) {
       return errorResponse(
-        'Long documents (10+ pages) require a free registered account. Please sign in with Google.',
+        'Documents over 30 pages require a registered account. Please sign in with Google to process up to 200 pages.',
         403,
         'LOGIN_REQUIRED',
-        { pageCount: estimatedPages }
+        { pageCount: estimatedPages, maxGuestPages: 30 }
       );
     }
 
@@ -78,6 +78,9 @@ export async function POST(req: NextRequest) {
     const callbackUrl = `${proto}://${host}/api/ocr/webhook`;
 
     // 4. Dispatch Async Job to Python OCR Advance API Worker Engine
+    const isGuest = !userEmail;
+    const isPaid = isGuest ? estimatedPages <= 10 : true;
+
     const jobResponse = await uploadAsyncJob(file, file.name, {
       documentType,
       language,
@@ -89,7 +92,7 @@ export async function POST(req: NextRequest) {
       userEmail: userEmail || 'guest',
     });
 
-    // 5. Pre-record initial document state in MongoDB so it is visible immediately in Vault
+    // 5. Pre-record initial document state in MongoDB
     if (jobResponse?.document_id) {
       try {
         const { getDatabase } = await import('@/lib/mongodb');
@@ -107,6 +110,8 @@ export async function POST(req: NextRequest) {
                 filename: file.name,
                 pages: estimatedPages,
                 status: 'processing',
+                is_paid: isPaid,
+                is_guest: isGuest,
                 extraction: {},
                 metadata: { pages: estimatedPages, job_id: jobResponse.job_id },
                 created_at: new Date().toISOString(),

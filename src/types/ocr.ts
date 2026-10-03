@@ -94,6 +94,9 @@ export interface ExtractionResponse {
   warnings?: string[];
   filename?: string;
   created_at?: string;
+  is_paid?: boolean;
+  is_guest?: boolean;
+  guest_session_id?: string;
 }
 
 export interface BatchItem {
@@ -129,6 +132,9 @@ export interface StoredDocument {
   pages: number;
   extraction: BankStatementData & Record<string, unknown>;
   metadata: ExtractionMetadata;
+  is_paid?: boolean;
+  is_guest?: boolean;
+  guest_session_id?: string;
 }
 
 export interface DocumentListResponse {

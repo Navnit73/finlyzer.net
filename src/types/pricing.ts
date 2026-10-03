@@ -1,5 +1,5 @@
 export interface PricingPlan {
-  id: 'single_10' | 'pack_25' | 'pack_50' | 'pack_100';
+  id: 'guest_doc_unlock' | 'single_10' | 'pack_25' | 'pack_50' | 'pack_100';
   name: string;
   price_usd: number;
   price_inr?: number;
@@ -14,13 +14,15 @@ export interface OrderRecord {
   _id?: string;
   order_id: string;
   user_email: string;
-  plan_id: 'single_10' | 'pack_25' | 'pack_50' | 'pack_100';
+  plan_id: 'guest_doc_unlock' | 'single_10' | 'pack_25' | 'pack_50' | 'pack_100';
   plan_name: string;
   amount_usd: number;
   amount_inr?: number;
   pages_credited: number;
   status: 'created' | 'pending' | 'completed' | 'failed';
   payment_gateway: 'razorpay' | 'manual' | 'test' | 'stripe';
+  document_id?: string;
+  guest_session_id?: string;
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
   razorpay_signature?: string;
@@ -29,6 +31,20 @@ export interface OrderRecord {
 }
 
 export const PRICING_PLANS: PricingPlan[] = [
+  {
+    id: 'guest_doc_unlock',
+    name: 'Guest Document Download Unlock',
+    price_usd: 4.99,
+    price_inr: 415,
+    pages: 30,
+    description: '1-time instant unlock to export statements between 11 and 30 pages.',
+    features: [
+      'Unlock All 6 Export Formats (.xlsx, .csv, .pdf, .qbo, .ofx, .qif)',
+      '11 to 30 Pages Full Export Access',
+      'AI Reconciled Ledger & Cash Flow Metrics',
+      'Instant Download Without Full Subscription',
+    ],
+  },
   {
     id: 'single_10',
     name: 'Single Download',
