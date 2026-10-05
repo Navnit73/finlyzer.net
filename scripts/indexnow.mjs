@@ -2,7 +2,7 @@
 // Run after deploying, so the key file is live: npm run indexnow [-- url1 url2 ...]
 import { readFileSync } from 'node:fs';
 
-const KEY = '402879426e91089ec57a8b8ed5f51652';
+const KEY = '8d596ea79a404c958e2c877a47373547';
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://finlyzers.com').replace(/\/$/, '');
 const host = new URL(SITE_URL).host;
 
