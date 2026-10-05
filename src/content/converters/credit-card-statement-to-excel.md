@@ -5,6 +5,7 @@ metaTitle: "Credit Card Statement to Excel & CSV Converter | Finlyzers"
 metaDescription: "Extract credit card statement transactions from Amex, Chase, Capital One, Citi, and Visa into clean Excel (XLSX) or CSV spreadsheets."
 category: "tools"
 bankName: "Amex, Chase, Capital One, Citi & More"
+statementLabel: "Credit Card Statement"
 country: "Global"
 badgeText: "Credit Card Hub"
 keywords:

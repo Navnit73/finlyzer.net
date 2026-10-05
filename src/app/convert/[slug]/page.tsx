@@ -24,6 +24,8 @@ import {
   FaqSection,
   FinalCtaSection,
   type LedgerRow,
+  type Step,
+  type FileOutputPreview,
 } from '@/components/converter/sections';
 import type { SEOConverterPage as SEOPageData } from '@/types/seo';
 
@@ -36,6 +38,101 @@ function toLedgerRows(page: SEOPageData): LedgerRow[] {
   });
 }
 
+const EXPORT_FORMATS = ['Excel', 'CSV', 'QBO', 'OFX', 'QIF'];
+const stepIcons = [UploadCloud, Cpu, Download];
+
+function listWithOr(items: string[]): string {
+  return items.length > 1 ? `${items.slice(0, -1).join(', ')} or ${items[items.length - 1]}` : items.join('');
+}
+
+/** Page-specific steps from frontmatter, or the template steps worded for this page. */
+function getSteps(page: SEOPageData): Omit<Step, 'icon'>[] {
+  if (page.steps.length > 0) return page.steps;
+  const otherFormats = EXPORT_FORMATS.filter((fmt) => !page.outputFormat.includes(fmt));
+  return [
+    { title: `Upload your ${page.statementLabel}`, body: 'Drop a digital PDF, a scanned copy or a phone photo. Password-protected files are supported.' },
+    { title: 'AI extracts & reconciles', body: 'Dates, descriptions, debits, credits and balances are extracted and checked against the statement totals.' },
+    { title: `Download ${page.outputFormat}`, body: `Get a clean ${page.outputFormat} file, or switch to ${listWithOr(otherFormats)} for your accounting software.` },
+  ];
+}
+
+function parseAmount(amount: string): number {
+  return Number(amount.replace(/[^0-9.-]/g, ''));
+}
+
+/** Accepts MM/DD/YYYY or YYYY-MM-DD sample dates and returns [yyyy, mm, dd]. */
+function dateParts(date: string): [string, string, string] {
+  const iso = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) return [iso[1], iso[2], iso[3]];
+  const [mm, dd, yyyy] = date.split('/');
+  return [yyyy, mm, dd];
+}
+
+/** Shows the actual export file for import formats, so each format page previews what it produces. */
+function toFileOutput(page: SEOPageData): FileOutputPreview | undefined {
+  const rows = page.sampleData;
+  const fmt = page.outputFormat;
+
+  if (fmt.includes('OFX') || fmt.includes('QBO')) {
+    const label = fmt.includes('QBO') ? 'QBO' : 'OFX';
+    return {
+      label,
+      lines: [
+        '<BANKTRANLIST>',
+        ...rows.flatMap((row) => {
+          const [y, m, d] = dateParts(row.date);
+          const amount = parseAmount(row.amount);
+          return [
+            '  <STMTTRN>',
+            `    <TRNTYPE>${amount < 0 ? 'DEBIT' : 'CREDIT'}`,
+            `    <DTPOSTED>${y}${m}${d}`,
+            `    <TRNAMT>${amount.toFixed(2)}`,
+            `    <NAME>${row.desc.slice(0, 32)}`,
+            '  </STMTTRN>',
+          ];
+        }),
+        '</BANKTRANLIST>',
+      ],
+      caption: label === 'QBO'
+        ? 'Signed amounts, posting dates and payee names in the Web Connect format QuickBooks imports directly.'
+        : 'Signed amounts, posting dates and payee names in standard OFX, ready for Xero bank reconciliation.',
+    };
+  }
+
+  if (fmt.includes('QIF')) {
+    return {
+      label: 'QIF',
+      lines: [
+        '!Type:Bank',
+        ...rows.flatMap((row) => {
+          const [y, m, d] = dateParts(row.date);
+          return [`D${m}/${d}/${y}`, `T${parseAmount(row.amount).toFixed(2)}`, `P${row.desc}`, '^'];
+        }),
+      ],
+      caption: 'One record per transaction with date, signed amount and payee, the layout Quicken expects.',
+    };
+  }
+
+  if (fmt.includes('CSV')) {
+    return {
+      label: 'CSV',
+      lines: [
+        'Date,Description,Debit,Credit,Balance',
+        ...rows.map((row) => {
+          const [y, m, d] = dateParts(row.date);
+          const amount = parseAmount(row.amount);
+          const desc = row.desc.includes(',') ? `"${row.desc}"` : row.desc;
+          const debit = amount < 0 ? Math.abs(amount).toFixed(2) : '';
+          const credit = amount >= 0 ? amount.toFixed(2) : '';
+          return `${y}-${m}-${d},${desc},${debit},${credit},${parseAmount(row.balance).toFixed(2)}`;
+        }),
+      ],
+      caption: 'ISO dates, plain numbers and separate debit and credit columns, so it imports cleanly anywhere.',
+    };
+  }
+
+  return undefined;
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -105,6 +202,9 @@ export default async function SEOConverterPage({ params }: PageProps) {
   const relatedPages = getRelatedLandingPages(slug, 4);
   const pageUrl = absoluteUrl(`/convert/${page.slug}`);
 
+  const steps = getSteps(page);
+  const statementPlural = `${page.statementLabel}s`;
+
   // JSON-LD Structured Data Schema
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -127,27 +227,13 @@ export default async function SEOConverterPage({ params }: PageProps) {
       },
       {
         '@type': 'HowTo',
-        name: `How to convert ${page.bankName} statements to ${page.outputFormat}`,
-        step: [
-          {
-            '@type': 'HowToStep',
-            position: 1,
-            name: 'Upload Statement',
-            text: `Drag and drop your ${page.bankName} PDF bank statement into the Finlyzers converter.`,
-          },
-          {
-            '@type': 'HowToStep',
-            position: 2,
-            name: 'AI Extraction & Balance Reconciliation',
-            text: 'Our financial entity parser detects debit, credit, balance, and transaction line items.',
-          },
-          {
-            '@type': 'HowToStep',
-            position: 3,
-            name: `Download ${page.outputFormat}`,
-            text: `Download a clean ${page.outputFormat} file, or switch to Excel, CSV, QBO, OFX, or QIF.`,
-          },
-        ],
+        name: `How to convert ${statementPlural} to ${page.outputFormat}`,
+        step: steps.map((step, i) => ({
+          '@type': 'HowToStep',
+          position: i + 1,
+          name: step.title,
+          text: step.body,
+        })),
       },
       {
         '@type': 'FAQPage',
@@ -167,8 +253,6 @@ export default async function SEOConverterPage({ params }: PageProps) {
       ]),
     ],
   };
-
-  const statementName = `${page.bankName} statement`;
 
   return (
     <div className="w-full">
@@ -190,7 +274,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
         badge={`${page.badgeText} · Free up to 10 pages`}
         title={page.title}
         description={page.metaDescription}
-        ctaLabel={page.category === 'formats' || page.category === 'tools' ? 'Choose Bank Statement' : `Choose ${page.bankName} Statement`}
+        ctaLabel={`Choose ${page.statementLabel}`}
         documentType="bank_statement"
       />
 
@@ -198,26 +282,23 @@ export default async function SEOConverterPage({ params }: PageProps) {
         <MetricsStrip />
 
         <HowItWorksSection
-          title={`How to Convert ${page.bankName} Statements to ${page.outputFormat}`}
-          steps={[
-            { icon: UploadCloud, title: `Upload your ${statementName}`, body: `Drop your ${page.bankName} PDF, a scanned copy or a phone photo. Password-protected files are supported.` },
-            { icon: Cpu, title: 'AI extracts & reconciles', body: 'Dates, descriptions, debits, credits and balances are extracted and checked against the statement totals.' },
-            { icon: Download, title: `Download ${page.outputFormat}`, body: `Get a clean ${page.outputFormat} file, or switch to Excel, CSV, QBO, OFX or QIF for your accounting software.` },
-          ]}
+          title={`How to Convert ${statementPlural} to ${page.outputFormat}`}
+          steps={steps.map((step, i) => ({ ...step, icon: stepIcons[i % stepIcons.length] }))}
         />
 
         {page.sampleData.length > 0 && (
           <BeforeAfterSection
-            title={`Before & After: Your ${page.bankName} Data`}
-            subtitle={`Messy ${page.bankName} PDF text becomes clean rows with separate debit and credit columns.`}
+            title={`Before & After: Your ${page.statementLabel} Data`}
+            subtitle={`Messy ${page.statementLabel} text becomes clean, verified ${page.outputFormat} output.`}
             rawLines={page.sampleData.map((row) => `${row.date} ${row.desc} ${row.amount.replace(/[$₹£,+]/g, '')} ${row.balance.replace(/[$₹£,]/g, '')}`)}
             rows={toLedgerRows(page)}
+            fileOutput={toFileOutput(page)}
           />
         )}
 
         {page.features.length > 0 && (
           <FeatureGridSection
-            title={`Built for ${page.bankName} Statements`}
+            title={`Built for ${statementPlural}`}
             subtitle="Understands real statement layouts, not just generic PDF tables."
             features={page.features}
           />
@@ -227,7 +308,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
 
         {page.contentHtml && <EditorialSection html={page.contentHtml} />}
 
-        <SecuritySection title={`Is It Safe to Upload My ${page.bankName} Statement?`} />
+        <SecuritySection title={`Is It Safe to Upload My ${page.statementLabel}?`} />
 
         {relatedPages.length > 0 && (
           <ConverterLinksSection
@@ -241,13 +322,13 @@ export default async function SEOConverterPage({ params }: PageProps) {
         {page.faqs.length > 0 && (
           <FaqSection
             title="Frequently Asked Questions"
-            subtitle={`Everything you need to know about converting ${page.bankName} statements.`}
+            subtitle={`Everything you need to know about converting ${statementPlural}.`}
             faqs={page.faqs.map((faq) => ({ q: faq.question, a: faq.answer }))}
           />
         )}
 
         <FinalCtaSection
-          title={`Ready to Convert Your ${page.bankName} Statement?`}
+          title={`Ready to Convert Your ${page.statementLabel}?`}
           subtitle="Upload a PDF and download clean transactions in seconds. Statements up to 10 pages are free."
         />
       </div>

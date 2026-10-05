@@ -26,6 +26,13 @@ export interface LedgerRow {
   balance: string;
 }
 
+/** Raw export-file snippet shown instead of the ledger table (OFX, QIF, CSV pages). */
+export interface FileOutputPreview {
+  label: string;
+  lines: string[];
+  caption: string;
+}
+
 export interface ConverterLink {
   name: string;
   slug: string;
@@ -172,11 +179,13 @@ export function BeforeAfterSection({
   subtitle = 'Generic PDF to Excel tools merge columns and split descriptions. Finlyzers is built for bank statements and verifies every balance before you download.',
   rawLines = defaultRawLines,
   rows = defaultLedgerRows,
+  fileOutput,
 }: {
   title?: string;
   subtitle?: string;
   rawLines?: string[];
   rows?: LedgerRow[];
+  fileOutput?: FileOutputPreview;
 }) {
   return (
     <section className="space-y-8 sm:space-y-10">
@@ -204,36 +213,42 @@ export function BeforeAfterSection({
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-brand-soft)]">
             <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--color-ink)]">
               <CheckCircle2 className="w-4 h-4 text-[var(--color-brand-hover)]" />
-              Finlyzers output
+              {fileOutput ? `Finlyzers ${fileOutput.label} output` : 'Finlyzers output'}
             </h3>
             <span className="feature-badge">Balances verified</span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-[13px]">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] font-semibold text-[var(--color-text-secondary)]">
-                  <th scope="col" className="py-2 px-2">Date</th>
-                  <th scope="col" className="py-2 px-2">Description</th>
-                  <th scope="col" className="py-2 px-2 text-right">Debit</th>
-                  <th scope="col" className="py-2 px-2 text-right">Credit</th>
-                  <th scope="col" className="hidden sm:table-cell py-2 px-2 text-right">Balance</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border)] font-mono">
-                {rows.map((row) => (
-                  <tr key={`${row.date}-${row.desc}`}>
-                    <td className="py-2 px-2 text-[var(--color-text-secondary)] whitespace-nowrap">{row.date}</td>
-                    <td className="py-2 px-2 font-sans font-medium text-[var(--color-ink)]">{row.desc}</td>
-                    <td className="py-2 px-2 text-right text-[var(--color-ink)] whitespace-nowrap">{row.debit || '—'}</td>
-                    <td className="py-2 px-2 text-right font-semibold text-[var(--color-success)] whitespace-nowrap">{row.credit || '—'}</td>
-                    <td className="hidden sm:table-cell py-2 px-2 text-right text-[var(--color-ink)] whitespace-nowrap">{row.balance}</td>
+          {fileOutput ? (
+            <pre className="font-mono text-xs sm:text-[13px] text-[var(--color-ink)] bg-[var(--color-surface-subtle)] p-4 rounded-lg leading-relaxed overflow-x-auto">
+              {fileOutput.lines.join('\n')}
+            </pre>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-[13px]">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] font-semibold text-[var(--color-text-secondary)]">
+                    <th scope="col" className="py-2 px-2">Date</th>
+                    <th scope="col" className="py-2 px-2">Description</th>
+                    <th scope="col" className="py-2 px-2 text-right">Debit</th>
+                    <th scope="col" className="py-2 px-2 text-right">Credit</th>
+                    <th scope="col" className="hidden sm:table-cell py-2 px-2 text-right">Balance</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-border)] font-mono">
+                  {rows.map((row) => (
+                    <tr key={`${row.date}-${row.desc}`}>
+                      <td className="py-2 px-2 text-[var(--color-text-secondary)] whitespace-nowrap">{row.date}</td>
+                      <td className="py-2 px-2 font-sans font-medium text-[var(--color-ink)]">{row.desc}</td>
+                      <td className="py-2 px-2 text-right text-[var(--color-ink)] whitespace-nowrap">{row.debit || '—'}</td>
+                      <td className="py-2 px-2 text-right font-semibold text-[var(--color-success)] whitespace-nowrap">{row.credit || '—'}</td>
+                      <td className="hidden sm:table-cell py-2 px-2 text-right text-[var(--color-ink)] whitespace-nowrap">{row.balance}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           <p className="text-sm text-[var(--color-text-secondary)]">
-            Separate debit and credit columns, clean descriptions, running balance reconciled.
+            {fileOutput?.caption ?? 'Separate debit and credit columns, clean descriptions, running balance reconciled.'}
           </p>
         </div>
       </div>

@@ -5,6 +5,7 @@ metaTitle: "Scanned Bank Statement to Excel (OCR) | Finlyzers"
 metaDescription: "Convert scanned and photographed bank statements into editable Excel (XLSX) or CSV. High accuracy OCR fixes skewed scans and blurry receipts."
 category: "tools"
 bankName: "Scanned & Photographed Documents"
+statementLabel: "Scanned Statement"
 country: "Global"
 badgeText: "High Precision AI OCR"
 keywords:

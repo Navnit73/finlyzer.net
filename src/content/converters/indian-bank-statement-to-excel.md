@@ -5,6 +5,7 @@ metaTitle: "SBI, ICICI, Axis & Kotak Statement to Excel | Finlyzers"
 metaDescription: "Convert SBI, ICICI, Axis, Kotak, and other Indian bank statement PDFs to Excel or CSV. Password unlock, UPI narration cleaning, free up to 10 pages."
 category: "india-banks"
 bankName: "SBI, ICICI, Axis & Kotak"
+statementLabel: "Indian Bank Statement"
 country: "India"
 badgeText: "India Banks Supported"
 keywords:

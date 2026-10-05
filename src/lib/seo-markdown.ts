@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { SEOConverterPage, SEOFeature, SEOFAQ, SEOSampleRow } from '@/types/seo';
+import { SEOConverterPage, SEOFeature, SEOFAQ, SEOSampleRow, SEOStep } from '@/types/seo';
 
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/converters');
 
@@ -171,13 +171,16 @@ export function getAllLandingPages(): SEOConverterPage[] {
       const fileContent = fs.readFileSync(fullPath, 'utf8');
       const { data, content } = parseFrontmatter(fileContent);
 
+      const bankName = (data.bankName as string) || 'Bank';
+
       pages.push({
         slug: (data.slug as string) || file.replace(/\.md$/, ''),
         title: (data.title as string) || 'Bank Statement Converter',
         metaTitle: (data.metaTitle as string) || 'Convert Bank Statement to Excel | Finlyzers',
         metaDescription: (data.metaDescription as string) || 'Convert PDF bank statements to Excel and CSV.',
         category: (data.category as SEOConverterPage['category']) || 'tools',
-        bankName: (data.bankName as string) || 'Bank Statement',
+        bankName,
+        statementLabel: (data.statementLabel as string) || `${bankName} Statement`,
         outputFormat: (data.outputFormat as string) || 'Excel',
         country: (data.country as string) || 'Global',
         badgeText: (data.badgeText as string) || 'AI Verified Converter',
@@ -185,6 +188,7 @@ export function getAllLandingPages(): SEOConverterPage[] {
         features: Array.isArray(data.features) ? (data.features as SEOFeature[]) : [],
         tableColumns: Array.isArray(data.tableColumns) ? (data.tableColumns as string[]) : ['Date', 'Description', 'Debit', 'Credit', 'Balance'],
         sampleData: Array.isArray(data.sampleData) ? (data.sampleData as SEOSampleRow[]) : [],
+        steps: Array.isArray(data.steps) ? (data.steps as SEOStep[]) : [],
         faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
         rawContent: content,
         contentHtml: renderMarkdown(content),

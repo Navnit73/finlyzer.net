@@ -5,6 +5,7 @@ metaTitle: "Financial PDF to Excel Converter (Free Online) | Finlyzers"
 metaDescription: "Convert financial PDF statements, invoices, and accounting tables into clean, structured Excel (XLSX) or CSV files using high-precision AI OCR."
 category: "tools"
 bankName: "All Financial Institutions"
+statementLabel: "Financial PDF"
 country: "Global"
 badgeText: "Universal Financial Tool"
 keywords:

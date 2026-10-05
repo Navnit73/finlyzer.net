@@ -43,6 +43,13 @@ sampleData:
     amount: "-$1,000.00"
     type: "Debit"
     balance: "$8,758.70"
+steps:
+  - title: "Upload your bank statement"
+    body: "Drop a digital PDF, a scanned copy or a phone photo of any bank statement. Password-protected files are supported."
+  - title: "AI builds the spreadsheet"
+    body: "Dates, descriptions, debits, credits and balances are mapped to columns and checked against the opening and closing balance."
+  - title: "Download Excel (.xlsx)"
+    body: "Open a formatted workbook with numeric amounts and separate debit and credit columns, ready for pivot tables, SUMIFs and budgeting."
 faqs:
   - question: "How do I convert a bank statement PDF to Excel?"
     answer: "Upload the PDF above, enter the password if your bank protects it, and download the .xlsx file once extraction finishes. It opens in Excel, Google Sheets, Numbers, and LibreOffice."
