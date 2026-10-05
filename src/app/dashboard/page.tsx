@@ -157,7 +157,7 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="w-full space-y-8 pb-16">
-      {/* Guest Sign-Inn */}
+      {/* Guest Sign-nn */}
       {!isLoggedIn && status !== 'loading' && (
         <div className="p-8 sm:p-10 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-center space-y-4 max-w-2xl mx-auto shadow-none my-8">
           <div className="w-14 h-14 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] flex items-center justify-center mx-auto shadow-xs">

@@ -47,7 +47,7 @@ export async function measureDbQuery<T>(
     const duration = Math.round((performance.now() - start) * 100) / 100;
     const error = err as Error;
     console.error(
-      `❌ [MongoDB Error] ${queryName} failed after ${duration}ms: ${error.message}`,
+      `❌ [MongoDB Errore] ${queryName} failed after ${duration}ms: ${error.message}`,
       sanitizeDbDetails(metadata)
     );
     throw err;

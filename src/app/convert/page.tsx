@@ -3,32 +3,36 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllLandingPages } from '@/lib/seo-markdown';
 import {
-  TrendingUp,
+  SITE_URL,
+  SITE_NAME,
+  getLanguageAlternates,
+  getBreadcrumbJsonLd,
+} from '@/lib/seo-config';
+import {
   Sparkles,
   ArrowRight,
-  ShieldCheck,
   Building2,
   Globe2,
   FileSpreadsheet,
-  Layers,
-  Search,
+  ChevronRight,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Financial PDF & Bank Statement Converters Directory | Finlyzer',
+  title: 'Bank Statement Converters Directory — Excel, CSV & QBO | Finlyzer',
   description:
-    'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
-  alternates: {
-    canonical: 'https://finlyzers.com/convert',
-  },
+    'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, HDFC, SBI, and credit cards to Excel, CSV, and QuickBooks.',
+  alternates: getLanguageAlternates('/convert'),
   openGraph: {
-    title: 'Financial PDF & Bank Statement Converters Directory | Finlyzer',
+    title: 'Bank Statement Converters Directory — Excel, CSV & QBO | Finlyzer',
     description:
       'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
-    url: 'https://finlyzers.com/convert',
-    siteName: 'Finlyzer',
+    url: `${SITE_URL}/convert`,
+    siteName: SITE_NAME,
     type: 'website',
     locale: 'en_US',
+    alternateLocale: ['en_GB', 'en_IN', 'en_CA', 'en_AU'],
     images: [
       {
         url: '/og_image.webp',
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Financial PDF & Bank Statement Converters Directory | Finlyzer',
+    title: 'Bank Statement Converters Directory — Excel, CSV & QBO | Finlyzer',
     description:
       'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
     images: ['/og_image.webp'],
@@ -56,9 +60,51 @@ export default function ConvertersDirectoryPage() {
   const indiaBanks = pages.filter((p) => p.category === 'india-banks');
   const tools = pages.filter((p) => p.category === 'tools');
 
+  // Directory Structured Data Schema (CollectionPage + ItemList + BreadcrumbList)
+  const directoryJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      getBreadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Converters', path: '/convert' },
+      ]),
+      {
+        '@type': 'CollectionPage',
+        '@id': `${SITE_URL}/convert#collection`,
+        name: 'Financial Document & Bank Statement Converters Directory',
+        description: 'Comprehensive directory of bank statement parsers and financial OCR tools.',
+        url: `${SITE_URL}/convert`,
+        mainEntity: {
+          '@type': 'ItemList',
+          numberOfItems: pages.length,
+          itemListElement: pages.map((p, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: p.title,
+            url: `${SITE_URL}/convert/${p.slug}`,
+          })),
+        },
+      },
+    ],
+  };
+
   return (
-    <div className="w-full bg-[var(--color-surface)] text-[var(--color-ink)] min-h-screen py-8 sm:py-12">
-      <div className="site-container space-y-12 sm:space-y-16">
+    <div className="w-full bg-[var(--color-surface)] text-[var(--color-ink)] min-h-screen py-6 sm:py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(directoryJsonLd) }}
+      />
+
+      <div className="site-container space-y-10 sm:space-y-14">
+        {/* Breadcrumb Header */}
+        <nav aria-label="Breadcrumbs" className="flex items-center gap-2 text-xs font-semibold text-[var(--color-text-muted)]">
+          <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">
+            Home
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="text-[var(--color-ink)] font-bold">Converters Directory</span>
+        </nav>
+
         {/* Header Hero */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="feature-badge">
@@ -77,7 +123,7 @@ export default function ConvertersDirectoryPage() {
         <div className="space-y-12">
           {/* US Banks */}
           {usBanks.length > 0 && (
-            <div className="space-y-4">
+            <section className="space-y-4">
               <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
                 <Building2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
                 <h2 className="text-xl font-black text-[var(--color-ink)]">
@@ -115,12 +161,12 @@ export default function ConvertersDirectoryPage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* UK Banks */}
           {ukBanks.length > 0 && (
-            <div className="space-y-4">
+            <section className="space-y-4">
               <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
                 <Globe2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
                 <h2 className="text-xl font-black text-[var(--color-ink)]">
@@ -158,12 +204,12 @@ export default function ConvertersDirectoryPage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Indian Banks */}
           {indiaBanks.length > 0 && (
-            <div className="space-y-4">
+            <section className="space-y-4">
               <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
                 <Building2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
                 <h2 className="text-xl font-black text-[var(--color-ink)]">
@@ -201,12 +247,12 @@ export default function ConvertersDirectoryPage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Universal & Specialist Tools */}
           {tools.length > 0 && (
-            <div className="space-y-4">
+            <section className="space-y-4">
               <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
                 <FileSpreadsheet className="w-5 h-5 text-[var(--color-brand-hover)]" />
                 <h2 className="text-xl font-black text-[var(--color-ink)]">
@@ -244,7 +290,7 @@ export default function ConvertersDirectoryPage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </div>
       </div>
