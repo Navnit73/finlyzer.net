@@ -19,8 +19,6 @@ import {
   ShieldCheck,
   ChevronRight,
   ChevronLeft,
-  PanelLeftClose,
-  PanelLeftOpen,
   X,
 } from 'lucide-react';
 import BrandLogo from '../BrandLogo';
@@ -34,25 +32,20 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({
   isCollapsed = false,
-  onToggleCollapse,
   onCloseMobile,
   onOpenCheckout,
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const isAdmin = !!session?.user?.isAdmin;
+  // null until the first fetch, so we never flash a fake "10 Pages" balance.
   const [quota, setQuota] = useState<{
     tier: string;
     freePagesRemaining: number;
     purchasedPages?: number;
     totalAvailablePages?: number;
     totalPagesProcessed: number;
-  }>({
-    tier: 'free',
-    freePagesRemaining: 10,
-    purchasedPages: 0,
-    totalAvailablePages: 10,
-    totalPagesProcessed: 0,
-  });
+  } | null>(null);
 
   useEffect(() => {
     async function loadQuota() {
@@ -69,16 +62,13 @@ export default function AdminSidebar({
 
     loadQuota();
 
-    const handleUpdate = () => {
-      loadQuota();
-    };
-
-    window.addEventListener('finlyzer:quota_updated', handleUpdate);
-    window.addEventListener('focus', handleUpdate);
+    window.addEventListener('finlyzer:quota_updated', loadQuota);
+    window.addEventListener('focus', loadQuota);
     return () => {
-      window.removeEventListener('finlyzer:quota_updated', handleUpdate);
-      window.removeEventListener('focus', handleUpdate);
+      window.removeEventListener('finlyzer:quota_updated', loadQuota);
+      window.removeEventListener('focus', loadQuota);
     };
+    // Re-fetch on navigation: finishing a conversion routes to /document/[id] without a quota event.
   }, [pathname]);
 
   const navSections = [
@@ -86,7 +76,7 @@ export default function AdminSidebar({
       title: 'WORKSPACE',
       items: [
         {
-          name: 'Dashboard Overview',
+          name: 'Dashboard',
           shortName: 'Dashboard',
           href: '/dashboard',
           icon: BarChart3,
@@ -95,13 +85,13 @@ export default function AdminSidebar({
         {
           name: 'OCR Studio & Convert',
           shortName: 'Convert',
-          href: '/',
+          href: '/workspace',
           icon: Sparkles,
-          active: pathname === '/',
+          active: pathname === '/workspace',
           badge: 'AI',
         },
         {
-          name: 'Converted Documents',
+          name: 'Document Vault',
           shortName: 'Vault',
           href: '/documents',
           icon: FileText,
@@ -113,12 +103,11 @@ export default function AdminSidebar({
       title: 'BILLING & ORDERS',
       items: [
         {
-          name: 'Credit Packages ($10 - $100)',
+          name: 'Buy Credits',
           shortName: 'Buy Credits',
           href: '/pricing',
           icon: CreditCard,
           active: pathname === '/pricing',
-          badge: 'Top Up',
         },
         {
           name: 'Invoices & Orders',
@@ -126,15 +115,14 @@ export default function AdminSidebar({
           href: '/invoices',
           icon: Receipt,
           active: pathname === '/invoices',
-          badge: 'PDF',
         },
       ],
     },
-    {
+    ...(isAdmin ? [{
       title: 'SYSTEM & OPS',
       items: [
         {
-          name: 'SuperAdmin Monitoring',
+          name: 'SuperAdmin',
           shortName: 'SuperAdmin',
           href: '/superadmin',
           icon: ShieldCheck,
@@ -142,10 +130,14 @@ export default function AdminSidebar({
           badge: 'Live',
         },
       ],
-    },
+    }] : []),
   ];
 
-  const totalCredits = quota.tier === 'enterprise' ? 99999 : (quota.freePagesRemaining ?? 10);
+  // `freePagesRemaining` from /api/user/quota is the total remaining balance (free + purchased − used).
+  const totalCredits = quota?.freePagesRemaining ?? 0;
+  const totalAllowance = quota?.totalAvailablePages || 0;
+  const creditPercent = totalAllowance > 0 ? Math.min(100, (totalCredits / totalAllowance) * 100) : 0;
+  const creditLabel = quota ? totalCredits.toLocaleString() : '—';
 
   return (
     <aside
@@ -160,29 +152,12 @@ export default function AdminSidebar({
         }`}>
           <BrandLogo
             size="md"
+            href="/dashboard"
             showText={!isCollapsed}
-            tag="Admin"
+            tag={isAdmin ? 'Admin' : undefined}
             onClick={onCloseMobile}
             textClassName="!text-lg"
           />
-
-          {/* Desktop Collapse Button */}
-          {onToggleCollapse && !onCloseMobile && (
-            <button
-              onClick={onToggleCollapse}
-              className={`hidden lg:flex p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer ${
-                isCollapsed ? 'mt-0' : ''
-              }`}
-              title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            >
-              {isCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4" />
-              ) : (
-                <PanelLeftClose className="w-4 h-4" />
-              )}
-            </button>
-          )}
 
           {/* Mobile Close Button */}
           {onCloseMobile && (
@@ -199,7 +174,7 @@ export default function AdminSidebar({
         {/* Quick Convert Button */}
         <div className="p-3 border-b border-[var(--color-border)]">
           <Link
-            href="/"
+            href="/workspace"
             onClick={onCloseMobile}
             className={`btn-brand-primary !min-h-[38px] !h-[38px] !text-xs font-bold flex items-center justify-center gap-2 shadow-xs rounded-lg ${
               isCollapsed ? 'w-full !px-0' : 'w-full'
@@ -215,8 +190,10 @@ export default function AdminSidebar({
         <div className="py-4 px-2 space-y-5 overflow-y-auto flex-1 min-h-0">
           {navSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              {!isCollapsed && (
-                <p className="px-3 text-[10px] font-black tracking-wider uppercase text-[var(--color-text-muted)]">
+              {isCollapsed ? (
+                idx > 0 && <div className="mx-3 mb-2 border-t border-[var(--color-border)]" aria-hidden="true" />
+              ) : (
+                <p className="px-3 pb-0.5 text-[10px] font-black tracking-wider uppercase text-[var(--color-text-muted)]">
                   {section.title}
                 </p>
               )}
@@ -228,18 +205,20 @@ export default function AdminSidebar({
                       key={itemIdx}
                       href={item.href}
                       onClick={onCloseMobile}
-                      title={item.name}
-                      className={`flex items-center rounded-lg text-xs font-semibold transition-all ${
+                      title={isCollapsed ? item.name : undefined}
+                      aria-label={isCollapsed ? item.name : undefined}
+                      aria-current={item.active ? 'page' : undefined}
+                      className={`flex items-center h-9 rounded-lg text-xs font-semibold transition-colors ${
                         isCollapsed
-                          ? 'justify-center p-2.5 h-10 w-full'
-                          : 'justify-between px-3 py-2'
+                          ? 'justify-center w-full'
+                          : 'justify-between gap-2 px-3'
                       } ${
                         item.active
                           ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold shadow-xs'
                           : 'text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)]'
                       }`}
                     >
-                      <div className={`flex items-center gap-2.5 ${isCollapsed ? 'justify-center' : 'truncate'}`}>
+                      <div className={`flex items-center gap-2.5 min-w-0 ${isCollapsed ? 'justify-center' : ''}`}>
                         <Icon className={`w-4 h-4 shrink-0 ${
                           item.active ? 'text-[var(--color-on-brand)]' : 'text-[var(--color-text-secondary)]'
                         }`} />
@@ -247,9 +226,9 @@ export default function AdminSidebar({
                       </div>
 
                       {!isCollapsed && item.badge && (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                        <span className={`shrink-0 whitespace-nowrap text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
                           item.active
-                            ? 'bg-black/20 text-[var(--color-on-brand)]'
+                            ? 'bg-[var(--color-surface)] text-[var(--color-on-brand)]'
                             : 'bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]'
                         }`}>
                           {item.badge}
@@ -272,11 +251,11 @@ export default function AdminSidebar({
             href="/pricing"
             onClick={onCloseMobile}
             className="flex flex-col items-center justify-center p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-colors text-center"
-            title={`${totalCredits} Pages Remaining (Click to Top Up)`}
+            title={`${creditLabel} Pages Remaining (Click to Top Up)`}
           >
             <Zap className="w-4 h-4 text-[var(--color-brand-dark)]" />
             <span className="font-mono font-black text-[10px] text-[var(--color-ink)] mt-0.5">
-              {totalCredits}p
+              {creditLabel}p
             </span>
           </Link>
         ) : (
@@ -287,21 +266,19 @@ export default function AdminSidebar({
                 <span>Credit Balance</span>
               </div>
               <span className="font-mono font-bold text-[var(--color-ink)]">
-                {totalCredits} Pages
+                {creditLabel} Pages
               </span>
             </div>
 
             <div className="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden">
               <div
                 className="bg-[var(--color-brand)] h-1.5 rounded-full transition-all duration-300"
-                style={{
-                  width: `${Math.min(100, Math.max(10, (totalCredits / (quota.totalAvailablePages || 10)) * 100))}%`,
-                }}
+                style={{ width: `${creditPercent}%` }}
               ></div>
             </div>
 
             <div className="flex items-center justify-between text-[10px] text-[var(--color-text-secondary)] pt-0.5">
-              <span>{quota.tier.toUpperCase()} Tier</span>
+              <span>{(quota?.tier ?? 'free').toUpperCase()} Tier</span>
               <Link
                 href="/pricing"
                 onClick={onCloseMobile}
@@ -315,7 +292,7 @@ export default function AdminSidebar({
         )}
 
         {/* User Card */}
-        <div className={`flex items-center gap-2 pt-1 ${isCollapsed ? 'flex-col justify-center' : 'justify-between'}`}>
+        <div className={`flex items-center gap-2 ${isCollapsed ? 'flex-col justify-center' : 'justify-between'}`}>
           <div className={`flex items-center gap-2.5 min-w-0 ${isCollapsed ? 'justify-center' : ''}`}>
             {session?.user?.image ? (
               <Image
@@ -350,7 +327,7 @@ export default function AdminSidebar({
               } catch {}
               await signOut({ callbackUrl: '/' });
             }}
-            className="p-1.5 rounded-lg text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer"
+            className="p-1.5 shrink-0 rounded-lg text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer"
             title="Sign Out"
             aria-label="Sign Out"
           >

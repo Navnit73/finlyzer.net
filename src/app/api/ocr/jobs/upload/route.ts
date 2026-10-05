@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (userEmail && quota.tier !== 'enterprise' && estimatedPages > quota.freePagesRemaining) {
+    if (userEmail && estimatedPages > quota.freePagesRemaining) {
       return errorResponse(
         `Insufficient page balance. This document requires approximately ${estimatedPages} page credits, but your account only has ${quota.freePagesRemaining} remaining.`,
         403,

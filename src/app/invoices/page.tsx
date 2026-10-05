@@ -67,8 +67,10 @@ export default function InvoicesBillingPage() {
     };
   }, [fetchOrders]);
 
-  const totalSpentUsd = orders.reduce((sum, o) => sum + (o.status === 'completed' || o.status === 'created' ? o.amount_usd : 0), 0);
-  const totalCreditsBought = orders.reduce((sum, o) => sum + (o.pages_credited || 0), 0);
+  // Only completed (paid) orders count toward spend and credits; abandoned checkouts stay 'created'.
+  const completedOrders = orders.filter((o) => o.status === 'completed');
+  const totalSpentUsd = completedOrders.reduce((sum, o) => sum + o.amount_usd, 0);
+  const totalCreditsBought = completedOrders.reduce((sum, o) => sum + (o.pages_credited || 0), 0);
 
   const handlePrintReceipt = () => {
     window.print();
@@ -256,6 +258,9 @@ export default function InvoicesBillingPage() {
                         {new Date(order.created_at).toLocaleDateString()}
                       </td>
                       <td className="text-right">
+                        {order.status !== 'completed' ? (
+                          <span className="text-[11px] text-[var(--color-text-muted)]">Unpaid</span>
+                        ) : (
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={(e) => handleDownloadPdf(e, order.order_id)}
@@ -273,6 +278,7 @@ export default function InvoicesBillingPage() {
                             View
                           </button>
                         </div>
+                        )}
                       </td>
                     </tr>
                   ))}

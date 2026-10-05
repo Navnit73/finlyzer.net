@@ -1,6 +1,8 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { findOrCreateUser } from './models/User';
+import { isAdminEmail } from './admin';
+import { AUTH_SECRET } from './auth-secret';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,6 +26,9 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.email) {
         session.user.email = token.email as string;
       }
+      if (session.user) {
+        session.user.isAdmin = isAdminEmail(session.user.email);
+      }
       return session;
     },
     async redirect({ url, baseUrl }) {
@@ -35,7 +40,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV === 'production' ? (() => { console.error('FATAL: NEXTAUTH_SECRET environment variable is missing in production!'); return 'finlyzer_super_secret_session_jwt_2026'; })() : 'finlyzer_dev_jwt_secret_2026'),
+  secret: AUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

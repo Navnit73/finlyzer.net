@@ -12,8 +12,20 @@ export default function AdminShell({ children }: AdminShellProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  // Remember the desktop collapse preference across reloads.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('finlyzer_sidebar_collapsed') === 'true') setIsCollapsed(true);
+    } catch {}
+  }, []);
+
   const toggleCollapse = () => {
-    setIsCollapsed((prev) => !prev);
+    setIsCollapsed((prev) => {
+      try {
+        localStorage.setItem('finlyzer_sidebar_collapsed', String(!prev));
+      } catch {}
+      return !prev;
+    });
   };
 
   // Lock body scroll and listen for Escape key when mobile sidebar drawer is open
@@ -43,10 +55,7 @@ export default function AdminShell({ children }: AdminShellProps) {
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
-        <AdminSidebar
-          isCollapsed={isCollapsed}
-          onToggleCollapse={toggleCollapse}
-        />
+        <AdminSidebar isCollapsed={isCollapsed} />
       </div>
 
       {/* Mobile Slide-Over Drawer */}

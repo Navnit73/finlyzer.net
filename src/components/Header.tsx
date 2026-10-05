@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
   TrendingUp,
@@ -25,6 +25,19 @@ import UserMenu from './auth/UserMenu';
 import HistoryDrawer from './ocr/HistoryDrawer';
 import AuthModal from './auth/AuthModal';
 import BrandLogo from './BrandLogo';
+import { sanitizeNextPath } from '@/lib/routes';
+
+// src/proxy.ts sends guests who open an app page to `/?login=1&next=<path>`.
+// Read that in its own Suspense boundary so the public pages stay statically rendered.
+function LoginPromptReader({ onPrompt }: { onPrompt: (next: string | null) => void }) {
+  const searchParams = useSearchParams();
+  const wantsLogin = searchParams.get('login') === '1';
+  const next = sanitizeNextPath(searchParams.get('next'));
+  useEffect(() => {
+    if (wantsLogin) onPrompt(next);
+  }, [wantsLogin, next, onPrompt]);
+  return null;
+}
 
 export default function Header() {
   const router = useRouter();
@@ -33,8 +46,15 @@ export default function Header() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [loginRedirect, setLoginRedirect] = useState<string | undefined>(undefined);
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
+  const isAdmin = !!session?.user?.isAdmin;
+
+  const handleLoginPrompt = React.useCallback((next: string | null) => {
+    setLoginRedirect(next ?? undefined);
+    setIsAuthModalOpen(true);
+  }, []);
 
   // Automatically close mobile menu on page navigation
   useEffect(() => {
@@ -86,9 +106,9 @@ export default function Header() {
                   <span>Dashboard</span>
                 </Link>
 
-                <Link href="/convert" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
+                <Link href="/workspace" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
-                  <span>Converters Hub</span>
+                  <span>OCR Studio</span>
                 </Link>
 
                 <Link href="/documents" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
@@ -107,10 +127,12 @@ export default function Header() {
                 </Link>
 
                 {/* SuperAdmin Link */}
+                {isAdmin && (
                 <Link href="/superadmin" className="hover:text-[var(--color-ink)] text-[var(--color-text-secondary)] transition-colors flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-hover)]" />
                   <span>SuperAdmin</span>
                 </Link>
+                )}
               </div>
             )}
 
@@ -265,13 +287,13 @@ export default function Header() {
                     </Link>
 
                     <Link
-                      href="/convert"
+                      href="/workspace"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
                     >
                       <div className="flex items-center gap-3">
                         <Sparkles className="w-4 h-4 text-[var(--color-brand-hover)]" />
-                        <span>Converters Hub</span>
+                        <span>OCR Studio</span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
                     </Link>
@@ -312,6 +334,7 @@ export default function Header() {
                       <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
                     </Link>
 
+                    {isAdmin && (
                     <Link
                       href="/superadmin"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -323,6 +346,7 @@ export default function Header() {
                       </div>
                       <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
                     </Link>
+                    )}
                   </div>
                 </div>
               )}
@@ -343,11 +367,16 @@ export default function Header() {
         />
       )}
 
+      <Suspense fallback={null}>
+        <LoginPromptReader onPrompt={handleLoginPrompt} />
+      </Suspense>
+
       {/* Guest Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         reason="general"
+        redirectUrl={loginRedirect}
       />
     </>
   );

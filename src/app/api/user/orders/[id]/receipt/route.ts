@@ -27,6 +27,11 @@ export async function GET(
       return NextResponse.json({ error: 'Invoice record not found' }, { status: 404 });
     }
 
+    // Only paid orders get a tax invoice; unpaid/abandoned checkouts must not produce one.
+    if (order.status !== 'completed') {
+      return NextResponse.json({ error: 'Invoice is only available for completed payments' }, { status: 409 });
+    }
+
     // Generate real PDF receipt with pdf-lib
     const pdfBytes = await generateInvoicePdf(order, session.user.name || undefined);
 

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AdminPage() {
   return (
-    <div className="site-container py-6 sm:py-8">
+    <div className="w-full pb-16">
       <AdminDashboardView />
     </div>
   );

@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import AdminShell from './AdminShell';
 import { ActiveJobsProvider } from '@/context/ActiveJobsContext';
 import ActiveJobFloatingTracker from '@/components/ocr/ActiveJobFloatingTracker';
+import { isAppRoute, isPublicOnlyRoute } from '@/lib/routes';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -18,13 +19,11 @@ export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [cachedLoggedIn, setCachedLoggedIn] = useState<boolean | null>(null);
 
+  // The session cookie is httpOnly, so a localStorage hint is the only way to avoid a
+  // public-header flash on shared pages while the session is still loading.
   useEffect(() => {
     try {
-      const hasAuthCookie =
-        document.cookie.includes('next-auth.session-token') ||
-        document.cookie.includes('__Secure-next-auth.session-token');
-      const hasLocalStorageFlag = localStorage.getItem('has_logged_in') === 'true';
-      setCachedLoggedIn(hasAuthCookie || hasLocalStorageFlag);
+      setCachedLoggedIn(localStorage.getItem('has_logged_in') === 'true');
     } catch {
       setCachedLoggedIn(false);
     }
@@ -42,14 +41,17 @@ export default function AppShell({ children }: AppShellProps) {
     }
   }, [status, session]);
 
-  // Determine if we should render the Admin Layout:
-  // ONLY render Admin Layout for authenticated logged-in users!
-  // Unauthenticated guests NEVER see the admin sidebar layout.
-  const showAdminLayout =
-    (status === 'authenticated' && !!session?.user) ||
-    (status === 'loading' && cachedLoggedIn === true);
+  // Layout is decided by route first, then by auth state:
+  // - app routes always use the app shell (src/proxy.ts already blocks guests)
+  // - marketing routes always use the public shell (src/proxy.ts already redirects signed-in users)
+  // - shared routes (/pricing, /document/[id]) follow the session
+  const isAuthenticated = status === 'authenticated' && !!session?.user;
+  const showAdminLayout = isAppRoute(pathname)
+    ? true
+    : isPublicOnlyRoute(pathname)
+      ? false
+      : isAuthenticated || (status === 'loading' && cachedLoggedIn === true);
 
-  // For authenticated logged-in users, render AdminShell
   if (showAdminLayout) {
     return (
       <ActiveJobsProvider>
@@ -59,7 +61,6 @@ export default function AppShell({ children }: AppShellProps) {
     );
   }
 
-  // Public Guest Layout
   return (
     <ActiveJobsProvider>
       <div className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)]">

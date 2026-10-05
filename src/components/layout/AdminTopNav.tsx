@@ -41,10 +41,10 @@ export default function AdminTopNav({
 
   // Generate dynamic breadcrumbs based on pathname
   const getBreadcrumbs = () => {
-    if (pathname === '/') {
+    if (pathname === '/workspace') {
       return [
-        { label: 'Workspace', href: '/' },
-        { label: 'OCR Studio & Convert', href: '/' },
+        { label: 'Workspace', href: '/dashboard' },
+        { label: 'OCR Studio & Convert', href: '/workspace' },
       ];
     }
     if (pathname === '/dashboard') {
@@ -79,9 +79,15 @@ export default function AdminTopNav({
         { label: 'Invoices & Receipts', href: '/invoices' },
       ];
     }
+    if (pathname === '/superadmin' || pathname === '/admin') {
+      return [
+        { label: 'System & Ops', href: '/superadmin' },
+        { label: 'SuperAdmin Monitoring', href: pathname },
+      ];
+    }
     return [
-      { label: 'Workspace', href: '/' },
-      { label: 'Dashboard', href: pathname },
+      { label: 'Workspace', href: '/dashboard' },
+      { label: 'Dashboard Overview', href: '/dashboard' },
     ];
   };
 
@@ -202,6 +208,7 @@ export default function AdminTopNav({
 
             <ul
               tabIndex={0}
+              onClick={() => (document.activeElement as HTMLElement | null)?.blur()}
               className="dropdown-content z-50 menu p-2.5 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg w-56 text-xs space-y-1 mt-2"
             >
               <li className="p-2 border-b border-[var(--color-border)] pb-2.5 mb-1">
@@ -211,11 +218,11 @@ export default function AdminTopNav({
 
               <li>
                 <Link
-                  href="/"
+                  href="/workspace"
                   className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
                 >
                   <Sparkles className="w-4 h-4 text-[var(--color-brand-dark)]" />
-                  <span>OCR Converter</span>
+                  <span>OCR Studio & Convert</span>
                 </Link>
               </li>
 
@@ -225,7 +232,7 @@ export default function AdminTopNav({
                   className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
                 >
                   <BarChart3 className="w-4 h-4 text-[var(--color-ink)]" />
-                  <span>Admin Dashboard</span>
+                  <span>Dashboard</span>
                 </Link>
               </li>
 

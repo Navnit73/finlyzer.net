@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
+import { isAdminEmail } from './admin';
 
 /**
  * Standardized API Error Response
@@ -52,10 +53,11 @@ export async function safeParseJson<T = Record<string, unknown>>(req: NextReques
  * 2. An 'X-Admin-Key' or 'Authorization' header matching process.env.OCR_ADMIN_KEY
  */
 export async function validateAdminAccess(req: NextRequest): Promise<{ authorized: boolean; reason?: string; userEmail?: string }> {
-  const adminKey = process.env.OCR_ADMIN_KEY || 'ocr_admin_secret_2026';
+  // The hardcoded fallback key is a dev convenience only; production requires OCR_ADMIN_KEY.
+  const adminKey = process.env.OCR_ADMIN_KEY || (process.env.NODE_ENV !== 'production' ? 'ocr_admin_secret_2026' : '');
   const headerKey = req.headers.get('x-admin-key') || req.headers.get('X-Admin-Key');
 
-  if (headerKey && headerKey === adminKey) {
+  if (adminKey && headerKey && headerKey === adminKey) {
     return { authorized: true, userEmail: 'admin-api-key' };
   }
 
@@ -71,24 +73,8 @@ export async function validateAdminAccess(req: NextRequest): Promise<{ authorize
   }
 
   const userEmail = session.user.email.toLowerCase().trim();
-  const rawAdminEmails = process.env.ADMIN_EMAILS || '';
-  const adminEmails = rawAdminEmails
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
-  // If ADMIN_EMAILS is configured, enforce strict email whitelist
-  if (adminEmails.length > 0) {
-    if (adminEmails.includes(userEmail)) {
-      return { authorized: true, userEmail };
-    }
-    return { authorized: false, reason: 'Access denied: Admin privileges required.' };
-  }
-
-  // In development without ADMIN_EMAILS explicitly configured, allow authenticated session
-  if (process.env.NODE_ENV !== 'production') {
+  if (isAdminEmail(userEmail)) {
     return { authorized: true, userEmail };
   }
-
-  return { authorized: false, reason: 'Access denied: No administrative permissions configured.' };
+  return { authorized: false, reason: 'Access denied: Admin privileges required.' };
 }

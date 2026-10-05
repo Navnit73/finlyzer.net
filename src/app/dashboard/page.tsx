@@ -108,7 +108,7 @@ export default function DashboardOverviewPage() {
 
       if (ordersRes.ok) {
         const data = await ordersRes.json();
-        setRecentOrders((data.orders || []).slice(0, 5));
+        setRecentOrders(((data.orders || []) as OrderRecord[]).filter((o) => o.status === 'completed').slice(0, 5));
       }
     } catch (err) {
       console.warn('Failed to load dashboard overview:', err);
@@ -157,7 +157,7 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="w-full space-y-8 pb-16">
-      {/* Guest Sign-nn */}
+      {/* Guest Sign-In */}
       {!isLoggedIn && status !== 'loading' && (
         <div className="p-8 sm:p-10 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-center space-y-4 max-w-2xl mx-auto shadow-none my-8">
           <div className="w-14 h-14 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] flex items-center justify-center mx-auto shadow-xs">
@@ -165,7 +165,7 @@ export default function DashboardOverviewPage() {
           </div>
           <div className="space-y-1">
             <h2 className="text-2xl font-black text-[var(--color-ink)] tracking-tight">
-              Sign in to Access Admin Dashboard
+              Sign in to Access Your Dashboard
             </h2>
             <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] max-w-md mx-auto">
               View your private account stats, credit balance, converted records, and billing history.
@@ -322,11 +322,11 @@ export default function DashboardOverviewPage() {
           {/* Quick Actions Panel */}
           <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-3">
             <h3 className="font-black text-sm text-[var(--color-ink)] uppercase tracking-wider text-[11px]">
-              Quick Admin Shortcuts
+              Quick Shortcuts
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Link
-                href="/"
+                href="/workspace"
                 className="p-3.5 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand-soft)] border border-[var(--color-border)] transition-colors flex flex-col items-center text-center gap-2 group"
               >
                 <Sparkles className="w-5 h-5 text-[var(--color-brand-dark)] group-hover:scale-110 transition-transform" />
@@ -385,7 +385,7 @@ export default function DashboardOverviewPage() {
                 <FileText className="w-8 h-8 text-[var(--color-text-secondary)] mx-auto opacity-50" />
                 <p className="text-xs font-bold text-[var(--color-ink)]">No documents converted yet</p>
                 <Link
-                  href="/"
+                  href="/workspace"
                   className="btn-brand-primary !min-h-[32px] !h-[32px] !px-3 text-xs font-bold inline-flex items-center gap-1 rounded-lg shadow-xs"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -521,7 +521,7 @@ export default function DashboardOverviewPage() {
               <button
                 onClick={handleDeleteAccount}
                 disabled={isDeletingAccount}
-                className="btn btn-sm rounded-lg bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger)] text-[var(--color-danger)] hover:text-white font-bold border border-[var(--color-danger-border)] px-4 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 transition-colors"
+                className="btn btn-sm rounded-lg bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger)] text-[var(--color-danger)] hover:text-[var(--color-on-dark)] font-bold border border-[var(--color-danger-border)] px-4 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 transition-colors"
               >
                 {isDeletingAccount ? (
                   <span className="loading loading-spinner loading-xs"></span>

@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     }
 
     const quota = await getUserQuota(userEmail);
-    if (quota.tier !== 'enterprise' && files.length > quota.freePagesRemaining) {
+    if (files.length > quota.freePagesRemaining) {
       return errorResponse(
         `Insufficient page credits. This batch has ${files.length} documents, but your account only has ${quota.freePagesRemaining} remaining credits. Please top up your package.`,
         403,

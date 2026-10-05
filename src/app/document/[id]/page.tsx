@@ -196,7 +196,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
               </p>
             </div>
             <Link
-              href="/"
+              href={isLoggedIn ? '/workspace' : '/'}
               className="btn-brand-primary inline-flex items-center gap-2 py-2.5 px-6 text-xs font-bold"
             >
               <Upload className="w-4 h-4" />
@@ -208,7 +208,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
           <div className="space-y-6">
             <ExtractionViewer
               data={documentData}
-              onNewScan={() => router.push('/')}
+              onNewScan={() => router.push(isLoggedIn ? '/workspace' : '/')}
               onConsolidateClick={() => setIsBatchModalOpen(true)}
             />
           </div>

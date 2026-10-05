@@ -162,7 +162,7 @@ export default function DocumentsVaultPage() {
           </button>
 
           <Link
-            href="/"
+            href="/workspace"
             className="btn-brand-primary !min-h-[36px] !h-[36px] !px-4 text-xs font-bold flex items-center gap-1.5 rounded-lg shadow-xs"
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -388,7 +388,7 @@ export default function DocumentsVaultPage() {
                   : 'Start by uploading a bank statement or invoice in the OCR Converter.'}
               </p>
               <Link
-                href="/"
+                href="/workspace"
                 className="btn-brand-primary !min-h-[36px] !h-[36px] !px-4 text-xs font-bold inline-flex items-center gap-1.5 mt-2 rounded-lg"
               >
                 <Sparkles className="w-3.5 h-3.5" />

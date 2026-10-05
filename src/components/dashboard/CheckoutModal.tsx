@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, ShieldCheck, Sparkles, CreditCard, ArrowRight, AlertCircle, Zap } from 'lucide-react';
 import { PricingPlan } from '@/types/pricing';
@@ -26,8 +27,18 @@ export default function CheckoutModal({
   const [orderCompleted, setOrderCompleted] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const mounted = useIsMounted();
+  const router = useRouter();
 
   if (!isOpen || !plan || !mounted) return null;
+
+  // The modal stays mounted between opens, so clear the previous purchase's state on close;
+  // otherwise reopening it for another plan shows "Credits Added" without any payment.
+  const handleClose = () => {
+    if (isProcessing) return;
+    setOrderCompleted(false);
+    setErrorMessage(null);
+    onClose();
+  };
 
   const handleInitializePayment = async () => {
     setIsProcessing(true);
@@ -96,7 +107,8 @@ export default function CheckoutModal({
       >
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
+          disabled={isProcessing}
           className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
@@ -181,8 +193,8 @@ export default function CheckoutModal({
             </div>
             <button
               onClick={() => {
-                onClose();
-                if (onSuccess) onSuccess();
+                handleClose();
+                router.push('/workspace');
               }}
               className="btn-brand-primary !min-h-[40px] !h-[40px] text-xs font-bold w-full rounded-lg"
             >

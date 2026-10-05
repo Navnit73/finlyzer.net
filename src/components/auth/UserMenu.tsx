@@ -111,7 +111,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                     {quota.tier} Plan
                   </span>
                   <span className="text-[11px] text-[var(--color-text-secondary)] font-mono font-bold">
-                    {quota.tier === 'enterprise' ? 'Unlimited Pages' : `${quota.freePagesRemaining} Pages Remaining`}
+                    {`${quota.freePagesRemaining.toLocaleString()} Pages Remaining`}
                   </span>
                 </div>
               </li>

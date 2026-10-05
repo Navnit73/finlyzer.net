@@ -30,32 +30,24 @@ export interface OrderRecord {
   updated_at: string;
 }
 
+// Free tier: documents up to FREE_PAGE_LIMIT pages convert and download at no cost.
+export const FREE_PAGE_LIMIT = 10;
+
+// 'single_10' is retired (merged into the $10 Document Pass) but stays in the id unions above
+// so historical orders still type-check and render.
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'guest_doc_unlock',
-    name: 'Guest Document Download Unlock',
+    name: 'Document Pass',
     price_usd: 10,
     price_inr: 830,
     pages: 30,
-    description: '1-time instant unlock to export statements between 11 and 30 pages.',
+    description: 'One-time $10 unlock for a single statement of 11 to 30 pages.',
     features: [
-      'Unlock All 6 Export Formats (.xlsx, .csv, .pdf, .qbo, .ofx, .qif)',
-      '11 to 30 Pages Full Export Access',
-      'AI Reconciled Ledger & Cash Flow Metrics',
-      'Instant Download Without Full Subscription',
-    ],
-  },
-  {
-    id: 'single_10',
-    name: 'Single Download',
-    price_usd: 10,
-    pages: 1,
-    description: 'Instant 1-document quick conversion pass with all export formats.',
-    features: [
-      '1 Full Document Extraction ($10/doc)',
-      'All 6 Export Formats (.xlsx, .csv, .pdf, .qbo, .ofx, .qif)',
-      'AI Financial Reconciliation',
-      'Encrypted PDF Support',
+      'Convert & download one 11–30 page statement',
+      'All 6 export formats (.xlsx, .csv, .pdf, .qbo, .ofx, .qif)',
+      'AI reconciled ledger & cash flow metrics',
+      'Encrypted PDF support',
     ],
   },
   {
@@ -65,11 +57,10 @@ export const PRICING_PLANS: PricingPlan[] = [
     pages: 600,
     description: 'Ideal for small businesses and accountants processing monthly statements.',
     features: [
-      '600 Page Credits ($0.041/page)',
-      'Bulk / Batch Multi-File Upload',
-      '12-Month Consolidated Annual Master P&L',
-      'Permanent Cloud Document Sync',
-      'High-Speed OCR Processing',
+      'Bulk / batch multi-file upload',
+      '12-month consolidated annual master P&L',
+      'Permanent cloud document sync',
+      'High-speed OCR processing',
     ],
     popular: true,
     badge: 'MOST POPULAR',
@@ -81,11 +72,10 @@ export const PRICING_PLANS: PricingPlan[] = [
     pages: 1000,
     description: 'High-volume reconciliation for financial analysts and tax consultants.',
     features: [
-      '1,000 Page Credits ($0.050/page)',
-      'Up to 50 Files in Single Batch Upload',
-      'Unlimited Cloud History Storage',
-      'QuickBooks (.qbo) & Xero (.ofx) Sync',
-      'Multi-Currency Balance Auditing',
+      'Up to 50 files in a single batch upload',
+      'Unlimited cloud history storage',
+      'QuickBooks (.qbo) & Xero (.ofx) sync',
+      'Multi-currency balance auditing',
     ],
   },
   {
@@ -95,11 +85,10 @@ export const PRICING_PLANS: PricingPlan[] = [
     pages: 5000,
     description: 'Maximum scale package for auditing firms and corporate finance teams.',
     features: [
-      '5,000 Page Credits ($0.020/page)',
-      'Lowest Per-Page Cost',
-      'Dedicated High-Speed Queue',
-      'Priority AI Reconciliation & Entity Extraction',
-      'Bulk Data Export to Master Excel Workbooks',
+      'Lowest per-page cost',
+      'Dedicated high-speed queue',
+      'Priority AI reconciliation & entity extraction',
+      'Bulk export to master Excel workbooks',
     ],
     badge: 'BEST VALUE',
   },

@@ -6,6 +6,7 @@ import { signIn } from 'next-auth/react';
 import { Sparkles, X, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useIsMounted } from '@/lib/useIsMounted';
 import BrandLogo from '../BrandLogo';
+import { APP_HOME, APP_WORKSPACE, isPublicOnlyRoute } from '@/lib/routes';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -39,14 +40,20 @@ export default function AuthModal({
         } catch {}
       }
 
+      // Never send a freshly signed-in user back to a public marketing page:
+      // conversion-related prompts land in the workspace, everything else in the dashboard
+      // (or back on the app/shared page they were already on).
       let destination = redirectUrl;
       if (!destination) {
-        if (reason === 'dashboard') {
-          destination = '/dashboard';
-        } else if (reason === 'pricing') {
+        const currentPath = window.location.pathname + window.location.search;
+        if (reason === 'pricing') {
           destination = planId ? `/pricing?plan=${planId}&checkout=true` : '/pricing';
+        } else if (reason === 'page_limit' || reason === 'batch_upload' || reason === 'save_history') {
+          destination = APP_WORKSPACE;
+        } else if (reason === 'dashboard' || isPublicOnlyRoute(window.location.pathname)) {
+          destination = APP_HOME;
         } else {
-          destination = window.location.href;
+          destination = currentPath;
         }
       }
 

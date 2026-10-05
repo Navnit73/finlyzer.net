@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Page Credits Quota Check for Authenticated Users
-    if (userEmail && quota.tier !== 'enterprise' && estimatedPages > quota.freePagesRemaining) {
+    if (userEmail && estimatedPages > quota.freePagesRemaining) {
       return errorResponse(
         `Insufficient page credits. This document requires ${estimatedPages} page credits, but your account only has ${quota.freePagesRemaining} remaining. Please top up your balance.`,
         403,

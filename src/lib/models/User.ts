@@ -151,7 +151,7 @@ export async function getUserQuota(email?: string | null): Promise<{
     return {
       isLoggedIn: true,
       tier: user.tier || 'free',
-      freePagesRemaining: user.tier === 'enterprise' ? 99999 : remaining,
+      freePagesRemaining: remaining,
       totalPagesProcessed: processed,
       maxFreePages: freeLimit,
       purchasedPages: purchased,
@@ -206,7 +206,7 @@ export async function getUserStats(email: string): Promise<{
     const freeLimit = typeof user.free_pages_limit === 'number' ? user.free_pages_limit : 10;
     const processed = typeof user.pages_processed === 'number' ? user.pages_processed : 0;
     const totalAllowed = freeLimit + purchased;
-    const remaining = user.tier === 'enterprise' ? 99999 : Math.max(0, totalAllowed - processed);
+    const remaining = Math.max(0, totalAllowed - processed);
 
     return {
       user,
@@ -272,7 +272,10 @@ export async function addPurchasedPages(
 
   return await measureDbQuery('addPurchasedPages', async () => {
     const existingUser = await findOrCreateUser(normalizedEmail);
-    const updatedTier = newTier || (existingUser.tier === 'free' ? 'starter' : existingUser.tier);
+    // Tiers only ever go up: buying a smaller pack after a bigger one must not downgrade the account.
+    const tierRank: Record<UserRecord['tier'], number> = { free: 0, starter: 1, pro: 2, enterprise: 3 };
+    const candidateTier = newTier || 'starter';
+    const updatedTier = tierRank[candidateTier] > tierRank[existingUser.tier || 'free'] ? candidateTier : (existingUser.tier || 'free');
 
     try {
       const db = await getDatabase();
