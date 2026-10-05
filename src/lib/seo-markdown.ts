@@ -192,7 +192,6 @@ export function getAllLandingPages(): SEOConverterPage[] {
         faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
         rawContent: content,
         contentHtml: renderMarkdown(content),
-        lastModified: fs.statSync(fullPath).mtime,
       });
     }
 

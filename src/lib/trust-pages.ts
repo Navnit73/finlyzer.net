@@ -1,4 +1,4 @@
-/** Trust & legal pages. Shared by the footer, sitemap and each page's "Related" links. */
+/** Trust & legal pages. Shared by the footer and each page's "Related" links. */
 export interface TrustPage {
   path: string;
   title: string;

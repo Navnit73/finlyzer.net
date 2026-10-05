@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 // Canonical public origin. Deliberately not derived from NEXTAUTH_URL: a build with a local or
-// staging auth URL would otherwise ship localhost canonicals and sitemap entries.
+// staging auth URL would otherwise ship localhost canonicals.
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://finlyzers.com').replace(/\/$/, '');
 export const SITE_NAME = 'Finlyzers';
 

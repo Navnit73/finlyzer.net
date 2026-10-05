@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Static sitemap, served at /sitemap.xml. Maintained by hand.
+  When you add a public page: add a <url> block below with its full https://finlyzers.com URL.
+  When you change a page materially: bump its <lastmod> (YYYY-MM-DD).
+  Never list private/app pages (dashboard, documents, invoices, workspace, admin, superadmin, document/*).
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Core pages -->
+  <url>
+    <loc>https://finlyzers.com</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/pricing</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+
+  <!-- Converters: formats -->
+  <url>
+    <loc>https://finlyzers.com/convert/bank-statement-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/bank-statement-to-csv</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/bank-statement-to-qbo</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/bank-statement-to-ofx</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/bank-statement-to-qif</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+
+  <!-- Converters: tools -->
+  <url>
+    <loc>https://finlyzers.com/convert/pdf-to-excel-converter</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/scanned-pdf-ocr-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/credit-card-statement-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+
+  <!-- Converters: banks -->
+  <url>
+    <loc>https://finlyzers.com/convert/chase-bank-statement-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/bank-of-america-statement-to-csv</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/wells-fargo-pdf-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/barclays-bank-statement-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/hdfc-bank-statement-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/indian-bank-statement-to-excel</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+
+  <!-- Trust &amp; legal -->
+  <url>
+    <loc>https://finlyzers.com/faq</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/security</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/privacy-policy</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/terms</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/disclaimer</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/editorial-policy</loc>
+    <lastmod>2026-10-05</lastmod>
+  </url>
+</urlset>

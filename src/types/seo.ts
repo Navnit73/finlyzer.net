@@ -42,5 +42,4 @@ export interface SEOConverterPage {
   faqs: SEOFAQ[];
   contentHtml?: string;
   rawContent: string;
-  lastModified: Date;
 }
