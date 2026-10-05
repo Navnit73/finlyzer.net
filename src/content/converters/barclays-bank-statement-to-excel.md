@@ -1,14 +1,12 @@
 ---
 slug: "barclays-bank-statement-to-excel"
 title: "Barclays Bank Statement to Excel & CSV Converter"
-metaTitle: "Convert Barclays Bank Statement PDF to Excel & CSV | Finlyzer UK"
+metaTitle: "Barclays Bank Statement to Excel & CSV | Finlyzer"
 metaDescription: "Convert UK Barclays Bank PDF statements to Excel (XLSX) or CSV. Instant, accurate table extraction for UK personal & business accounts."
 category: "uk-banks"
 bankName: "Barclays Bank"
 country: "United Kingdom"
 badgeText: "UK Format Ready"
-rating: 4.9
-reviewCount: 2180
 keywords:
   - "barclays bank statement to excel"
   - "convert barclays pdf to csv"
@@ -56,10 +54,22 @@ faqs:
 
 # Convert Barclays Bank Statements to Excel & CSV
 
-Barclays UK bank statements contain detailed transaction descriptions, sort code headers, and dual-column Money In/Money Out entries. Finlyzer simplifies your bookkeeping by converting these statements into audit-ready spreadsheets.
+Barclays statements list transactions with separate *Money out* and *Money in* columns, a running balance, and multi-line descriptions for card payments and direct debits. Finlyzer keeps those columns separate, joins split descriptions, and handles UK date formats (DD/MM/YYYY) and GBP amounts.
 
-## Key Advantages for UK Accountants & Businesses
+## How to Download Your Barclays Statement
 
-- **UK Format Intelligence**: Native handling of DD/MM/YYYY dates and GBP currency symbols.
-- **Flawless Multi-Page OCR**: Process complex quarterly or annual Barclays PDF exports with full reconciliation.
-- **Privacy Guaranteed**: Fully GDPR compliant with automated data purge after processing.
+1. Log in to Barclays Online Banking or the Barclays app.
+2. Select the account and open **Statements**.
+3. Download the statement period you need as a PDF.
+4. Upload it above and export to Excel or CSV.
+
+## Built for UK Bookkeeping
+
+- **Money in / Money out preserved** as separate numeric columns.
+- **Multi-page and annual statements** processed with full balance reconciliation.
+- **Ready for Xero, QuickBooks UK, Sage, and FreeAgent** via CSV or [OFX export](/convert/bank-statement-to-ofx).
+- **Privacy first**: files are encrypted in transit and deleted after processing.
+
+## Common Use Cases
+
+Self Assessment tax returns, landlord income records, mortgage applications that ask for transaction histories, and month-end reconciliation for UK limited companies.

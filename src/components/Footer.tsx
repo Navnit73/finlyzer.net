@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="w-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-t border-[var(--color-border)] py-12 mt-auto">
       <div className="site-container space-y-10">
         {/* Top Multi-Column Link Directory for SEO & Crawlers */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Col 1: Brand Info */}
           <div className="space-y-3">
             <BrandLogo size="sm" textClassName="!text-lg" />
@@ -20,7 +20,32 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Col 2: US Bank Statement Converters */}
+          {/* Col 2: Export Format Converters */}
+          <div className="space-y-3">
+            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
+              Convert by Format
+            </p>
+            <ul className="space-y-2 text-xs">
+              {[
+                ['bank-statement-to-excel', 'Bank Statement to Excel'],
+                ['bank-statement-to-csv', 'Bank Statement to CSV'],
+                ['bank-statement-to-qbo', 'Bank Statement to QuickBooks (QBO)'],
+                ['bank-statement-to-ofx', 'Bank Statement to Xero (OFX)'],
+                ['bank-statement-to-qif', 'Bank Statement to Quicken (QIF)'],
+              ].map(([slug, label]) => (
+                <li key={slug}>
+                  <Link
+                    href={`/convert/${slug}`}
+                    className="hover:text-[var(--color-ink)] hover:underline transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 3: US Bank Statement Converters */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
               US Bank Converters
@@ -61,7 +86,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Col 3: UK & Global Bank Converters */}
+          {/* Col 4: UK & Global Bank Converters */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
               UK &amp; Global Banks
@@ -85,6 +110,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/convert/indian-bank-statement-to-excel"
+                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
+                >
+                  SBI, ICICI, Axis &amp; Kotak to Excel
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/convert/pdf-to-excel-converter"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
@@ -102,7 +135,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Col 4: Resources & Directory */}
+          {/* Col 5: Resources & Directory */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
               Product &amp; Directory
@@ -130,7 +163,7 @@ export default function Footer() {
                   href="/"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Free Online PDF Extractor
+                  Free Bank Statement Converter
                 </Link>
               </li>
             </ul>

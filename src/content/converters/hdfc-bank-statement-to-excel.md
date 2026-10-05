@@ -1,14 +1,12 @@
 ---
 slug: "hdfc-bank-statement-to-excel"
 title: "HDFC Bank Statement to Excel & CSV Converter"
-metaTitle: "Convert HDFC Bank Statement PDF to Excel & CSV | Finlyzer"
+metaTitle: "HDFC Bank Statement to Excel & CSV (Free) | Finlyzer"
 metaDescription: "Convert HDFC Bank PDF statements to Excel (XLSX) or CSV with password unlock. Instant AI table parsing for Indian savings and current accounts."
 category: "india-banks"
 bankName: "HDFC Bank"
 country: "India"
 badgeText: "India #1 Bank Supported"
-rating: 4.9
-reviewCount: 4210
 keywords:
   - "hdfc bank statement to excel"
   - "convert hdfc pdf statement to csv"
@@ -22,7 +20,7 @@ features:
   - title: "INR Currency & Lakhs / Crores Support"
     description: "Standardizes Indian numbering formatting (₹) into clean numeric columns compatible with Excel and Tally."
   - title: "Tally Prime & Zoho Books Ready"
-    description: "Export formats formatted for direct entry into Indian accounting software including Tally, Zoho Books, and Busy."
+    description: "Clean CSV and Excel exports that map easily into Tally, Zoho Books, and Busy import templates."
 tableColumns:
   - "Date"
   - "Narration / Transaction Details"
@@ -58,10 +56,20 @@ faqs:
 
 # Convert HDFC Bank Statements to Excel & CSV
 
-HDFC Bank statements often have dense narrations filled with alphanumeric UPI, IMPS, and NEFT codes. Finlyzer's intelligent financial entity extractor isolates payee names and cleans up complex transaction descriptions automatically.
+HDFC Bank statements pack long narrations full of UPI, IMPS, NEFT, and RTGS reference codes into a single column, and the PDFs sent by email are password protected. Finlyzer unlocks the file in your browser session, cleans each narration, and gives you Excel or CSV with withdrawals and deposits in separate columns.
 
-## Perfect for Indian CA Firms & Businesses
+## How to Download Your HDFC Statement
 
-- **Instant Password Unlock**: No need to manually decrypt PDF files beforehand.
-- **UPI Transaction Cleaning**: Automatically categorizes merchant payments and peer transfers.
-- **Tally & Excel Ready**: Export with zero data loss or distorted column alignments.
+1. Log in to HDFC NetBanking or the HDFC Bank mobile app.
+2. Go to **Accounts**, then **Enquire**, then **Download Historical Statements**.
+3. Pick the date range and download as PDF.
+4. Upload it above. If prompted, enter the PDF password (for emailed statements this is usually your Customer ID).
+
+## Built for Indian CA Firms & Businesses
+
+- **Password-protected PDFs**: no need to remove the password beforehand. It is never stored.
+- **UPI narration cleaning**: payee name, UPI ID, and reference number are separated.
+- **INR formatting**: amounts written with lakh separators become clean numbers.
+- **Accounting-ready CSV** that maps into Tally, Zoho Books, and Busy import templates.
+
+Using another Indian bank? See the [SBI, ICICI, Axis & Kotak converter](/convert/indian-bank-statement-to-excel).

@@ -1,14 +1,12 @@
 ---
 slug: "scanned-pdf-ocr-to-excel"
 title: "Scanned Bank Statement OCR to Excel Converter"
-metaTitle: "Scanned PDF Bank Statement OCR to Excel & CSV | Finlyzer"
+metaTitle: "Scanned Bank Statement to Excel (OCR) | Finlyzer"
 metaDescription: "Convert scanned and photographed bank statements into editable Excel (XLSX) or CSV. High accuracy OCR fixes skewed scans and blurry receipts."
 category: "tools"
 bankName: "Scanned & Photographed Documents"
 country: "Global"
 badgeText: "High Precision AI OCR"
-rating: 4.8
-reviewCount: 3120
 keywords:
   - "scanned bank statement ocr to excel"
   - "convert scanned pdf to excel"
@@ -50,4 +48,23 @@ faqs:
 
 # Scanned Bank Statement OCR to Excel
 
-Turn paper bank statements and scan PDFs into structured spreadsheets ready for your accounting workflow.
+Paper statements, scanned PDFs, and phone photos have no text layer, so ordinary PDF-to-Excel tools return nothing or garbled characters. Finlyzer runs OCR (optical character recognition) on every page, rebuilds the transaction table, and checks the result against the statement balances.
+
+## What It Handles
+
+- **Scanned PDFs** from office scanners and copiers.
+- **Phone photos** in PNG, JPG, or TIFF, including slightly skewed or shadowed shots.
+- **Old archives** of paper statements needed for audits, loans, or legal cases.
+- **Mixed files** where some pages are digital and some are scanned.
+
+## Tips for the Best OCR Accuracy
+
+1. Scan at 300 DPI or higher, in grayscale or color.
+2. Photograph pages flat, in even light, with the whole table in frame.
+3. Upload all pages of a statement together so balances can be verified end to end.
+
+## Why the Balance Check Matters
+
+OCR can misread a digit. Finlyzer adds up every extracted transaction and compares it to the opening and closing balances printed on the statement, so a misread row is flagged before you export rather than discovered during reconciliation.
+
+Have a digital PDF instead? Use the [bank statement to Excel converter](/convert/bank-statement-to-excel).

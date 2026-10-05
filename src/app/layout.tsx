@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { SITE_URL } from "@/lib/seo-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://finlyzers.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
     template: "%s | Finlyzer",
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     "Wells Fargo statement to Excel",
     "HDFC bank statement to Excel",
   ],
-  authors: [{ name: "Finlyzer Team", url: "https://finlyzers.com" }],
+  authors: [{ name: "Finlyzer Team", url: SITE_URL }],
   creator: "Finlyzer",
   publisher: "Finlyzer",
   formatDetection: {
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://finlyzers.com",
+    url: SITE_URL,
     siteName: "Finlyzer",
     title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
     description:

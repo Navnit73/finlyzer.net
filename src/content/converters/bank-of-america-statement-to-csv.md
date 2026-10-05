@@ -1,14 +1,13 @@
 ---
 slug: "bank-of-america-statement-to-csv"
 title: "Bank of America Statement to CSV & Excel Converter"
-metaTitle: "Bank of America PDF Statement to CSV & Excel Converter | Finlyzer"
+metaTitle: "Bank of America Statement to CSV & Excel | Finlyzer"
 metaDescription: "Convert Bank of America (BofA) PDF statements to Excel or CSV. Fast, accurate, and secure AI converter for personal and business checking accounts."
 category: "us-banks"
 bankName: "Bank of America"
+outputFormat: "CSV"
 country: "United States"
 badgeText: "US BofA Optimized"
-rating: 4.9
-reviewCount: 2950
 keywords:
   - "bank of america statement to csv"
   - "bofa pdf to excel converter"
@@ -56,10 +55,22 @@ faqs:
 
 # Convert Bank of America Statements to CSV & Excel
 
-Bank of America statements are frequently formatted with multi-page summary tables, itemized check clearances, and electronic transfer schedules. Finlyzer's OCR engine is trained on BofA layout patterns to give you clean, structured data in seconds.
+Bank of America statements are spread across several sections: an account summary, *Deposits and other additions*, *Withdrawals and other subtractions*, *Checks*, and *Service fees*. Copying those tables out of a PDF usually breaks columns and splits long descriptions across rows. Finlyzer reads each section, merges multi-line descriptions, and outputs one clean row per transaction.
 
-## Fast & Secure Conversion
+## How to Download Your Bank of America Statement
 
-- **No Manual Typing**: Save hours of tedious transaction entry.
-- **Accurate Mathematical Reconciliation**: Verify starting and ending balances automatically.
-- **Compatible with All Major Accounting Platforms**: QuickBooks, Xero, Sage, Excel, and Google Sheets.
+1. Sign in to Online Banking or the Bank of America mobile app.
+2. Open the account and choose **Statements & Documents**.
+3. Select the statement month and download it as a PDF.
+4. Upload the PDF to the converter above and choose CSV or Excel.
+
+## What You Get in the CSV
+
+- **One row per transaction** with date, description, amount, and running balance.
+- **Separate debit and credit columns**, so withdrawals and deposits never mix.
+- **Check numbers kept** from the Checks section for easy matching.
+- **Balance verification**: beginning balance plus deposits minus withdrawals is checked against the ending balance before you download.
+
+## Who Uses It
+
+Bookkeepers reconciling client accounts, small businesses preparing for tax season, and anyone moving transaction history into QuickBooks, Xero, Excel, or Google Sheets. Need a different format? Export the same statement as [QuickBooks QBO](/convert/bank-statement-to-qbo) or [OFX](/convert/bank-statement-to-ofx).

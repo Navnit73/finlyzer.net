@@ -2,19 +2,20 @@ import React from 'react';
 import type { Metadata } from 'next';
 import HomeWorkspace from '@/components/home/HomeWorkspace';
 import HomeEditorialContent, { faqs, steps } from '@/components/home/HomeEditorialContent';
+import { SITE_URL } from '@/lib/seo-config';
 
 export const metadata: Metadata = {
-  title: 'AI Bank Statement Converter to Excel & CSV (Free) | Finlyzer',
+  title: { absolute: 'Bank Statement Converter: PDF to Excel & CSV | Finlyzer' },
   description:
     'Convert PDF bank statements to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX). 99.8% precision with mathematical running balance check, OCR, and zero data retention.',
   alternates: {
-    canonical: 'https://finlyzers.com',
+    canonical: SITE_URL,
   },
   openGraph: {
     title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzer',
     description:
       'Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero with instant running-balance audit.',
-    url: 'https://finlyzers.com',
+    url: SITE_URL,
     siteName: 'Finlyzer',
     type: 'website',
     locale: 'en_US',
@@ -42,30 +43,26 @@ const jsonLdGraph = {
   '@graph': [
     {
       '@type': 'WebSite',
-      '@id': 'https://finlyzers.com/#website',
-      url: 'https://finlyzers.com',
+      '@id': `${SITE_URL}/#website`,
+      url: SITE_URL,
       name: 'Finlyzer',
       description: 'AI-Powered Bank Statement and Financial PDF Converter to Excel, CSV & QuickBooks',
       inLanguage: 'en-US',
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: 'https://finlyzers.com/convert?q={search_term_string}',
-        'query-input': 'required name=search_term_string',
-      },
+      publisher: { '@id': `${SITE_URL}/#organization` },
     },
     {
       '@type': 'Organization',
-      '@id': 'https://finlyzers.com/#organization',
+      '@id': `${SITE_URL}/#organization`,
       name: 'Finlyzer',
-      url: 'https://finlyzers.com',
-      logo: 'https://finlyzers.com/logo.png',
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
       description: 'Automated financial document OCR and bank statement conversion platform.',
     },
     {
       '@type': 'WebApplication',
-      '@id': 'https://finlyzers.com/#webapp',
+      '@id': `${SITE_URL}/#webapp`,
       name: 'Finlyzer Bank Statement Converter',
-      url: 'https://finlyzers.com',
+      url: SITE_URL,
       applicationCategory: 'FinanceApplication',
       operatingSystem: 'All',
       browserRequirements: 'Requires JavaScript. Requires HTML5.',
@@ -80,13 +77,13 @@ const jsonLdGraph = {
         'Mathematical Running Balance Reconciliation',
         'Password-Protected PDF Decryption',
         'Scanned and Photo OCR',
-        'Multi-Format Exports: Excel (.xlsx), CSV, QuickBooks (.qbo), Xero (.ofx), Quicken (.qif), Tally (.xml)',
+        'Multi-Format Exports: Excel (.xlsx), CSV, QuickBooks (.qbo), Xero (.ofx), Quicken (.qif)',
         'Zero Permanent Data Retention',
       ],
     },
     {
       '@type': 'HowTo',
-      '@id': 'https://finlyzers.com/#howto',
+      '@id': `${SITE_URL}/#howto`,
       name: 'How to Convert a Bank Statement PDF to Excel in Seconds',
       description:
         'Step-by-step tutorial to convert digital or scanned bank statement PDFs into Excel spreadsheets or QuickBooks accounting files.',
@@ -100,7 +97,7 @@ const jsonLdGraph = {
     },
     {
       '@type': 'FAQPage',
-      '@id': 'https://finlyzers.com/#faq',
+      '@id': `${SITE_URL}/#faq`,
       mainEntity: faqs.map((f) => ({
         '@type': 'Question',
         name: f.q,

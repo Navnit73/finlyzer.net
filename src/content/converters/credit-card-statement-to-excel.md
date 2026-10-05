@@ -1,14 +1,12 @@
 ---
 slug: "credit-card-statement-to-excel"
 title: "Credit Card Statement to Excel & CSV Converter"
-metaTitle: "Convert Credit Card PDF Statements to Excel & CSV | Finlyzer"
+metaTitle: "Credit Card Statement to Excel & CSV Converter | Finlyzer"
 metaDescription: "Extract credit card statement transactions from Amex, Chase, Capital One, Citi, and Visa into clean Excel (XLSX) or CSV spreadsheets."
 category: "tools"
 bankName: "Amex, Chase, Capital One, Citi & More"
 country: "Global"
 badgeText: "Credit Card Hub"
-rating: 4.9
-reviewCount: 3590
 keywords:
   - "credit card statement to excel"
   - "convert amex statement to csv"
@@ -50,4 +48,23 @@ faqs:
 
 # Convert Credit Card Statements to Excel & CSV
 
-Export all your credit card statements into structured spreadsheets ready for tax deductions, expense reports, and bookkeeping.
+Credit card statements mix purchases, payments, refunds, interest, and fees, often with foreign-currency details on a second line. Finlyzer extracts every line into a structured spreadsheet so you can track spending, prepare expense reports, or claim business deductions without retyping anything.
+
+## Supported Card Statements
+
+Finlyzer works with statements from American Express, Chase, Capital One, Citi, Discover, Barclaycard, HDFC, ICICI, and most other issuers. It adapts to different layouts, so you do not need a separate template per card.
+
+## What the Converter Extracts
+
+- **Transaction and posting dates** in separate columns.
+- **Merchant names** cleaned of trailing location and reference codes.
+- **Charges and credits** split, so payments and refunds are not counted as spending.
+- **Foreign-currency lines** kept with the converted amount.
+
+## Popular Uses
+
+1. **Expense reports**: filter business purchases in Excel and attach the sheet to your claim.
+2. **Tax preparation**: total deductible categories for the year in minutes.
+3. **Budgeting**: import a CSV into Google Sheets or your budgeting app.
+
+Want the data in accounting software? Export as [QuickBooks QBO](/convert/bank-statement-to-qbo) or [Quicken QIF](/convert/bank-statement-to-qif).

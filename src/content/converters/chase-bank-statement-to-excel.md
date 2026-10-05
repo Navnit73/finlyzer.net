@@ -1,14 +1,12 @@
 ---
 slug: "chase-bank-statement-to-excel"
 title: "Chase Bank Statement to Excel & CSV Converter"
-metaTitle: "Convert Chase Bank Statement to Excel & CSV (Free & Fast) | Finlyzer"
+metaTitle: "Chase Bank Statement to Excel & CSV Converter | Finlyzer"
 metaDescription: "Instantly convert Chase PDF bank statements to clean Excel (XLSX) or CSV. AI extracts deposits, withdrawals, dates, and balances with 100% reconciliation."
 category: "us-banks"
 bankName: "Chase Bank"
 country: "United States"
 badgeText: "US #1 Bank Supported"
-rating: 4.9
-reviewCount: 3840
 keywords:
   - "chase bank statement to excel"
   - "convert chase pdf to csv"
@@ -74,3 +72,5 @@ Finlyzer uses specialized **AI-powered financial OCR** tailored specifically for
 - **Zero Formatting Headaches**: Automatically formats dates into standard `YYYY-MM-DD` or `MM/DD/YYYY` and separates debits and credits into clean numeric columns.
 - **Enterprise-Grade Privacy**: Your financial information is protected with end-to-end encryption.
 - **High-Speed Batch Processing**: Convert multi-month statement archives (up to 200 pages) in a single asynchronous job.
+
+Need the data in accounting software instead? Export the same Chase statement as [QuickBooks QBO](/convert/bank-statement-to-qbo), [OFX for Xero](/convert/bank-statement-to-ofx), or [CSV](/convert/bank-statement-to-csv).

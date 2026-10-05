@@ -1,84 +1,98 @@
-import React from 'react';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { getAllLandingPages } from '@/lib/seo-markdown';
+import React from "react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getAllLandingPages } from "@/lib/seo-markdown";
 import {
   SITE_URL,
   SITE_NAME,
   getLanguageAlternates,
   getBreadcrumbJsonLd,
-} from '@/lib/seo-config';
-import {
-  Sparkles,
-  ArrowRight,
-  Building2,
-  Globe2,
-  FileSpreadsheet,
-  ChevronRight,
-  ShieldCheck,
-  Zap,
-} from 'lucide-react';
+} from "@/lib/seo-config";
+import { ChevronRight, CheckCircle2, ArrowRight } from "lucide-react";
+import ConverterDirectory, {
+  type DirectoryEntry,
+} from "@/components/converter/ConverterDirectory";
+import { FinalCtaSection } from "@/components/converter/sections";
 
 export const metadata: Metadata = {
-  title: 'Bank Statement Converters Directory — Excel, CSV & QBO | Finlyzer',
+  title: {
+    absolute: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzer",
+  },
   description:
-    'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, HDFC, SBI, and credit cards to Excel, CSV, and QuickBooks.',
-  alternates: getLanguageAlternates('/convert'),
+    "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, HDFC, SBI, and credit cards to Excel, CSV, and QuickBooks.",
+  alternates: getLanguageAlternates("/convert"),
   openGraph: {
-    title: 'Bank Statement Converters Directory — Excel, CSV & QBO | Finlyzer',
+    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzer",
     description:
-      'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
+      "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.",
     url: `${SITE_URL}/convert`,
     siteName: SITE_NAME,
-    type: 'website',
-    locale: 'en_US',
-    alternateLocale: ['en_GB', 'en_IN', 'en_CA', 'en_AU'],
+    type: "website",
+    locale: "en_US",
+    alternateLocale: ["en_GB", "en_IN", "en_CA", "en_AU"],
     images: [
       {
-        url: '/og_image.webp',
+        url: "/og_image.webp",
         width: 1200,
         height: 630,
-        alt: 'Finlyzer Bank Converters Directory',
-        type: 'image/webp',
+        alt: "Finlyzer Bank Converters Directory",
+        type: "image/webp",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Bank Statement Converters Directory — Excel, CSV & QBO | Finlyzer',
+    card: "summary_large_image",
+    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzer",
     description:
-      'Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.',
-    images: ['/og_image.webp'],
+      "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.",
+    images: ["/og_image.webp"],
   },
 };
 
 export default function ConvertersDirectoryPage() {
   const pages = getAllLandingPages();
 
-  const usBanks = pages.filter((p) => p.category === 'us-banks');
-  const ukBanks = pages.filter((p) => p.category === 'uk-banks');
-  const indiaBanks = pages.filter((p) => p.category === 'india-banks');
-  const tools = pages.filter((p) => p.category === 'tools');
+  // Only the fields the client-side directory needs (keeps the RSC payload small).
+  const entries: DirectoryEntry[] = pages.map(
+    ({
+      slug,
+      title,
+      metaDescription,
+      badgeText,
+      category,
+      country,
+      bankName,
+    }) => ({
+      slug,
+      title,
+      metaDescription,
+      badgeText,
+      category,
+      country,
+      bankName,
+    }),
+  );
 
   // Directory Structured Data Schema (CollectionPage + ItemList + BreadcrumbList)
   const directoryJsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
+    "@context": "https://schema.org",
+    "@graph": [
       getBreadcrumbJsonLd([
-        { name: 'Home', path: '/' },
-        { name: 'Converters', path: '/convert' },
+        { name: "Home", path: "/" },
+        { name: "Converters", path: "/convert" },
       ]),
       {
-        '@type': 'CollectionPage',
-        '@id': `${SITE_URL}/convert#collection`,
-        name: 'Financial Document & Bank Statement Converters Directory',
-        description: 'Comprehensive directory of bank statement parsers and financial OCR tools.',
+        "@type": "CollectionPage",
+        "@id": `${SITE_URL}/convert#collection`,
+        name: "Financial Document & Bank Statement Converters Directory",
+        description:
+          "Comprehensive directory of bank statement parsers and financial OCR tools.",
         url: `${SITE_URL}/convert`,
         mainEntity: {
-          '@type': 'ItemList',
+          "@type": "ItemList",
           numberOfItems: pages.length,
           itemListElement: pages.map((p, index) => ({
-            '@type': 'ListItem',
+            "@type": "ListItem",
             position: index + 1,
             name: p.title,
             url: `${SITE_URL}/convert/${p.slug}`,
@@ -89,210 +103,73 @@ export default function ConvertersDirectoryPage() {
   };
 
   return (
-    <div className="w-full bg-[var(--color-surface)] text-[var(--color-ink)] min-h-screen py-6 sm:py-10">
+    <div className="w-full">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(directoryJsonLd) }}
       />
 
-      <div className="site-container space-y-10 sm:space-y-14">
-        {/* Breadcrumb Header */}
-        <nav aria-label="Breadcrumbs" className="flex items-center gap-2 text-xs font-semibold text-[var(--color-text-muted)]">
-          <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">
-            Home
+      <nav
+        aria-label="Breadcrumbs"
+        className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]"
+      >
+        <Link
+          href="/"
+          className="hover:text-[var(--color-ink)] transition-colors"
+        >
+          Home
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+        <span
+          className="text-[var(--color-ink)] font-semibold"
+          aria-current="page"
+        >
+          Converters
+        </span>
+      </nav>
+
+      <div className="space-y-16 sm:space-y-24 pt-6 sm:pt-10 pb-8 sm:pb-16">
+        {/* Hero */}
+        <div className="space-y-8 sm:space-y-10">
+          <header className="text-center max-w-3xl mx-auto space-y-4 sm:space-y-5">
+            <span className="feature-badge">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{pages.length} converters · Free up to 10 pages</span>
+            </span>
+            <h1 className="text-[2rem] leading-[1.08] sm:text-5xl lg:text-[3.5rem] lg:leading-[1.04] font-extrabold tracking-tight text-[var(--color-ink)]">
+              Bank Statement Converters for Every Bank &amp; Format
+            </h1>
+            <p className="text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed max-w-2xl mx-auto">
+              Pick your bank or export format to open a converter tuned for it.
+              Every converter splits debits and credits and checks balances
+              before you download.
+            </p>
+          </header>
+
+          <ConverterDirectory pages={entries} />
+        </div>
+
+        {/* Fallback for banks without a dedicated page */}
+        <section className="intro-panel grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-ink)]">
+              Don&apos;t See Your Bank?
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--color-text-secondary)]">
+              The universal converter adapts to almost any bank statement layout
+              worldwide, including scanned PDFs and photos.
+            </p>
+          </div>
+          <Link
+            href="/convert/bank-statement-to-excel"
+            className="btn-brand-dark !min-h-[52px] w-full lg:w-auto lg:justify-self-end"
+          >
+            <span>Open Universal Converter</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-[var(--color-ink)] font-bold">Converters Directory</span>
-        </nav>
+        </section>
 
-        {/* Header Hero */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="feature-badge">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
-            <span>Financial Document Converters Directory</span>
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-[var(--color-ink)]">
-            Convert Any Bank Statement into Excel &amp; CSV
-          </h1>
-          <p className="text-sm sm:text-base text-[var(--color-text-secondary)] leading-relaxed">
-            Choose your financial institution or document type below to use our dedicated AI-powered parser with 100% mathematical balance verification.
-          </p>
-        </div>
-
-        {/* Categories Section */}
-        <div className="space-y-12">
-          {/* US Banks */}
-          {usBanks.length > 0 && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
-                <Building2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
-                <h2 className="text-xl font-black text-[var(--color-ink)]">
-                  United States Bank Converters
-                </h2>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
-                  {usBanks.length} Converters
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {usBanks.map((page) => (
-                  <Link
-                    key={page.slug}
-                    href={`/convert/${page.slug}`}
-                    className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-all group shadow-xs hover:shadow-md space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
-                        {page.badgeText}
-                      </span>
-                      <span className="text-xs font-bold text-amber-500">★ {page.rating}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)] transition-colors">
-                        {page.title}
-                      </h3>
-                      <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mt-1">
-                        {page.metaDescription}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)]">
-                      <span>Launch Converter</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* UK Banks */}
-          {ukBanks.length > 0 && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
-                <Globe2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
-                <h2 className="text-xl font-black text-[var(--color-ink)]">
-                  United Kingdom Bank Converters
-                </h2>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
-                  {ukBanks.length} Converters
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {ukBanks.map((page) => (
-                  <Link
-                    key={page.slug}
-                    href={`/convert/${page.slug}`}
-                    className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-all group shadow-xs hover:shadow-md space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
-                        {page.badgeText}
-                      </span>
-                      <span className="text-xs font-bold text-amber-500">★ {page.rating}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)] transition-colors">
-                        {page.title}
-                      </h3>
-                      <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mt-1">
-                        {page.metaDescription}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)]">
-                      <span>Launch Converter</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Indian Banks */}
-          {indiaBanks.length > 0 && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
-                <Building2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
-                <h2 className="text-xl font-black text-[var(--color-ink)]">
-                  Indian Bank Statement Converters
-                </h2>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
-                  {indiaBanks.length} Converters
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {indiaBanks.map((page) => (
-                  <Link
-                    key={page.slug}
-                    href={`/convert/${page.slug}`}
-                    className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-all group shadow-xs hover:shadow-md space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
-                        {page.badgeText}
-                      </span>
-                      <span className="text-xs font-bold text-amber-500">★ {page.rating}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)] transition-colors">
-                        {page.title}
-                      </h3>
-                      <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mt-1">
-                        {page.metaDescription}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)]">
-                      <span>Launch Converter</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Universal & Specialist Tools */}
-          {tools.length > 0 && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-[var(--color-border)]">
-                <FileSpreadsheet className="w-5 h-5 text-[var(--color-brand-hover)]" />
-                <h2 className="text-xl font-black text-[var(--color-ink)]">
-                  Universal Financial OCR &amp; Table Extraction Tools
-                </h2>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
-                  {tools.length} Tools
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tools.map((page) => (
-                  <Link
-                    key={page.slug}
-                    href={`/convert/${page.slug}`}
-                    className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-all group shadow-xs hover:shadow-md space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
-                        {page.badgeText}
-                      </span>
-                      <span className="text-xs font-bold text-amber-500">★ {page.rating}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)] transition-colors">
-                        {page.title}
-                      </h3>
-                      <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2 mt-1">
-                        {page.metaDescription}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] group-hover:text-[var(--color-brand-hover)]">
-                      <span>Launch Tool</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+        <FinalCtaSection href="/#upload" />
       </div>
     </div>
   );

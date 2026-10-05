@@ -94,6 +94,66 @@ function cleanYamlValue(val: string): unknown {
   return trimmed;
 }
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function renderInline(text: string): string {
+  return escapeHtml(text)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+}
+
+/**
+ * Renders the small markdown subset used in converter content files.
+ * Headings are shifted down one level because the page template owns the H1.
+ */
+export function renderMarkdown(md: string): string {
+  const html: string[] = [];
+  let paragraph: string[] = [];
+  let list: { tag: 'ul' | 'ol'; items: string[] } | null = null;
+
+  const flushParagraph = () => {
+    if (paragraph.length) html.push(`<p>${renderInline(paragraph.join(' '))}</p>`);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (list) html.push(`<${list.tag}>${list.items.map((i) => `<li>${renderInline(i)}</li>`).join('')}</${list.tag}>`);
+    list = null;
+  };
+
+  for (const rawLine of md.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    const heading = line.match(/^(#{1,4})\s+(.*)$/);
+    const ordered = line.match(/^\d+\.\s+(.*)$/);
+    const unordered = line.match(/^[-*]\s+(.*)$/);
+
+    if (!line) {
+      flushParagraph();
+      flushList();
+    } else if (heading) {
+      flushParagraph();
+      flushList();
+      const level = Math.min(heading[1].length + 1, 4);
+      html.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
+    } else if (ordered || unordered) {
+      flushParagraph();
+      const tag = ordered ? 'ol' : 'ul';
+      if (list && list.tag !== tag) flushList();
+      if (!list) list = { tag, items: [] };
+      list.items.push((ordered || unordered)![1]);
+    } else {
+      flushList();
+      paragraph.push(line);
+    }
+  }
+  flushParagraph();
+  flushList();
+  return html.join('\n');
+}
+
 /**
  * Returns all SEO landing pages parsed from markdown
  */
@@ -116,18 +176,19 @@ export function getAllLandingPages(): SEOConverterPage[] {
         title: (data.title as string) || 'Bank Statement Converter',
         metaTitle: (data.metaTitle as string) || 'Convert Bank Statement to Excel | Finlyzer',
         metaDescription: (data.metaDescription as string) || 'Convert PDF bank statements to Excel and CSV.',
-        category: (data.category as 'us-banks' | 'uk-banks' | 'india-banks' | 'tools') || 'tools',
+        category: (data.category as SEOConverterPage['category']) || 'tools',
         bankName: (data.bankName as string) || 'Bank Statement',
+        outputFormat: (data.outputFormat as string) || 'Excel',
         country: (data.country as string) || 'Global',
         badgeText: (data.badgeText as string) || 'AI Verified Converter',
-        rating: typeof data.rating === 'number' ? data.rating : 4.9,
-        reviewCount: typeof data.reviewCount === 'number' ? data.reviewCount : 1250,
         keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
         features: Array.isArray(data.features) ? (data.features as SEOFeature[]) : [],
         tableColumns: Array.isArray(data.tableColumns) ? (data.tableColumns as string[]) : ['Date', 'Description', 'Debit', 'Credit', 'Balance'],
         sampleData: Array.isArray(data.sampleData) ? (data.sampleData as SEOSampleRow[]) : [],
         faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
         rawContent: content,
+        contentHtml: renderMarkdown(content),
+        lastModified: fs.statSync(fullPath).mtime,
       });
     }
 

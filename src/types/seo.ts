@@ -21,12 +21,11 @@ export interface SEOConverterPage {
   title: string;
   metaTitle: string;
   metaDescription: string;
-  category: 'us-banks' | 'uk-banks' | 'india-banks' | 'tools';
+  category: 'formats' | 'us-banks' | 'uk-banks' | 'india-banks' | 'tools';
   bankName: string;
+  outputFormat: string;
   country: string;
   badgeText: string;
-  rating: number;
-  reviewCount: number;
   keywords: string[];
   features: SEOFeature[];
   tableColumns: string[];
@@ -34,4 +33,5 @@ export interface SEOConverterPage {
   faqs: SEOFAQ[];
   contentHtml?: string;
   rawContent: string;
+  lastModified: Date;
 }

@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import GuestWorkspace from '@/components/guest/GuestWorkspace';
+import ConverterHero from '@/components/converter/ConverterHero';
 import OcrWorkspace from '@/components/ocr/OcrWorkspace';
+import MobileStickyCta from '@/components/converter/MobileStickyCta';
 
 export default function HomeWorkspace() {
   const { data: session, status } = useSession();
@@ -19,5 +20,10 @@ export default function HomeWorkspace() {
     );
   }
 
-  return <GuestWorkspace />;
+  return (
+    <>
+      <ConverterHero />
+      <MobileStickyCta />
+    </>
+  );
 }

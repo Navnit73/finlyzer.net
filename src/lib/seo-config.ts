@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
-export const SITE_URL = (process.env.NEXTAUTH_URL || 'https://finlyzers.com').replace(/\/$/, '');
+// Canonical public origin. Deliberately not derived from NEXTAUTH_URL: a build with a local or
+// staging auth URL would otherwise ship localhost canonicals and sitemap entries.
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://finlyzers.com').replace(/\/$/, '');
 export const SITE_NAME = 'Finlyzer';
 
 // English-speaking markets served by the same content (no locale-prefixed routes).

@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/seo-config';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,9 +7,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/superadmin/', '/dashboard/', '/invoices/'],
+        // No trailing slashes: '/dashboard/' would not block '/dashboard' itself. '/document' also covers '/documents'.
+        disallow: ['/api/', '/admin', '/superadmin', '/dashboard', '/invoices', '/document', '/user'],
       },
     ],
-    sitemap: `${process.env.NEXTAUTH_URL || 'https://finlyzers.com'}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

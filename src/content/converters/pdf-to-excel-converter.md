@@ -1,14 +1,12 @@
 ---
 slug: "pdf-to-excel-converter"
 title: "Universal Financial PDF to Excel Converter"
-metaTitle: "Convert Financial PDF to Excel (XLSX) Online Free | Finlyzer"
+metaTitle: "Financial PDF to Excel Converter (Free Online) | Finlyzer"
 metaDescription: "Convert financial PDF statements, invoices, and accounting tables into clean, structured Excel (XLSX) or CSV files using high-precision AI OCR."
 category: "tools"
 bankName: "All Financial Institutions"
 country: "Global"
 badgeText: "Universal Financial Tool"
-rating: 4.9
-reviewCount: 9420
 keywords:
   - "pdf to excel converter"
   - "financial pdf table extractor"
@@ -55,4 +53,23 @@ faqs:
 
 # Universal Financial PDF to Excel Converter
 
-Finlyzer converts complex financial PDFs into clean Excel worksheets without broken columns or merged cells.
+Generic PDF converters treat a financial document like any other table, so they merge debit and credit columns, split descriptions across rows, and drop numbers that fall near page edges. Finlyzer is built for financial PDFs: it detects table boundaries, normalizes dates and amounts, and produces an Excel sheet you can filter and total straight away.
+
+## Documents You Can Convert
+
+- Bank and credit card statements from any institution.
+- Brokerage and loan statements.
+- Invoices, receipts, and vendor statements.
+- Accounting reports exported as PDF.
+
+## How It Works
+
+1. Upload a PDF (digital or scanned).
+2. Finlyzer extracts every table row and checks totals where balances are available.
+3. Download Excel (.xlsx), CSV, or an accounting format.
+
+## Limits and Pricing
+
+Documents up to 10 pages are free. Files of 11 to 30 pages can be previewed free and unlocked for a one-time fee, and long archives up to 200 pages run in the background with a free account. See [pricing](/pricing) for details.
+
+Converting a bank statement specifically? The [bank statement to Excel converter](/convert/bank-statement-to-excel) is tuned for ledger layouts.

@@ -20,9 +20,19 @@ import { PRICING_PLANS, PricingPlan } from '@/types/pricing';
 import CheckoutModal from '@/components/dashboard/CheckoutModal';
 import AuthModal from '@/components/auth/AuthModal';
 
-function PricingContent() {
-  const { data: session, status } = useSession();
+// Reads ?plan= in its own Suspense boundary so the rest of the page can be server-rendered.
+function PlanQueryReader({ onPlan }: { onPlan: (planId: string | null) => void }) {
   const searchParams = useSearchParams();
+  const planId = searchParams.get('plan');
+  useEffect(() => {
+    onPlan(planId);
+  }, [planId, onPlan]);
+  return null;
+}
+
+export default function PricingPage() {
+  const { data: session, status } = useSession();
+  const [queryPlanId, setQueryPlanId] = useState<string | null>(null);
 
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -75,7 +85,7 @@ function PricingContent() {
   useEffect(() => {
     if (status !== 'authenticated') return;
 
-    let targetPlanId = searchParams.get('plan');
+    let targetPlanId = queryPlanId;
     if (!targetPlanId && typeof window !== 'undefined') {
       targetPlanId =
         localStorage.getItem('finlyzer_pending_plan') ||
@@ -101,7 +111,7 @@ function PricingContent() {
         } catch {}
       }
     }
-  }, [status, searchParams]);
+  }, [status, queryPlanId]);
 
   const handleSelectPlan = (plan: PricingPlan) => {
     setSelectedPlan(plan);
@@ -142,6 +152,10 @@ function PricingContent() {
 
   return (
     <div className="max-w-6xl mx-auto w-full space-y-12 pb-16">
+      <Suspense fallback={null}>
+        <PlanQueryReader onPlan={setQueryPlanId} />
+      </Suspense>
+
       {/* Header Section */}
       <div className="text-center space-y-3 max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
@@ -149,7 +163,7 @@ function PricingContent() {
           <span>Pay-As-You-Go Pricing</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-ink)] tracking-tight">
-          Flexible Credit Packages For Any Volume
+          Bank Statement Converter Pricing
         </h1>
         <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
           No monthly lock-ins or recurring commitments. Buy page credits when you need them, processed with high-accuracy AI financial parsing.
@@ -396,19 +410,5 @@ function PricingContent() {
         redirectUrl={selectedPlan ? `/pricing?plan=${selectedPlan.id}&checkout=true` : '/pricing'}
       />
     </div>
-  );
-}
-
-export default function PricingPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="max-w-6xl mx-auto w-full py-16 flex items-center justify-center">
-          <span className="loading loading-spinner loading-lg text-[var(--color-ink)]"></span>
-        </div>
-      }
-    >
-      <PricingContent />
-    </Suspense>
   );
 }
