@@ -50,7 +50,7 @@ faqs:
   - question: "Does Finlyzer support password-protected Chase statements?"
     answer: "Yes. If your Chase statement is encrypted with a password, Finlyzer prompts you to enter the password securely in your browser to unlock and process the document."
   - question: "Are my financial documents secure and private?"
-    answer: "Absolutely. All document transfers use enterprise 256-bit SSL encryption. We never sell or share your data, and uploaded files are deleted automatically after processing."
+    answer: "Absolutely. All document transfers use enterprise 256-bit SSL encryption. We never sell your data. Guest uploads are deleted automatically 24 hours after upload, and signed-in users can delete any saved statement at any time."
   - question: "Can I convert scanned or photographed Chase statements?"
     answer: "Yes. Our OCR engine uses advanced computer vision and DeepSeek AI vision models to extract tabular data even from skewed scans, mobile photos, and multi-column layouts."
 ---

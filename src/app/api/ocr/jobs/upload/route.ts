@@ -5,6 +5,7 @@ import { getUserQuota } from '@/lib/models/User';
 import { uploadAsyncJob } from '@/lib/ocr-api';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
 import { errorResponse, successResponse } from '@/lib/api-utils';
+import { guestExpiryDate } from '@/lib/retention';
 
 const WEBHOOK_SECRET = process.env.OCR_WEBHOOK_SECRET || 'ocr_webhook_secret_2026';
 
@@ -116,6 +117,7 @@ export async function POST(req: NextRequest) {
                 metadata: { pages: estimatedPages, job_id: jobResponse.job_id },
                 created_at: new Date().toISOString(),
               },
+              ...(isGuest ? { $setOnInsert: { expires_at: guestExpiryDate() } } : {}),
             },
             { upsert: true }
           );

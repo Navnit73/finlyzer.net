@@ -75,7 +75,7 @@ const metrics = [
 
 const securityPoints = [
   { icon: ShieldCheck, title: 'Encrypted in transit', body: 'Every upload travels over 256-bit SSL/TLS.' },
-  { icon: Trash2, title: 'Deleted after processing', body: 'Files are processed in memory and removed after your session.' },
+  { icon: Trash2, title: 'Auto-deleted in 24 hours', body: 'Guest uploads and their results are deleted automatically 24 hours after upload.' },
   { icon: KeyRound, title: 'Passwords never stored', body: 'Protected PDFs are unlocked for processing only.' },
   { icon: BrainCircuit, title: 'Never used for AI training', body: 'Your statements are not shared or used to train models.' },
 ];
@@ -465,7 +465,7 @@ export function FinalCtaSection({
       <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-[var(--color-text-muted)]">
         <span className="inline-flex items-center gap-1.5"><UploadCloud className="w-4 h-4" aria-hidden="true" /> PDF, scans &amp; photos</span>
         <span className="inline-flex items-center gap-1.5"><Download className="w-4 h-4" aria-hidden="true" /> Excel, CSV, QBO, OFX, QIF</span>
-        <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" aria-hidden="true" /> Deleted after processing</span>
+        <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" aria-hidden="true" /> Auto-deleted in 24h</span>
       </p>
     </section>
   );

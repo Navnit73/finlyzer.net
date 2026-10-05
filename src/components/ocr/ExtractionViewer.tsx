@@ -11,8 +11,11 @@ import {
 import FinancialMetricCard from './FinancialMetricCard';
 import TransactionsTable from './TransactionsTable';
 import ExportActionBar from './ExportActionBar';
+import { checkRunningBalance } from '@/lib/balance-check';
 import {
   Sparkles,
+  AlertTriangle,
+  Info,
   Layers,
   FileCode,
   FileSpreadsheet,
@@ -62,6 +65,12 @@ export default function ExtractionViewer({
   const totalOutflow = bankData.total_withdrawals ?? transactions.reduce((acc, t) => acc + (t.debit || 0), 0);
   const netSavings = totalInflow - totalOutflow;
   const closingBalance = bankData.closing_balance ?? (bankData.opening_balance ? bankData.opening_balance + netSavings : 0);
+
+  // Real running-balance verification (previous + credit − debit vs. the printed balance on each row).
+  const balanceCheck = useMemo(
+    () => checkRunningBalance(transactions, bankData.opening_balance, bankData.closing_balance),
+    [transactions, bankData.opening_balance, bankData.closing_balance]
+  );
 
   const [rawTextPage, setRawTextPage] = useState(1);
   const [itemsPage, setItemsPage] = useState(1);
@@ -418,15 +427,48 @@ export default function ExtractionViewer({
         {/* Tab Content 2: AI Insights & Cleaned Summary */}
         {activeTab === 'ai_summary' && (
           <div className="space-y-6">
-            <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
-              <Sparkles className="w-5 h-5 text-[var(--color-brand-hover)] shrink-0 mt-0.5" />
-              <div className="space-y-1 text-xs">
-                <p className="font-bold text-sm">AI Reconciliation Verified</p>
-                <p className="leading-relaxed">
-                  The document extraction was validated against arithmetic balance checks and verified with zero discrepancy between line items and opening/closing totals.
-                </p>
-              </div>
-            </div>
+            {transactions.length > 0 && (
+              balanceCheck.status === 'verified' ? (
+                <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
+                  <Sparkles className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0 mt-0.5" />
+                  <div className="space-y-1 text-xs">
+                    <p className="font-bold text-sm">Running balance verified</p>
+                    <p className="leading-relaxed">
+                      {balanceCheck.checkedRows > 0
+                        ? `All ${balanceCheck.checkedRows} rows with a printed balance match the recomputed running balance`
+                        : 'The recomputed balance'}
+                      {balanceCheck.closingMatches ? ', and the result equals the closing balance.' : '.'}
+                    </p>
+                  </div>
+                </div>
+              ) : balanceCheck.status === 'mismatch' ? (
+                <div className="alert bg-[var(--color-warning-soft)] border border-[var(--color-warning-border)] rounded-lg p-4 flex items-start gap-3 text-[var(--color-ink)]">
+                  <AlertTriangle className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" />
+                  <div className="space-y-1 text-xs">
+                    <p className="font-bold text-sm">Check these rows before exporting</p>
+                    <p className="leading-relaxed">
+                      {balanceCheck.mismatchRows.length > 0 &&
+                        `${balanceCheck.mismatchRows.length} row${balanceCheck.mismatchRows.length === 1 ? '' : 's'} don't match the printed running balance (row ${balanceCheck.mismatchRows
+                          .slice(0, 5)
+                          .map((i) => i + 1)
+                          .join(', ')}${balanceCheck.mismatchRows.length > 5 ? ', …' : ''}). `}
+                      {balanceCheck.closingMatches === false && 'The recomputed total does not equal the closing balance. '}
+                      Compare with the original statement.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="alert bg-[var(--color-surface-subtle)] border border-[var(--color-border)] rounded-lg p-4 flex items-start gap-3 text-[var(--color-ink)]">
+                  <Info className="w-5 h-5 text-[var(--color-text-secondary)] shrink-0 mt-0.5" />
+                  <div className="space-y-1 text-xs">
+                    <p className="font-bold text-sm">Balance check not available</p>
+                    <p className="leading-relaxed text-[var(--color-text-secondary)]">
+                      This statement has no printed running or closing balance to verify against. Compare the totals with your statement.
+                    </p>
+                  </div>
+                </div>
+              )
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">

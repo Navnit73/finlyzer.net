@@ -68,7 +68,7 @@ Barclays statements list transactions with separate *Money out* and *Money in* c
 - **Money in / Money out preserved** as separate numeric columns.
 - **Multi-page and annual statements** processed with full balance reconciliation.
 - **Ready for Xero, QuickBooks UK, Sage, and FreeAgent** via CSV or [OFX export](/convert/bank-statement-to-ofx).
-- **Privacy first**: files are encrypted in transit and deleted after processing.
+- **Privacy first**: files are encrypted in transit, and guest uploads are deleted automatically within 24 hours.
 
 ## Common Use Cases
 

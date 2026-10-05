@@ -7,7 +7,7 @@ import { SITE_URL } from '@/lib/seo-config';
 export const metadata: Metadata = {
   title: { absolute: 'Bank Statement Converter: PDF to Excel & CSV | Finlyzer' },
   description:
-    'Convert PDF bank statements to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX). 99.8% precision with mathematical running balance check, OCR, and zero data retention.',
+    'Convert PDF bank statements to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX). 99.8% precision with mathematical running balance check, OCR, and guest uploads auto-deleted after 24 hours.',
   alternates: {
     canonical: SITE_URL,
   },
@@ -78,7 +78,7 @@ const jsonLdGraph = {
         'Password-Protected PDF Decryption',
         'Scanned and Photo OCR',
         'Multi-Format Exports: Excel (.xlsx), CSV, QuickBooks (.qbo), Xero (.ofx), Quicken (.qif)',
-        'Zero Permanent Data Retention',
+        'Guest Uploads Auto-Deleted After 24 Hours',
       ],
     },
     {

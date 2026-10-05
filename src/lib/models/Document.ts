@@ -1,6 +1,7 @@
 import { getDatabase } from '../mongodb';
 import { ExtractionResponse, StoredDocument, DocumentListResponse } from '@/types/ocr';
 import { measureDbQuery } from '../db-logger';
+import { guestExpiryDate } from '../retention';
 
 export interface ExtractionDocument {
   _id?: string;
@@ -19,6 +20,8 @@ export interface ExtractionDocument {
   is_guest?: boolean;
   guest_session_id?: string;
   payment_order_id?: string;
+  /** Set only on guest documents; a TTL index deletes the document at this time. */
+  expires_at?: Date;
 }
 
 // In-memory fallback if MongoDB is not reachable
@@ -67,9 +70,10 @@ export async function saveDocumentExtraction(
       const db = await getDatabase();
       if (db) {
         const collection = db.collection<ExtractionDocument>('extractions');
+        // Guest docs get an expiry on first insert only, so re-saves (job completion) don't extend it.
         await collection.updateOne(
           { id: extraction.id },
-          { $set: docRecord },
+          { $set: docRecord, ...(isGuest ? { $setOnInsert: { expires_at: guestExpiryDate() } } : {}) },
           { upsert: true }
         );
         return docRecord;

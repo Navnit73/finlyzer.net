@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ShieldCheck, Sparkles, Lock } from "lucide-react";
 import BrandLogo from "./BrandLogo";
+import { TRUST_PAGES } from "@/lib/trust-pages";
 
 export default function Footer() {
   return (
@@ -16,7 +17,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] pt-1">
               <ShieldCheck className="w-4 h-4 text-[var(--color-brand-hover)]" />
-              <span>256-Bit SSL Encrypted &bull; ISO-27001 Pattern</span>
+              <span>Encrypted in transit &bull; Guest uploads auto-deleted in 24h</span>
             </div>
           </div>
 
@@ -166,6 +167,16 @@ export default function Footer() {
                   Free Bank Statement Converter
                 </Link>
               </li>
+              <li>
+                <Link href="/faq" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/editorial-policy" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
+                  How It Works &amp; Accuracy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -173,13 +184,16 @@ export default function Footer() {
         {/* Bottom Copyright Bar */}
         <div className="pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
           <p>&copy; {new Date().getFullYear()} Finlyzer. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <span>Enterprise 256-Bit SSL</span>
-            <span>&bull;</span>
-            <span>GDPR &amp; CCPA Compliant</span>
-            <span>&bull;</span>
-            <span>DeepSeek AI Vision</span>
-          </div>
+          <nav aria-label="Legal" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            {['/security', '/privacy-policy', '/terms', '/disclaimer'].map((path) => {
+              const page = TRUST_PAGES.find((p) => p.path === path)!;
+              return (
+                <Link key={path} href={path} className="hover:text-[var(--color-ink)] hover:underline transition-colors">
+                  {page.shortTitle}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </footer>

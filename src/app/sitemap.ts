@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllLandingPages } from '@/lib/seo-markdown';
 import { SITE_URL } from '@/lib/seo-config';
+import { TRUST_PAGES, POLICIES_LAST_UPDATED } from '@/lib/trust-pages';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = getAllLandingPages();
@@ -27,6 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    ...TRUST_PAGES.map((p) => ({
+      url: `${SITE_URL}${p.path}`,
+      lastModified: new Date(POLICIES_LAST_UPDATED),
+      changeFrequency: 'yearly' as const,
+      priority: p.path === '/faq' || p.path === '/security' ? 0.6 : 0.3,
+    })),
   ];
 
   const programmaticRoutes: MetadataRoute.Sitemap = pages.map((page) => ({

@@ -79,6 +79,8 @@ export async function ensureDatabaseIndexes(db: Db): Promise<void> {
       extractionsCol.createIndex({ user_email: 1, document_type: 1, created_at: -1 }, { background: true }),
       extractionsCol.createIndex({ job_id: 1 }, { sparse: true, background: true }),
       extractionsCol.createIndex({ status: 1 }, { background: true }),
+      // TTL: guest documents carry `expires_at` and are deleted automatically; account documents never set it.
+      extractionsCol.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0, background: true }),
     ]);
 
     // 3. Orders Collection Indexes

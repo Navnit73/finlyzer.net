@@ -238,13 +238,13 @@ export default function ConverterHero({
           isBusy ? 'cursor-progress' : 'cursor-pointer'
         } ${
           isDragging
-            ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
-            : 'border-[var(--color-border-hover)] bg-[var(--color-surface-subtle)] hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]/40'
+            ? 'border-[var(--media-violet)] bg-[var(--media-violet-hover)]'
+            : 'border-[var(--media-violet-border)] bg-[var(--media-violet-soft)] hover:border-[var(--media-violet)] hover:bg-[var(--media-violet-hover)]'
         }`}
       >
         {isBusy && selectedFile ? (
           <div className="flex flex-col items-center gap-3 w-full" aria-live="polite">
-            <span className="loading loading-spinner loading-lg text-[var(--color-ink)]" />
+            <span className="loading loading-spinner loading-lg text-[var(--media-violet)]" />
             <p className="text-base font-bold text-[var(--color-ink)]">
               {isDetectingPages ? 'Reading your file...' : progressStage || 'Converting...'}
             </p>
@@ -255,8 +255,8 @@ export default function ConverterHero({
           </div>
         ) : selectedFile ? (
           <div className="flex flex-col items-center gap-2 w-full">
-            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-soft)] flex items-center justify-center">
-              <FileText className="w-6 h-6 text-[var(--color-ink)]" />
+            <div className="w-12 h-12 rounded-full bg-[var(--media-violet)] flex items-center justify-center">
+              <FileText className="w-6 h-6 text-[var(--color-on-dark)]" />
             </div>
             <p className="text-base font-bold text-[var(--color-ink)] truncate max-w-full px-2" title={selectedFile.name}>
               {selectedFile.name}
@@ -274,17 +274,17 @@ export default function ConverterHero({
           </div>
         ) : (
           <>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[var(--color-brand-soft)] flex items-center justify-center">
-              <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-[var(--color-ink)]" />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[var(--media-violet)] flex items-center justify-center">
+              <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-[var(--color-on-dark)]" />
             </div>
-            <p className="hidden sm:block text-lg font-bold text-[var(--color-ink)]">
+            <p className="hidden sm:block text-lg font-bold text-[var(--media-violet-text)]">
               Drag &amp; drop your bank statement here
             </p>
-            <span className="btn-brand-primary w-full sm:w-auto !min-h-[56px] pointer-events-none">
+            <span className="btn-brand-primary w-full sm:w-auto !min-h-[56px] pointer-events-none !bg-[var(--media-violet)] !border-[var(--media-violet)] !text-[var(--color-on-dark)] !shadow-none">
               <span>{ctaLabel}</span>
               <ArrowRight className="w-5 h-5" />
             </span>
-            <p className="text-sm text-[var(--color-text-secondary)]">
+            <p className="text-sm text-[var(--media-violet-text)]/80">
               PDF, scanned PNG / JPG / TIFF · up to 50 MB
             </p>
           </>
@@ -344,7 +344,7 @@ export default function ConverterHero({
         </li>
         <li className="flex items-center gap-1.5 sm:justify-center">
           <Trash2 className="w-4 h-4 text-[var(--color-ink)] shrink-0" />
-          <span>Deleted after processing</span>
+          <span>Auto-deleted in 24h</span>
         </li>
         <li className="flex items-center gap-1.5 sm:justify-center">
           <BrainCircuit className="w-4 h-4 text-[var(--color-ink)] shrink-0" />
