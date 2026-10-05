@@ -1,7 +1,7 @@
 ---
 slug: "bank-statement-to-qbo"
 title: "Bank Statement to QBO Converter for QuickBooks"
-metaTitle: "Bank Statement to QBO for QuickBooks | Finlyzer"
+metaTitle: "Bank Statement to QBO for QuickBooks | Finlyzers"
 metaDescription: "Convert PDF bank statements to QBO files and import them into QuickBooks Online or Desktop. Verified balances, clean payee names, free up to 10 pages."
 category: "formats"
 bankName: "Bank"
@@ -46,7 +46,7 @@ sampleData:
     balance: "$8,758.70"
 faqs:
   - question: "How do I import a QBO file into QuickBooks Online?"
-    answer: "In QuickBooks Online go to Banking, choose Upload transactions, select the .qbo file you downloaded from Finlyzer, and pick the bank account to import into."
+    answer: "In QuickBooks Online go to Banking, choose Upload transactions, select the .qbo file you downloaded from Finlyzers, and pick the bank account to import into."
   - question: "Why use QBO instead of CSV for QuickBooks?"
     answer: "QBO files are the native Web Connect format, so QuickBooks imports them without column mapping and applies your bank rules automatically."
   - question: "Can I import statements older than my bank feed?"
@@ -64,7 +64,7 @@ QuickBooks bank feeds often stop at 90 days of history, break when a bank change
 ## How to Convert and Import
 
 1. **Upload** your PDF bank statement above.
-2. **Check** the extracted transactions. Finlyzer verifies them against the statement balances.
+2. **Check** the extracted transactions. Finlyzers verifies them against the statement balances.
 3. **Download the .qbo file.**
 4. In QuickBooks Online, go to **Banking**, then **Upload transactions**, choose the file, and select the account.
 

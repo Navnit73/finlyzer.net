@@ -1,7 +1,7 @@
 ---
 slug: "bank-statement-to-ofx"
 title: "Bank Statement to OFX Converter for Xero"
-metaTitle: "Bank Statement to OFX for Xero & More | Finlyzer"
+metaTitle: "Bank Statement to OFX for Xero & More | Finlyzers"
 metaDescription: "Convert PDF bank statements to OFX files for Xero, Zoho Books, MoneyMoney, and other accounting apps. Verified balances, free up to 10 pages."
 category: "formats"
 bankName: "Bank"
@@ -46,7 +46,7 @@ sampleData:
     balance: "$8,758.70"
 faqs:
   - question: "How do I import an OFX file into Xero?"
-    answer: "In Xero open the bank account, choose Manage Account, then Import a Statement, and upload the .ofx file downloaded from Finlyzer. The transactions then appear for reconciliation."
+    answer: "In Xero open the bank account, choose Manage Account, then Import a Statement, and upload the .ofx file downloaded from Finlyzers. The transactions then appear for reconciliation."
   - question: "Which apps accept OFX files?"
     answer: "Xero, Zoho Books, Microsoft Money, MoneyMoney, GnuCash, and many other personal and business finance tools."
   - question: "Should I use OFX or CSV for Xero?"
@@ -59,7 +59,7 @@ faqs:
 
 # Convert Bank Statements to OFX for Xero
 
-OFX (Open Financial Exchange) is a standard bank data format that Xero and many other accounting apps import directly. Finlyzer converts PDF statements into OFX so you can bring in transactions your bank feed missed.
+OFX (Open Financial Exchange) is a standard bank data format that Xero and many other accounting apps import directly. Finlyzers converts PDF statements into OFX so you can bring in transactions your bank feed missed.
 
 ## How to Convert and Import into Xero
 

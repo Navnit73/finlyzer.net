@@ -96,7 +96,7 @@ export async function GET(
 
     const buffer = Buffer.from(await blob.arrayBuffer());
     const contentType = CONTENT_TYPES[format] || 'application/octet-stream';
-    const filename = `finlyzer_export_${id.trim()}.${format}`;
+    const filename = `finlyzers_export_${id.trim()}.${format}`;
 
     return new NextResponse(buffer, {
       status: 200,

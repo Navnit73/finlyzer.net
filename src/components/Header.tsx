@@ -174,7 +174,7 @@ export default function Header() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-[var(--color-surface)] border border-[var(--color-border)] p-1 flex items-center justify-center">
-                          <Image src="/logo.png" alt="Finlyzer Logo" width={24} height={24} className="w-full h-full object-contain" />
+                          <Image src="/logo.png" alt="Finlyzers Logo" width={24} height={24} className="w-full h-full object-contain" />
                         </div>
                         <span>Home &amp; Instant Extractor</span>
                       </div>

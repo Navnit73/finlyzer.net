@@ -6,13 +6,13 @@ import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 
 const title = 'Privacy Policy';
 const description =
-  'What data Finlyzer collects when you convert bank statements, why, how long it is kept, which providers process it, and how to delete it.';
+  'What data Finlyzers collects when you convert bank statements, why, how long it is kept, which providers process it, and how to delete it.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzer` },
+  title: { absolute: `${title} | Finlyzers` },
   description,
   alternates: { canonical: absoluteUrl('/privacy-policy') },
-  openGraph: { title: `${title} | Finlyzer`, description, url: absoluteUrl('/privacy-policy'), type: 'website' },
+  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/privacy-policy'), type: 'website' },
 };
 
 const sections: LegalSection[] = [
@@ -85,7 +85,7 @@ const sections: LegalSection[] = [
     heading: '4. Service providers',
     body: (
       <>
-        <p>We share data only with providers that help us run Finlyzer, and only as needed for their role:</p>
+        <p>We share data only with providers that help us run Finlyzers, and only as needed for their role:</p>
         <table>
           <thead>
             <tr>
@@ -162,7 +162,7 @@ const sections: LegalSection[] = [
           permanent.
         </li>
         <li>
-          <strong>Use Finlyzer without an account</strong> for statements up to 30 pages.
+          <strong>Use Finlyzers without an account</strong> for statements up to 30 pages.
         </li>
         <li>
           Depending on where you live, you may have additional rights to access, correct, or export your data, or to
@@ -184,7 +184,7 @@ const sections: LegalSection[] = [
   {
     id: 'children',
     heading: '9. Children',
-    body: <p>Finlyzer is not intended for anyone under 18, and we do not knowingly collect their data.</p>,
+    body: <p>Finlyzers is not intended for anyone under 18, and we do not knowingly collect their data.</p>,
   },
   {
     id: 'changes',
@@ -205,7 +205,7 @@ export default function PrivacyPolicyPage() {
       title={title}
       intro={
         <p>
-          This policy explains what Finlyzer (“we”, “us”) collects when you use our bank statement converter, why we
+          This policy explains what Finlyzers (“we”, “us”) collects when you use our bank statement converter, why we
           collect it, and how you stay in control of it.
         </p>
       }

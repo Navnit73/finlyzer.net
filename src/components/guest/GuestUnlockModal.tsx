@@ -63,7 +63,7 @@ export default function GuestUnlockModal({
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
           amount: Math.round(orderPayload.amount_usd * 100),
           currency: 'USD',
-          name: 'Finlyzer AI Hub',
+          name: 'Finlyzers AI Hub',
           description: `Unlock ${pageCount}-Page Statement Export (${filename})`,
           order_id: orderPayload.orderId,
           handler: async function (response: {

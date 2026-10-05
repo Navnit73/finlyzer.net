@@ -7,13 +7,13 @@ import { FREE_PAGE_LIMIT } from '@/types/pricing';
 
 const title = 'Terms & Conditions';
 const description =
-  'The rules for using Finlyzer: acceptable use, usage limits, page credits and payments, refunds, and limitation of liability.';
+  'The rules for using Finlyzers: acceptable use, usage limits, page credits and payments, refunds, and limitation of liability.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzer` },
+  title: { absolute: `${title} | Finlyzers` },
   description,
   alternates: { canonical: absoluteUrl('/terms') },
-  openGraph: { title: `${title} | Finlyzer`, description, url: absoluteUrl('/terms'), type: 'website' },
+  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/terms'), type: 'website' },
 };
 
 const sections: LegalSection[] = [
@@ -22,7 +22,7 @@ const sections: LegalSection[] = [
     heading: '1. Acceptance',
     body: (
       <p>
-        By using Finlyzer you agree to these terms and to our <Link href="/privacy-policy">Privacy Policy</Link>. If you
+        By using Finlyzers you agree to these terms and to our <Link href="/privacy-policy">Privacy Policy</Link>. If you
         do not agree, do not use the service.
       </p>
     ),
@@ -32,7 +32,7 @@ const sections: LegalSection[] = [
     heading: '2. The service',
     body: (
       <p>
-        Finlyzer converts bank statements and similar financial documents into structured formats such as Excel, CSV,
+        Finlyzers converts bank statements and similar financial documents into structured formats such as Excel, CSV,
         QBO, OFX, QIF, and PDF. Output is generated automatically and may contain errors; see the{' '}
         <Link href="/disclaimer">Disclaimer</Link>.
       </p>
@@ -139,7 +139,7 @@ const sections: LegalSection[] = [
           any other decision.
         </p>
         <p>
-          To the extent permitted by law, Finlyzer is not liable for indirect or consequential losses, and our total
+          To the extent permitted by law, Finlyzers is not liable for indirect or consequential losses, and our total
           liability for any claim is limited to the amount you paid us in the 12 months before the claim.
         </p>
       </>
@@ -150,7 +150,7 @@ const sections: LegalSection[] = [
     heading: '9. Termination',
     body: (
       <p>
-        You can stop using Finlyzer and delete your account at any time from the dashboard. We may suspend or end access
+        You can stop using Finlyzers and delete your account at any time from the dashboard. We may suspend or end access
         for breach of these terms.
       </p>
     ),
@@ -172,7 +172,7 @@ export default function TermsPage() {
     <LegalPage
       path="/terms"
       title={title}
-      intro={<p>These terms govern your use of Finlyzer’s website and bank statement conversion service.</p>}
+      intro={<p>These terms govern your use of Finlyzers’s website and bank statement conversion service.</p>}
       sections={sections}
     />
   );

@@ -5,13 +5,13 @@ import { absoluteUrl } from '@/lib/seo-config';
 
 const title = 'Disclaimer';
 const description =
-  'Finlyzer converts financial documents automatically. It is not financial, tax, or legal advice, and users must verify converted figures before relying on them.';
+  'Finlyzers converts financial documents automatically. It is not financial, tax, or legal advice, and users must verify converted figures before relying on them.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzer` },
+  title: { absolute: `${title} | Finlyzers` },
   description,
   alternates: { canonical: absoluteUrl('/disclaimer') },
-  openGraph: { title: `${title} | Finlyzer`, description, url: absoluteUrl('/disclaimer'), type: 'website' },
+  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/disclaimer'), type: 'website' },
 };
 
 const sections: LegalSection[] = [
@@ -20,7 +20,7 @@ const sections: LegalSection[] = [
     heading: 'Not financial, tax, or legal advice',
     body: (
       <p>
-        Finlyzer is a document conversion tool. Nothing it produces, including summaries, cash flow figures, or
+        Finlyzers is a document conversion tool. Nothing it produces, including summaries, cash flow figures, or
         categorized transactions, is financial, investment, tax, accounting, or legal advice. Consult a qualified
         professional before making decisions.
       </p>
@@ -48,7 +48,7 @@ const sections: LegalSection[] = [
     heading: 'No liability for decisions',
     body: (
       <p>
-        Finlyzer is not responsible for losses or decisions based on converted data. See section 8 of the{' '}
+        Finlyzers is not responsible for losses or decisions based on converted data. See section 8 of the{' '}
         <Link href="/terms">Terms &amp; Conditions</Link> for the full limitation of liability.
       </p>
     ),
@@ -70,7 +70,7 @@ const sections: LegalSection[] = [
     body: (
       <p>
         Bank and software names (such as Chase, HDFC, QuickBooks, or Xero) are used only to describe compatibility.
-        Finlyzer is not affiliated with or endorsed by them.
+        Finlyzers is not affiliated with or endorsed by them.
       </p>
     ),
   },
@@ -81,7 +81,7 @@ export default function DisclaimerPage() {
     <LegalPage
       path="/disclaimer"
       title={title}
-      intro={<p>Please read this before relying on any data converted with Finlyzer.</p>}
+      intro={<p>Please read this before relying on any data converted with Finlyzers.</p>}
       sections={sections}
     />
   );

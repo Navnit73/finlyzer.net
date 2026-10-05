@@ -5,18 +5,18 @@ import HomeEditorialContent, { faqs, steps } from '@/components/home/HomeEditori
 import { SITE_URL } from '@/lib/seo-config';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Bank Statement Converter: PDF to Excel & CSV | Finlyzer' },
+  title: { absolute: 'Bank Statement Converter: PDF to Excel & CSV | Finlyzers' },
   description:
     'Convert PDF bank statements to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX). 99.8% precision with mathematical running balance check, OCR, and guest uploads auto-deleted after 24 hours.',
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzer',
+    title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzers',
     description:
       'Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero with instant running-balance audit.',
     url: SITE_URL,
-    siteName: 'Finlyzer',
+    siteName: 'Finlyzers',
     type: 'website',
     locale: 'en_US',
     images: [
@@ -24,14 +24,14 @@ export const metadata: Metadata = {
         url: '/og_image.webp',
         width: 1200,
         height: 630,
-        alt: 'Finlyzer — Turn Bank Statements into Clean Data (Excel, CSV, QuickBooks)',
+        alt: 'Finlyzers — Turn Bank Statements into Clean Data (Excel, CSV, QuickBooks)',
         type: 'image/webp',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzer',
+    title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzers',
     description:
       'Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero with instant running-balance audit.',
     images: ['/og_image.webp'],
@@ -45,7 +45,7 @@ const jsonLdGraph = {
       '@type': 'WebSite',
       '@id': `${SITE_URL}/#website`,
       url: SITE_URL,
-      name: 'Finlyzer',
+      name: 'Finlyzers',
       description: 'AI-Powered Bank Statement and Financial PDF Converter to Excel, CSV & QuickBooks',
       inLanguage: 'en-US',
       publisher: { '@id': `${SITE_URL}/#organization` },
@@ -53,7 +53,7 @@ const jsonLdGraph = {
     {
       '@type': 'Organization',
       '@id': `${SITE_URL}/#organization`,
-      name: 'Finlyzer',
+      name: 'Finlyzers',
       url: SITE_URL,
       logo: `${SITE_URL}/logo.png`,
       description: 'Automated financial document OCR and bank statement conversion platform.',
@@ -61,7 +61,7 @@ const jsonLdGraph = {
     {
       '@type': 'WebApplication',
       '@id': `${SITE_URL}/#webapp`,
-      name: 'Finlyzer Bank Statement Converter',
+      name: 'Finlyzers Bank Statement Converter',
       url: SITE_URL,
       applicationCategory: 'FinanceApplication',
       operatingSystem: 'All',

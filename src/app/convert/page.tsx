@@ -16,13 +16,13 @@ import { FinalCtaSection } from "@/components/converter/sections";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzer",
+    absolute: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzers",
   },
   description:
     "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, HDFC, SBI, and credit cards to Excel, CSV, and QuickBooks.",
   alternates: getLanguageAlternates("/convert"),
   openGraph: {
-    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzer",
+    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzers",
     description:
       "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.",
     url: `${SITE_URL}/convert`,
@@ -35,14 +35,14 @@ export const metadata: Metadata = {
         url: "/og_image.webp",
         width: 1200,
         height: 630,
-        alt: "Finlyzer Bank Converters Directory",
+        alt: "Finlyzers Bank Converters Directory",
         type: "image/webp",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzer",
+    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzers",
     description:
       "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.",
     images: ["/og_image.webp"],

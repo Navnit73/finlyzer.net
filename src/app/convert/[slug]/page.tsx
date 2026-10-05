@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonicalUrl = absoluteUrl(`/convert/${page.slug}`);
 
   return {
-    // metaTitle already carries the brand, so skip the root layout's "%s | Finlyzer" template.
+    // metaTitle already carries the brand, so skip the root layout's "%s | Finlyzers" template.
     title: { absolute: page.metaTitle },
     description: page.metaDescription,
     keywords: page.keywords,
@@ -133,7 +133,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
             '@type': 'HowToStep',
             position: 1,
             name: 'Upload Statement',
-            text: `Drag and drop your ${page.bankName} PDF bank statement into the Finlyzer converter.`,
+            text: `Drag and drop your ${page.bankName} PDF bank statement into the Finlyzers converter.`,
           },
           {
             '@type': 'HowToStep',

@@ -39,7 +39,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Finlyzer_Invoice_${order.order_id}.pdf"`,
+        'Content-Disposition': `attachment; filename="Finlyzers_Invoice_${order.order_id}.pdf"`,
         'Cache-Control': 'no-store, max-age=0',
       },
     });

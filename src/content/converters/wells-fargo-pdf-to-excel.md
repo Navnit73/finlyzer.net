@@ -1,7 +1,7 @@
 ---
 slug: "wells-fargo-pdf-to-excel"
 title: "Wells Fargo Bank Statement to Excel & CSV Converter"
-metaTitle: "Wells Fargo Statement to Excel & CSV | Finlyzer"
+metaTitle: "Wells Fargo Statement to Excel & CSV | Finlyzers"
 metaDescription: "Easily convert Wells Fargo PDF bank statements into clean Excel or CSV files. Fast, accurate, AI-powered extraction for personal and business checking."
 category: "us-banks"
 bankName: "Wells Fargo"
@@ -46,14 +46,14 @@ sampleData:
     balance: "$23,565.60"
 faqs:
   - question: "How do I extract transactions from a Wells Fargo statement?"
-    answer: "Upload your Wells Fargo statement to Finlyzer. Our system detects the table geometry, extracts the transaction lines, and creates an Excel or CSV file in under 5 seconds."
+    answer: "Upload your Wells Fargo statement to Finlyzers. Our system detects the table geometry, extracts the transaction lines, and creates an Excel or CSV file in under 5 seconds."
   - question: "Does this handle Wells Fargo Commercial & Treasury statements?"
-    answer: "Yes, Finlyzer processes standard personal checking statements as well as complex Wells Fargo Commercial Banking and Treasury Management PDF files."
+    answer: "Yes, Finlyzers processes standard personal checking statements as well as complex Wells Fargo Commercial Banking and Treasury Management PDF files."
 ---
 
 # Convert Wells Fargo Bank Statements to Excel & CSV
 
-Wells Fargo statements group activity into a summary, a *Transaction history* table with deposits/credits and withdrawals/debits columns, and an ending daily balance column. Descriptions often wrap onto two or three lines. Finlyzer keeps each transaction on one row and preserves the daily balance for reconciliation.
+Wells Fargo statements group activity into a summary, a *Transaction history* table with deposits/credits and withdrawals/debits columns, and an ending daily balance column. Descriptions often wrap onto two or three lines. Finlyzers keeps each transaction on one row and preserves the daily balance for reconciliation.
 
 ## How to Download Your Wells Fargo Statement
 
@@ -62,7 +62,7 @@ Wells Fargo statements group activity into a summary, a *Transaction history* ta
 3. Choose the account and statement period, then download the PDF.
 4. Upload it above and export to Excel or CSV.
 
-## Why Use Finlyzer for Wells Fargo Statements
+## Why Use Finlyzers for Wells Fargo Statements
 
 - **Wrapped descriptions merged** into a single clean description field.
 - **Deposits and withdrawals** in separate numeric columns.

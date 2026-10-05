@@ -1,4 +1,4 @@
-# Finlyzer Project Guidelines
+# Finlyzers Project Guidelines
 
 @AGENTS.md
 

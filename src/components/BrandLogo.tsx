@@ -44,7 +44,7 @@ export default function BrandLogo({
       >
         <Image
           src="/logo.png"
-          alt="Finlyzer Logo"
+          alt="Finlyzers Logo"
           width={pixelSize * 2}
           height={pixelSize * 2}
           priority={priority}
@@ -54,7 +54,7 @@ export default function BrandLogo({
       {showText && (
         <span className={`flex items-center text-xl font-black tracking-tight text-[var(--color-ink)] ${textClassName}`}>
           <span className="text-[var(--color-brand-hover)]">Fin</span>
-          <span className="text-[var(--color-ink)]">lyzer</span>
+          <span className="text-[var(--color-ink)]">lyzers</span>
           {tag && (
             <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] rounded-md">
               {tag}
@@ -71,7 +71,7 @@ export default function BrandLogo({
         href={href}
         onClick={onClick}
         className="inline-flex items-center hover:opacity-90 transition-opacity"
-        aria-label="Finlyzer Home"
+        aria-label="Finlyzers Home"
       >
         {content}
       </Link>

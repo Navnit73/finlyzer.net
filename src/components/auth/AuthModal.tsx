@@ -97,7 +97,7 @@ export default function AuthModal({
     save_history: 'Sign in to save your conversions',
     dashboard: 'Sign in to your dashboard',
     pricing: selectedPlan ? `Sign in to buy ${selectedPlan.name}` : 'Sign in to buy page credits',
-    general: 'Sign in to Finlyzer',
+    general: 'Sign in to Finlyzers',
   };
 
   const descriptions = {

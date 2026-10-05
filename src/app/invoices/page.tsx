@@ -85,7 +85,7 @@ export default function InvoicesBillingPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Finlyzer_Invoice_${orderId}.pdf`);
+      link.setAttribute('download', `Finlyzers_Invoice_${orderId}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();

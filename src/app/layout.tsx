@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
-    template: "%s | Finlyzer",
+    default: "Finlyzers — AI Bank Statement to Excel & CSV Converter",
+    template: "%s | Finlyzers",
   },
   description:
     "Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX) with 99.8% precision, OCR, and automated balance reconciliation.",
@@ -37,9 +37,9 @@ export const metadata: Metadata = {
     "Wells Fargo statement to Excel",
     "HDFC bank statement to Excel",
   ],
-  authors: [{ name: "Finlyzer Team", url: SITE_URL }],
-  creator: "Finlyzer",
-  publisher: "Finlyzer",
+  authors: [{ name: "Finlyzers Team", url: SITE_URL }],
+  creator: "Finlyzers",
+  publisher: "Finlyzers",
   formatDetection: {
     email: false,
     address: false,
@@ -60,8 +60,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    siteName: "Finlyzer",
-    title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
+    siteName: "Finlyzers",
+    title: "Finlyzers — AI Bank Statement to Excel & CSV Converter",
     description:
       "Convert PDF bank statements to Excel, CSV, QuickBooks QBO, and Xero OFX with 99.8% precision, OCR, and automated balance reconciliation.",
     images: [
@@ -69,14 +69,14 @@ export const metadata: Metadata = {
         url: "/og_image.webp",
         width: 1200,
         height: 630,
-        alt: "Finlyzer — AI Bank Statement to Excel, CSV & QuickBooks Converter",
+        alt: "Finlyzers — AI Bank Statement to Excel, CSV & QuickBooks Converter",
         type: "image/webp",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Finlyzer — AI Bank Statement to Excel & CSV Converter",
+    title: "Finlyzers — AI Bank Statement to Excel & CSV Converter",
     description:
       "Convert PDF bank statements to Excel, CSV, QuickBooks QBO, and Xero OFX with 99.8% precision, OCR, and automated balance reconciliation.",
     images: ["/og_image.webp"],

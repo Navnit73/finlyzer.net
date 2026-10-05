@@ -174,7 +174,7 @@ export function getAllLandingPages(): SEOConverterPage[] {
       pages.push({
         slug: (data.slug as string) || file.replace(/\.md$/, ''),
         title: (data.title as string) || 'Bank Statement Converter',
-        metaTitle: (data.metaTitle as string) || 'Convert Bank Statement to Excel | Finlyzer',
+        metaTitle: (data.metaTitle as string) || 'Convert Bank Statement to Excel | Finlyzers',
         metaDescription: (data.metaDescription as string) || 'Convert PDF bank statements to Excel and CSV.',
         category: (data.category as SEOConverterPage['category']) || 'tools',
         bankName: (data.bankName as string) || 'Bank Statement',

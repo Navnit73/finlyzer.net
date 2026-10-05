@@ -1,7 +1,7 @@
 ---
 slug: "bank-statement-to-excel"
 title: "Bank Statement to Excel Converter"
-metaTitle: "Bank Statement to Excel Converter (Free) | Finlyzer"
+metaTitle: "Bank Statement to Excel Converter (Free) | Finlyzers"
 metaDescription: "Convert any PDF bank statement to Excel (XLSX) in seconds. Separate debit and credit columns, verified balances, scanned PDF support. Free up to 10 pages."
 category: "formats"
 bankName: "Bank"
@@ -58,12 +58,12 @@ faqs:
 
 # Convert Bank Statements to Excel Without Retyping
 
-Copying a bank statement out of a PDF usually leaves you with merged columns, descriptions split across rows, and amounts Excel treats as text. Finlyzer rebuilds the transaction table properly, so the spreadsheet you download is ready to sort, filter, and total.
+Copying a bank statement out of a PDF usually leaves you with merged columns, descriptions split across rows, and amounts Excel treats as text. Finlyzers rebuilds the transaction table properly, so the spreadsheet you download is ready to sort, filter, and total.
 
 ## How to Convert a Bank Statement to Excel
 
 1. **Upload** your PDF statement, scanned page, or photo using the box above.
-2. **Review** the extracted transactions. Finlyzer checks them against the statement's opening and closing balances.
+2. **Review** the extracted transactions. Finlyzers checks them against the statement's opening and closing balances.
 3. **Download** an .xlsx file and open it in Excel or Google Sheets.
 
 ## What Your Excel File Contains
@@ -75,7 +75,7 @@ Copying a bank statement out of a PDF usually leaves you with merged columns, de
 
 ## Why Not a Generic PDF to Excel Tool?
 
-General converters copy the page layout, not the ledger. Headers repeat on every page, summary boxes end up mixed with transactions, and nothing checks that the totals add up. Finlyzer understands statement structure and flags any page where the extracted rows do not reconcile.
+General converters copy the page layout, not the ledger. Headers repeat on every page, summary boxes end up mixed with transactions, and nothing checks that the totals add up. Finlyzers understands statement structure and flags any page where the extracted rows do not reconcile.
 
 ## Works With Your Bank
 

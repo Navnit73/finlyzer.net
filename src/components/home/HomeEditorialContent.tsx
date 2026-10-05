@@ -39,16 +39,16 @@ export const supportedBanks = [
 export const steps = defaultSteps;
 
 export const faqs = [
-  { q: 'What is a bank statement converter and how does it work?', a: 'A bank statement converter reads a PDF or scanned bank statement and turns the transactions into structured rows (date, description, debit, credit, balance) that you can open in Excel or import into accounting software. Finlyzer uses AI table extraction and then checks that opening balance plus credits minus debits equals the closing balance.' },
+  { q: 'What is a bank statement converter and how does it work?', a: 'A bank statement converter reads a PDF or scanned bank statement and turns the transactions into structured rows (date, description, debit, credit, balance) that you can open in Excel or import into accounting software. Finlyzers uses AI table extraction and then checks that opening balance plus credits minus debits equals the closing balance.' },
   { q: 'How do I convert a PDF bank statement to Excel?', a: 'Upload your PDF, enter the password if your bank protects it, and click convert. In a few seconds you can download an .xlsx file that opens in Excel, Google Sheets or LibreOffice.' },
   { q: 'How can I convert a PDF bank statement to CSV?', a: 'Upload the statement and choose CSV as the export format. Each transaction becomes one row with separate debit and credit columns, ready for any accounting or budgeting tool.' },
-  { q: 'Can it convert statements from any bank or format?', a: 'Finlyzer handles major US, UK and Indian banks, credit card statements and scanned PDFs, and adapts to different layouts and multi-line descriptions. If a file does not convert as expected, contact us and we will fix it.' },
+  { q: 'Can it convert statements from any bank or format?', a: 'Finlyzers handles major US, UK and Indian banks, credit card statements and scanned PDFs, and adapts to different layouts and multi-line descriptions. If a file does not convert as expected, contact us and we will fix it.' },
   { q: 'How do I import a converted bank statement into QuickBooks?', a: 'Export as a QuickBooks .qbo file, then in QuickBooks choose Banking > Upload transactions and select the file. Headers are formatted for a one-click import.' },
   { q: 'Can I use it for Xero reconciliation?', a: 'Yes. Export as OFX or CSV and import it into Xero as a bank statement, then reconcile as usual. Quicken (.qif) exports are also available.' },
   { q: 'How does the free tier work?', a: 'Any financial statement or invoice up to 10 pages is free to convert and download in all export formats. Documents of 11 to 30 pages can be previewed free and unlocked for a one-time $10 fee. Larger archives (30+ pages) require a free account.' },
   { q: 'Are my bank statements secure and private?', a: 'Yes. Uploads are encrypted with 256-bit SSL, files are processed in memory and deleted after your session, and we never train AI models on your statements.' },
   { q: 'What if my PDF statement is password-protected?', a: 'Enter the password when prompted. The file is unlocked and parsed in memory, and the password is never stored.' },
-  { q: 'How accurate is the conversion?', a: 'Finlyzer reaches 99.8% ledger precision on complex statements, and every file is verified with a running-balance check so errors are flagged before you export.' },
+  { q: 'How accurate is the conversion?', a: 'Finlyzers reaches 99.8% ledger precision on complex statements, and every file is verified with a running-balance check so errors are flagged before you export.' },
 ];
 
 export default function HomeEditorialContent() {

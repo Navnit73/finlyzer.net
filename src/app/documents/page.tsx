@@ -115,7 +115,7 @@ export default function DocumentsVaultPage() {
       url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `finlyzer_${docId}.${format}`);
+      link.setAttribute('download', `finlyzers_${docId}.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();

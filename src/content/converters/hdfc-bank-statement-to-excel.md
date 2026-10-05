@@ -1,7 +1,7 @@
 ---
 slug: "hdfc-bank-statement-to-excel"
 title: "HDFC Bank Statement to Excel & CSV Converter"
-metaTitle: "HDFC Bank Statement to Excel & CSV (Free) | Finlyzer"
+metaTitle: "HDFC Bank Statement to Excel & CSV (Free) | Finlyzers"
 metaDescription: "Convert HDFC Bank PDF statements to Excel (XLSX) or CSV with password unlock. Instant AI table parsing for Indian savings and current accounts."
 category: "india-banks"
 bankName: "HDFC Bank"
@@ -47,16 +47,16 @@ sampleData:
     balance: "₹2,07,120.00"
 faqs:
   - question: "How do I convert a password-protected HDFC bank statement?"
-    answer: "Upload your HDFC statement to Finlyzer. When prompted, enter your password (typically your Customer ID or DOB). Finlyzer unlocks and processes the statement securely in memory."
+    answer: "Upload your HDFC statement to Finlyzers. When prompted, enter your password (typically your Customer ID or DOB). Finlyzers unlocks and processes the statement securely in memory."
   - question: "Can I import the Excel output into Tally Prime or Zoho Books?"
-    answer: "Yes! Finlyzer provides clean separate columns for Narration, Cheque/Ref Number, Withdrawal (Debit), Deposit (Credit), and Balance, matching Tally and Zoho Books import templates."
+    answer: "Yes! Finlyzers provides clean separate columns for Narration, Cheque/Ref Number, Withdrawal (Debit), Deposit (Credit), and Balance, matching Tally and Zoho Books import templates."
   - question: "Are my Indian banking details safe?"
     answer: "Yes. All data processing is strictly encrypted via SSL. We do not store your banking credentials or document contents after your session finishes."
 ---
 
 # Convert HDFC Bank Statements to Excel & CSV
 
-HDFC Bank statements pack long narrations full of UPI, IMPS, NEFT, and RTGS reference codes into a single column, and the PDFs sent by email are password protected. Finlyzer unlocks the file in your browser session, cleans each narration, and gives you Excel or CSV with withdrawals and deposits in separate columns.
+HDFC Bank statements pack long narrations full of UPI, IMPS, NEFT, and RTGS reference codes into a single column, and the PDFs sent by email are password protected. Finlyzers unlocks the file in your browser session, cleans each narration, and gives you Excel or CSV with withdrawals and deposits in separate columns.
 
 ## How to Download Your HDFC Statement
 

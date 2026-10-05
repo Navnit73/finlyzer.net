@@ -1,7 +1,7 @@
 ---
 slug: "scanned-pdf-ocr-to-excel"
 title: "Scanned Bank Statement OCR to Excel Converter"
-metaTitle: "Scanned Bank Statement to Excel (OCR) | Finlyzer"
+metaTitle: "Scanned Bank Statement to Excel (OCR) | Finlyzers"
 metaDescription: "Convert scanned and photographed bank statements into editable Excel (XLSX) or CSV. High accuracy OCR fixes skewed scans and blurry receipts."
 category: "tools"
 bankName: "Scanned & Photographed Documents"
@@ -40,15 +40,15 @@ sampleData:
     type: "Credit"
     balance: "$5,320.30"
 faqs:
-  - question: "Can Finlyzer read phone photos of paper bank statements?"
+  - question: "Can Finlyzers read phone photos of paper bank statements?"
     answer: "Yes! Take a photo of your paper statement and upload the JPG, PNG, or scanned PDF. Our AI vision model flattens the perspective, enhances text contrast, and converts it into structured Excel data."
-  - question: "How does Finlyzer handle unclear or faded numbers?"
+  - question: "How does Finlyzers handle unclear or faded numbers?"
     answer: "Our ledger reconciliation engine cross-checks row calculations against stated sub-totals and daily balance indicators to verify OCR accuracy."
 ---
 
 # Scanned Bank Statement OCR to Excel
 
-Paper statements, scanned PDFs, and phone photos have no text layer, so ordinary PDF-to-Excel tools return nothing or garbled characters. Finlyzer runs OCR (optical character recognition) on every page, rebuilds the transaction table, and checks the result against the statement balances.
+Paper statements, scanned PDFs, and phone photos have no text layer, so ordinary PDF-to-Excel tools return nothing or garbled characters. Finlyzers runs OCR (optical character recognition) on every page, rebuilds the transaction table, and checks the result against the statement balances.
 
 ## What It Handles
 
@@ -65,6 +65,6 @@ Paper statements, scanned PDFs, and phone photos have no text layer, so ordinary
 
 ## Why the Balance Check Matters
 
-OCR can misread a digit. Finlyzer adds up every extracted transaction and compares it to the opening and closing balances printed on the statement, so a misread row is flagged before you export rather than discovered during reconciliation.
+OCR can misread a digit. Finlyzers adds up every extracted transaction and compares it to the opening and closing balances printed on the statement, so a misread row is flagged before you export rather than discovered during reconciliation.
 
 Have a digital PDF instead? Use the [bank statement to Excel converter](/convert/bank-statement-to-excel).

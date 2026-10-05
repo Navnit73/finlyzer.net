@@ -1,7 +1,7 @@
 ---
 slug: "barclays-bank-statement-to-excel"
 title: "Barclays Bank Statement to Excel & CSV Converter"
-metaTitle: "Barclays Bank Statement to Excel & CSV | Finlyzer"
+metaTitle: "Barclays Bank Statement to Excel & CSV | Finlyzers"
 metaDescription: "Convert UK Barclays Bank PDF statements to Excel (XLSX) or CSV. Instant, accurate table extraction for UK personal & business accounts."
 category: "uk-banks"
 bankName: "Barclays Bank"
@@ -46,15 +46,15 @@ sampleData:
 faqs:
   - question: "How do I convert a Barclays UK statement into Excel?"
     answer: "Drag your Barclays PDF statement into the dropzone above. Our AI reads the UK table headers and produces an Excel (.xlsx) file with separate Money In, Money Out, and Balance columns in seconds."
-  - question: "Does Finlyzer support Barclays Business and Corporate accounts?"
-    answer: "Yes, Finlyzer supports all Barclays account types including Barclays Community, Business Current, and Corporate multi-currency accounts."
+  - question: "Does Finlyzers support Barclays Business and Corporate accounts?"
+    answer: "Yes, Finlyzers supports all Barclays account types including Barclays Community, Business Current, and Corporate multi-currency accounts."
   - question: "Is the output compatible with Xero and QuickBooks UK?"
     answer: "Yes. You can export directly into CSV formats structured for instant 1-click import into Xero, FreeAgent, QuickBooks UK, and Sage."
 ---
 
 # Convert Barclays Bank Statements to Excel & CSV
 
-Barclays statements list transactions with separate *Money out* and *Money in* columns, a running balance, and multi-line descriptions for card payments and direct debits. Finlyzer keeps those columns separate, joins split descriptions, and handles UK date formats (DD/MM/YYYY) and GBP amounts.
+Barclays statements list transactions with separate *Money out* and *Money in* columns, a running balance, and multi-line descriptions for card payments and direct debits. Finlyzers keeps those columns separate, joins split descriptions, and handles UK date formats (DD/MM/YYYY) and GBP amounts.
 
 ## How to Download Your Barclays Statement
 

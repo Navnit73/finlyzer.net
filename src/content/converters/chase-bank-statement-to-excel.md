@@ -1,7 +1,7 @@
 ---
 slug: "chase-bank-statement-to-excel"
 title: "Chase Bank Statement to Excel & CSV Converter"
-metaTitle: "Chase Bank Statement to Excel & CSV Converter | Finlyzer"
+metaTitle: "Chase Bank Statement to Excel & CSV Converter | Finlyzers"
 metaDescription: "Instantly convert Chase PDF bank statements to clean Excel (XLSX) or CSV. AI extracts deposits, withdrawals, dates, and balances with 100% reconciliation."
 category: "us-banks"
 bankName: "Chase Bank"
@@ -46,9 +46,9 @@ sampleData:
     balance: "$12,271.00"
 faqs:
   - question: "How do I convert a Chase PDF statement to Excel?"
-    answer: "Simply upload your Chase PDF statement into the Finlyzer converter dropzone above. Our AI parser extracts all transaction lines, reconciles balances, and provides a structured Excel (.xlsx) or CSV file for download in seconds."
-  - question: "Does Finlyzer support password-protected Chase statements?"
-    answer: "Yes. If your Chase statement is encrypted with a password, Finlyzer prompts you to enter the password securely in your browser to unlock and process the document."
+    answer: "Simply upload your Chase PDF statement into the Finlyzers converter dropzone above. Our AI parser extracts all transaction lines, reconciles balances, and provides a structured Excel (.xlsx) or CSV file for download in seconds."
+  - question: "Does Finlyzers support password-protected Chase statements?"
+    answer: "Yes. If your Chase statement is encrypted with a password, Finlyzers prompts you to enter the password securely in your browser to unlock and process the document."
   - question: "Are my financial documents secure and private?"
     answer: "Absolutely. All document transfers use enterprise 256-bit SSL encryption. We never sell your data. Guest uploads are deleted automatically 24 hours after upload, and signed-in users can delete any saved statement at any time."
   - question: "Can I convert scanned or photographed Chase statements?"
@@ -59,7 +59,7 @@ faqs:
 
 Manually entering transactions from **Chase Bank PDF statements** into QuickBooks, Xero, or Microsoft Excel is tedious, error-prone, and time-consuming. Chase statements frequently use multi-section layouts including *Checking Summary*, *Deposits and Additions*, *ATM & Debit Card Withdrawals*, and *Electronic Withdrawals*.
 
-Finlyzer uses specialized **AI-powered financial OCR** tailored specifically for Chase Bank statement formats. It eliminates manual data entry by extracting every single line item into structured Excel columns.
+Finlyzers uses specialized **AI-powered financial OCR** tailored specifically for Chase Bank statement formats. It eliminates manual data entry by extracting every single line item into structured Excel columns.
 
 ## How to Convert Chase Bank Statements in 3 Simple Steps
 
@@ -67,7 +67,7 @@ Finlyzer uses specialized **AI-powered financial OCR** tailored specifically for
 2. **AI Line-Item Extraction & Verification**: Our OCR engine parses dates, descriptions, reference numbers, debit/credit amounts, and performs mathematical balance reconciliation.
 3. **Download Structured Excel or CSV**: Export clean spreadsheet files ready for QuickBooks, Xero, Excel, or tax preparation.
 
-## Why Choose Finlyzer for Chase Statements?
+## Why Choose Finlyzers for Chase Statements?
 
 - **Zero Formatting Headaches**: Automatically formats dates into standard `YYYY-MM-DD` or `MM/DD/YYYY` and separates debits and credits into clean numeric columns.
 - **Enterprise-Grade Privacy**: Your financial information is protected with end-to-end encryption.

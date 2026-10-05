@@ -1,7 +1,7 @@
 ---
 slug: "credit-card-statement-to-excel"
 title: "Credit Card Statement to Excel & CSV Converter"
-metaTitle: "Credit Card Statement to Excel & CSV Converter | Finlyzer"
+metaTitle: "Credit Card Statement to Excel & CSV Converter | Finlyzers"
 metaDescription: "Extract credit card statement transactions from Amex, Chase, Capital One, Citi, and Visa into clean Excel (XLSX) or CSV spreadsheets."
 category: "tools"
 bankName: "Amex, Chase, Capital One, Citi & More"
@@ -41,18 +41,18 @@ sampleData:
     balance: "$0.00"
 faqs:
   - question: "Which credit card issuers are supported?"
-    answer: "Finlyzer supports American Express (Amex), Chase Sapphire & Freedom, Capital One, Citibank, Discover, Apple Card, and all major Visa/Mastercard statements."
-  - question: "How does Finlyzer classify expenses?"
+    answer: "Finlyzers supports American Express (Amex), Chase Sapphire & Freedom, Capital One, Citibank, Discover, Apple Card, and all major Visa/Mastercard statements."
+  - question: "How does Finlyzers classify expenses?"
     answer: "Our DeepSeek AI financial model identifies merchant categories (Travel, SaaS, Meals, Office Supplies) directly from raw transaction lines."
 ---
 
 # Convert Credit Card Statements to Excel & CSV
 
-Credit card statements mix purchases, payments, refunds, interest, and fees, often with foreign-currency details on a second line. Finlyzer extracts every line into a structured spreadsheet so you can track spending, prepare expense reports, or claim business deductions without retyping anything.
+Credit card statements mix purchases, payments, refunds, interest, and fees, often with foreign-currency details on a second line. Finlyzers extracts every line into a structured spreadsheet so you can track spending, prepare expense reports, or claim business deductions without retyping anything.
 
 ## Supported Card Statements
 
-Finlyzer works with statements from American Express, Chase, Capital One, Citi, Discover, Barclaycard, HDFC, ICICI, and most other issuers. It adapts to different layouts, so you do not need a separate template per card.
+Finlyzers works with statements from American Express, Chase, Capital One, Citi, Discover, Barclaycard, HDFC, ICICI, and most other issuers. It adapts to different layouts, so you do not need a separate template per card.
 
 ## What the Converter Extracts
 

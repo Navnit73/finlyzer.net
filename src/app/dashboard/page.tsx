@@ -61,7 +61,7 @@ export default function DashboardOverviewPage() {
 
   const handleDeleteAccount = async () => {
     const confirmation = window.prompt(
-      'Are you sure you want to permanently delete your Finlyzer account and all stored documents/invoices? Type "DELETE" to confirm:'
+      'Are you sure you want to permanently delete your Finlyzers account and all stored documents/invoices? Type "DELETE" to confirm:'
     );
     if (confirmation !== 'DELETE') return;
 
@@ -142,7 +142,7 @@ export default function DashboardOverviewPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `finlyzer_${docId}.${format}`);
+      link.setAttribute('download', `finlyzers_${docId}.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -487,7 +487,7 @@ export default function DashboardOverviewPage() {
                         <td className="text-right">
                           <a
                             href={`/api/user/orders/${order.order_id}/receipt`}
-                            download={`Finlyzer_Invoice_${order.order_id}.pdf`}
+                            download={`Finlyzers_Invoice_${order.order_id}.pdf`}
                             className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] inline-flex items-center gap-1"
                             title="Download PDF Invoice"
                           >

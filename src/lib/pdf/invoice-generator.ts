@@ -57,7 +57,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
     logoOffset = 0;
   }
 
-  page.drawText('Finlyzer', {
+  page.drawText('Finlyzers', {
     x: margin + logoOffset,
     y: currentY,
     size: 24,
@@ -321,7 +321,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
     color: borderGray,
   });
 
-  page.drawText('Finlyzer AI Financial Statement OCR Hub — Thank you for your business!', {
+  page.drawText('Finlyzers AI Financial Statement OCR Hub — Thank you for your business!', {
     x: margin,
     y: 26,
     size: 8,

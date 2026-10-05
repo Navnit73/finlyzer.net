@@ -188,7 +188,7 @@ jobs:
 
             echo ""
             echo "=========================================="
-            echo "FINLYZER FRONTEND DEPLOYMENT"
+            echo "FINLYZERS FRONTEND DEPLOYMENT"
             echo "=========================================="
 
             echo "SHA:"

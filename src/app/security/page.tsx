@@ -5,13 +5,13 @@ import { absoluteUrl } from '@/lib/seo-config';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 
 const title = 'Security & Data Handling';
-const description = `How Finlyzer protects bank statements: encrypted transfer, guest uploads deleted after ${GUEST_RETENTION_HOURS} hours, account-scoped access, and one-click account deletion.`;
+const description = `How Finlyzers protects bank statements: encrypted transfer, guest uploads deleted after ${GUEST_RETENTION_HOURS} hours, account-scoped access, and one-click account deletion.`;
 
 export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzer` },
+  title: { absolute: `${title} | Finlyzers` },
   description,
   alternates: { canonical: absoluteUrl('/security') },
-  openGraph: { title: `${title} | Finlyzer`, description, url: absoluteUrl('/security'), type: 'website' },
+  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/security'), type: 'website' },
 };
 
 const sections: LegalSection[] = [
@@ -98,7 +98,7 @@ const sections: LegalSection[] = [
     body: (
       <p>
         Purchases are processed by Razorpay. Card and bank details are entered with and stored by Razorpay, not
-        Finlyzer. We keep only the order record (plan, amount, status, and the payment reference) so we can credit your
+        Finlyzers. We keep only the order record (plan, amount, status, and the payment reference) so we can credit your
         pages and issue invoices. Payment confirmations are verified with a cryptographic signature before credits are
         added.
       </p>
@@ -111,7 +111,7 @@ const sections: LegalSection[] = [
       <>
         <p>
           Uploaded files are sent to our document processing service, which reads text with OCR and an AI vision model
-          to identify dates, descriptions, amounts, and balances. The result is returned to Finlyzer and stored as
+          to identify dates, descriptions, amounts, and balances. The result is returned to Finlyzers and stored as
           described above.
         </p>
         <p>
@@ -129,7 +129,7 @@ const sections: LegalSection[] = [
       <ul>
         <li>Delete any single document from the Document Vault.</li>
         <li>Delete your whole account and all associated data from the dashboard.</li>
-        <li>Use Finlyzer without an account for statements up to 30 pages, so nothing is kept beyond the guest window.</li>
+        <li>Use Finlyzers without an account for statements up to 30 pages, so nothing is kept beyond the guest window.</li>
       </ul>
     ),
   },

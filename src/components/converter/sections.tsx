@@ -117,7 +117,7 @@ export function SectionHeading({
 
 export function MetricsStrip() {
   return (
-    <section aria-label="Finlyzer in numbers" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] px-4 py-6 sm:py-8">
+    <section aria-label="Finlyzers in numbers" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] px-4 py-6 sm:py-8">
       <p className="text-center text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
         Trusted by accountants, CAs, small businesses &amp; analysts
       </p>
@@ -169,7 +169,7 @@ export function HowItWorksSection({
 
 export function BeforeAfterSection({
   title = 'From Messy PDF to Audit-Ready Spreadsheet',
-  subtitle = 'Generic PDF to Excel tools merge columns and split descriptions. Finlyzer is built for bank statements and verifies every balance before you download.',
+  subtitle = 'Generic PDF to Excel tools merge columns and split descriptions. Finlyzers is built for bank statements and verifies every balance before you download.',
   rawLines = defaultRawLines,
   rows = defaultLedgerRows,
 }: {
@@ -204,7 +204,7 @@ export function BeforeAfterSection({
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-brand-soft)]">
             <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--color-ink)]">
               <CheckCircle2 className="w-4 h-4 text-[var(--color-brand-hover)]" />
-              Finlyzer output
+              Finlyzers output
             </h3>
             <span className="feature-badge">Balances verified</span>
           </div>
@@ -360,7 +360,7 @@ export function ConverterLinksSection({ title, links }: { title: string; links: 
 }
 
 export function ComparisonSection({
-  title = 'Finlyzer vs Manual Entry vs Generic PDF Converters',
+  title = 'Finlyzers vs Manual Entry vs Generic PDF Converters',
 }: {
   title?: string;
 }) {
@@ -374,7 +374,7 @@ export function ComparisonSection({
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-[var(--color-ink)]">
               <th scope="col" className="py-4 px-5 font-semibold">Feature</th>
-              <th scope="col" className="py-4 px-5 font-extrabold bg-[var(--color-brand-soft)]">Finlyzer</th>
+              <th scope="col" className="py-4 px-5 font-extrabold bg-[var(--color-brand-soft)]">Finlyzers</th>
               <th scope="col" className="py-4 px-5 font-semibold text-[var(--color-text-secondary)]">Manual entry</th>
               <th scope="col" className="py-4 px-5 font-semibold text-[var(--color-text-secondary)]">Generic converter</th>
             </tr>

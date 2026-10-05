@@ -1,7 +1,7 @@
 ---
 slug: "pdf-to-excel-converter"
 title: "Universal Financial PDF to Excel Converter"
-metaTitle: "Financial PDF to Excel Converter (Free Online) | Finlyzer"
+metaTitle: "Financial PDF to Excel Converter (Free Online) | Finlyzers"
 metaDescription: "Convert financial PDF statements, invoices, and accounting tables into clean, structured Excel (XLSX) or CSV files using high-precision AI OCR."
 category: "tools"
 bankName: "All Financial Institutions"
@@ -46,14 +46,14 @@ sampleData:
     balance: "$52,469.50"
 faqs:
   - question: "How does the Universal PDF to Excel converter work?"
-    answer: "Upload any financial PDF document. Finlyzer uses computer vision and DeepSeek AI to detect table boundaries, extract cell values, normalize numbers and dates, and generate an audit-ready Excel spreadsheet."
+    answer: "Upload any financial PDF document. Finlyzers uses computer vision and DeepSeek AI to detect table boundaries, extract cell values, normalize numbers and dates, and generate an audit-ready Excel spreadsheet."
   - question: "Can I convert multi-page documents?"
     answer: "Yes! Single documents with up to 30 pages are processed instantly, and long archival statements (up to 200 pages) process through our asynchronous background engine."
 ---
 
 # Universal Financial PDF to Excel Converter
 
-Generic PDF converters treat a financial document like any other table, so they merge debit and credit columns, split descriptions across rows, and drop numbers that fall near page edges. Finlyzer is built for financial PDFs: it detects table boundaries, normalizes dates and amounts, and produces an Excel sheet you can filter and total straight away.
+Generic PDF converters treat a financial document like any other table, so they merge debit and credit columns, split descriptions across rows, and drop numbers that fall near page edges. Finlyzers is built for financial PDFs: it detects table boundaries, normalizes dates and amounts, and produces an Excel sheet you can filter and total straight away.
 
 ## Documents You Can Convert
 
@@ -65,7 +65,7 @@ Generic PDF converters treat a financial document like any other table, so they 
 ## How It Works
 
 1. Upload a PDF (digital or scanned).
-2. Finlyzer extracts every table row and checks totals where balances are available.
+2. Finlyzers extracts every table row and checks totals where balances are available.
 3. Download Excel (.xlsx), CSV, or an accounting format.
 
 ## Limits and Pricing

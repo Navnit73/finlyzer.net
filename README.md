@@ -1,4 +1,4 @@
-# Finlyzer (Next.js + DaisyUI)
+# Finlyzers (Next.js + DaisyUI)
 
 A modern web application built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, and **DaisyUI v5**.
 
@@ -33,4 +33,4 @@ To customize themes or add new ones, update `src/app/globals.css`:
 }
 ```
 
-# finlyzer.net
+# finlyzers.com

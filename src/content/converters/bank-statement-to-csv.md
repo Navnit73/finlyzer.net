@@ -1,7 +1,7 @@
 ---
 slug: "bank-statement-to-csv"
 title: "Bank Statement to CSV Converter"
-metaTitle: "Bank Statement to CSV Converter (Free) | Finlyzer"
+metaTitle: "Bank Statement to CSV Converter (Free) | Finlyzers"
 metaDescription: "Convert PDF bank statements to CSV for any accounting or budgeting tool. One row per transaction, separate debits and credits, verified balances. Free up to 10 pages."
 category: "formats"
 bankName: "Bank"
@@ -59,12 +59,12 @@ faqs:
 
 # Convert PDF Bank Statements to CSV
 
-CSV is the format almost every accounting, budgeting, and analytics tool can import. Finlyzer turns a PDF bank statement into a clean CSV file with one row per transaction and consistent columns, so imports work the first time.
+CSV is the format almost every accounting, budgeting, and analytics tool can import. Finlyzers turns a PDF bank statement into a clean CSV file with one row per transaction and consistent columns, so imports work the first time.
 
 ## How to Convert a Bank Statement to CSV
 
 1. **Upload** the PDF, scanned statement, or photo above.
-2. **Let Finlyzer extract and verify** every transaction against the statement balances.
+2. **Let Finlyzers extract and verify** every transaction against the statement balances.
 3. **Download as CSV** and import it into your accounting software or spreadsheet.
 
 ## CSV Columns You Get

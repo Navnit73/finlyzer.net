@@ -1,7 +1,7 @@
 ---
 slug: "bank-statement-to-qif"
 title: "Bank Statement to QIF Converter for Quicken"
-metaTitle: "Bank Statement to QIF for Quicken | Finlyzer"
+metaTitle: "Bank Statement to QIF for Quicken | Finlyzers"
 metaDescription: "Convert PDF bank statements to QIF files for Quicken and legacy finance software. Verified balances and clean payees. Free up to 10 pages."
 category: "formats"
 bankName: "Bank"
@@ -46,7 +46,7 @@ sampleData:
     balance: "$8,758.70"
 faqs:
   - question: "How do I import a QIF file into Quicken?"
-    answer: "In Quicken choose File, then Import, then QIF File, select the file downloaded from Finlyzer, and pick the account to import into."
+    answer: "In Quicken choose File, then Import, then QIF File, select the file downloaded from Finlyzers, and pick the account to import into."
   - question: "Which programs accept QIF?"
     answer: "Quicken, GnuCash, Moneydance, AceMoney, and many older accounting and personal finance programs."
   - question: "Should I use QIF or OFX?"
@@ -59,7 +59,7 @@ faqs:
 
 # Convert Bank Statements to QIF for Quicken
 
-QIF (Quicken Interchange Format) is still the import format many desktop finance programs rely on. Finlyzer turns PDF bank statements into QIF files so you can load past transactions into Quicken without typing them in.
+QIF (Quicken Interchange Format) is still the import format many desktop finance programs rely on. Finlyzers turns PDF bank statements into QIF files so you can load past transactions into Quicken without typing them in.
 
 ## How to Convert and Import into Quicken
 

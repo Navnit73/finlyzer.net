@@ -1,7 +1,7 @@
 ---
 slug: "indian-bank-statement-to-excel"
 title: "SBI, ICICI, Axis & Kotak Statement to Excel Converter"
-metaTitle: "SBI, ICICI, Axis & Kotak Statement to Excel | Finlyzer"
+metaTitle: "SBI, ICICI, Axis & Kotak Statement to Excel | Finlyzers"
 metaDescription: "Convert SBI, ICICI, Axis, Kotak, and other Indian bank statement PDFs to Excel or CSV. Password unlock, UPI narration cleaning, free up to 10 pages."
 category: "india-banks"
 bankName: "SBI, ICICI, Axis & Kotak"
@@ -60,7 +60,7 @@ faqs:
 
 # Convert Indian Bank Statements to Excel & CSV
 
-Indian bank statements share the same headaches: password-protected PDFs, long UPI narrations, and amounts written with lakh separators. Finlyzer handles all three for SBI, ICICI, Axis, Kotak, and most other Indian banks, giving you a clean Excel or CSV file in seconds.
+Indian bank statements share the same headaches: password-protected PDFs, long UPI narrations, and amounts written with lakh separators. Finlyzers handles all three for SBI, ICICI, Axis, Kotak, and most other Indian banks, giving you a clean Excel or CSV file in seconds.
 
 ## How to Convert Your Statement
 

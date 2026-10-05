@@ -5,13 +5,13 @@ import { absoluteUrl } from '@/lib/seo-config';
 
 const title = 'Editorial Policy & Methodology';
 const description =
-  'How Finlyzer extracts transactions from bank statements with OCR and AI, how running-balance checks verify the result, known limitations, and how our guides are written.';
+  'How Finlyzers extracts transactions from bank statements with OCR and AI, how running-balance checks verify the result, known limitations, and how our guides are written.';
 
 export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzer` },
+  title: { absolute: `${title} | Finlyzers` },
   description,
   alternates: { canonical: absoluteUrl('/editorial-policy') },
-  openGraph: { title: `${title} | Finlyzer`, description, url: absoluteUrl('/editorial-policy'), type: 'website' },
+  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/editorial-policy'), type: 'website' },
 };
 
 const steps = [
@@ -105,7 +105,7 @@ export default function EditorialPolicyPage() {
       title={title}
       intro={
         <p>
-          How Finlyzer turns a bank statement into clean data, how the result is verified, where it can go wrong, and
+          How Finlyzers turns a bank statement into clean data, how the result is verified, where it can go wrong, and
           the standards we follow when writing guides.
         </p>
       }
@@ -113,7 +113,7 @@ export default function EditorialPolicyPage() {
       jsonLd={[
         {
           '@type': 'HowTo',
-          name: 'How Finlyzer converts a bank statement',
+          name: 'How Finlyzers converts a bank statement',
           step: steps.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
         },
       ]}

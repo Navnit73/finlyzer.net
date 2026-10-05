@@ -8,13 +8,13 @@ import { FREE_PAGE_LIMIT } from '@/types/pricing';
 
 const title = 'Frequently Asked Questions';
 const description =
-  'Answers about Finlyzer: data safety and retention, conversion accuracy, supported files and export formats, pricing, and accounts.';
+  'Answers about Finlyzers: data safety and retention, conversion accuracy, supported files and export formats, pricing, and accounts.';
 
 export const metadata: Metadata = {
-  title: { absolute: `FAQ: Bank Statement Converter | Finlyzer` },
+  title: { absolute: `FAQ: Bank Statement Converter | Finlyzers` },
   description,
   alternates: { canonical: absoluteUrl('/faq') },
-  openGraph: { title: `FAQ | Finlyzer`, description, url: absoluteUrl('/faq'), type: 'website' },
+  openGraph: { title: `FAQ | Finlyzers`, description, url: absoluteUrl('/faq'), type: 'website' },
 };
 
 interface Faq {
@@ -60,15 +60,15 @@ const groups: { id: string; heading: string; faqs: Faq[] }[] = [
     faqs: [
       {
         q: 'How accurate is the conversion?',
-        a: 'Accuracy is highest on digital PDFs and good-quality scans. When a statement prints a running balance, Finlyzer recomputes it row by row and flags any row that does not match, so you know exactly what to review.',
+        a: 'Accuracy is highest on digital PDFs and good-quality scans. When a statement prints a running balance, Finlyzers recomputes it row by row and flags any row that does not match, so you know exactly what to review.',
       },
       {
         q: 'Do I still need to check the output?',
-        a: 'Yes. Always review flagged rows and confirm the opening and closing balances, especially for tax, lending, or audit use. Finlyzer is not financial advice.',
+        a: 'Yes. Always review flagged rows and confirm the opening and closing balances, especially for tax, lending, or audit use. Finlyzers is not financial advice.',
         rich: (
           <>
             Yes. Always review flagged rows and confirm the opening and closing balances, especially for tax, lending, or
-            audit use. Finlyzer is not financial advice; see the <Link href="/disclaimer">Disclaimer</Link> and our{' '}
+            audit use. Finlyzers is not financial advice; see the <Link href="/disclaimer">Disclaimer</Link> and our{' '}
             <Link href="/editorial-policy">Methodology</Link>.
           </>
         ),
@@ -98,7 +98,7 @@ const groups: { id: string; heading: string; faqs: Faq[] }[] = [
     heading: 'Pricing',
     faqs: [
       {
-        q: 'Is Finlyzer free?',
+        q: 'Is Finlyzers free?',
         a: `Statements up to ${FREE_PAGE_LIMIT} pages are free to convert and download in every format, with no card required.`,
       },
       {
