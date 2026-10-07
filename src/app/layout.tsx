@@ -73,8 +73,20 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased selection:bg-[var(--color-brand)] selection:text-[var(--color-on-brand)]">
-        {/* Microsoft Clarity analytics. next/head is ignored in the App Router, so load it with next/script after hydration. */}
-        <Script id="ms-clarity" src="https://www.clarity.ms/tag/yszul1h2c2" strategy="afterInteractive" />
+        {/* Microsoft Clarity analytics */}
+        <Script
+          id="microsoft-clarity"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "yszul1h1c2");
+            `,
+          }}
+        />
         <AuthProvider>
           <AppShell>
             {children}
