@@ -33,7 +33,12 @@ export interface SEOConverterPage {
   outputFormat: string;
   country: string;
   badgeText: string;
+  /** Visible lead paragraph under the H1; falls back to metaDescription. */
+  intro: string;
+  /** Primary + secondary search terms this page owns (keyword map; not emitted as a meta tag). */
   keywords: string[];
+  /** Slugs of converter pages to cross-link, in display order. */
+  related: string[];
   features: SEOFeature[];
   tableColumns: string[];
   sampleData: SEOSampleRow[];

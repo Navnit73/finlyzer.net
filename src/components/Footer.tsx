@@ -13,7 +13,7 @@ export default function Footer() {
           <div className="space-y-3">
             <BrandLogo size="sm" textClassName="!text-lg" />
             <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-              AI-powered financial statement extraction, bank statement OCR, and balance reconciliation engine. Built for accountants, SMBs, and financial analysts.
+              Converts PDF and scanned bank statements into Excel, CSV, QBO, OFX and QIF, with every transaction checked against the statement balance.
             </p>
             <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] pt-1">
               <ShieldCheck className="w-4 h-4 text-[var(--color-brand-hover)]" />
@@ -24,15 +24,15 @@ export default function Footer() {
           {/* Col 2: Export Format Converters */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              Convert by Format
+              Bank Statement to…
             </p>
             <ul className="space-y-2 text-xs">
               {[
-                ['bank-statement-to-excel', 'Bank Statement to Excel'],
-                ['bank-statement-to-csv', 'Bank Statement to CSV'],
-                ['bank-statement-to-qbo', 'Bank Statement to QuickBooks (QBO)'],
-                ['bank-statement-to-ofx', 'Bank Statement to Xero (OFX)'],
-                ['bank-statement-to-qif', 'Bank Statement to Quicken (QIF)'],
+                ['bank-statement-to-excel', 'Excel (.xlsx)'],
+                ['bank-statement-to-csv', 'CSV'],
+                ['bank-statement-to-qbo', 'QuickBooks (.qbo)'],
+                ['bank-statement-to-ofx', 'OFX for Xero'],
+                ['bank-statement-to-qif', 'Quicken (.qif)'],
               ].map(([slug, label]) => (
                 <li key={slug}>
                   <Link
@@ -49,7 +49,7 @@ export default function Footer() {
           {/* Col 3: US Bank Statement Converters */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              US Bank Converters
+              US Banks &amp; Cards
             </p>
             <ul className="space-y-2 text-xs">
               <li>
@@ -57,23 +57,23 @@ export default function Footer() {
                   href="/convert/chase-bank-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Chase Bank to Excel / CSV
+                  Chase
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/convert/bank-of-america-statement-to-csv"
+                  href="/convert/bank-of-america-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Bank of America to CSV / XLSX
+                  Bank of America
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/convert/wells-fargo-pdf-to-excel"
+                  href="/convert/wells-fargo-bank-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Wells Fargo Statement to Excel
+                  Wells Fargo
                 </Link>
               </li>
               <li>
@@ -81,7 +81,7 @@ export default function Footer() {
                   href="/convert/credit-card-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Credit Card Statement Parser
+                  Credit card statements
                 </Link>
               </li>
             </ul>
@@ -90,7 +90,7 @@ export default function Footer() {
           {/* Col 4: UK & Global Bank Converters */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              UK &amp; Global Banks
+              UK, India &amp; More
             </p>
             <ul className="space-y-2 text-xs">
               <li>
@@ -98,7 +98,7 @@ export default function Footer() {
                   href="/convert/barclays-bank-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Barclays UK Statement Converter
+                  Barclays (UK)
                 </Link>
               </li>
               <li>
@@ -106,7 +106,7 @@ export default function Footer() {
                   href="/convert/hdfc-bank-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  HDFC Bank Statement to Excel (India)
+                  HDFC Bank (India)
                 </Link>
               </li>
               <li>
@@ -114,7 +114,7 @@ export default function Footer() {
                   href="/convert/indian-bank-statement-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  SBI, ICICI, Axis &amp; Kotak to Excel
+                  SBI, ICICI, Axis &amp; Kotak
                 </Link>
               </li>
               <li>
@@ -122,7 +122,7 @@ export default function Footer() {
                   href="/convert/pdf-to-excel-converter"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Universal PDF to Excel Converter
+                  Invoices &amp; other financial PDFs
                 </Link>
               </li>
               <li>
@@ -130,7 +130,7 @@ export default function Footer() {
                   href="/convert/scanned-pdf-ocr-to-excel"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Scanned PDF &amp; Photo OCR
+                  Scanned statements (OCR)
                 </Link>
               </li>
             </ul>
@@ -164,7 +164,7 @@ export default function Footer() {
                   href="/"
                   className="hover:text-[var(--color-ink)] hover:underline transition-colors"
                 >
-                  Free Bank Statement Converter
+                  Bank Statement Converter
                 </Link>
               </li>
               <li>
@@ -174,7 +174,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/editorial-policy" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
-                  How It Works &amp; Accuracy
+                  Methodology &amp; Accuracy
                 </Link>
               </li>
             </ul>

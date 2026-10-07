@@ -1,18 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
-import { absoluteUrl } from '@/lib/seo-config';
+import { pageMetadata } from '@/lib/seo-config';
 
 const title = 'Disclaimer';
 const description =
   'Finlyzers converts financial documents automatically. It is not financial, tax, or legal advice, and users must verify converted figures before relying on them.';
 
-export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzers` },
-  description,
-  alternates: { canonical: absoluteUrl('/disclaimer') },
-  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/disclaimer'), type: 'website' },
-};
+export const metadata: Metadata = pageMetadata({ title: `${title} | Finlyzers`, description, path: '/disclaimer' });
 
 const sections: LegalSection[] = [
   {
@@ -81,6 +76,7 @@ export default function DisclaimerPage() {
     <LegalPage
       path="/disclaimer"
       title={title}
+      description={description}
       intro={<p>Please read this before relying on any data converted with Finlyzers.</p>}
       sections={sections}
     />

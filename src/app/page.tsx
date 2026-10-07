@@ -1,122 +1,82 @@
 import React from 'react';
-import type { Metadata } from 'next';
 import HomeWorkspace from '@/components/home/HomeWorkspace';
-import HomeEditorialContent, { faqs, steps } from '@/components/home/HomeEditorialContent';
-import { SITE_URL } from '@/lib/seo-config';
+import HomeEditorialContent, { faqs } from '@/components/home/HomeEditorialContent';
+import {
+  ORGANIZATION_ID,
+  SITE_NAME,
+  SITE_URL,
+  WEBAPP_ID,
+  WEBSITE_ID,
+  absoluteUrl,
+  getFaqJsonLd,
+  getWebPageJsonLd,
+  pageMetadata,
+  serializeJsonLd,
+} from '@/lib/seo-config';
+import { FREE_PAGE_LIMIT } from '@/types/pricing';
+import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 
-export const metadata: Metadata = {
-  title: { absolute: 'Bank Statement Converter: PDF to Excel & CSV | Finlyzers' },
-  description:
-    'Convert PDF bank statements to Excel (XLSX), CSV, QuickBooks (QBO), and Xero (OFX). 99.8% precision with mathematical running balance check, OCR, and guest uploads auto-deleted after 24 hours.',
-  alternates: {
-    canonical: SITE_URL,
-  },
-  openGraph: {
-    title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzers',
-    description:
-      'Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero with instant running-balance audit.',
+const title = 'Bank Statement Converter: PDF to Excel, CSV & QBO | Finlyzers';
+const description =
+  'Convert PDF and scanned bank statements to Excel, CSV, QBO, OFX or QIF. OCR extracts every transaction and checks it against the balance. Free up to 10 pages.';
+
+export const metadata = pageMetadata({
+  title,
+  description,
+  path: '/',
+  socialTitle: 'Finlyzers: Bank Statement Converter for Excel, CSV & QuickBooks',
+});
+
+// Site-wide entities live on the homepage; other pages reference them by @id.
+// Only verifiable facts: no ratings, reviews, addresses or social profiles.
+const jsonLd = serializeJsonLd([
+  {
+    '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
+    name: SITE_NAME,
     url: SITE_URL,
-    siteName: 'Finlyzers',
-    type: 'website',
-    locale: 'en_US',
-    images: [
-      {
-        url: '/og_image.webp',
-        width: 1200,
-        height: 630,
-        alt: 'Finlyzers — Turn Bank Statements into Clean Data (Excel, CSV, QuickBooks)',
-        type: 'image/webp',
-      },
+    logo: absoluteUrl('/logo.png'),
+  },
+  {
+    '@type': 'WebSite',
+    '@id': WEBSITE_ID,
+    url: SITE_URL,
+    name: SITE_NAME,
+    inLanguage: 'en',
+    publisher: { '@id': ORGANIZATION_ID },
+  },
+  {
+    '@type': 'WebApplication',
+    '@id': WEBAPP_ID,
+    name: 'Finlyzers Bank Statement Converter',
+    url: SITE_URL,
+    description: 'Converts PDF and scanned bank statements into Excel, CSV, QBO, OFX and QIF files.',
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any (web browser)',
+    publisher: { '@id': ORGANIZATION_ID },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      description: `Free for statements up to ${FREE_PAGE_LIMIT} pages`,
+    },
+    featureList: [
+      'Transaction extraction from digital and scanned PDF bank statements',
+      'OCR for scanned statements and photos',
+      'Running-balance verification',
+      'Password-protected PDF support',
+      'Export to Excel (.xlsx), CSV, QuickBooks (.qbo), OFX, Quicken (.qif) and PDF',
+      `Guest uploads deleted after ${GUEST_RETENTION_HOURS} hours`,
     ],
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'AI Bank Statement Converter to Excel, CSV & QuickBooks | Finlyzers',
-    description:
-      'Convert PDF bank statements and financial documents to Excel (XLSX), CSV, QuickBooks (QBO), and Xero with instant running-balance audit.',
-    images: ['/og_image.webp'],
-  },
-};
-
-const jsonLdGraph = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebSite',
-      '@id': `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: 'Finlyzers',
-      description: 'AI-Powered Bank Statement and Financial PDF Converter to Excel, CSV & QuickBooks',
-      inLanguage: 'en-US',
-      publisher: { '@id': `${SITE_URL}/#organization` },
-    },
-    {
-      '@type': 'Organization',
-      '@id': `${SITE_URL}/#organization`,
-      name: 'Finlyzers',
-      url: SITE_URL,
-      logo: `${SITE_URL}/logo.png`,
-      description: 'Automated financial document OCR and bank statement conversion platform.',
-    },
-    {
-      '@type': 'WebApplication',
-      '@id': `${SITE_URL}/#webapp`,
-      name: 'Finlyzers Bank Statement Converter',
-      url: SITE_URL,
-      applicationCategory: 'FinanceApplication',
-      operatingSystem: 'All',
-      browserRequirements: 'Requires JavaScript. Requires HTML5.',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-        description: 'Free processing and multi-format download up to 10 pages per financial statement',
-      },
-      featureList: [
-        'AI Table and Ledger Extraction',
-        'Mathematical Running Balance Reconciliation',
-        'Password-Protected PDF Decryption',
-        'Scanned and Photo OCR',
-        'Multi-Format Exports: Excel (.xlsx), CSV, QuickBooks (.qbo), Xero (.ofx), Quicken (.qif)',
-        'Guest Uploads Auto-Deleted After 24 Hours',
-      ],
-    },
-    {
-      '@type': 'HowTo',
-      '@id': `${SITE_URL}/#howto`,
-      name: 'How to Convert a Bank Statement PDF to Excel in Seconds',
-      description:
-        'Step-by-step tutorial to convert digital or scanned bank statement PDFs into Excel spreadsheets or QuickBooks accounting files.',
-      totalTime: 'PT1M',
-      step: steps.map((s, index) => ({
-        '@type': 'HowToStep',
-        position: index + 1,
-        name: s.title,
-        text: s.body,
-      })),
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${SITE_URL}/#faq`,
-      mainEntity: faqs.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: f.a,
-        },
-      })),
-    },
-  ],
-};
+  { ...getWebPageJsonLd({ path: '/', name: title, description }), about: { '@id': WEBAPP_ID } },
+  getFaqJsonLd(faqs),
+]);
 
 export default function HomePage() {
   return (
     <div className="w-full">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
 
       {/* Interactive Uploader Workspace */}
       <HomeWorkspace />

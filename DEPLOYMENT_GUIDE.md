@@ -120,8 +120,14 @@ sudo apt install -y nginx certbot python3-certbot-nginx
 ### 2. Configure Nginx
 Create `/etc/nginx/sites-available/finlyzers`:
 ```nginx
+# One canonical host for SEO: send www to the apex (the app also redirects www, see next.config.ts).
 server {
-    server_name finlyzers.com www.finlyzers.com;
+    server_name www.finlyzers.com;
+    return 301 https://finlyzers.com$request_uri;
+}
+
+server {
+    server_name finlyzers.com;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -151,6 +157,7 @@ sudo systemctl reload nginx
 ```bash
 sudo certbot --nginx -d finlyzers.com -d www.finlyzers.com
 ```
+When certbot asks, choose **Redirect** so all HTTP traffic is sent to HTTPS.
 
 ---
 

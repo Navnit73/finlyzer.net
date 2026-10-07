@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { getBreadcrumbJsonLd, absoluteUrl, SITE_NAME } from '@/lib/seo-config';
+import { getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from '@/lib/seo-config';
 import { TRUST_PAGES, POLICIES_LAST_UPDATED } from '@/lib/trust-pages';
 
 export interface LegalSection {
@@ -13,6 +13,8 @@ export interface LegalSection {
 interface LegalPageProps {
   path: string;
   title: string;
+  /** Meta description, reused for the WebPage JSON-LD node. */
+  description: string;
   intro: React.ReactNode;
   sections: LegalSection[];
   /** Extra JSON-LD nodes (e.g. FAQPage) merged into the page graph. */
@@ -27,31 +29,21 @@ const updatedLabel = new Date(`${POLICIES_LAST_UPDATED}T00:00:00Z`).toLocaleDate
 });
 
 /** Shared layout for trust & legal pages: breadcrumb, title, table of contents, sections, related links. */
-export default function LegalPage({ path, title, intro, sections, jsonLd = [] }: LegalPageProps) {
-  const graph = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${absoluteUrl(path)}#webpage`,
-        url: absoluteUrl(path),
-        name: title,
-        dateModified: POLICIES_LAST_UPDATED,
-        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: absoluteUrl('/') },
-      },
-      getBreadcrumbJsonLd([
-        { name: 'Home', path: '/' },
-        { name: title, path },
-      ]),
-      ...jsonLd,
-    ],
-  };
+export default function LegalPage({ path, title, description, intro, sections, jsonLd = [] }: LegalPageProps) {
+  const graph = serializeJsonLd([
+    getWebPageJsonLd({ path, name: title, description, dateModified: POLICIES_LAST_UPDATED }),
+    getBreadcrumbJsonLd([
+      { name: 'Home', path: '/' },
+      { name: title, path },
+    ]),
+    ...jsonLd,
+  ]);
 
   const related = TRUST_PAGES.filter((p) => p.path !== path);
 
   return (
     <article className="max-w-6xl mx-auto w-full pb-16">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: graph }} />
 
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] mb-6">
         <Link href="/" className="hover:text-[var(--color-ink)]">Home</Link>

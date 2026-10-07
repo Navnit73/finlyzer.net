@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
-import { absoluteUrl } from '@/lib/seo-config';
+import { pageMetadata } from '@/lib/seo-config';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 import { FREE_PAGE_LIMIT } from '@/types/pricing';
 
@@ -10,12 +10,11 @@ const title = 'Frequently Asked Questions';
 const description =
   'Answers about Finlyzers: data safety and retention, conversion accuracy, supported files and export formats, pricing, and accounts.';
 
-export const metadata: Metadata = {
-  title: { absolute: `FAQ: Bank Statement Converter | Finlyzers` },
+export const metadata: Metadata = pageMetadata({
+  title: 'FAQ: Security, Accuracy & Pricing | Finlyzers',
   description,
-  alternates: { canonical: absoluteUrl('/faq') },
-  openGraph: { title: `FAQ | Finlyzers`, description, url: absoluteUrl('/faq'), type: 'website' },
-};
+  path: '/faq',
+});
 
 interface Faq {
   q: string;
@@ -148,6 +147,7 @@ export default function FaqPage() {
     <LegalPage
       path="/faq"
       title={title}
+      description={description}
       intro={<p>Quick answers about data safety, accuracy, supported formats, and pricing.</p>}
       sections={sections}
       jsonLd={[

@@ -1,19 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
-import { absoluteUrl } from '@/lib/seo-config';
+import { pageMetadata } from '@/lib/seo-config';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 
 const title = 'Privacy Policy';
 const description =
   'What data Finlyzers collects when you convert bank statements, why, how long it is kept, which providers process it, and how to delete it.';
 
-export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzers` },
-  description,
-  alternates: { canonical: absoluteUrl('/privacy-policy') },
-  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/privacy-policy'), type: 'website' },
-};
+export const metadata: Metadata = pageMetadata({ title: `${title} | Finlyzers`, description, path: '/privacy-policy' });
 
 const sections: LegalSection[] = [
   {
@@ -203,6 +198,7 @@ export default function PrivacyPolicyPage() {
     <LegalPage
       path="/privacy-policy"
       title={title}
+      description={description}
       intro={
         <p>
           This policy explains what Finlyzers (“we”, “us”) collects when you use our bank statement converter, why we

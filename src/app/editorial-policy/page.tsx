@@ -1,18 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
-import { absoluteUrl } from '@/lib/seo-config';
+import { pageMetadata } from '@/lib/seo-config';
 
 const title = 'Editorial Policy & Methodology';
 const description =
-  'How Finlyzers extracts transactions from bank statements with OCR and AI, how running-balance checks verify the result, known limitations, and how our guides are written.';
+  'How Finlyzers extracts bank statement transactions with OCR and AI, how the running-balance check works, its known limitations, and how to verify results.';
 
-export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzers` },
-  description,
-  alternates: { canonical: absoluteUrl('/editorial-policy') },
-  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/editorial-policy'), type: 'website' },
-};
+export const metadata: Metadata = pageMetadata({ title: `${title} | Finlyzers`, description, path: '/editorial-policy' });
 
 const steps = [
   {
@@ -75,6 +70,19 @@ const sections: LegalSection[] = [
     ),
   },
   {
+    id: 'verify',
+    heading: 'How to check a converted statement',
+    body: (
+      <ol className="space-y-2 list-decimal pl-5">
+        <li>Confirm the opening and closing balances in the export match the statement.</li>
+        <li>Compare the totals of the debit and credit columns with the totals printed in the statement summary.</li>
+        <li>Review every row flagged by the balance check, and fix it against the PDF before exporting.</li>
+        <li>Check the transaction count and the first and last dates, especially for multi-month files.</li>
+        <li>After importing into accounting software, reconcile the account to the statement&apos;s closing balance.</li>
+      </ol>
+    ),
+  },
+  {
     id: 'accuracy',
     heading: 'How we talk about accuracy',
     body: (
@@ -103,6 +111,7 @@ export default function EditorialPolicyPage() {
     <LegalPage
       path="/editorial-policy"
       title={title}
+      description={description}
       intro={
         <p>
           How Finlyzers turns a bank statement into clean data, how the result is verified, where it can go wrong, and
@@ -110,13 +119,6 @@ export default function EditorialPolicyPage() {
         </p>
       }
       sections={sections}
-      jsonLd={[
-        {
-          '@type': 'HowTo',
-          name: 'How Finlyzers converts a bank statement',
-          step: steps.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
-        },
-      ]}
     />
   );
 }

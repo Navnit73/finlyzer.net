@@ -6,6 +6,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import UploadCtaButton from './UploadCtaButton';
+import { FREE_PAGE_LIMIT } from '@/types/pricing';
+import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 
 /* ------------------------------------------------------------------
    Shared marketing sections for the homepage and /convert/[slug] pages.
@@ -40,17 +42,17 @@ export interface ConverterLink {
 }
 
 export const exportFormats = [
-  { fmt: 'Excel (.xlsx)', use: 'Analysis, budgeting and bookkeeping in Excel or Google Sheets', slug: 'bank-statement-to-excel' },
-  { fmt: 'CSV (.csv)', use: 'Convert PDF bank statement to CSV for any accounting tool', slug: 'bank-statement-to-csv' },
-  { fmt: 'QuickBooks (.qbo)', use: 'Import bank statements into QuickBooks in one click', slug: 'bank-statement-to-qbo' },
-  { fmt: 'Xero / OFX (.ofx)', use: 'Bank reconciliation in Xero and other OFX apps', slug: 'bank-statement-to-ofx' },
-  { fmt: 'Quicken (.qif)', use: 'Load transactions into Quicken and legacy software', slug: 'bank-statement-to-qif' },
+  { fmt: 'Excel (.xlsx)', use: 'Sort, filter and total transactions in Excel or Google Sheets', slug: 'bank-statement-to-excel' },
+  { fmt: 'CSV (.csv)', use: 'Plain-text rows for accounting imports, budgeting apps and scripts', slug: 'bank-statement-to-csv' },
+  { fmt: 'QuickBooks (.qbo)', use: 'Web Connect file for QuickBooks Online and Desktop', slug: 'bank-statement-to-qbo' },
+  { fmt: 'OFX (.ofx)', use: 'Statement import for Xero, GnuCash and other OFX apps', slug: 'bank-statement-to-ofx' },
+  { fmt: 'Quicken (.qif)', use: 'Records for Quicken, Moneydance and older desktop software', slug: 'bank-statement-to-qif' },
 ];
 
 export const defaultSteps: Step[] = [
   { icon: UploadCloud, title: 'Upload your bank statement PDF', body: 'Drop a PDF, scanned statement or photo. Password-protected files are supported.' },
   { icon: Cpu, title: 'AI extracts every transaction', body: 'Dates, descriptions, debits, credits and balances are read and checked against your closing balance.' },
-  { icon: Download, title: 'Download Excel, CSV, QBO or OFX', body: 'Get a clean spreadsheet or accounting file ready for analysis, reconciliation or tax filing.' },
+  { icon: Download, title: 'Download your format', body: 'Get Excel, CSV, QBO, OFX or QIF, ready for analysis, reconciliation or import into accounting software.' },
 ];
 
 const defaultLedgerRows: LedgerRow[] = [
@@ -68,27 +70,29 @@ const defaultRawLines = [
 const defaultFeatures = [
   { title: 'Multi-Page Table Stitching', description: 'Joins tables across pages without dropping rows or repeating headers.' },
   { title: 'Balance Verification', description: 'Opening balance plus credits minus debits is checked against the closing balance.' },
-  { title: 'Password-Protected PDFs', description: 'Unlock statements from HDFC, ICICI, Amex and more right in your browser.' },
+  { title: 'Password-Protected PDFs', description: 'Enter the PDF password when prompted. It is used only to open the file and is never stored.' },
   { title: 'Annual Statement Merge', description: 'Combine 12 monthly statements into one annual ledger with summaries.' },
 ];
 const featureIcons: LucideIcon[] = [TableProperties, Cpu, Lock, Layers, Sparkles];
 
+// Product facts only (limits and policies enforced in code). Usage or accuracy statistics belong here
+// only with a published methodology on /editorial-policy.
 const metrics = [
-  ['12.4M+', 'Transactions extracted'],
-  ['99.8%', 'Ledger precision'],
-  ['< 5 sec', 'Average conversion'],
-  ['50+', 'Bank formats ready'],
+  [`${FREE_PAGE_LIMIT} pages`, 'Free per statement, no signup'],
+  ['200 pages', 'Per statement with a free account'],
+  ['6 formats', 'XLSX, CSV, QBO, OFX, QIF & PDF'],
+  [`${GUEST_RETENTION_HOURS} hours`, 'Until guest uploads are deleted'],
 ];
 
 const securityPoints = [
-  { icon: ShieldCheck, title: 'Encrypted in transit', body: 'Every upload travels over 256-bit SSL/TLS.' },
+  { icon: ShieldCheck, title: 'Encrypted in transit', body: 'Every upload travels over HTTPS (TLS) to our servers and processing service.' },
   { icon: Trash2, title: 'Auto-deleted in 24 hours', body: 'Guest uploads and their results are deleted automatically 24 hours after upload.' },
   { icon: KeyRound, title: 'Passwords never stored', body: 'Protected PDFs are unlocked for processing only.' },
   { icon: BrainCircuit, title: 'Never used for AI training', body: 'Your statements are not shared or used to train models.' },
 ];
 
 const comparisonRows = [
-  ['Time for a 10-page statement', '< 5 seconds', '45–60 minutes', '2–3 minutes'],
+  ['Time for a 10-page statement', 'Typically seconds', '45–60 minutes', 'Minutes, plus cleanup'],
   ['Debit & credit columns', 'Split automatically', 'Manual sorting', 'Merged / single column'],
   ['Balance check', 'Automatic', 'Calculator', 'None'],
   ['Password-protected PDFs', 'Supported', 'Manual unlock', 'Usually fails'],
@@ -124,9 +128,9 @@ export function SectionHeading({
 
 export function MetricsStrip() {
   return (
-    <section aria-label="Finlyzers in numbers" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] px-4 py-6 sm:py-8">
+    <section aria-label="Finlyzers at a glance" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] px-4 py-6 sm:py-8">
       <p className="text-center text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-        Trusted by accountants, CAs, small businesses &amp; analysts
+        Built for accountants, bookkeepers, small businesses &amp; analysts
       </p>
       <dl className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-y-6 gap-x-4">
         {metrics.map(([value, label]) => (
@@ -142,7 +146,7 @@ export function MetricsStrip() {
 }
 
 export function HowItWorksSection({
-  title = 'How to Convert a Bank Statement to Excel',
+  title = 'How the Bank Statement Converter Works',
   subtitle = 'Three steps, about a minute. Works with digital PDFs, scanned statements and phone photos.',
   steps = defaultSteps,
 }: {

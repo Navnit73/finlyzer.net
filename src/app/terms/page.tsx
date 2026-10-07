@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
-import { absoluteUrl } from '@/lib/seo-config';
+import { pageMetadata } from '@/lib/seo-config';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 import { FREE_PAGE_LIMIT } from '@/types/pricing';
 
@@ -9,12 +9,7 @@ const title = 'Terms & Conditions';
 const description =
   'The rules for using Finlyzers: acceptable use, usage limits, page credits and payments, refunds, and limitation of liability.';
 
-export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzers` },
-  description,
-  alternates: { canonical: absoluteUrl('/terms') },
-  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/terms'), type: 'website' },
-};
+export const metadata: Metadata = pageMetadata({ title: `${title} | Finlyzers`, description, path: '/terms' });
 
 const sections: LegalSection[] = [
   {
@@ -172,6 +167,7 @@ export default function TermsPage() {
     <LegalPage
       path="/terms"
       title={title}
+      description={description}
       intro={<p>These terms govern your use of Finlyzers’s website and bank statement conversion service.</p>}
       sections={sections}
     />

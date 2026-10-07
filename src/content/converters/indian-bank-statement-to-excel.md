@@ -1,28 +1,35 @@
 ---
 slug: "indian-bank-statement-to-excel"
-title: "SBI, ICICI, Axis & Kotak Statement to Excel Converter"
+title: "Indian Bank Statement to Excel Converter"
 metaTitle: "SBI, ICICI, Axis & Kotak Statement to Excel | Finlyzers"
-metaDescription: "Convert SBI, ICICI, Axis, Kotak, and other Indian bank statement PDFs to Excel or CSV. Password unlock, UPI narration cleaning, free up to 10 pages."
+metaDescription: "Convert SBI, ICICI, Axis, Kotak and other Indian bank statement PDFs to Excel or CSV. Password-protected PDFs, Dr/Cr balances and lakh amounts handled."
+intro: "Convert statements from SBI, ICICI Bank, Axis Bank, Kotak Mahindra Bank and other Indian banks into Excel or CSV, including password-protected PDFs and amounts written in lakh format."
 category: "india-banks"
-bankName: "SBI, ICICI, Axis & Kotak"
+bankName: "Indian Banks"
 statementLabel: "Indian Bank Statement"
+outputFormat: "Excel"
 country: "India"
-badgeText: "India Banks Supported"
+badgeText: "India · SBI, ICICI, Axis, Kotak"
 keywords:
+  - "indian bank statement to excel"
   - "sbi bank statement to excel"
   - "icici bank statement to excel"
   - "axis bank statement to excel"
   - "kotak bank statement to excel"
-  - "indian bank statement converter"
+related:
+  - "hdfc-bank-statement-to-excel"
+  - "scanned-pdf-ocr-to-excel"
+  - "bank-statement-to-csv"
+  - "credit-card-statement-to-excel"
 features:
   - title: "Password-Protected PDFs"
-    description: "Unlock emailed statements in your session. The password is never stored."
-  - title: "UPI, IMPS & NEFT Cleaning"
-    description: "Long narrations are split into payee, UPI ID, and reference number."
-  - title: "INR Number Formatting"
-    description: "Amounts written with lakh separators become clean numeric values."
-  - title: "Accounting-Ready Export"
-    description: "Excel and CSV files map easily into Tally, Zoho Books, and Busy import templates."
+    description: "Unlock emailed and downloaded statements by entering the password when prompted. It is never stored."
+  - title: "Debit and Credit Columns Normalized"
+    description: "Whether a bank labels them Debit and Credit, Withdrawal and Deposit, or Dr and Cr, they map to the same two columns."
+  - title: "Dr/Cr Balances Read Correctly"
+    description: "Balances printed with a Cr or Dr suffix are converted to signed numbers, so overdrawn balances stay negative."
+  - title: "Lakh Formatting Removed"
+    description: "Amounts like 1,25,000.00 become plain numbers that Excel and accounting software can total."
 tableColumns:
   - "Date"
   - "Narration"
@@ -46,35 +53,51 @@ sampleData:
     amount: "-₹22,000.00"
     type: "Debit"
     balance: "₹1,11,210.55"
+steps:
+  - title: "Get the statement PDF"
+    body: "Download it from your bank's net banking site or app, such as OnlineSBI or YONO, ICICI iMobile, Axis Mobile or the Kotak app, or use an emailed statement."
+  - title: "Upload and unlock"
+    body: "Upload the PDF and enter its password if prompted. Narrations are joined, Dr/Cr labels are normalized and lakh amounts are converted."
+  - title: "Download Excel or CSV"
+    body: "Use the file for GST and income tax work, or map it into Tally, Zoho Books or Busy."
 faqs:
-  - question: "How do I convert an SBI statement to Excel?"
-    answer: "Download the statement PDF from SBI YONO or OnlineSBI, upload it above, enter the PDF password if asked, and download Excel or CSV."
   - question: "What is the password for my emailed bank statement?"
-    answer: "It depends on the bank. Many use a combination of your name, date of birth, Customer ID, or part of your account number. Check the email that came with the statement."
+    answer: "Each bank sets its own rule, usually a combination of details such as your name, date of birth, customer ID or part of your account number. The email that came with the statement normally explains the format."
   - question: "Which Indian banks are supported?"
-    answer: "SBI, ICICI, Axis, Kotak, HDFC, Yes Bank, IndusInd, PNB, Bank of Baroda, Canara, IDFC First, and most other Indian banks."
-  - question: "Is the converter free?"
-    answer: "Statements up to 10 pages are free to convert and download. Documents of 11 to 30 pages can be previewed free and unlocked for a one-time fee, and archives up to 200 pages are available with a free account."
-  - question: "Is it safe to upload my bank statement?"
-    answer: "Yes. Uploads are encrypted with 256-bit SSL, files are processed in memory and deleted after your session, and your statements are never used to train AI models."
+    answer: "SBI, ICICI Bank, Axis Bank, Kotak Mahindra Bank, Yes Bank, IndusInd, PNB, Bank of Baroda, Canara Bank, IDFC First and most other banks that issue PDF statements. HDFC Bank has its own guide."
+  - question: "Can I convert a scanned passbook or branch printout?"
+    answer: "Yes. Photos and scanned pages are read with OCR. Clear, flat images give the best results, and the balance check flags any row that may have been misread."
+  - question: "Can I use the file in Tally?"
+    answer: "Yes. The Excel and CSV files have separate columns for date, narration, reference, withdrawal, deposit and balance, which you can map in Tally's bank statement import or in Zoho Books and Busy."
 ---
 
-# Convert Indian Bank Statements to Excel & CSV
+# Converting Indian Bank Statements to Excel
 
-Indian bank statements share the same headaches: password-protected PDFs, long UPI narrations, and amounts written with lakh separators. Finlyzers handles all three for SBI, ICICI, Axis, Kotak, and most other Indian banks, giving you a clean Excel or CSV file in seconds.
+Statements from Indian banks share a few headaches: PDFs protected with a password, long UPI and NEFT narrations, debit and credit columns with different names at each bank, balances marked Cr or Dr, and amounts written with lakh separators. Finlyzers handles these for SBI, ICICI, Axis, Kotak and most other Indian banks, so you get one consistent spreadsheet layout whichever bank issued the statement.
 
-## How to Convert Your Statement
+## Typical Indian Statement Columns
 
-1. **Download** the statement PDF from your bank's net banking portal or app (for example SBI YONO, ICICI iMobile, Axis Mobile, or Kotak 811).
-2. **Upload** it above and enter the PDF password if prompted.
-3. **Download** Excel or CSV with withdrawals and deposits in separate columns.
+Most Indian bank statements contain the same information under slightly different headings:
 
-## Built for CA Firms, Businesses & Loan Applications
+- **Transaction date** and often a separate **value date**.
+- **Narration**, **Description** or **Particulars** describing the payment.
+- **Cheque or reference number**.
+- **Withdrawal** or **Debit (Dr)**, and **Deposit** or **Credit (Cr)**.
+- **Balance**, sometimes followed by Cr or Dr.
 
-- **GST and income tax work**: total business receipts and expenses quickly.
-- **Bookkeeping**: CSV that maps into Tally, Zoho Books, and Busy.
-- **Loan and visa files**: a clean transaction history from a long PDF.
+The converter maps all of these to the same output columns: date, narration, reference, withdrawal, deposit and balance.
 
-## Supported Banks
+## How to Get Your Statement
 
-SBI, ICICI Bank, Axis Bank, Kotak Mahindra Bank, Yes Bank, IndusInd, PNB, Bank of Baroda, Canara Bank, IDFC First, and more. HDFC customers can use the dedicated [HDFC converter](/convert/hdfc-bank-statement-to-excel).
+1. **SBI:** download the account statement from OnlineSBI or YONO for the date range you need.
+2. **ICICI Bank, Axis Bank and Kotak:** use the statement or e-statement option in net banking or the mobile app.
+3. **Emailed statements:** these are usually password protected. Upload them as they are and enter the password when asked.
+
+## Uses for Converted Statements
+
+- **GST and income tax:** total business receipts and expenses for a quarter or financial year.
+- **Bookkeeping:** import into Tally, Zoho Books or Busy.
+- **Loan, visa and rental applications:** a readable transaction history from a long PDF.
+- **Personal budgeting:** filter UPI spending by merchant.
+
+HDFC Bank customers can use the dedicated [HDFC converter](/convert/hdfc-bank-statement-to-excel), which covers HDFC's column layout in detail. Paper statements and passbook photos go through the [scanned statement converter](/convert/scanned-pdf-ocr-to-excel), and you can download [CSV](/convert/bank-statement-to-csv) instead of Excel from the same upload.

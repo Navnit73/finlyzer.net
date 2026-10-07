@@ -183,8 +183,10 @@ export function getAllLandingPages(): SEOConverterPage[] {
         statementLabel: (data.statementLabel as string) || `${bankName} Statement`,
         outputFormat: (data.outputFormat as string) || 'Excel',
         country: (data.country as string) || 'Global',
-        badgeText: (data.badgeText as string) || 'AI Verified Converter',
+        badgeText: (data.badgeText as string) || 'Bank statement converter',
+        intro: (data.intro as string) || (data.metaDescription as string) || '',
         keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
+        related: Array.isArray(data.related) ? (data.related as string[]) : [],
         features: Array.isArray(data.features) ? (data.features as SEOFeature[]) : [],
         tableColumns: Array.isArray(data.tableColumns) ? (data.tableColumns as string[]) : ['Date', 'Description', 'Debit', 'Credit', 'Balance'],
         sampleData: Array.isArray(data.sampleData) ? (data.sampleData as SEOSampleRow[]) : [],
@@ -211,18 +213,18 @@ export function getLandingPageBySlug(slug: string): SEOConverterPage | null {
 }
 
 /**
- * Returns related landing pages for cross-linking
+ * Returns related landing pages for cross-linking: the page's hand-picked `related` slugs first,
+ * then same-category pages to fill any remaining slots.
  */
 export function getRelatedLandingPages(currentSlug: string, limit = 4): SEOConverterPage[] {
   const allPages = getAllLandingPages();
   const current = allPages.find((p) => p.slug === currentSlug);
-  
-  return allPages
-    .filter((p) => p.slug !== currentSlug)
-    .sort((a, b) => {
-      if (current && a.category === current.category && b.category !== current.category) return -1;
-      if (current && b.category === current.category && a.category !== current.category) return 1;
-      return 0;
-    })
-    .slice(0, limit);
+  const others = allPages.filter((p) => p.slug !== currentSlug);
+
+  const picked = (current?.related ?? [])
+    .map((slug) => others.find((p) => p.slug === slug))
+    .filter((p): p is SEOConverterPage => Boolean(p));
+  const fill = others.filter((p) => !picked.includes(p) && p.category === current?.category);
+
+  return [...picked, ...fill].slice(0, limit);
 }

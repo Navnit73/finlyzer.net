@@ -7,7 +7,14 @@ import {
   getLandingPageBySlug,
   getRelatedLandingPages,
 } from '@/lib/seo-markdown';
-import { SITE_NAME, absoluteUrl, getBreadcrumbJsonLd } from '@/lib/seo-config';
+import {
+  WEBAPP_ID,
+  getBreadcrumbJsonLd,
+  getFaqJsonLd,
+  getWebPageJsonLd,
+  pageMetadata,
+  serializeJsonLd,
+} from '@/lib/seo-config';
 import { ChevronRight, UploadCloud, Cpu, Download } from 'lucide-react';
 import ConverterHero from '@/components/converter/ConverterHero';
 import MobileStickyCta from '@/components/converter/MobileStickyCta';
@@ -127,7 +134,7 @@ function toFileOutput(page: SEOPageData): FileOutputPreview | undefined {
           return `${y}-${m}-${d},${desc},${debit},${credit},${parseAmount(row.balance).toFixed(2)}`;
         }),
       ],
-      caption: 'ISO dates, plain numbers and separate debit and credit columns, so it imports cleanly anywhere.',
+      caption: 'A header row, plain numbers and separate debit and credit columns, so it imports cleanly.',
     };
   }
 
@@ -137,6 +144,9 @@ function toFileOutput(page: SEOPageData): FileOutputPreview | undefined {
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+// Only the converter pages that exist in src/content/converters; anything else is a 404.
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const pages = getAllLandingPages();
@@ -156,39 +166,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const canonicalUrl = absoluteUrl(`/convert/${page.slug}`);
-
-  return {
-    // metaTitle already carries the brand, so skip the root layout's "%s | Finlyzers" template.
-    title: { absolute: page.metaTitle },
+  return pageMetadata({
+    title: page.metaTitle,
     description: page.metaDescription,
-    keywords: page.keywords,
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
-      title: page.metaTitle,
-      description: page.metaDescription,
-      url: canonicalUrl,
-      siteName: SITE_NAME,
-      type: 'website',
-      images: [
-        {
-          url: '/og_image.webp',
-          width: 1200,
-          height: 630,
-          alt: page.title,
-          type: 'image/webp',
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: page.metaTitle,
-      description: page.metaDescription,
-      images: ['/og_image.webp'],
-    },
-  };
+    path: `/convert/${page.slug}`,
+    // Uses the per-converter card from ./opengraph-image.tsx.
+    defaultShareImage: false,
+  });
+}
+
+/** Section title for the "other formats" grid, worded for the page type. */
+function exportFormatsTitle(page: SEOPageData): string {
+  if (page.category === 'formats') return 'Other Formats From the Same Upload';
+  if (page.category === 'tools') return 'Choose Your Export Format';
+  return `Export ${page.bankName} Statements to Other Formats`;
 }
 
 export default async function SEOConverterPage({ params }: PageProps) {
@@ -200,66 +191,30 @@ export default async function SEOConverterPage({ params }: PageProps) {
   }
 
   const relatedPages = getRelatedLandingPages(slug, 4);
-  const pageUrl = absoluteUrl(`/convert/${page.slug}`);
+  const path = `/convert/${page.slug}`;
 
   const steps = getSteps(page);
   const statementPlural = `${page.statementLabel}s`;
+  const faqs = page.faqs.map((faq) => ({ q: faq.question, a: faq.answer }));
 
-  // JSON-LD Structured Data Schema
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebApplication',
-        '@id': `${pageUrl}#app`,
-        name: page.title,
-        url: pageUrl,
-        description: page.metaDescription,
-        applicationCategory: 'FinanceApplication',
-        operatingSystem: 'All (Web Browser)',
-        publisher: { '@id': `${absoluteUrl('/')}/#organization` },
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'USD',
-          description: 'Free for 1–10 pages per document',
-        },
-      },
-      {
-        '@type': 'HowTo',
-        name: `How to convert ${statementPlural} to ${page.outputFormat}`,
-        step: steps.map((step, i) => ({
-          '@type': 'HowToStep',
-          position: i + 1,
-          name: step.title,
-          text: step.body,
-        })),
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: page.faqs.map((faq) => ({
-          '@type': 'Question',
-          name: faq.question,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: faq.answer,
-          },
-        })),
-      },
-      getBreadcrumbJsonLd([
-        { name: 'Home', path: '/' },
-        { name: 'Converters', path: '/convert' },
-        { name: page.title, path: `/convert/${page.slug}` },
-      ]),
-    ],
-  };
+  // WebPage + BreadcrumbList, plus FAQPage for the FAQs rendered below. The product entity
+  // (WebApplication) lives once on the homepage and is referenced here by @id.
+  const jsonLd = serializeJsonLd([
+    { ...getWebPageJsonLd({ path, name: page.title, description: page.metaDescription }), about: { '@id': WEBAPP_ID } },
+    getBreadcrumbJsonLd([
+      { name: 'Home', path: '/' },
+      { name: 'Converters', path: '/convert' },
+      { name: page.title, path },
+    ]),
+    ...(faqs.length > 0 ? [getFaqJsonLd(faqs)] : []),
+  ]);
 
   return (
     <div className="w-full">
       {/* Inject Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
 
       <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] min-w-0">
@@ -273,7 +228,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
       <ConverterHero
         badge={`${page.badgeText} · Free up to 10 pages`}
         title={page.title}
-        description={page.metaDescription}
+        description={page.intro}
         ctaLabel={`Choose ${page.statementLabel}`}
         documentType="bank_statement"
       />
@@ -288,7 +243,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
 
         {page.sampleData.length > 0 && (
           <BeforeAfterSection
-            title={`Before & After: Your ${page.statementLabel} Data`}
+            title={page.category === 'formats' ? `From PDF Statement to ${page.outputFormat}` : `Before & After: Your ${page.statementLabel} Data`}
             subtitle={`Messy ${page.statementLabel} text becomes clean, verified ${page.outputFormat} output.`}
             rawLines={page.sampleData.map((row) => `${row.date} ${row.desc} ${row.amount.replace(/[$₹£,+]/g, '')} ${row.balance.replace(/[$₹£,]/g, '')}`)}
             rows={toLedgerRows(page)}
@@ -298,32 +253,39 @@ export default async function SEOConverterPage({ params }: PageProps) {
 
         {page.features.length > 0 && (
           <FeatureGridSection
-            title={`Built for ${statementPlural}`}
+            title={page.category === 'formats' ? `Why Use the ${page.outputFormat} Export` : `Built for ${statementPlural}`}
             subtitle="Understands real statement layouts, not just generic PDF tables."
             features={page.features}
           />
         )}
 
-        <ExportFormatsSection excludeSlug={page.slug} />
+        <ExportFormatsSection title={exportFormatsTitle(page)} excludeSlug={page.slug} />
 
         {page.contentHtml && <EditorialSection html={page.contentHtml} />}
+
+        {page.category.endsWith('-banks') && (
+          <p className="max-w-3xl mx-auto -mt-8 sm:-mt-16 text-sm text-[var(--color-text-muted)]">
+            Finlyzers is an independent tool and is not affiliated with or endorsed by {page.bankName}. Statement
+            layouts described here can change; always check the converted figures against your statement.
+          </p>
+        )}
 
         <SecuritySection title={`Is It Safe to Upload My ${page.statementLabel}?`} />
 
         {relatedPages.length > 0 && (
           <ConverterLinksSection
-            title="More Bank Statement Converters"
+            title="Related Converters"
             links={relatedPages.map((rel) => ({ name: rel.title, slug: rel.slug, badge: rel.badgeText }))}
           />
         )}
 
         <ComparisonSection />
 
-        {page.faqs.length > 0 && (
+        {faqs.length > 0 && (
           <FaqSection
-            title="Frequently Asked Questions"
-            subtitle={`Everything you need to know about converting ${statementPlural}.`}
-            faqs={page.faqs.map((faq) => ({ q: faq.question, a: faq.answer }))}
+            title={`${page.title} FAQ`}
+            subtitle={`Common questions about converting ${statementPlural}.`}
+            faqs={faqs}
           />
         )}
 

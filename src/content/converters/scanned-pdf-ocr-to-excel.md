@@ -1,31 +1,38 @@
 ---
 slug: "scanned-pdf-ocr-to-excel"
-title: "Scanned Bank Statement OCR to Excel Converter"
-metaTitle: "Scanned Bank Statement to Excel (OCR) | Finlyzers"
-metaDescription: "Convert scanned and photographed bank statements into editable Excel (XLSX) or CSV. High accuracy OCR fixes skewed scans and blurry receipts."
+title: "Scanned Bank Statement to Excel (OCR)"
+metaTitle: "Scanned Bank Statement to Excel with OCR | Finlyzers"
+metaDescription: "Convert scanned bank statements and phone photos of paper statements to Excel or CSV. OCR reads the text and the running balance check flags misread rows."
+intro: "Convert scanned PDFs and phone photos of paper bank statements into Excel or CSV. OCR reads pages that have no text layer, and the balance check flags any row it may have misread."
 category: "tools"
-bankName: "Scanned & Photographed Documents"
+bankName: "Scanned Statements"
 statementLabel: "Scanned Statement"
+outputFormat: "Excel"
 country: "Global"
-badgeText: "High Precision AI OCR"
+badgeText: "OCR for scans & photos"
 keywords:
-  - "scanned bank statement ocr to excel"
-  - "convert scanned pdf to excel"
-  - "photo bank statement to csv"
-  - "ocr table extraction financial"
+  - "scanned bank statement to excel"
+  - "bank statement ocr"
+  - "convert scanned pdf bank statement"
+  - "photo of bank statement to excel"
+related:
+  - "bank-statement-to-excel"
+  - "indian-bank-statement-to-excel"
+  - "hdfc-bank-statement-to-excel"
+  - "pdf-to-excel-converter"
 features:
-  - title: "Auto-Deskew & Contrast Optimization"
-    description: "Cleans rotation, skew, shadows, and low-contrast mobile camera photos before OCR processing."
-  - title: "Sub-Pixel Character Recognition"
-    description: "Extracts fine decimal points, comma separators, and negative currency symbols with high precision."
-  - title: "Header & Footer Noise Elimination"
-    description: "Strips redundant legal disclaimers and page numbering to provide continuous data rows."
-  - title: "Instant Mathematical Cross-Check"
-    description: "Compares OCR extracted ledger totals with stated beginning and closing balances."
+  - title: "Reads Image-Only Pages"
+    description: "Scanned PDFs and photos have no selectable text. OCR turns each page into text before the table is rebuilt."
+  - title: "Handles Imperfect Scans"
+    description: "Slightly skewed, shadowed or low-contrast pages are processed, though clearer images give better results."
+  - title: "Mixed Documents"
+    description: "Files where some pages are digital and others are scanned are handled in one upload."
+  - title: "Misreads Flagged"
+    description: "The running balance is recomputed row by row, so a misread digit shows up as a mismatch instead of slipping through."
 tableColumns:
   - "Date"
-  - "Description / Narrative"
-  - "Transaction ID"
+  - "Description"
+  - "Reference"
   - "Debit"
   - "Credit"
   - "Balance"
@@ -40,32 +47,51 @@ sampleData:
     amount: "+$1,200.00"
     type: "Credit"
     balance: "$5,320.30"
+steps:
+  - title: "Upload a scan or photo"
+    body: "Drop a scanned PDF, or a PNG, JPG, WEBP or TIFF photo of each page. Files up to 50 MB are accepted."
+  - title: "OCR reads every page"
+    body: "Text is recognized on each page, the transaction table is rebuilt and the running balance is recomputed."
+  - title: "Review flagged rows and download"
+    body: "Check any rows where the balance does not match, then download Excel, CSV or an accounting format."
 faqs:
-  - question: "Can Finlyzers read phone photos of paper bank statements?"
-    answer: "Yes! Take a photo of your paper statement and upload the JPG, PNG, or scanned PDF. Our AI vision model flattens the perspective, enhances text contrast, and converts it into structured Excel data."
-  - question: "How does Finlyzers handle unclear or faded numbers?"
-    answer: "Our ledger reconciliation engine cross-checks row calculations against stated sub-totals and daily balance indicators to verify OCR accuracy."
+  - question: "What is OCR and why do scanned statements need it?"
+    answer: "OCR (optical character recognition) converts an image of text into actual text. Scanned PDFs and photos are images, so without OCR there is nothing for a converter to read."
+  - question: "Can I photograph a paper statement with my phone?"
+    answer: "Yes. Lay the page flat in even light, fill the frame with the transaction table and avoid shadows across the numbers. Upload one photo per page, or combine the pages into a single PDF."
+  - question: "How do I know if the OCR misread a number?"
+    answer: "When a statement prints a running balance, each row is checked against it. A misread amount breaks the chain and the row is flagged for you to correct before exporting."
+  - question: "Is OCR as accurate as converting a digital PDF?"
+    answer: "Digital PDFs are more reliable because the text is already there. OCR accuracy depends on scan quality, so blurred, low-resolution or heavily compressed images need more review."
 ---
 
-# Scanned Bank Statement OCR to Excel
+# Convert Scanned Bank Statements to Excel
 
-Paper statements, scanned PDFs, and phone photos have no text layer, so ordinary PDF-to-Excel tools return nothing or garbled characters. Finlyzers runs OCR (optical character recognition) on every page, rebuilds the transaction table, and checks the result against the statement balances.
+Paper statements, scanned PDFs and phone photos have no text layer, so ordinary PDF to Excel tools return nothing or a block of garbled characters. Finlyzers runs OCR (optical character recognition) on each page, rebuilds the transaction table and checks the result against the balances printed on the statement.
 
-## What It Handles
+## When You Need OCR
 
-- **Scanned PDFs** from office scanners and copiers.
-- **Phone photos** in PNG, JPG, or TIFF, including slightly skewed or shadowed shots.
-- **Old archives** of paper statements needed for audits, loans, or legal cases.
-- **Mixed files** where some pages are digital and some are scanned.
+- **Old paper statements** needed for audits, loan applications, divorce or probate files, or tax enquiries.
+- **Scans from an office copier** saved as image-only PDFs.
+- **Phone photos** of statements received by post.
+- **PDFs that look digital but are not.** If you cannot select the text in your PDF viewer, the file is an image and needs OCR.
 
-## Tips for the Best OCR Accuracy
+## How the Conversion Works
 
-1. Scan at 300 DPI or higher, in grayscale or color.
-2. Photograph pages flat, in even light, with the whole table in frame.
-3. Upload all pages of a statement together so balances can be verified end to end.
+1. **Text recognition.** Each page image is converted to text, including small figures such as decimal points and minus signs.
+2. **Table rebuilding.** Dates, descriptions and amounts are grouped into rows and assigned to debit, credit and balance columns.
+3. **Balance verification.** Starting from the opening balance, each row is applied and compared with the printed running balance. Rows that do not match are flagged.
 
-## Why the Balance Check Matters
+## Tips for Better Results
 
-OCR can misread a digit. Finlyzers adds up every extracted transaction and compares it to the opening and closing balances printed on the statement, so a misread row is flagged before you export rather than discovered during reconciliation.
+1. Scan at **300 DPI or higher**, in grayscale or color.
+2. Keep pages **flat and straight**. Curled pages and steep angles distort the figures.
+3. Use **even lighting** without shadows or glare across the table.
+4. Upload **every page of the statement together**, so the balance can be verified from start to finish.
+5. Avoid heavy compression. A blurry JPEG loses the detail that separates a 3 from an 8.
 
-Have a digital PDF instead? Use the [bank statement to Excel converter](/convert/bank-statement-to-excel).
+## Known Limitations
+
+Handwritten notes, stamps over the table, faded thermal paper and very low-resolution images reduce accuracy. Statements without a printed running balance cannot be verified row by row, so compare the column totals with the statement summary instead. The [methodology page](/editorial-policy) lists these limitations in full.
+
+Have a digital PDF instead? The standard [bank statement to Excel converter](/convert/bank-statement-to-excel) is faster. For Indian bank statements that arrive as scanned copies, see the [Indian bank statement guide](/convert/indian-bank-statement-to-excel).

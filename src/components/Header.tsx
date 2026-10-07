@@ -192,7 +192,7 @@ export default function Header() {
                         </div>
                         <div>
                           <span>All Bank Converters Hub</span>
-                          <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">50+ Global Bank Formats</p>
+                          <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">By bank &amp; export format</p>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
@@ -224,8 +224,8 @@ export default function Header() {
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { name: 'Chase to Excel', slug: 'chase-bank-statement-to-excel' },
-                        { name: 'BofA to CSV', slug: 'bank-of-america-statement-to-csv' },
-                        { name: 'Wells Fargo to Excel', slug: 'wells-fargo-pdf-to-excel' },
+                        { name: 'Bank of America', slug: 'bank-of-america-statement-to-excel' },
+                        { name: 'Wells Fargo to Excel', slug: 'wells-fargo-bank-statement-to-excel' },
                         { name: 'Barclays Statement', slug: 'barclays-bank-statement-to-excel' },
                         { name: 'Indian Banks (HDFC/SBI)', slug: 'indian-bank-statement-to-excel' },
                         { name: 'Scanned PDF OCR', slug: 'scanned-pdf-ocr-to-excel' },

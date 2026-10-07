@@ -8,7 +8,8 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         // No trailing slashes: '/dashboard/' would not block '/dashboard' itself. '/document' also covers '/documents'.
-        disallow: ['/api/', '/admin', '/superadmin', '/dashboard', '/invoices', '/document', '/user'],
+        // Pages here also send noindex; CSS, JS (/_next/) and images stay crawlable.
+        disallow: ['/api/', '/admin', '/superadmin', '/dashboard', '/workspace', '/invoices', '/document', '/user'],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

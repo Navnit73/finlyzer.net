@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllLandingPages } from "@/lib/seo-markdown";
 import {
-  SITE_URL,
-  SITE_NAME,
-  getLanguageAlternates,
+  absoluteUrl,
   getBreadcrumbJsonLd,
+  getWebPageJsonLd,
+  pageMetadata,
+  serializeJsonLd,
 } from "@/lib/seo-config";
 import { ChevronRight, CheckCircle2, ArrowRight } from "lucide-react";
 import ConverterDirectory, {
@@ -14,40 +15,11 @@ import ConverterDirectory, {
 } from "@/components/converter/ConverterDirectory";
 import { FinalCtaSection } from "@/components/converter/sections";
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzers",
-  },
-  description:
-    "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, HDFC, SBI, and credit cards to Excel, CSV, and QuickBooks.",
-  alternates: getLanguageAlternates("/convert"),
-  openGraph: {
-    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzers",
-    description:
-      "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.",
-    url: `${SITE_URL}/convert`,
-    siteName: SITE_NAME,
-    type: "website",
-    locale: "en_US",
-    alternateLocale: ["en_GB", "en_IN", "en_CA", "en_AU"],
-    images: [
-      {
-        url: "/og_image.webp",
-        width: 1200,
-        height: 630,
-        alt: "Finlyzers Bank Converters Directory",
-        type: "image/webp",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "All Bank Statement Converters: Excel, CSV & QBO | Finlyzers",
-    description:
-      "Browse our comprehensive catalog of bank statement converters. Convert Chase, Bank of America, Barclays, Wells Fargo, and HDFC PDF statements to Excel and CSV.",
-    images: ["/og_image.webp"],
-  },
-};
+const title = "Bank Statement Converters by Bank & Format | Finlyzers";
+const description =
+  "Find the right converter: Excel, CSV, QBO, OFX and QIF formats, plus guides for Chase, Bank of America, Wells Fargo, Barclays, HDFC and other banks.";
+
+export const metadata: Metadata = pageMetadata({ title, description, path: "/convert" });
 
 export default function ConvertersDirectoryPage() {
   const pages = getAllLandingPages();
@@ -73,40 +45,33 @@ export default function ConvertersDirectoryPage() {
     }),
   );
 
-  // Directory Structured Data Schema (CollectionPage + ItemList + BreadcrumbList)
-  const directoryJsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      getBreadcrumbJsonLd([
-        { name: "Home", path: "/" },
-        { name: "Converters", path: "/convert" },
-      ]),
-      {
-        "@type": "CollectionPage",
-        "@id": `${SITE_URL}/convert#collection`,
-        name: "Financial Document & Bank Statement Converters Directory",
-        description:
-          "Comprehensive directory of bank statement parsers and financial OCR tools.",
-        url: `${SITE_URL}/convert`,
-        mainEntity: {
-          "@type": "ItemList",
-          numberOfItems: pages.length,
-          itemListElement: pages.map((p, index) => ({
-            "@type": "ListItem",
-            position: index + 1,
-            name: p.title,
-            url: `${SITE_URL}/convert/${p.slug}`,
-          })),
-        },
+  // CollectionPage + ItemList of every converter, with BreadcrumbList.
+  const directoryJsonLd = serializeJsonLd([
+    getBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Converters", path: "/convert" },
+    ]),
+    {
+      ...getWebPageJsonLd({ path: "/convert", name: title, description }),
+      "@type": "CollectionPage",
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: pages.length,
+        itemListElement: pages.map((p, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: p.title,
+          url: absoluteUrl(`/convert/${p.slug}`),
+        })),
       },
-    ],
-  };
+    },
+  ]);
 
   return (
     <div className="w-full">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(directoryJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: directoryJsonLd }}
       />
 
       <nav
@@ -137,12 +102,12 @@ export default function ConvertersDirectoryPage() {
               <span>{pages.length} converters · Free up to 10 pages</span>
             </span>
             <h1 className="text-[2rem] leading-[1.08] sm:text-5xl lg:text-[3.5rem] lg:leading-[1.04] font-extrabold tracking-tight text-[var(--color-ink)]">
-              Bank Statement Converters for Every Bank &amp; Format
+              Converters by Bank &amp; Format
             </h1>
             <p className="text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed max-w-2xl mx-auto">
-              Pick your bank or export format to open a converter tuned for it.
-              Every converter splits debits and credits and checks balances
-              before you download.
+              Pick the export format you need, or your bank for a guide to its
+              statement layout. Every converter splits debits and credits and
+              checks balances before you download.
             </p>
           </header>
 
@@ -156,15 +121,15 @@ export default function ConvertersDirectoryPage() {
               Don&apos;t See Your Bank?
             </h2>
             <p className="text-base sm:text-lg text-[var(--color-text-secondary)]">
-              The universal converter adapts to almost any bank statement layout
-              worldwide, including scanned PDFs and photos.
+              The bank statement converter adapts to most statement layouts,
+              including scanned PDFs and photos. No bank-specific page is needed.
             </p>
           </div>
           <Link
-            href="/convert/bank-statement-to-excel"
+            href="/#upload"
             className="btn-brand-dark !min-h-[52px] w-full lg:w-auto lg:justify-self-end"
           >
-            <span>Open Universal Converter</span>
+            <span>Open the Bank Statement Converter</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </section>

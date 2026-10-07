@@ -44,9 +44,9 @@ interface ConverterHeroProps {
  * copy on the left, upload card on the right (stacked on mobile).
  */
 export default function ConverterHero({
-  badge = 'Free bank statement converter · No signup',
-  title = 'Convert Bank Statements to Excel, CSV & QuickBooks',
-  description = 'Upload a PDF or scanned bank statement and download clean transactions in seconds. Free for statements up to 10 pages.',
+  badge = 'Free up to 10 pages · No signup',
+  title = 'Bank Statement Converter',
+  description = 'Convert PDF and scanned bank statements into Excel, CSV, QuickBooks (QBO), OFX or QIF files. Every transaction is extracted and checked against the statement balance before you download.',
   benefits = DEFAULT_BENEFITS,
   ctaLabel = 'Choose Bank Statement',
   documentType = 'auto',
@@ -340,7 +340,7 @@ export default function ConverterHero({
       <ul className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs sm:text-[13px] text-[var(--color-text-secondary)]">
         <li className="flex items-center gap-1.5 sm:justify-center">
           <ShieldCheck className="w-4 h-4 text-[var(--color-ink)] shrink-0" />
-          <span>256-bit SSL encrypted</span>
+          <span>Encrypted upload (HTTPS)</span>
         </li>
         <li className="flex items-center gap-1.5 sm:justify-center">
           <Trash2 className="w-4 h-4 text-[var(--color-ink)] shrink-0" />

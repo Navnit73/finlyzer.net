@@ -1,8 +1,9 @@
 ---
 slug: "bank-statement-to-csv"
 title: "Bank Statement to CSV Converter"
-metaTitle: "Bank Statement to CSV Converter (Free) | Finlyzers"
-metaDescription: "Convert PDF bank statements to CSV for any accounting or budgeting tool. One row per transaction, separate debits and credits, verified balances. Free up to 10 pages."
+metaTitle: "Bank Statement to CSV Converter: PDF to CSV | Finlyzers"
+metaDescription: "Convert PDF bank statements to CSV for accounting imports, budgeting apps, databases and scripts. One row per transaction, plain numbers. Free up to 10 pages."
+intro: "Turn a PDF bank statement into a plain CSV file with a header row and one line per transaction, ready for accounting imports, budgeting apps, databases and scripts."
 category: "formats"
 bankName: "Bank"
 outputFormat: "CSV"
@@ -10,21 +11,27 @@ country: "Global"
 badgeText: "CSV (.csv)"
 keywords:
   - "bank statement to csv"
-  - "convert pdf bank statement to csv"
-  - "bank statement csv converter"
-  - "pdf to csv bank statement"
+  - "pdf bank statement to csv"
+  - "convert bank statement pdf to csv"
+  - "bank statement csv export"
+related:
+  - "bank-of-america-statement-to-excel"
+  - "wells-fargo-bank-statement-to-excel"
+  - "indian-bank-statement-to-excel"
+  - "credit-card-statement-to-excel"
 features:
-  - title: "Import-Ready Rows"
-    description: "Each transaction becomes a single CSV row with a header line that accounting tools recognise."
-  - title: "Debit / Credit Separation"
-    description: "Withdrawals and deposits are exported in separate columns so imports map cleanly."
-  - title: "Verified Totals"
-    description: "Extracted rows are reconciled against the statement balances before export."
-  - title: "Works Everywhere"
-    description: "Import into Xero, QuickBooks, Sage, Zoho Books, YNAB, Google Sheets, or your own scripts."
+  - title: "Header Row Included"
+    description: "Column names in the first line make it easy to map fields when an app asks which column is the date or amount."
+  - title: "Plain Numbers"
+    description: "No currency symbols or thousands separators in amount columns, so imports and scripts read them as numbers."
+  - title: "Separate Debit and Credit"
+    description: "Money out and money in sit in their own columns, matching the 4-column layout many accounting imports accept."
+  - title: "Checked Before Export"
+    description: "Rows are reconciled against the statement's running balance, so a missed line shows up before you import."
 tableColumns:
   - "Date"
   - "Description"
+  - "Reference"
   - "Debit"
   - "Credit"
   - "Balance"
@@ -47,44 +54,48 @@ sampleData:
 steps:
   - title: "Upload your bank statement"
     body: "Drop the PDF, a scanned copy or a phone photo. Multi-page and password-protected statements work too."
-  - title: "AI extracts & normalises"
-    body: "Every row is extracted, dates are converted to ISO format and amounts are stripped of currency symbols and thousands separators."
-  - title: "Download CSV"
-    body: "Get a UTF-8 CSV that imports cleanly into Google Sheets, Wave, Zoho Books, Python, SQL or any tool that reads plain text."
+  - title: "Rows are extracted and normalized"
+    body: "Each transaction becomes one row, multi-line descriptions are joined and amounts are stripped of symbols and separators."
+  - title: "Download the CSV"
+    body: "Import it into your accounting or budgeting tool, load it into a database, or read it with Python, R or SQL."
 faqs:
-  - question: "How do I convert a PDF bank statement to CSV?"
-    answer: "Upload the statement above and choose CSV when downloading. Each transaction becomes one row with date, description, debit, credit, and balance columns."
-  - question: "Which apps accept the CSV file?"
-    answer: "Any tool that imports CSV bank data, including Xero, QuickBooks, Sage, Zoho Books, FreeAgent, budgeting apps, and spreadsheets."
-  - question: "Does the CSV keep negative signs and decimals?"
-    answer: "Yes. Amounts are exported as plain numbers with two decimals, and debits and credits are kept in their own columns."
-  - question: "Is the converter free?"
-    answer: "Statements up to 10 pages are free to convert and download. Documents of 11 to 30 pages can be previewed free and unlocked for a one-time fee, and archives up to 200 pages are available with a free account."
-  - question: "Is it safe to upload my bank statement?"
-    answer: "Yes. Uploads are encrypted with 256-bit SSL, files are processed in memory and deleted after your session, and your statements are never used to train AI models."
+  - question: "What is the difference between CSV and Excel?"
+    answer: "CSV is plain text with one record per line and values separated by commas. It has no formatting or formulas, which is why almost every app can import it. Excel (.xlsx) keeps formatting and is better for working in a spreadsheet."
+  - question: "Can I import the CSV into QuickBooks Online?"
+    answer: "Yes. QuickBooks Online accepts bank CSVs in a 3-column layout (date, description, amount) or a 4-column layout (date, description, credit, debit) and lets you map the columns during upload. A QBO file skips the mapping step."
+  - question: "Why do symbols like £ or ₹ look wrong when I open the CSV in Excel?"
+    answer: "Excel sometimes guesses the wrong text encoding when you double-click a CSV. Use Data, then From Text/CSV, and choose UTF-8 as the file origin so currency symbols and accented names display correctly."
+  - question: "Excel changed my dates or long reference numbers. What happened?"
+    answer: "When Excel opens a CSV directly it reformats anything that looks like a date or a large number. Import the file through Data, then From Text/CSV, and set those columns to Text to keep them exactly as exported."
+  - question: "Can I load the CSV into a database or script?"
+    answer: "Yes. The header row and consistent columns make it straightforward to read with pandas, R, or a SQL bulk loader such as COPY or LOAD DATA."
 ---
 
-# Convert PDF Bank Statements to CSV
+# Why Convert a Bank Statement to CSV
 
-CSV is the format almost every accounting, budgeting, and analytics tool can import. Finlyzers turns a PDF bank statement into a clean CSV file with one row per transaction and consistent columns, so imports work the first time.
+CSV (comma-separated values) is the most widely accepted format for moving transaction data between systems. Accounting software, budgeting apps, spreadsheets, databases and analytics tools all read it. When your bank only gives you PDF statements, converting them to CSV is the quickest route into those tools.
 
-## How to Convert a Bank Statement to CSV
+## What the CSV Contains
 
-1. **Upload** the PDF, scanned statement, or photo above.
-2. **Let Finlyzers extract and verify** every transaction against the statement balances.
-3. **Download as CSV** and import it into your accounting software or spreadsheet.
+- **A header row** naming each column.
+- **One line per transaction**, with multi-line descriptions joined into a single field.
+- **Date, description and reference** columns, plus **debit**, **credit** and **balance** where the statement shows them.
+- **Values containing commas are quoted**, so a payee such as "SMITH, J" stays in one column.
 
-## CSV Columns You Get
+## Common Uses for Bank Statement CSVs
 
-- **Date** in a consistent format.
-- **Description** with multi-line narrations joined into one field.
-- **Debit** and **Credit** as separate numeric columns.
-- **Balance** after each transaction, where the statement provides it.
+1. **Accounting imports** when a bank feed is missing or does not reach back far enough, for example in QuickBooks, Xero, Sage, FreeAgent, Zoho Books or Wave.
+2. **Budgeting apps** that accept CSV uploads for accounts without a live connection.
+3. **Data work** such as loading transactions into a database, a BI tool or a Python notebook to categorise spending or detect duplicates.
+4. **Audits and reviews** where you need to filter thousands of lines quickly.
 
-## Common Uses
+## Tips for a Clean Import
 
-- Importing bank transactions into [Xero](/convert/bank-statement-to-ofx) or QuickBooks when the bank feed is missing history.
-- Loading spending data into budgeting apps or Google Sheets.
-- Feeding transaction data into Python, R, or BI tools for analysis.
+- **Check the date order.** US statements use month/day and most other countries use day/month. Tell the importing app which one it is, or it may swap days and months.
+- **Decide on one amount column or two.** Some apps want a single signed amount, others want separate debit and credit columns. You can derive one from the other with a simple formula if needed.
+- **Import through a wizard, not a double-click.** Opening a CSV directly in Excel can reformat dates and long reference numbers. The Data, From Text/CSV route lets you control each column.
+- **Watch your delimiter.** In regions that use a comma as the decimal mark, some spreadsheet setups expect semicolons. Choose comma as the delimiter when importing.
 
-Need a spreadsheet instead? Use the [bank statement to Excel converter](/convert/bank-statement-to-excel).
+## CSV or a Native Accounting Format?
+
+If the destination is QuickBooks, Xero or Quicken, a native file is often easier because it needs no column mapping: use [QBO for QuickBooks](/convert/bank-statement-to-qbo), [OFX for Xero](/convert/bank-statement-to-ofx) or [QIF for Quicken](/convert/bank-statement-to-qif). For analysis in a spreadsheet with formatting kept, [Excel](/convert/bank-statement-to-excel) is the better choice. All formats come from the same upload, so you can download more than one.

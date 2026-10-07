@@ -1,33 +1,40 @@
 ---
 slug: "hdfc-bank-statement-to-excel"
-title: "HDFC Bank Statement to Excel & CSV Converter"
-metaTitle: "HDFC Bank Statement to Excel & CSV (Free) | Finlyzers"
-metaDescription: "Convert HDFC Bank PDF statements to Excel (XLSX) or CSV with password unlock. Instant AI table parsing for Indian savings and current accounts."
+title: "HDFC Bank Statement to Excel Converter"
+metaTitle: "HDFC Bank Statement to Excel & CSV Converter | Finlyzers"
+metaDescription: "Convert HDFC Bank statement PDFs to Excel or CSV, including password-protected e-statements. UPI and NEFT narrations kept intact, lakh amounts cleaned."
+intro: "Convert HDFC Bank savings and current account statement PDFs into Excel or CSV, including password-protected e-statements, with withdrawals and deposits in separate columns."
 category: "india-banks"
 bankName: "HDFC Bank"
+statementLabel: "HDFC Bank Statement"
+outputFormat: "Excel"
 country: "India"
-badgeText: "India #1 Bank Supported"
+badgeText: "India · HDFC Bank statements"
 keywords:
   - "hdfc bank statement to excel"
-  - "convert hdfc pdf statement to csv"
+  - "hdfc statement pdf to excel"
   - "hdfc password protected statement to excel"
-  - "hdfc bank statement converter tally"
+  - "hdfc bank statement to csv"
+related:
+  - "indian-bank-statement-to-excel"
+  - "scanned-pdf-ocr-to-excel"
+  - "credit-card-statement-to-excel"
+  - "bank-statement-to-csv"
 features:
-  - title: "Password Protected PDF Unlock"
-    description: "Easily unlock your password-protected HDFC PDF statement using your customer ID / DOB right in the browser."
-  - title: "UPI & IMPS / NEFT Clean Narrative Extraction"
-    description: "Parses complex Indian UPI strings (e.g., UPI-PAYTM-REF-...) to isolate merchant name, reference number, and payment mode."
-  - title: "INR Currency & Lakhs / Crores Support"
-    description: "Standardizes Indian numbering formatting (₹) into clean numeric columns compatible with Excel and Tally."
-  - title: "Tally Prime & Zoho Books Ready"
-    description: "Clean CSV and Excel exports that map easily into Tally, Zoho Books, and Busy import templates."
+  - title: "Password-Protected PDFs"
+    description: "Enter the e-statement password when prompted. It is used only to open the file and is never stored."
+  - title: "HDFC Columns Mapped"
+    description: "Narration, Chq./Ref. No., Withdrawal Amt., Deposit Amt. and Closing Balance map to clean spreadsheet columns."
+  - title: "Lakh Amounts Cleaned"
+    description: "Amounts written as 1,25,000.00 become plain numbers that Excel and accounting software can total."
+  - title: "Long Narrations Kept Whole"
+    description: "UPI, IMPS and NEFT narrations that wrap across lines are joined into a single description."
 tableColumns:
   - "Date"
-  - "Narration / Transaction Details"
-  - "Chq/Ref No."
-  - "Value Dt"
-  - "Withdrawal (Dr)"
-  - "Deposit (Cr)"
+  - "Narration"
+  - "Chq./Ref. No."
+  - "Withdrawal"
+  - "Deposit"
   - "Closing Balance"
 sampleData:
   - date: "02/09/2026"
@@ -45,31 +52,50 @@ sampleData:
     amount: "₹12,400.00"
     type: "Debit"
     balance: "₹2,07,120.00"
+steps:
+  - title: "Get the statement PDF"
+    body: "Download it from HDFC NetBanking or the mobile app, or use the e-statement HDFC Bank emails you."
+  - title: "Upload and unlock"
+    body: "Upload the PDF and enter its password if prompted. Narrations are joined and amounts are converted from lakh format."
+  - title: "Download Excel or CSV"
+    body: "Use the spreadsheet for GST or income tax work, or map the CSV into Tally, Zoho Books or Busy."
 faqs:
-  - question: "How do I convert a password-protected HDFC bank statement?"
-    answer: "Upload your HDFC statement to Finlyzers. When prompted, enter your password (typically your Customer ID or DOB). Finlyzers unlocks and processes the statement securely in memory."
-  - question: "Can I import the Excel output into Tally Prime or Zoho Books?"
-    answer: "Yes! Finlyzers provides clean separate columns for Narration, Cheque/Ref Number, Withdrawal (Debit), Deposit (Credit), and Balance, matching Tally and Zoho Books import templates."
-  - question: "Are my Indian banking details safe?"
-    answer: "Yes. All data processing is strictly encrypted via SSL. We do not store your banking credentials or document contents after your session finishes."
+  - question: "What is the password for my HDFC e-statement?"
+    answer: "For HDFC Bank account e-statements it is usually your Customer ID. Credit card statements use a different password, so check the email that came with the statement if the Customer ID does not work."
+  - question: "Is my statement password saved?"
+    answer: "No. The password is used only to open the PDF for processing and is never written to our database."
+  - question: "Can I use the Excel file with Tally or Zoho Books?"
+    answer: "Yes. The file has separate columns for date, narration, reference number, withdrawal, deposit and balance, which you can map in the bank statement import of Tally, Zoho Books or Busy."
+  - question: "Does it work for HDFC current accounts and long statements?"
+    answer: "Yes. Savings and current account statements use the same layout. Statements up to 10 pages are free, and longer statements up to 200 pages are available with a free account."
 ---
 
-# Convert HDFC Bank Statements to Excel & CSV
+# Converting HDFC Bank Statements to Excel
 
-HDFC Bank statements pack long narrations full of UPI, IMPS, NEFT, and RTGS reference codes into a single column, and the PDFs sent by email are password protected. Finlyzers unlocks the file in your browser session, cleans each narration, and gives you Excel or CSV with withdrawals and deposits in separate columns.
+HDFC Bank statements are detailed but awkward to work with. The e-statements HDFC emails are password protected, narrations for UPI and NEFT payments are long and wrap across lines, and amounts use Indian digit grouping that spreadsheets do not always read as numbers. Finlyzers deals with all three, so the file you download is ready to total and filter.
 
-## How to Download Your HDFC Statement
+## How an HDFC Bank Statement Is Laid Out
 
-1. Log in to HDFC NetBanking or the HDFC Bank mobile app.
-2. Go to **Accounts**, then **Enquire**, then **Download Historical Statements**.
-3. Pick the date range and download as PDF.
-4. Upload it above. If prompted, enter the PDF password (for emailed statements this is usually your Customer ID).
+- **Header:** account holder, account number, branch, IFSC and the statement period.
+- **Transaction table:** **Date**, **Narration**, **Chq./Ref. No.**, **Value Dt**, **Withdrawal Amt.**, **Deposit Amt.** and **Closing Balance**.
+- **Statement summary:** opening balance, debit and credit counts and totals, and closing balance.
+- **Dates** in DD/MM/YY format.
 
-## Built for Indian CA Firms & Businesses
+## How to Get Your HDFC Statement
 
-- **Password-protected PDFs**: no need to remove the password beforehand. It is never stored.
-- **UPI narration cleaning**: payee name, UPI ID, and reference number are separated.
-- **INR formatting**: amounts written with lakh separators become clean numbers.
-- **Accounting-ready CSV** that maps into Tally, Zoho Books, and Busy import templates.
+1. Log in to **HDFC NetBanking** or the **HDFC Bank mobile app**.
+2. Open your account and look for the statement or **Download historical statements** option (menu names vary slightly between NetBanking and the app).
+3. Choose the date range and download as **PDF**.
+4. Upload it above and enter the PDF password if asked. Monthly e-statements sent by email work the same way.
 
-Using another Indian bank? See the [SBI, ICICI, Axis & Kotak converter](/convert/indian-bank-statement-to-excel).
+## Reading HDFC Narrations
+
+Narrations tell you how money moved. Common prefixes include **UPI-** for UPI payments, **NEFT CR** and **NEFT DR** for NEFT credits and debits, **IMPS** for instant transfers, **ACH DR** for auto-debits such as insurance or loan EMIs, and **POS** for card payments. Because the full narration is kept in one cell, you can filter by these prefixes in Excel to separate UPI spending from salary credits or EMIs.
+
+## Built for CA Firms and Businesses
+
+- **GST and income tax work:** total receipts and expenses for a quarter or financial year.
+- **Bookkeeping:** map the CSV into Tally, Zoho Books or Busy.
+- **Loan and visa applications:** a clean transaction history from a long PDF.
+
+Banking with SBI, ICICI, Axis or Kotak as well? See the [Indian bank statement converter](/convert/indian-bank-statement-to-excel). For HDFC credit cards, use the [credit card converter](/convert/credit-card-statement-to-excel), and for scanned passbook pages or branch printouts, the [scanned statement converter](/convert/scanned-pdf-ocr-to-excel).

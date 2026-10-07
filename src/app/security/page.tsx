@@ -1,18 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
-import { absoluteUrl } from '@/lib/seo-config';
+import { pageMetadata } from '@/lib/seo-config';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 
 const title = 'Security & Data Handling';
 const description = `How Finlyzers protects bank statements: encrypted transfer, guest uploads deleted after ${GUEST_RETENTION_HOURS} hours, account-scoped access, and one-click account deletion.`;
 
-export const metadata: Metadata = {
-  title: { absolute: `${title} | Finlyzers` },
-  description,
-  alternates: { canonical: absoluteUrl('/security') },
-  openGraph: { title: `${title} | Finlyzers`, description, url: absoluteUrl('/security'), type: 'website' },
-};
+export const metadata: Metadata = pageMetadata({ title: `${title} | Finlyzers`, description, path: '/security' });
 
 const sections: LegalSection[] = [
   {
@@ -150,6 +145,7 @@ export default function SecurityPage() {
     <LegalPage
       path="/security"
       title={title}
+      description={description}
       intro={
         <p>
           Bank statements are sensitive. This page explains, in plain terms, what happens to a file after you upload
