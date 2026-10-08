@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import { SEOConverterPage, SEOFeature, SEOFAQ, SEOSampleRow, SEOStep } from '@/types/seo';
+import { SEOConverterPage, SEOFeature, SEOFAQ, SEOGuidePage, SEOSampleRow, SEOStep } from '@/types/seo';
 
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/converters');
+const GUIDES_DIR = path.join(process.cwd(), 'src/content/guides');
 
 /**
  * Parses simple YAML-like frontmatter without bulky dependencies
@@ -192,6 +193,7 @@ export function getAllLandingPages(): SEOConverterPage[] {
         sampleData: Array.isArray(data.sampleData) ? (data.sampleData as SEOSampleRow[]) : [],
         steps: Array.isArray(data.steps) ? (data.steps as SEOStep[]) : [],
         faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
+        acceptsSpreadsheets: data.acceptsSpreadsheets === true,
         rawContent: content,
         contentHtml: renderMarkdown(content),
       });
@@ -227,4 +229,47 @@ export function getRelatedLandingPages(currentSlug: string, limit = 4): SEOConve
   const fill = others.filter((p) => !picked.includes(p) && p.category === current?.category);
 
   return [...picked, ...fill].slice(0, limit);
+}
+
+/**
+ * Returns all guide pages parsed from src/content/guides
+ */
+export function getAllGuides(): SEOGuidePage[] {
+  try {
+    if (!fs.existsSync(GUIDES_DIR)) {
+      return [];
+    }
+
+    return fs
+      .readdirSync(GUIDES_DIR)
+      .filter((f) => f.endsWith('.md'))
+      .map((file) => {
+        const { data, content } = parseFrontmatter(fs.readFileSync(path.join(GUIDES_DIR, file), 'utf8'));
+        const title = (data.title as string) || 'Guide';
+        return {
+          slug: (data.slug as string) || file.replace(/\.md$/, ''),
+          title,
+          shortTitle: (data.shortTitle as string) || title,
+          metaTitle: (data.metaTitle as string) || `${title} | Finlyzers`,
+          metaDescription: (data.metaDescription as string) || '',
+          intro: (data.intro as string) || (data.metaDescription as string) || '',
+          badgeText: (data.badgeText as string) || 'Guide',
+          ctaLabel: (data.ctaLabel as string) || 'Choose File',
+          datePublished: String(data.datePublished || ''),
+          dateModified: String(data.dateModified || data.datePublished || ''),
+          acceptsSpreadsheets: data.acceptsSpreadsheets === true,
+          related: Array.isArray(data.related) ? (data.related as string[]) : [],
+          keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
+          faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
+          contentHtml: renderMarkdown(content),
+        };
+      });
+  } catch (err) {
+    console.error('Error loading guides:', err);
+    return [];
+  }
+}
+
+export function getGuideBySlug(slug: string): SEOGuidePage | null {
+  return getAllGuides().find((g) => g.slug === slug) || null;
 }

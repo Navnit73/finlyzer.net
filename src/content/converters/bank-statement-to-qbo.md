@@ -1,8 +1,8 @@
 ---
 slug: "bank-statement-to-qbo"
-title: "Bank Statement to QBO Converter for QuickBooks"
-metaTitle: "Bank Statement to QBO Converter for QuickBooks | Finlyzers"
-metaDescription: "Convert PDF bank statements to QBO (Web Connect) files and import them into QuickBooks Online or Desktop without column mapping. Free up to 10 pages."
+title: "PDF to QBO Converter: Bank Statements to QuickBooks"
+metaTitle: "PDF to QBO Converter: Bank Statements to QuickBooks | Finlyzers"
+metaDescription: "Convert PDF bank and credit card statements to QBO (Web Connect) files and import them into QuickBooks Online or Desktop. Online, no download, free up to 10 pages."
 intro: "Turn PDF bank statements into QBO (QuickBooks Web Connect) files, then import the transactions into QuickBooks Online or QuickBooks Desktop without retyping or mapping columns."
 category: "formats"
 bankName: "Bank"
@@ -10,15 +10,18 @@ outputFormat: "QuickBooks QBO"
 country: "Global"
 badgeText: "QuickBooks (.qbo)"
 keywords:
-  - "bank statement to qbo"
+  - "convert bank statements to quickbooks"
   - "pdf to qbo"
-  - "bank statement to quickbooks"
-  - "qbo converter"
+  - "pdf to qbo converter"
+  - "convert bank statements to qbo"
+  - "convert pdf bank statements to qbo"
+  - "pdf to quickbooks converter"
+  - "convert pdf to qbo"
 related:
-  - "chase-bank-statement-to-excel"
-  - "wells-fargo-bank-statement-to-excel"
-  - "bank-of-america-statement-to-excel"
+  - "csv-to-qbo"
   - "credit-card-statement-to-excel"
+  - "chase-bank-statement-to-excel"
+  - "bank-statement-to-csv"
 features:
   - title: "QuickBooks Web Connect File"
     description: "Exports a .qbo file, the bank-download format QuickBooks Online and Desktop are built to import."
@@ -58,6 +61,12 @@ steps:
   - title: "Import into QuickBooks"
     body: "Upload the .qbo file in QuickBooks Online, or open it in QuickBooks Desktop, and choose the account to import into."
 faqs:
+  - question: "Is there a free PDF to QBO converter?"
+    answer: "Finlyzers converts statements up to 10 pages to QBO free, with no signup. Statements of 11 to 30 pages can be previewed free and downloaded for a one-time fee, and a free account covers longer statements."
+  - question: "Do I need to download PDF to QBO software?"
+    answer: "No. The converter runs online in your browser. Upload the PDF, check the transactions and download the .qbo file; nothing is installed on your computer."
+  - question: "Can I convert an Excel or CSV file to QBO?"
+    answer: "Yes. Use the CSV and Excel to QBO converter, which takes .csv, .xlsx and .xls files and produces the same Web Connect file."
   - question: "How do I import a QBO file into QuickBooks Online?"
     answer: "Go to Transactions, then Bank transactions, choose Link account and then Upload from file (older menus call this Upload transactions). Select the .qbo file, pick the QuickBooks account, and review the transactions in the For review tab."
   - question: "How do I import a QBO file into QuickBooks Desktop?"
@@ -93,6 +102,16 @@ QBO is Intuit's **Web Connect** format, a variant of OFX that banks provide for 
 3. Select the .qbo file and link it to an existing account (or create one).
 4. Review the downloaded transactions in the Bank Feeds center.
 
+## What to Look For in a PDF to QBO Converter
+
+Any converter can write a .qbo file. The difference is whether the transactions inside it are right. Before you rely on one for client books, check that it:
+
+- **Verifies the running balance**, so a skipped or misread line is caught before it reaches QuickBooks.
+- **Handles scanned statements**, not just PDFs with a text layer.
+- **Lets you review the rows** before you download, instead of producing a file blind.
+- **Works for credit cards as well as bank accounts**, since most clients have both.
+- **Runs without installing software**, so it works on any computer you use for bookkeeping.
+
 ## Good Practice Before You Import
 
 - **Start where your books end.** Convert statements that begin the day after your last reconciled date to avoid overlaps.
@@ -103,5 +122,7 @@ QBO is Intuit's **Web Connect** format, a variant of OFX that banks provide for 
 ## Typical Uses
 
 Backfilling a new QuickBooks company with prior-year transactions, catching up bookkeeping for clients who only send PDFs, and importing accounts that have no bank feed at all.
+
+Card statements convert the same way; see the [credit card statement converter](/convert/credit-card-statement-to-excel) for how charges and payments are split. If the transactions are already in a spreadsheet, the [CSV and Excel to QBO converter](/convert/csv-to-qbo) produces the same file, and the [guide to importing Excel into QuickBooks](/guides/import-excel-into-quickbooks) compares that with a manual CSV upload.
 
 Working in a different tool? Use [OFX for Xero](/convert/bank-statement-to-ofx), [QIF for Quicken](/convert/bank-statement-to-qif), or [CSV](/convert/bank-statement-to-csv) and [Excel](/convert/bank-statement-to-excel) if you want to review the data in a spreadsheet first.

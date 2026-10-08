@@ -1,8 +1,8 @@
 ---
 slug: "bank-statement-to-csv"
 title: "Bank Statement to CSV Converter"
-metaTitle: "Bank Statement to CSV Converter: PDF to CSV | Finlyzers"
-metaDescription: "Convert PDF bank statements to CSV for accounting imports, budgeting apps, databases and scripts. One row per transaction, plain numbers. Free up to 10 pages."
+metaTitle: "Bank Statement to CSV Converter: PDF to CSV Free | Finlyzers"
+metaDescription: "Convert PDF bank statements to CSV online for QuickBooks, Xero, budgeting apps and scripts. One row per transaction, plain numbers. Free up to 10 pages."
 intro: "Turn a PDF bank statement into a plain CSV file with a header row and one line per transaction, ready for accounting imports, budgeting apps, databases and scripts."
 category: "formats"
 bankName: "Bank"
@@ -10,15 +10,19 @@ outputFormat: "CSV"
 country: "Global"
 badgeText: "CSV (.csv)"
 keywords:
-  - "bank statement to csv"
-  - "pdf bank statement to csv"
-  - "convert bank statement pdf to csv"
-  - "bank statement csv export"
+  - "convert bank statement to csv"
+  - "convert pdf bank statement to csv"
+  - "pdf to csv bank statement"
+  - "bank statement to csv converter"
+  - "bank statement pdf to csv"
+  - "convert pdf statement to csv"
 related:
   - "bank-of-america-statement-to-excel"
   - "wells-fargo-bank-statement-to-excel"
   - "indian-bank-statement-to-excel"
   - "credit-card-statement-to-excel"
+  - "bank-statement-to-ofx"
+  - "csv-to-qbo"
 features:
   - title: "Header Row Included"
     description: "Column names in the first line make it easy to map fields when an app asks which column is the date or amount."
@@ -59,6 +63,10 @@ steps:
   - title: "Download the CSV"
     body: "Import it into your accounting or budgeting tool, load it into a database, or read it with Python, R or SQL."
 faqs:
+  - question: "Can I convert a PDF bank statement to CSV for free?"
+    answer: "Yes. Statements up to 10 pages convert free with no signup, online in your browser. Longer statements follow the limits on the pricing page."
+  - question: "Can I import the CSV into Xero?"
+    answer: "Yes. In Xero, open the bank account, choose Manage Account and then Import a Statement, and upload the CSV. Xero asks you to match the columns; it works best with one signed amount column. An OFX file imports into Xero without column matching."
   - question: "What is the difference between CSV and Excel?"
     answer: "CSV is plain text with one record per line and values separated by commas. It has no formatting or formulas, which is why almost every app can import it. Excel (.xlsx) keeps formatting and is better for working in a spreadsheet."
   - question: "Can I import the CSV into QuickBooks Online?"
@@ -70,6 +78,10 @@ faqs:
   - question: "Can I load the CSV into a database or script?"
     answer: "Yes. The header row and consistent columns make it straightforward to read with pandas, R, or a SQL bulk loader such as COPY or LOAD DATA."
 ---
+
+# Convert PDF Bank Statements to CSV
+
+Upload a PDF statement, check the extracted rows on screen, and download a CSV with one line per transaction. It runs online with nothing to install, works on scanned statements as well as digital PDFs, and the same upload can also give you Excel, QBO, OFX or QIF.
 
 # Why Convert a Bank Statement to CSV
 
@@ -96,6 +108,18 @@ CSV (comma-separated values) is the most widely accepted format for moving trans
 - **Import through a wizard, not a double-click.** Opening a CSV directly in Excel can reformat dates and long reference numbers. The Data, From Text/CSV route lets you control each column.
 - **Watch your delimiter.** In regions that use a comma as the decimal mark, some spreadsheet setups expect semicolons. Choose comma as the delimiter when importing.
 
+## Importing the CSV Into Xero
+
+Xero can import a bank statement from CSV when an account has no bank feed or the feed does not reach back far enough:
+
+1. Open **Accounting**, then **Bank accounts**, and pick the account.
+2. Choose **Manage Account**, then **Import a Statement**, and upload the CSV.
+3. Match the date, amount and description columns, then review the imported lines in the reconcile screen.
+
+Xero works best with a single signed amount column. If your CSV has separate debit and credit columns, add a column with `=Credit-Debit` before importing, or skip the mapping entirely with an [OFX file for Xero](/convert/bank-statement-to-ofx).
+
 ## CSV or a Native Accounting Format?
 
 If the destination is QuickBooks, Xero or Quicken, a native file is often easier because it needs no column mapping: use [QBO for QuickBooks](/convert/bank-statement-to-qbo), [OFX for Xero](/convert/bank-statement-to-ofx) or [QIF for Quicken](/convert/bank-statement-to-qif). For analysis in a spreadsheet with formatting kept, [Excel](/convert/bank-statement-to-excel) is the better choice. All formats come from the same upload, so you can download more than one.
+
+If you already have a CSV and need it in QuickBooks, the [CSV to QBO converter](/convert/csv-to-qbo) turns it into a Web Connect file, and the [QuickBooks import guide](/guides/import-excel-into-quickbooks) covers uploading a CSV to QuickBooks Online by hand.

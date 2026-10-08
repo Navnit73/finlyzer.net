@@ -58,6 +58,8 @@ steps:
   - title: "Import the QIF file"
     body: "Use your program's QIF import option and choose the account the transactions belong to."
 faqs:
+  - question: "Can I import a QIF file into QuickBooks?"
+    answer: "Not as a bank statement. QuickBooks Online's bank upload takes QBO, QFX, OFX and CSV files, and QuickBooks Desktop brings bank transactions in as Web Connect (.qbo) files. Convert the statement to QBO instead; the same upload produces both formats."
   - question: "How do I import a QIF file into Quicken?"
     answer: "In Quicken choose File, then Import, then QIF File, select the downloaded file and pick the account. Note that recent Quicken for Windows versions restrict QIF imports into checking, savings and credit card accounts, so check your version's import options first."
   - question: "Which programs accept QIF?"

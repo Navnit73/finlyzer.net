@@ -94,7 +94,12 @@ function HomeIntroSection() {
           <Link href="/convert/bank-statement-to-csv" className={linkClass}>CSV file</Link> for imports, a{' '}
           <Link href="/convert/bank-statement-to-qbo" className={linkClass}>QBO file for QuickBooks</Link>, an{' '}
           <Link href="/convert/bank-statement-to-ofx" className={linkClass}>OFX file for Xero</Link> or a{' '}
-          <Link href="/convert/bank-statement-to-qif" className={linkClass}>QIF file for Quicken</Link>.
+          <Link href="/convert/bank-statement-to-qif" className={linkClass}>QIF file for Quicken</Link>. If your
+          transactions are already in a spreadsheet, the{' '}
+          <Link href="/convert/csv-to-qbo" className={linkClass}>CSV and Excel to QBO converter</Link> prepares them for
+          QuickBooks, and the{' '}
+          <Link href="/guides/import-excel-into-quickbooks" className={linkClass}>QuickBooks import guide</Link> covers
+          both import methods.
         </p>
         <p>
           Bookkeepers use it to backfill accounting software when a bank feed is missing history, small businesses use

@@ -23,6 +23,9 @@ export const UPLOAD_INPUT_ID = 'bank-statement-file-input';
 
 const EXPORT_FORMATS = ['Excel', 'CSV', 'QuickBooks', 'Xero', 'Quicken', 'PDF'];
 
+const STATEMENT_ACCEPT = '.pdf,.png,.jpg,.jpeg,.webp,.tiff';
+const SPREADSHEET_ACCEPT = '.csv,.xlsx,.xls';
+
 const DEFAULT_BENEFITS = [
   'Debits, credits & balances in separate columns',
   'Running balance checked against your statement',
@@ -37,6 +40,8 @@ interface ConverterHeroProps {
   /** Label for the main button, e.g. "Choose Chase Statement". */
   ctaLabel?: string;
   documentType?: DocumentType;
+  /** Also accept CSV / Excel files (spreadsheet-to-QBO pages). */
+  acceptSpreadsheets?: boolean;
 }
 
 /**
@@ -50,6 +55,7 @@ export default function ConverterHero({
   benefits = DEFAULT_BENEFITS,
   ctaLabel = 'Choose Bank Statement',
   documentType = 'auto',
+  acceptSpreadsheets = false,
 }: ConverterHeroProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,7 +103,7 @@ export default function ConverterHero({
 
     setIsUploading(true);
     setErrorMessage(null);
-    setProgressStage('Uploading statement...');
+    setProgressStage(acceptSpreadsheets ? 'Uploading file...' : 'Uploading statement...');
 
     try {
       const formData = new FormData();
@@ -205,9 +211,9 @@ export default function ConverterHero({
         id={UPLOAD_INPUT_ID}
         name="bank_statement_file"
         type="file"
-        accept=".pdf,.png,.jpg,.jpeg,.webp,.tiff"
+        accept={acceptSpreadsheets ? `${SPREADSHEET_ACCEPT},${STATEMENT_ACCEPT}` : STATEMENT_ACCEPT}
         className="hidden"
-        aria-label="Upload PDF bank statement or scanned document"
+        aria-label={acceptSpreadsheets ? 'Upload CSV, Excel or PDF file' : 'Upload PDF bank statement or scanned document'}
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) {
             handleFileChange(e.target.files[0]);
@@ -219,7 +225,7 @@ export default function ConverterHero({
       <div
         role="button"
         tabIndex={0}
-        aria-label="Choose or drag and drop a bank statement PDF to convert"
+        aria-label={acceptSpreadsheets ? 'Choose or drag and drop a CSV, Excel or PDF file to convert' : 'Choose or drag and drop a bank statement PDF to convert'}
         aria-busy={isBusy}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -278,14 +284,14 @@ export default function ConverterHero({
               <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-[var(--color-on-dark)]" />
             </div>
             <p className="hidden sm:block text-lg font-bold text-[var(--media-violet-text)]">
-              Drag &amp; drop your bank statement here
+              {acceptSpreadsheets ? 'Drag & drop your CSV or Excel file here' : 'Drag & drop your bank statement here'}
             </p>
             <span className="btn-brand-primary w-full sm:w-auto !min-h-[56px] pointer-events-none !bg-[var(--media-violet)] !border-[var(--media-violet)] !text-[var(--color-on-dark)] !shadow-none">
               <span>{ctaLabel}</span>
               <ArrowRight className="w-5 h-5" />
             </span>
             <p className="text-sm text-[var(--media-violet-text)]/80">
-              PDF, scanned PNG / JPG / TIFF · up to 50 MB
+              {acceptSpreadsheets ? 'CSV, XLSX, XLS or PDF · up to 50 MB' : 'PDF, scanned PNG / JPG / TIFF · up to 50 MB'}
             </p>
           </>
         )}

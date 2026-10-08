@@ -11,11 +11,11 @@
   <!-- Core pages -->
   <url>
     <loc>https://finlyzers.com/</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/pricing</loc>
@@ -25,15 +25,15 @@
   <!-- Converters: formats -->
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-csv</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-qbo</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-ofx</loc>
@@ -41,7 +41,7 @@
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-qif</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
 
   <!-- Converters: tools -->
@@ -51,11 +51,15 @@
   </url>
   <url>
     <loc>https://finlyzers.com/convert/scanned-pdf-ocr-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/credit-card-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/csv-to-qbo</loc>
+    <lastmod>2026-10-08</lastmod>
   </url>
 
   <!-- Converters: banks -->
@@ -82,6 +86,12 @@
   <url>
     <loc>https://finlyzers.com/convert/indian-bank-statement-to-excel</loc>
     <lastmod>2026-10-07</lastmod>
+  </url>
+
+  <!-- Guides -->
+  <url>
+    <loc>https://finlyzers.com/guides/import-excel-into-quickbooks</loc>
+    <lastmod>2026-10-08</lastmod>
   </url>
 
   <!-- Trust &amp; legal -->

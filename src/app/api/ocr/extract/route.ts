@@ -31,13 +31,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Server-Side MIME Type & Extension Whitelist
-    const ALLOWED_MIME = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/tiff'];
-    const ALLOWED_EXTS = ['.pdf', '.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff'];
+    // Spreadsheets (CSV / Excel) are parsed by the OCR service for the CSV & Excel to QBO converter.
+    const ALLOWED_MIME = [
+      'application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/tiff',
+      'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+    const ALLOWED_EXTS = ['.pdf', '.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff', '.csv', '.xlsx', '.xls'];
     const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')).toLowerCase() : '';
 
     if (!ALLOWED_EXTS.includes(ext) && file.type && !ALLOWED_MIME.includes(file.type.toLowerCase())) {
       return errorResponse(
-        'Unsupported file format. Please upload a PDF, PNG, JPG, WEBP, or TIFF document.',
+        'Unsupported file format. Please upload a PDF, PNG, JPG, WEBP, TIFF, CSV, XLSX or XLS file.',
         415,
         'UNSUPPORTED_MEDIA_TYPE'
       );

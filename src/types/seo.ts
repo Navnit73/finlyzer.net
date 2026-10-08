@@ -45,6 +45,32 @@ export interface SEOConverterPage {
   /** Optional page-specific "How it works" copy; falls back to the template steps when empty. */
   steps: SEOStep[];
   faqs: SEOFAQ[];
+  /** The upload hero also takes CSV / Excel files (spreadsheet-to-QBO converters). */
+  acceptsSpreadsheets: boolean;
   contentHtml?: string;
   rawContent: string;
+}
+
+/** Long-form how-to page under /guides, rendered from src/content/guides. */
+export interface SEOGuidePage {
+  slug: string;
+  /** Visible H1. */
+  title: string;
+  /** Short name for breadcrumbs and link cards. */
+  shortTitle: string;
+  metaTitle: string;
+  metaDescription: string;
+  intro: string;
+  badgeText: string;
+  /** Label for the upload hero button. */
+  ctaLabel: string;
+  datePublished: string;
+  dateModified: string;
+  /** The upload hero also takes CSV / Excel files. */
+  acceptsSpreadsheets: boolean;
+  /** Converter slugs to cross-link, in display order. */
+  related: string[];
+  keywords: string[];
+  faqs: SEOFAQ[];
+  contentHtml: string;
 }

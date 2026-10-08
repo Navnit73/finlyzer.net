@@ -251,7 +251,7 @@ export default function OcrUploader({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.jpg,.jpeg,.png,.webp,.tiff"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,.tiff,.csv,.xlsx,.xls"
             className="hidden"
             onChange={(e) => {
               if (e.target.files && e.target.files[0]) {
@@ -309,6 +309,9 @@ export default function OcrUploader({
                 </span>
                 <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
                   PNG &bull; JPG &bull; TIFF
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
+                  CSV &bull; XLSX
                 </span>
                 <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center gap-1 text-[var(--color-brand-hover)]">
                   <Lock className="w-3 h-3" /> Password Protected PDFs

@@ -46,6 +46,12 @@ function toLedgerRows(page: SEOPageData): LedgerRow[] {
 }
 
 const EXPORT_FORMATS = ['Excel', 'CSV', 'QBO', 'OFX', 'QIF'];
+
+const SPREADSHEET_BENEFITS = [
+  'Upload CSV, XLSX or XLS, or a PDF statement',
+  'Download a QuickBooks Web Connect (.qbo) file',
+  'Same upload also exports Excel, CSV, OFX and QIF',
+];
 const stepIcons = [UploadCloud, Cpu, Download];
 
 function listWithOr(items: string[]): string {
@@ -226,11 +232,13 @@ export default async function SEOConverterPage({ params }: PageProps) {
       </nav>
 
       <ConverterHero
-        badge={`${page.badgeText} · Free up to 10 pages`}
+        badge={page.acceptsSpreadsheets ? page.badgeText : `${page.badgeText} · Free up to 10 pages`}
         title={page.title}
         description={page.intro}
+        benefits={page.acceptsSpreadsheets ? SPREADSHEET_BENEFITS : undefined}
         ctaLabel={`Choose ${page.statementLabel}`}
         documentType="bank_statement"
+        acceptSpreadsheets={page.acceptsSpreadsheets}
       />
 
       <div className="w-full space-y-16 sm:space-y-24 pt-8 sm:pt-12 pb-8 sm:pb-16">
@@ -291,7 +299,11 @@ export default async function SEOConverterPage({ params }: PageProps) {
 
         <FinalCtaSection
           title={`Ready to Convert Your ${page.statementLabel}?`}
-          subtitle="Upload a PDF and download clean transactions in seconds. Statements up to 10 pages are free."
+          subtitle={
+            page.acceptsSpreadsheets
+              ? 'Upload a CSV or Excel file and download a QuickBooks-ready QBO file.'
+              : 'Upload a PDF and download clean transactions in seconds. Statements up to 10 pages are free.'
+          }
         />
       </div>
 

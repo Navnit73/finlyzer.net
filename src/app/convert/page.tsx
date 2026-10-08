@@ -134,6 +134,32 @@ export default function ConvertersDirectoryPage() {
           </Link>
         </section>
 
+        {/* QuickBooks import help for visitors who already have a spreadsheet */}
+        <section className="intro-panel grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-ink)]">
+              Importing a Spreadsheet Into QuickBooks?
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--color-text-secondary)]">
+              Upload a CSV or Excel file to the{" "}
+              <Link
+                href="/convert/csv-to-qbo"
+                className="font-semibold text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-brand)] decoration-2"
+              >
+                CSV and Excel to QBO converter
+              </Link>
+              , or follow the step-by-step guide for QuickBooks Online and Desktop.
+            </p>
+          </div>
+          <Link
+            href="/guides/import-excel-into-quickbooks"
+            className="btn-brand-secondary !min-h-[52px] w-full lg:w-auto lg:justify-self-end"
+          >
+            <span>Read the QuickBooks Import Guide</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </section>
+
         <FinalCtaSection href="/#upload" />
       </div>
     </div>

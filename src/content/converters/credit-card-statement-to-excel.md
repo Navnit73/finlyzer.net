@@ -1,7 +1,7 @@
 ---
 slug: "credit-card-statement-to-excel"
 title: "Credit Card Statement to Excel & CSV Converter"
-metaTitle: "Credit Card Statement to Excel & CSV Converter | Finlyzers"
+metaTitle: "Credit Card Statement PDF to Excel & CSV | Finlyzers"
 metaDescription: "Convert Amex, Chase, Capital One, Citi and other credit card statement PDFs to Excel or CSV, with charges and payments in separate columns."
 intro: "Convert credit card statement PDFs into Excel or CSV, with purchases, payments, refunds, fees and interest in clearly separated columns for expense reports, budgeting and bookkeeping."
 category: "tools"
@@ -11,7 +11,8 @@ outputFormat: "Excel"
 country: "Global"
 badgeText: "Amex, Chase, Citi & more"
 keywords:
-  - "credit card statement to excel"
+  - "convert credit card statement to excel"
+  - "convert credit card statement pdf to excel"
   - "credit card statement to csv"
   - "amex statement to excel"
   - "convert credit card statement pdf"

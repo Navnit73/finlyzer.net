@@ -168,6 +168,19 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/convert/csv-to-qbo" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
+                  CSV &amp; Excel to QBO
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/guides/import-excel-into-quickbooks"
+                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
+                >
+                  Guide: Import Excel into QuickBooks
+                </Link>
+              </li>
+              <li>
                 <Link href="/faq" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
                   FAQ
                 </Link>
