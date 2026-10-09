@@ -191,6 +191,53 @@ const sections: LegalSection[] = [
       </p>
     ),
   },
+  {
+    id: 'data-controller',
+    heading: '11. Data controller and contact details',
+    body: (
+      <>
+        <p>
+          The data controller responsible for personal information processed under this policy is <strong>NAVNIT RAI</strong>.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Data Controller / Legal Name</td>
+              <td><strong>NAVNIT RAI</strong></td>
+            </tr>
+            <tr>
+              <td>Privacy &amp; Support Email</td>
+              <td>
+                <a href="mailto:navnitrai5389@gmail.com">navnitrai5389@gmail.com</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Helpline / Phone</td>
+              <td>
+                <a href="tel:+917355087072">+91 7355087072</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Billing / Order Inquiries</td>
+              <td>
+                <a href="mailto:billing@finlyzers.com">billing@finlyzers.com</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          If you have questions regarding data privacy, wish to request full data erasure, or need grievance redressal,
+          please contact us directly.
+        </p>
+      </>
+    ),
+  },
 ];
 
 export default function PrivacyPolicyPage() {
@@ -201,7 +248,7 @@ export default function PrivacyPolicyPage() {
       description={description}
       intro={
         <p>
-          This policy explains what Finlyzers (“we”, “us”) collects when you use our bank statement converter, why we
+          This policy explains what Finlyzers (operated by NAVNIT RAI) collects when you use our bank statement converter, why we
           collect it, and how you stay in control of it.
         </p>
       }

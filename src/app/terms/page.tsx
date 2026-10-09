@@ -160,6 +160,55 @@ const sections: LegalSection[] = [
       </p>
     ),
   },
+  {
+    id: 'legal-contact',
+    heading: '11. Legal entity and contact details',
+    body: (
+      <>
+        <p>
+          Finlyzers is owned and operated by <strong>NAVNIT RAI</strong> as a registered proprietorship.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Detail</th>
+              <th>Information</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Legal Name / Proprietor</td>
+              <td><strong>NAVNIT RAI</strong></td>
+            </tr>
+            <tr>
+              <td>Operating Brand Name</td>
+              <td>Finlyzers (finlyzers.com / finlyzer.net)</td>
+            </tr>
+            <tr>
+              <td>Official Contact Email</td>
+              <td>
+                <a href="mailto:navnitrai5389@gmail.com">navnitrai5389@gmail.com</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Customer Helpline / Phone</td>
+              <td>
+                <a href="tel:+917355087072">+91 7355087072</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Grievance &amp; Compliance Officer</td>
+              <td>Navnit Rai</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          For inquiries regarding subscriptions, billing disputes, technical assistance, or account cancellations, please
+          contact us directly via email or phone. See our <Link href="/about">About Us &amp; Contact</Link> page for full operational details.
+        </p>
+      </>
+    ),
+  },
 ];
 
 export default function TermsPage() {
@@ -168,7 +217,7 @@ export default function TermsPage() {
       path="/terms"
       title={title}
       description={description}
-      intro={<p>These terms govern your use of Finlyzers’s website and bank statement conversion service.</p>}
+      intro={<p>These terms govern your use of Finlyzers’s website and bank statement conversion service operated by NAVNIT RAI.</p>}
       sections={sections}
     />
   );

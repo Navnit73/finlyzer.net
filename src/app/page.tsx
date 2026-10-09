@@ -34,8 +34,11 @@ const jsonLd = serializeJsonLd([
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
     name: SITE_NAME,
+    legalName: 'NAVNIT RAI',
     url: SITE_URL,
     logo: absoluteUrl('/logo.png'),
+    email: 'navnitrai5389@gmail.com',
+    telephone: '+91-7355087072',
   },
   {
     '@type': 'WebSite',

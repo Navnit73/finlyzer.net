@@ -6,6 +6,7 @@ export interface TrustPage {
 }
 
 export const TRUST_PAGES: TrustPage[] = [
+  { path: '/about', title: 'About Us & Contact', shortTitle: 'About Us' },
   { path: '/security', title: 'Security & Data Handling', shortTitle: 'Security' },
   { path: '/privacy-policy', title: 'Privacy Policy', shortTitle: 'Privacy' },
   { path: '/terms', title: 'Terms & Conditions', shortTitle: 'Terms' },
@@ -15,4 +16,4 @@ export const TRUST_PAGES: TrustPage[] = [
 ];
 
 /** Date the policy text was last revised. Bump whenever a policy page changes materially. */
-export const POLICIES_LAST_UPDATED = '2026-10-05';
+export const POLICIES_LAST_UPDATED = '2026-10-09';

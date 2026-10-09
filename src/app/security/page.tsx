@@ -132,10 +132,21 @@ const sections: LegalSection[] = [
     id: 'reporting',
     heading: 'Reporting a security issue',
     body: (
-      <p>
-        If you believe you have found a vulnerability, please report it to us privately before disclosing it publicly.
-        Do not access or modify other users&apos; data while testing.
-      </p>
+      <>
+        <p>
+          If you believe you have found a vulnerability or security issue, please report it to us privately before
+          disclosing it publicly:
+        </p>
+        <ul>
+          <li><strong>Security Lead / Proprietor:</strong> NAVNIT RAI</li>
+          <li><strong>Security Reporting Email:</strong> <a href="mailto:navnitrai5389@gmail.com">navnitrai5389@gmail.com</a></li>
+          <li><strong>Urgent Hotline:</strong> <a href="tel:+917355087072">+91 7355087072</a></li>
+        </ul>
+        <p>
+          We take responsible disclosure seriously and aim to acknowledge reports within 24 hours. Do not access or
+          modify other users&apos; data while testing.
+        </p>
+      </>
     ),
   },
 ];

@@ -96,27 +96,31 @@
 
   <!-- Trust &amp; legal -->
   <url>
+    <loc>https://finlyzers.com/about</loc>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
     <loc>https://finlyzers.com/faq</loc>
     <lastmod>2026-10-07</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/security</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/privacy-policy</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/terms</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/disclaimer</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/editorial-policy</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-09</lastmod>
   </url>
 </urlset>

@@ -287,7 +287,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   currentY -= 70;
 
   // 9. Terms and Support Information
-  page.drawText('CUSTOMER SUPPORT & BILLING INQUIRIES', {
+  page.drawText('MERCHANT & BILLING SUPPORT (LEGAL ENTITY: NAVNIT RAI)', {
     x: margin,
     y: currentY,
     size: 8,
@@ -296,7 +296,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   });
 
   currentY -= 14;
-  page.drawText('If you have any questions concerning this invoice or need custom enterprise contracts, contact us at:', {
+  page.drawText('For invoice questions, custom enterprise plans, or refunds, contact:', {
     x: margin,
     y: currentY,
     size: 8,
@@ -305,7 +305,7 @@ export async function generateInvoicePdf(order: OrderRecord, userName?: string):
   });
 
   currentY -= 12;
-  page.drawText('Website: https://finlyzers.com  |  Email: billing@finlyzers.com  |  Security: 256-Bit SSL Encrypted', {
+  page.drawText('Operator: NAVNIT RAI (Finlyzers)  |  Email: navnitrai5389@gmail.com  |  Phone: +91 7355087072', {
     x: margin,
     y: currentY,
     size: 8,

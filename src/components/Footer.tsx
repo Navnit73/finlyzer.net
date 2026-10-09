@@ -181,6 +181,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/about" className="hover:text-[var(--color-ink)] hover:underline transition-colors font-medium">
+                  About Us &amp; Contact
+                </Link>
+              </li>
+              <li>
                 <Link href="/faq" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
                   FAQ
                 </Link>
@@ -196,9 +201,9 @@ export default function Footer() {
 
         {/* Bottom Copyright Bar */}
         <div className="pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
-          <p>&copy; {new Date().getFullYear()} Finlyzers. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Finlyzers (NAVNIT RAI). All rights reserved.</p>
           <nav aria-label="Legal" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            {['/security', '/privacy-policy', '/terms', '/disclaimer'].map((path) => {
+            {['/about', '/security', '/privacy-policy', '/terms', '/disclaimer'].map((path) => {
               const page = TRUST_PAGES.find((p) => p.path === path)!;
               return (
                 <Link key={path} href={path} className="hover:text-[var(--color-ink)] hover:underline transition-colors">
