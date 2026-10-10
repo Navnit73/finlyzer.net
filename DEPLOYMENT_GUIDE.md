@@ -105,7 +105,19 @@ NEXTAUTH_URL=https://finlyzers.com
 NEXTAUTH_SECRET=your_long_random_jwt_secret_key_here
 GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Razorpay (use rzp_live_* keys in production)
+RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxx
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_random_webhook_secret
+RAZORPAY_CURRENCY=USD
+
+# Resend (purchase receipts + low-credit alerts); domain must be verified in Resend
+RESEND_API_KEY=re_xxxxxxxxxxxx
+EMAIL_FROM=Finlyzers <billing@finlyzers.com>
 ```
+
+> **Razorpay webhook:** in Dashboard → Webhooks add `https://finlyzers.com/api/razorpay/webhook`, use the same secret as `RAZORPAY_WEBHOOK_SECRET`, and subscribe to `payment.captured`, `order.paid` and `payment.failed`. These variables are read at runtime from `.env`, so restart the app after changing them.
 
 ---
 

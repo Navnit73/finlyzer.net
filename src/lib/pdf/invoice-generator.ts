@@ -1,341 +1,217 @@
 import fs from 'fs';
 import path from 'path';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
 import { OrderRecord } from '@/types/pricing';
+import { SITE_URL } from '@/lib/seo-config';
+
+// pdf-lib can't use CSS variables, so these mirror the tokens in globals.css.
+const BRAND = rgb(0.439, 0.941, 0); // --color-brand #70F000
+const INK = rgb(0.09, 0.09, 0.09); // --color-ink #171717
+const MUTED = rgb(0.467, 0.467, 0.467); // --color-text-secondary #777777
+const SUBTLE = rgb(0.961, 0.961, 0.961); // --color-surface-subtle #F5F5F5
+const BORDER = rgb(0.898, 0.898, 0.898); // --color-border #E5E5E5
+const BRAND_SOFT = rgb(0.914, 1, 0.839); // --color-brand-soft #E9FFD6
+const WHITE = rgb(1, 1, 1);
+
+const BUSINESS = {
+  name: 'Finlyzers',
+  domain: SITE_URL.replace(/^https?:\/\//, ''),
+  operator: 'Navnit Rai',
+  email: 'navnitrai5389@gmail.com',
+  phone: '+91 7355087072',
+};
+
+/** Standard PDF fonts only cover WinAnsi, so non-USD currencies print as a code (INR 830.00), never a symbol like the rupee sign. */
+function formatMoney(amountMinor: number, currency: string): string {
+  const formatted = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    currencyDisplay: currency === 'USD' ? 'symbol' : 'code',
+  }).format(amountMinor / 100);
+  return formatted.replace(/ /g, ' ');
+}
+
+/** Standard PDF fonts throw on characters outside WinAnsi (e.g. non-Latin names), so swap those for '?'. */
+function toWinAnsi(value: string, font: PDFFont): string {
+  const supported = new Set(font.getCharacterSet());
+  return Array.from(value, (ch) => (supported.has(ch.codePointAt(0)!) ? ch : '?')).join('');
+}
+
+function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
+  const lines: string[] = [];
+  let line = '';
+  for (const word of text.split(/\s+/)) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+      line = candidate;
+    } else {
+      if (line) lines.push(line);
+      line = word;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
 
 export async function generateInvoicePdf(order: OrderRecord, userName?: string): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
-  
-  // A4 dimensions in points: 595.28 x 841.89
-  const page = pdfDoc.addPage([595.28, 841.89]);
+  pdfDoc.setTitle(`Payment receipt ${order.order_id}`);
+  pdfDoc.setAuthor(BUSINESS.name);
+
+  const page = pdfDoc.addPage([595.28, 841.89]); // A4
   const { width, height } = page.getSize();
-
-  // Embed standard Helvetica fonts
-  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  // Palette definition
-  const brandGreen = rgb(0.439, 0.941, 0.0); // #70F000
-  const inkDark = rgb(0.09, 0.09, 0.09); // #171717
-  const surfaceSubtle = rgb(0.96, 0.96, 0.96); // #F5F5F5
-  const borderGray = rgb(0.88, 0.88, 0.88); // #E0E0E0
-  const textMuted = rgb(0.45, 0.45, 0.45);
-  const textSuccess = rgb(0.12, 0.65, 0.28);
-  const badgeBg = rgb(0.91, 1.0, 0.84);
+  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const margin = 48;
-  let currentY = height - margin;
+  const contentWidth = width - margin * 2;
+  const right = width - margin;
 
-  // 1. Top Decorative Brand Accent Bar
-  page.drawRectangle({
-    x: margin,
-    y: currentY - 6,
-    width: width - margin * 2,
-    height: 6,
-    color: brandGreen,
-  });
+  const text = (
+    value: string,
+    x: number,
+    y: number,
+    opts: { size?: number; font?: PDFFont; color?: ReturnType<typeof rgb>; align?: 'left' | 'right' } = {}
+  ) => {
+    const font = opts.font ?? regular;
+    const size = opts.size ?? 10;
+    value = toWinAnsi(value, font);
+    const w = font.widthOfTextAtSize(value, size);
+    page.drawText(value, { x: opts.align === 'right' ? x - w : x, y, size, font, color: opts.color ?? INK });
+  };
 
-  currentY -= 32;
+  const currency = order.currency || 'USD';
+  const amountMinor = order.amount_minor ?? Math.round(order.amount_usd * 100);
+  const total = formatMoney(amountMinor, currency);
+  const paidAt = new Date(order.updated_at || order.created_at);
+  const dateLabel = paidAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
-  // 2. Header: Company Logo & Document Title
-  let logoOffset = 0;
+  // ---- Header: logo + brand on the left, document title on the right
+  let y = height - margin;
+  let textX = margin;
   try {
     const logoPath = path.join(process.cwd(), 'public', 'logo.png');
     if (fs.existsSync(logoPath)) {
-      const logoBytes = fs.readFileSync(logoPath);
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      const logoSize = 30;
-      page.drawImage(logoImage, {
-        x: margin,
-        y: currentY - 4,
-        width: logoSize,
-        height: logoSize,
-      });
-      logoOffset = logoSize + 10;
+      const logo = await pdfDoc.embedPng(fs.readFileSync(logoPath));
+      page.drawImage(logo, { x: margin, y: y - 34, width: 38, height: 38 });
+      textX = margin + 48;
     }
   } catch {
-    logoOffset = 0;
+    textX = margin;
+  }
+  text(BUSINESS.name, textX, y - 14, { size: 22, font: bold });
+  text(BUSINESS.domain, textX, y - 30, { size: 9, color: MUTED });
+
+  text('PAYMENT RECEIPT', right, y - 12, { size: 18, font: bold, align: 'right' });
+  text(`No. ${order.order_id}`, right, y - 28, { size: 8, color: MUTED, align: 'right' });
+
+  y -= 52;
+  page.drawRectangle({ x: margin, y, width: contentWidth, height: 3, color: BRAND });
+
+  // ---- Paid banner with total
+  y -= 28;
+  const bannerH = 64;
+  page.drawRectangle({ x: margin, y: y - bannerH, width: contentWidth, height: bannerH, color: BRAND_SOFT });
+  page.drawRectangle({ x: margin, y: y - bannerH, width: 4, height: bannerH, color: BRAND });
+  text('PAID', margin + 20, y - 24, { size: 9, font: bold });
+  text(`Paid on ${dateLabel}`, margin + 20, y - 42, { size: 10, color: MUTED });
+  text(total, right - 20, y - 48, { size: 26, font: bold, align: 'right' });
+  text('Total paid', right - 20, y - 16, { size: 9, color: MUTED, align: 'right' });
+
+  // ---- Billed to / Payment details
+  y -= bannerH + 28;
+  const colGap = 24;
+  const colW = (contentWidth - colGap) / 2;
+  const col2X = margin + colW + colGap;
+
+  const label = (s: string, x: number, yy: number) => text(s, x, yy, { size: 8, font: bold, color: MUTED });
+  label('BILLED TO', margin, y);
+  let ly = y - 16;
+  const billedName = order.payer_name || userName;
+  if (billedName) {
+    text(billedName, margin, ly, { size: 11, font: bold });
+    ly -= 15;
+  }
+  text(order.user_email, margin, ly, { size: 10 });
+  // Email and phone the customer entered at Razorpay Checkout, when they differ from the account email.
+  if (order.payer_email && order.payer_email.toLowerCase() !== order.user_email.toLowerCase()) {
+    ly -= 14;
+    text(order.payer_email, margin, ly, { size: 9, color: MUTED });
+  }
+  if (order.payer_contact) {
+    ly -= 14;
+    text(order.payer_contact, margin, ly, { size: 9, color: MUTED });
   }
 
-  page.drawText('Finlyzers', {
-    x: margin + logoOffset,
-    y: currentY,
-    size: 24,
-    font: boldFont,
-    color: inkDark,
-  });
+  label('PAYMENT DETAILS', col2X, y);
+  let ry = y - 16;
+  const detail = (k: string, v: string) => {
+    text(k, col2X, ry, { size: 9, color: MUTED });
+    text(v, right, ry, { size: 9, font: bold, align: 'right' });
+    ry -= 14;
+  };
+  detail('Method', order.payment_method_label || 'Razorpay secure checkout');
+  if (order.razorpay_payment_id) detail('Payment ID', order.razorpay_payment_id);
+  if (order.razorpay_order_id) detail('Gateway order', order.razorpay_order_id);
+  detail('Currency', currency);
 
-  page.drawText('.net', {
-    x: margin + logoOffset + 92,
-    y: currentY,
-    size: 24,
-    font: regularFont,
-    color: textMuted,
-  });
+  y = Math.min(ly, ry) - 24;
 
-  // Top Right: "PAYMENT RECEIPT"
-  const titleText = 'PAYMENT RECEIPT';
-  const titleWidth = boldFont.widthOfTextAtSize(titleText, 16);
-  page.drawText(titleText, {
-    x: width - margin - titleWidth,
-    y: currentY + 4,
-    size: 16,
-    font: boldFont,
-    color: inkDark,
-  });
+  // ---- Line items
+  const headerH = 28;
+  page.drawRectangle({ x: margin, y: y - headerH, width: contentWidth, height: headerH, color: INK });
+  const cols = { pages: margin + contentWidth * 0.6, amount: right - 14 };
+  text('DESCRIPTION', margin + 14, y - 18, { size: 8, font: bold, color: WHITE });
+  text('PAGE CREDITS', cols.pages, y - 18, { size: 8, font: bold, color: WHITE });
+  text('AMOUNT', cols.amount, y - 18, { size: 8, font: bold, color: WHITE, align: 'right' });
+  y -= headerH;
 
-  const subtitleText = 'Official Electronic Invoice';
-  const subtitleWidth = regularFont.widthOfTextAtSize(subtitleText, 9);
-  page.drawText(subtitleText, {
-    x: width - margin - subtitleWidth,
-    y: currentY - 10,
-    size: 9,
-    font: regularFont,
-    color: textMuted,
-  });
+  const rowH = 54;
+  page.drawRectangle({ x: margin, y: y - rowH, width: contentWidth, height: rowH, color: WHITE, borderColor: BORDER, borderWidth: 1 });
+  text(`${order.plan_name} credit package`, margin + 14, y - 24, { size: 11, font: bold });
+  text('AI financial statement extraction pages', margin + 14, y - 40, { size: 8.5, color: MUTED });
+  text(`+${order.pages_credited.toLocaleString('en-US')} pages`, cols.pages, y - 30, { size: 10, font: bold });
+  text(total, cols.amount, y - 30, { size: 11, font: bold, align: 'right' });
+  y -= rowH + 20;
 
-  currentY -= 36;
+  // ---- Totals
+  const totalsW = 240;
+  const tx = right - totalsW;
+  const totalsRow = (k: string, v: string, yy: number) => {
+    text(k, tx, yy, { size: 10, color: MUTED });
+    text(v, right, yy, { size: 10, align: 'right' });
+  };
+  totalsRow('Subtotal', total, y);
+  totalsRow('Tax', 'Not applicable', y - 18);
+  page.drawLine({ start: { x: tx, y: y - 30 }, end: { x: right, y: y - 30 }, thickness: 1, color: BORDER });
+  text('Total paid', tx, y - 50, { size: 12, font: bold });
+  text(total, right, y - 50, { size: 14, font: bold, align: 'right' });
+  y -= 84;
 
-  // 3. Paid Status Pill Badge
-  page.drawRectangle({
-    x: margin,
-    y: currentY - 18,
-    width: 140,
-    height: 24,
-    color: badgeBg,
-    borderColor: textSuccess,
-    borderWidth: 1,
-  });
+  // ---- Credit confirmation (wrapped so long emails never overflow)
+  const note = `${order.pages_credited.toLocaleString('en-US')} page credits were added to ${order.user_email}. Purchased credits never expire and can be used on any statement.`;
+  const noteLines = wrapText(toWinAnsi(note, regular), regular, 9, contentWidth - 32);
+  const noteH = 34 + noteLines.length * 13;
+  page.drawRectangle({ x: margin, y: y - noteH, width: contentWidth, height: noteH, color: SUBTLE, borderColor: BORDER, borderWidth: 1 });
+  text('CREDITS ACTIVATED', margin + 16, y - 20, { size: 8, font: bold });
+  noteLines.forEach((line, i) => text(line, margin + 16, y - 36 - i * 13, { size: 9, color: MUTED }));
 
-  page.drawText('STATUS: PAID IN FULL', {
-    x: margin + 12,
-    y: currentY - 10,
-    size: 9,
-    font: boldFont,
-    color: textSuccess,
-  });
-
-  currentY -= 40;
-
-  // 4. Metadata Box (Order Info & Customer Info)
-  page.drawRectangle({
-    x: margin,
-    y: currentY - 80,
-    width: width - margin * 2,
-    height: 80,
-    color: surfaceSubtle,
-    borderColor: borderGray,
-    borderWidth: 1,
-  });
-
-  // Left Column: Order Information
-  const col1X = margin + 16;
-  const col2X = margin + (width - margin * 2) / 2 + 16;
-  const metaY = currentY - 20;
-
-  page.drawText('INVOICE REFERENCE:', { x: col1X, y: metaY, size: 8, font: boldFont, color: textMuted });
-  page.drawText(order.order_id, { x: col1X, y: metaY - 12, size: 10, font: boldFont, color: inkDark });
-
-  page.drawText('DATE & TIME:', { x: col1X, y: metaY - 30, size: 8, font: boldFont, color: textMuted });
-  const orderDate = order.created_at ? new Date(order.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : new Date().toLocaleDateString();
-  page.drawText(orderDate, { x: col1X, y: metaY - 42, size: 10, font: regularFont, color: inkDark });
-
-  // Right Column: Customer Information
-  page.drawText('BILLED TO (ACCOUNT):', { x: col2X, y: metaY, size: 8, font: boldFont, color: textMuted });
-  page.drawText(order.user_email, { x: col2X, y: metaY - 12, size: 10, font: boldFont, color: inkDark });
-
-  if (userName) {
-    page.drawText(userName, { x: col2X, y: metaY - 24, size: 9, font: regularFont, color: textMuted });
-  }
-
-  page.drawText('PAYMENT METHOD:', { x: col2X, y: metaY - 36, size: 8, font: boldFont, color: textMuted });
-  const paymentMethod = order.razorpay_payment_id ? `Card / Gateway (${order.razorpay_payment_id})` : 'Online Secure Checkout (USD)';
-  page.drawText(paymentMethod, { x: col2X, y: metaY - 48, size: 9, font: regularFont, color: inkDark });
-
-  currentY -= 110;
-
-  // 5. Line Item Table Header
-  const tableWidth = width - margin * 2;
-  page.drawRectangle({
-    x: margin,
-    y: currentY - 24,
-    width: tableWidth,
-    height: 24,
-    color: inkDark,
-  });
-
-  page.drawText('DESCRIPTION', { x: margin + 12, y: currentY - 16, size: 9, font: boldFont, color: rgb(1, 1, 1) });
-  page.drawText('PAGE CREDITS', { x: margin + 260, y: currentY - 16, size: 9, font: boldFont, color: rgb(1, 1, 1) });
-  page.drawText('PRICE (USD)', { x: width - margin - 80, y: currentY - 16, size: 9, font: boldFont, color: rgb(1, 1, 1) });
-
-  currentY -= 24;
-
-  // 6. Line Item Table Row
-  page.drawRectangle({
-    x: margin,
-    y: currentY - 44,
-    width: tableWidth,
-    height: 44,
-    color: rgb(1, 1, 1),
-    borderColor: borderGray,
-    borderWidth: 1,
-  });
-
-  page.drawText(`${order.plan_name} Package`, {
-    x: margin + 12,
-    y: currentY - 18,
-    size: 11,
-    font: boldFont,
-    color: inkDark,
-  });
-
-  page.drawText('High-Accuracy AI Financial Statement Extraction Pass', {
-    x: margin + 12,
-    y: currentY - 32,
-    size: 8,
-    font: regularFont,
-    color: textMuted,
-  });
-
-  page.drawText(`+${order.pages_credited.toLocaleString()} Pages`, {
-    x: margin + 260,
-    y: currentY - 24,
-    size: 10,
-    font: boldFont,
-    color: textSuccess,
-  });
-
-  page.drawText(`$${order.amount_usd.toFixed(2)}`, {
-    x: width - margin - 80,
-    y: currentY - 24,
-    size: 11,
-    font: boldFont,
-    color: inkDark,
-  });
-
-  currentY -= 64;
-
-  // 7. Summary Breakdown Box
-  const summaryBoxWidth = 240;
-  const summaryBoxX = width - margin - summaryBoxWidth;
-
-  page.drawRectangle({
-    x: summaryBoxX,
-    y: currentY - 80,
-    width: summaryBoxWidth,
-    height: 80,
-    color: surfaceSubtle,
-    borderColor: borderGray,
-    borderWidth: 1,
-  });
-
-  let sumY = currentY - 20;
-
-  // Subtotal
-  page.drawText('Subtotal:', { x: summaryBoxX + 16, y: sumY, size: 9, font: regularFont, color: textMuted });
-  page.drawText(`$${order.amount_usd.toFixed(2)} USD`, { x: summaryBoxX + summaryBoxWidth - 95, y: sumY, size: 9, font: regularFont, color: inkDark });
-
-  // Tax / VAT
-  sumY -= 18;
-  page.drawText('Taxes & Fees (0%):', { x: summaryBoxX + 16, y: sumY, size: 9, font: regularFont, color: textMuted });
-  page.drawText('$0.00 USD', { x: summaryBoxX + summaryBoxWidth - 95, y: sumY, size: 9, font: regularFont, color: inkDark });
-
-  // Total Paid
-  sumY -= 24;
-  page.drawLine({
-    start: { x: summaryBoxX + 16, y: sumY + 14 },
-    end: { x: summaryBoxX + summaryBoxWidth - 16, y: sumY + 14 },
-    thickness: 1,
-    color: borderGray,
-  });
-
-  page.drawText('TOTAL PAID:', { x: summaryBoxX + 16, y: sumY, size: 10, font: boldFont, color: inkDark });
-  page.drawText(`$${order.amount_usd.toFixed(2)} USD`, { x: summaryBoxX + summaryBoxWidth - 95, y: sumY, size: 11, font: boldFont, color: textSuccess });
-
-  currentY -= 110;
-
-  // 8. Account Credit Confirmation Banner
-  page.drawRectangle({
-    x: margin,
-    y: currentY - 48,
-    width: tableWidth,
-    height: 48,
-    color: surfaceSubtle,
-    borderColor: borderGray,
-    borderWidth: 1,
-  });
-
-  page.drawText('PAGE CREDITS ACTIVATION GUARANTEE', {
-    x: margin + 14,
-    y: currentY - 18,
-    size: 8,
-    font: boldFont,
-    color: inkDark,
-  });
-
-  page.drawText(
-    `Your account ${order.user_email} has been credited with ${order.pages_credited.toLocaleString()} pages. These credits never expire and are ready for instant extraction.`,
-    {
-      x: margin + 14,
-      y: currentY - 32,
-      size: 8,
-      font: regularFont,
-      color: textMuted,
-    }
-  );
-
-  currentY -= 70;
-
-  // 9. Terms and Support Information
-  page.drawText('MERCHANT & BILLING SUPPORT (LEGAL ENTITY: NAVNIT RAI)', {
-    x: margin,
-    y: currentY,
-    size: 8,
-    font: boldFont,
-    color: inkDark,
-  });
-
-  currentY -= 14;
-  page.drawText('For invoice questions, custom enterprise plans, or refunds, contact:', {
-    x: margin,
-    y: currentY,
-    size: 8,
-    font: regularFont,
-    color: textMuted,
-  });
-
-  currentY -= 12;
-  page.drawText('Operator: NAVNIT RAI (Finlyzers)  |  Email: navnitrai5389@gmail.com  |  Phone: +91 7355087072', {
-    x: margin,
-    y: currentY,
-    size: 8,
-    font: regularFont,
-    color: textMuted,
-  });
-
-  // 10. Footer at bottom of page
-  page.drawLine({
-    start: { x: margin, y: 40 },
-    end: { x: width - margin, y: 40 },
-    thickness: 1,
-    color: borderGray,
-  });
-
-  page.drawText('Finlyzers AI Financial Statement OCR Hub — Thank you for your business!', {
-    x: margin,
-    y: 26,
-    size: 8,
-    font: regularFont,
-    color: textMuted,
-  });
-
-  page.drawText(`Generated on ${new Date().toISOString().substring(0, 10)}`, {
-    x: width - margin - 120,
-    y: 26,
-    size: 8,
-    font: regularFont,
-    color: textMuted,
-  });
-
+  // ---- Footer
+  drawFooter(page, { margin, right, text });
   return await pdfDoc.save();
+}
+
+function drawFooter(
+  page: PDFPage,
+  ctx: {
+    margin: number;
+    right: number;
+    text: (v: string, x: number, y: number, o?: { size?: number; font?: PDFFont; color?: ReturnType<typeof rgb>; align?: 'left' | 'right' }) => void;
+  }
+) {
+  const { margin, right, text } = ctx;
+  page.drawLine({ start: { x: margin, y: 84 }, end: { x: right, y: 84 }, thickness: 1, color: BORDER });
+  text('Questions about this receipt or need a refund?', margin, 66, { size: 9, color: MUTED });
+  text(`${BUSINESS.operator} (${BUSINESS.name})  |  ${BUSINESS.email}  |  ${BUSINESS.phone}`, margin, 52, { size: 9 });
+  text(`${BUSINESS.name} is operated by ${BUSINESS.operator}. This is a computer-generated receipt and needs no signature.`, margin, 34, { size: 8, color: MUTED });
 }

@@ -1,5 +1,6 @@
 import { getDatabase } from '../mongodb';
 import { measureDbQuery } from '../db-logger';
+import { sendLowCreditEmail } from '../email';
 
 export interface UserRecord {
   _id?: string;
@@ -10,6 +11,8 @@ export interface UserRecord {
   pages_processed: number;
   free_pages_limit: number;
   purchased_pages: number;
+  /** Last low-credit email sent; cleared when credits are purchased so alerts can fire again. */
+  credit_alert?: 'low' | 'empty' | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -51,45 +54,6 @@ export async function findOrCreateUser(
         } else {
           if (user.purchased_pages === undefined || user.purchased_pages === null) {
             user.purchased_pages = 0;
-          }
-
-          // Auto-reconcile with completed orders in DB using optimized aggregation
-          try {
-            const orderAggregation = await db
-              .collection('orders')
-              .aggregate([
-                { $match: { user_email: normalizedEmail, status: 'completed' } },
-                { $group: { _id: null, total: { $sum: '$pages_credited' } } },
-              ])
-              .toArray();
-
-            const totalFromOrders = (orderAggregation[0]?.total as number) || 0;
-            if (user.purchased_pages < totalFromOrders) {
-              const updatedTier: UserRecord['tier'] =
-                totalFromOrders >= 5000
-                  ? 'enterprise'
-                  : totalFromOrders >= 1000
-                  ? 'pro'
-                  : totalFromOrders > 0
-                  ? 'starter'
-                  : user.tier;
-
-              user.purchased_pages = totalFromOrders;
-              user.tier = updatedTier;
-
-              await usersCollection.updateOne(
-                { email: normalizedEmail },
-                {
-                  $set: {
-                    purchased_pages: totalFromOrders,
-                    tier: updatedTier,
-                    updated_at: new Date(),
-                  },
-                }
-              );
-            }
-          } catch (orderErr) {
-            console.warn('Order reconciliation warning:', (orderErr as Error).message);
           }
         }
 
@@ -232,7 +196,7 @@ export async function incrementUserPageCount(email: string, pageCount: number): 
       if (db) {
         const usersCollection = db.collection<UserRecord>('users');
         const now = new Date();
-        await usersCollection.updateOne(
+        const updated = await usersCollection.findOneAndUpdate(
           { email: normalizedEmail },
           {
             $inc: { pages_processed: pageCount },
@@ -247,8 +211,14 @@ export async function incrementUserPageCount(email: string, pageCount: number): 
               created_at: now,
             },
           },
-          { upsert: true }
+          { upsert: true, returnDocument: 'after' }
         );
+        if (updated) {
+          // Email must never block or fail the document run.
+          void maybeSendLowCreditAlert(updated as unknown as UserRecord).catch((err) =>
+            console.warn('[Credits] Low-credit alert failed:', (err as Error).message)
+          );
+        }
         return;
       }
     } catch (err) {
@@ -263,6 +233,37 @@ export async function incrementUserPageCount(email: string, pageCount: number): 
   }, { email: normalizedEmail, pageCount });
 }
 
+/**
+ * Emails paying customers once when their balance gets low (<= 10% of what they bought, min 20
+ * pages) and once when it hits zero. Free-tier users are never emailed. The alert level is claimed
+ * with a conditional update so concurrent jobs can't send duplicates; buying credits resets it.
+ */
+async function maybeSendLowCreditAlert(user: UserRecord): Promise<void> {
+  const purchased = user.purchased_pages || 0;
+  if (purchased <= 0) return;
+
+  const remaining = Math.max(0, (user.free_pages_limit ?? 10) + purchased - (user.pages_processed || 0));
+  const state: 'low' | 'empty' | null =
+    remaining <= 0 ? 'empty' : remaining <= Math.max(20, Math.round(purchased * 0.1)) ? 'low' : null;
+  if (!state || user.credit_alert === state || (state === 'low' && user.credit_alert === 'empty')) return;
+
+  const db = await getDatabase();
+  if (!db) return;
+  const claimed = await db.collection<UserRecord>('users').findOneAndUpdate(
+    { email: user.email, credit_alert: { $nin: state === 'low' ? ['low', 'empty'] : ['empty'] } },
+    { $set: { credit_alert: state } }
+  );
+  if (!claimed) return;
+
+  await sendLowCreditEmail({
+    to: user.email,
+    name: user.name,
+    remaining,
+    state,
+    alertKey: `credit-${state}-${user.email}-${purchased}`,
+  });
+}
+
 export async function addPurchasedPages(
   email: string,
   pageCount: number,
@@ -271,48 +272,30 @@ export async function addPurchasedPages(
   const normalizedEmail = email.toLowerCase().trim();
 
   return await measureDbQuery('addPurchasedPages', async () => {
+    // Paid credits must be persisted: throw (so the order is reopened and retried) rather than
+    // crediting an in-memory copy that would vanish on restart.
+    const db = await getDatabase();
+    if (!db) throw new Error('Database unavailable');
+
     const existingUser = await findOrCreateUser(normalizedEmail);
     // Tiers only ever go up: buying a smaller pack after a bigger one must not downgrade the account.
     const tierRank: Record<UserRecord['tier'], number> = { free: 0, starter: 1, pro: 2, enterprise: 3 };
     const candidateTier = newTier || 'starter';
     const updatedTier = tierRank[candidateTier] > tierRank[existingUser.tier || 'free'] ? candidateTier : (existingUser.tier || 'free');
 
-    try {
-      const db = await getDatabase();
-      if (db) {
-        const usersCollection = db.collection<UserRecord>('users');
-        const now = new Date();
-        const updated = await usersCollection.findOneAndUpdate(
-          { email: normalizedEmail },
-          {
-            $inc: { purchased_pages: pageCount },
-            $set: {
-              tier: updatedTier,
-              updated_at: now,
-            },
-          },
-          { returnDocument: 'after', upsert: true }
-        );
+    const updated = await db.collection<UserRecord>('users').findOneAndUpdate(
+      { email: normalizedEmail },
+      {
+        $inc: { purchased_pages: pageCount },
+        $set: { tier: updatedTier, credit_alert: null, updated_at: new Date() },
+      },
+      { returnDocument: 'after', upsert: true }
+    );
+    if (!updated) throw new Error('Failed to credit purchased pages');
 
-        if (updated) {
-          const freshUser = updated as unknown as UserRecord;
-          memoryUsers.set(normalizedEmail, freshUser);
-          return freshUser;
-        }
-      }
-    } catch (err) {
-      console.warn('⚠️ MongoDB addPurchasedPages fallback to memory:', (err as Error).message);
-    }
-
-    const currentPurchased = typeof existingUser.purchased_pages === 'number' ? existingUser.purchased_pages : 0;
-    const mem: UserRecord = {
-      ...existingUser,
-      purchased_pages: currentPurchased + pageCount,
-      tier: updatedTier,
-      updated_at: new Date(),
-    };
-    memoryUsers.set(normalizedEmail, mem);
-    return mem;
+    const freshUser = updated as unknown as UserRecord;
+    memoryUsers.set(normalizedEmail, freshUser);
+    return freshUser;
   }, { email: normalizedEmail, pageCount });
 }
 

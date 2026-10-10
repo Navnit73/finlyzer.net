@@ -20,12 +20,21 @@ export interface OrderRecord {
   amount_inr?: number;
   pages_credited: number;
   status: 'created' | 'pending' | 'completed' | 'failed';
-  payment_gateway: 'razorpay' | 'manual' | 'test' | 'stripe';
+  payment_gateway: 'razorpay';
   document_id?: string;
   guest_session_id?: string;
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
   razorpay_signature?: string;
+  /** Name of the payer as reported by Razorpay (cardholder name), shown on the receipt. */
+  payer_name?: string;
+  payer_email?: string;
+  payer_contact?: string;
+  /** How they paid, e.g. 'Visa card ending 1111', 'UPI (name@bank)', 'Netbanking (HDFC)'. */
+  payment_method_label?: string;
+  /** Currency and amount (minor units) actually charged on the Razorpay order. */
+  currency?: string;
+  amount_minor?: number;
   created_at: string;
   updated_at: string;
 }

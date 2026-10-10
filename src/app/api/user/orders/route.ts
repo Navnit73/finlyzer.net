@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import {
-  createOrder,
-  updateOrderStatus,
-  getUserOrders,
-  getOrderById,
-  PRICING_PLANS,
-  OrderRecord,
-} from '@/lib/models/Order';
-import { addPurchasedPages, getUserQuota } from '@/lib/models/User';
+import { createOrder, getUserOrders, getOrderById, PRICING_PLANS, OrderRecord } from '@/lib/models/Order';
+import { getUserQuota } from '@/lib/models/User';
+import { completeAndFulfillOrder } from '@/lib/fulfill-order';
+import { startRazorpayCheckout, checkoutErrorStatus } from '@/lib/checkout-order';
+import { verifyPaymentSignature, RazorpayConfigError } from '@/lib/razorpay';
 import { errorResponse, successResponse, safeParseJson } from '@/lib/api-utils';
 
 /**
@@ -35,7 +30,8 @@ export async function GET() {
 
 /**
  * POST /api/user/orders
- * Initializes a new checkout order with server-validated pricing.
+ * Creates our order record plus the matching Razorpay order (server-validated pricing) and
+ * returns the options needed to open Razorpay Checkout.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -44,50 +40,34 @@ export async function POST(req: NextRequest) {
       return errorResponse('Unauthorized. Please sign in to create an order.', 401, 'UNAUTHORIZED');
     }
 
-    const { data: body, error: parseError } = await safeParseJson<{
-      plan_id?: string;
-      gateway?: OrderRecord['payment_gateway'];
-    }>(req);
-
+    const { data: body, error: parseError } = await safeParseJson<{ plan_id?: string }>(req);
     if (parseError || !body) {
       return errorResponse(parseError || 'Invalid request body', 400, 'BAD_REQUEST');
     }
 
-    const { plan_id, gateway = 'razorpay' } = body;
-
-    const plan = PRICING_PLANS.find((p) => p.id === plan_id);
+    // Guest passes are sold through /api/guest/orders and are not account credit packs.
+    const plan = PRICING_PLANS.find((p) => p.id === body.plan_id && p.id !== 'guest_doc_unlock');
     if (!plan) {
       return errorResponse('Invalid pricing plan selected.', 400, 'INVALID_PLAN');
     }
 
-    const allowedGateways: OrderRecord['payment_gateway'][] = ['razorpay', 'stripe', 'test', 'manual'];
-    const safeGateway = allowedGateways.includes(gateway) ? gateway : 'razorpay';
+    const order = await createOrder(session.user.email, plan.id, 'razorpay');
 
-    // 1. Create DB order record (initial status: created)
-    const order = await createOrder(session.user.email, plan.id, safeGateway);
-
-    // Order configuration payload
-    const orderPayload = {
-      orderId: order.order_id,
-      amount: plan.price_usd,
-      currency: 'USD',
-      amount_usd: plan.price_usd,
-      plan_name: plan.name,
-      pages_credited: plan.pages,
-      prefill: {
-        name: session.user.name || '',
-        email: session.user.email || '',
-      },
-      theme: {
-        color: '#70F000',
-      },
-    };
+    let checkout;
+    try {
+      checkout = await startRazorpayCheckout(order, `${plan.name} - ${plan.pages.toLocaleString()} pages`);
+    } catch (err) {
+      return errorResponse((err as Error).message, checkoutErrorStatus(err), 'CHECKOUT_UNAVAILABLE');
+    }
 
     const { _id, ...safeOrder } = order as unknown as { _id?: unknown } & OrderRecord;
     return successResponse({
       success: true,
       order: safeOrder,
-      payload: orderPayload,
+      checkout: {
+        ...checkout,
+        prefill: { name: session.user.name || '', email: session.user.email },
+      },
     });
   } catch (err: unknown) {
     const error = err as { message?: string };
@@ -97,7 +77,9 @@ export async function POST(req: NextRequest) {
 
 /**
  * PUT /api/user/orders
- * Verifies payment confirmation with HMAC-SHA256 signature verification and allocates page credits.
+ * Verifies the Checkout success response (HMAC-SHA256 signature) and credits the purchased pages.
+ * Credits are granted at most once per order; the Razorpay webhook is the backstop if this
+ * request never arrives (closed tab, lost connection).
  */
 export async function PUT(req: NextRequest) {
   try {
@@ -106,107 +88,54 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Unauthorized. Please sign in to complete payment.', 401, 'UNAUTHORIZED');
     }
 
-    const normalizedUserEmail = session.user.email.toLowerCase().trim();
-
     const { data: body, error: parseError } = await safeParseJson<{
       order_id?: string;
-      status?: OrderRecord['status'];
       razorpay_payment_id?: string;
       razorpay_order_id?: string;
       razorpay_signature?: string;
     }>(req);
-
     if (parseError || !body) {
       return errorResponse(parseError || 'Invalid request body', 400, 'BAD_REQUEST');
     }
 
-    const {
-      order_id,
-      status = 'completed',
-      razorpay_payment_id,
-      razorpay_order_id,
-      razorpay_signature,
-    } = body;
-
+    const { order_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = body;
     if (!order_id || typeof order_id !== 'string') {
       return errorResponse('Valid order_id is required', 400, 'MISSING_ORDER_ID');
     }
 
-    // 1. Ownership & Existence Verification BEFORE any state modification
     const existingOrder = await getOrderById(order_id.trim());
     if (!existingOrder) {
       return errorResponse('Order not found', 404, 'NOT_FOUND');
     }
-
-    if (existingOrder.user_email !== normalizedUserEmail) {
+    if (existingOrder.user_email !== session.user.email.toLowerCase().trim()) {
       return errorResponse('Unauthorized: Order belongs to another account', 403, 'FORBIDDEN');
     }
 
-    // 2. Prevent Replay Attack / Double Crediting
-    if (existingOrder.status === 'completed') {
-      const freshQuota = await getUserQuota(session.user.email);
-      const { _id, ...safeOrder } = existingOrder as unknown as { _id?: unknown } & OrderRecord;
-      return successResponse({
-        success: true,
-        order: safeOrder,
-        quota: freshQuota,
-        message: `Order ${order_id} is already completed.`,
+    if (existingOrder.status !== 'completed') {
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return errorResponse('Missing required Razorpay payment verification parameters', 400, 'MISSING_PAYMENT_PROOF');
+      }
+      // The Razorpay order id must be the one we created for this order, not whatever the client sent.
+      if (!existingOrder.razorpay_order_id || existingOrder.razorpay_order_id !== razorpay_order_id) {
+        return errorResponse('Payment does not match this order', 400, 'ORDER_MISMATCH');
+      }
+      if (!verifyPaymentSignature({ razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id, signature: razorpay_signature })) {
+        console.error(`[SECURITY ALERT] Invalid payment signature for order ${order_id}`);
+        return errorResponse('Payment signature verification failed.', 400, 'INVALID_SIGNATURE');
+      }
+
+      await completeAndFulfillOrder(existingOrder.order_id, {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
       });
     }
 
-    // 3. Cryptographic Signature Verification for Paid Gateways (Razorpay)
-    const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (status === 'completed' && existingOrder.payment_gateway === 'razorpay') {
-      if (razorpayKeySecret) {
-        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-          return errorResponse('Missing required Razorpay payment verification parameters', 400, 'MISSING_PAYMENT_PROOF');
-        }
-
-        const generatedSignature = crypto
-          .createHmac('sha256', razorpayKeySecret)
-          .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-          .digest('hex');
-
-        if (generatedSignature !== razorpay_signature) {
-          console.error(`[SECURITY ALERT] Invalid payment signature for order ${order_id}`);
-          return errorResponse('Payment signature verification failed. Access denied.', 400, 'INVALID_SIGNATURE');
-        }
-      } else {
-        // In development/mock mode without secret, require at least mock payment id
-        if (!razorpay_payment_id) {
-          return errorResponse('Payment confirmation details are required', 400, 'PAYMENT_ID_REQUIRED');
-        }
-      }
-    }
-
-    // 4. Update Order Status
-    const updatedOrder = await updateOrderStatus(order_id, status, {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    });
-
-    if (!updatedOrder) {
-      return errorResponse('Order update failed', 500);
-    }
-
-    // 5. Secure Credit Allocation only after strict verification
-    if (status === 'completed' && updatedOrder.pages_credited > 0) {
-      const plan = PRICING_PLANS.find((p) => p.id === updatedOrder.plan_id);
-      const newTier = plan?.id === 'pack_100' ? 'enterprise' : plan?.id === 'pack_50' ? 'pro' : undefined;
-      await addPurchasedPages(session.user.email, updatedOrder.pages_credited, newTier);
-    }
-
-    const freshQuota = await getUserQuota(session.user.email);
-    const { _id, ...safeOrder } = updatedOrder as unknown as { _id?: unknown } & OrderRecord;
-
-    return successResponse({
-      success: true,
-      order: safeOrder,
-      quota: freshQuota,
-      message: `Order ${order_id} verified and updated to ${status}.`,
-    });
+    const [order, quota] = await Promise.all([getOrderById(existingOrder.order_id), getUserQuota(session.user.email)]);
+    const { _id, ...safeOrder } = (order || existingOrder) as unknown as { _id?: unknown } & OrderRecord;
+    return successResponse({ success: true, order: safeOrder, quota, message: `Order ${order_id} verified.` });
   } catch (err: unknown) {
+    if (err instanceof RazorpayConfigError) return errorResponse(err.message, 503, 'CHECKOUT_UNAVAILABLE');
     const error = err as { message?: string };
     return errorResponse(error.message || 'Failed to update order', 500);
   }

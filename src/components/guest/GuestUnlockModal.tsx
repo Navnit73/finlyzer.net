@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, X, CheckCircle2, ShieldCheck, Lock, CreditCard, ArrowRight, Zap } from 'lucide-react';
 import { useIsMounted } from '@/lib/useIsMounted';
+import { openRazorpayCheckout, RazorpayCheckoutOptions } from '@/lib/razorpay-client';
 
 interface GuestUnlockModalProps {
   isOpen: boolean;
@@ -39,7 +40,6 @@ export default function GuestUnlockModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           document_id: documentId,
-          gateway: 'razorpay',
         }),
       });
 
@@ -54,78 +54,35 @@ export default function GuestUnlockModal({
         return;
       }
 
-      const orderPayload = data.payload;
-
-      // Check if Razorpay script is available in window
-      if (typeof window !== 'undefined' && (window as unknown as { Razorpay?: unknown }).Razorpay) {
-        const RazorpayClass = (window as unknown as { Razorpay: new (options: Record<string, unknown>) => { open: () => void } }).Razorpay;
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-          amount: Math.round(orderPayload.amount_usd * 100),
-          currency: 'USD',
-          name: 'Finlyzers AI Hub',
-          description: `Unlock ${pageCount}-Page Statement Export (${filename})`,
-          order_id: orderPayload.orderId,
-          handler: async function (response: {
-            razorpay_payment_id?: string;
-            razorpay_order_id?: string;
-            razorpay_signature?: string;
-          }) {
-            try {
-              const verifyRes = await fetch('/api/guest/orders', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  order_id: orderPayload.orderId,
-                  document_id: documentId,
-                  status: 'completed',
-                  razorpay_payment_id: response.razorpay_payment_id || `pay_${Date.now()}`,
-                  razorpay_order_id: response.razorpay_order_id || orderPayload.orderId,
-                  razorpay_signature: response.razorpay_signature,
-                }),
-              });
-
-              const verifyData = await verifyRes.json();
-              if (verifyRes.ok && verifyData.success) {
-                onUnlockSuccess();
-                onClose();
-              } else {
-                throw new Error(verifyData.error || 'Payment verification failed');
-              }
-            } catch (err) {
-              setErrorMessage((err as Error).message || 'Payment verification failed');
-              setIsProcessing(false);
-            }
-          },
-          prefill: orderPayload.prefill,
-          theme: { color: '#70F000' },
-        };
-
-        const rzp = new RazorpayClass(options);
-        rzp.open();
-        setIsProcessing(false);
-      } else {
-        // Fallback / Instant Verification for test/dev mode
-        const verifyRes = await fetch('/api/guest/orders', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order_id: orderPayload.orderId,
-            document_id: documentId,
-            status: 'completed',
-            razorpay_payment_id: `guest_pay_${Date.now()}`,
-            razorpay_order_id: orderPayload.orderId,
-          }),
-        });
-
-        const verifyData = await verifyRes.json();
-        if (verifyRes.ok && verifyData.success) {
-          onUnlockSuccess();
-          onClose();
-        } else {
-          throw new Error(verifyData.error || 'Payment verification failed');
-        }
+      const checkout: RazorpayCheckoutOptions | undefined = data.checkout;
+      const orderId = data.order?.order_id;
+      if (!checkout || !orderId) {
+        throw new Error('Order creation failed to return payment details.');
       }
+
+      const payment = await openRazorpayCheckout({
+        ...checkout,
+        description: `Unlock ${pageCount}-Page Statement Export (${filename})`,
+      });
+      if (!payment) {
+        setIsProcessing(false); // closed the window without paying
+        return;
+      }
+
+      const verifyRes = await fetch('/api/guest/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, document_id: documentId, ...payment }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok || !verifyData.success) {
+        throw new Error(
+          `${verifyData.error || 'Payment verification failed'}. If you were charged, your document will unlock automatically within a few minutes.`
+        );
+      }
+      onUnlockSuccess();
+      onClose();
     } catch (e) {
       setErrorMessage((e as Error).message || 'Unlock checkout failed. Please try again.');
       setIsProcessing(false);

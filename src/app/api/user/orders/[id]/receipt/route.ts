@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getUserOrders } from '@/lib/models/Order';
 import { generateInvoicePdf } from '@/lib/pdf/invoice-generator';
+import { ensurePayerDetails } from '@/lib/fulfill-order';
 
 export async function GET(
   req: NextRequest,
@@ -33,7 +34,9 @@ export async function GET(
     }
 
     // Generate real PDF receipt with pdf-lib
-    const pdfBytes = await generateInvoicePdf(order, session.user.name || undefined);
+    // Payer details come from Razorpay (this also backfills older orders); the account name is the fallback.
+    const paidOrder = await ensurePayerDetails(order);
+    const pdfBytes = await generateInvoicePdf(paidOrder, session.user.name || undefined);
 
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,

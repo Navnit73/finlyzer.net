@@ -7,6 +7,7 @@ import { X, CheckCircle2, ShieldCheck, Sparkles, CreditCard, ArrowRight, AlertCi
 import { PricingPlan } from '@/types/pricing';
 import { useIsMounted } from '@/lib/useIsMounted';
 import { formatUSD } from '@/lib/format';
+import { openRazorpayCheckout, RazorpayCheckoutOptions } from '@/lib/razorpay-client';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -45,43 +46,40 @@ export default function CheckoutModal({
     setErrorMessage(null);
 
     try {
-      // 1. Create order
+      // 1. Create our order + the Razorpay order on the server
       const createRes = await fetch('/api/user/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan_id: plan.id,
-          gateway: 'razorpay',
-        }),
+        body: JSON.stringify({ plan_id: plan.id }),
       });
 
-      if (!createRes.ok) {
-        const data = await createRes.json();
-        throw new Error(data.error || 'Failed to initialize order');
-      }
-
       const createData = await createRes.json();
-      const orderId = createData.order?.order_id;
-
-      if (!orderId) {
-        throw new Error('Order creation failed to return order identifier.');
+      if (!createRes.ok) {
+        throw new Error(createData.error || 'Failed to initialize order');
       }
 
-      // 2. Complete order and credit pages
+      const orderId = createData.order?.order_id;
+      const checkout: RazorpayCheckoutOptions | undefined = createData.checkout;
+      if (!orderId || !checkout) {
+        throw new Error('Order creation failed to return payment details.');
+      }
+
+      // 2. Customer pays in Razorpay Checkout
+      const payment = await openRazorpayCheckout(checkout);
+      if (!payment) return; // closed the window without paying
+
+      // 3. Server verifies the signature and credits pages (the webhook is the backstop)
       const completeRes = await fetch('/api/user/orders', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order_id: orderId,
-          status: 'completed',
-          razorpay_payment_id: `pay_${Date.now()}_test`,
-          razorpay_order_id: createData.razorpay?.orderId,
-        }),
+        body: JSON.stringify({ order_id: orderId, ...payment }),
       });
 
       if (!completeRes.ok) {
         const compData = await completeRes.json();
-        throw new Error(compData.error || 'Failed to activate purchased credits');
+        throw new Error(
+          `${compData.error || 'Failed to activate purchased credits'}. If you were charged, your credits will be added automatically within a few minutes.`
+        );
       }
 
       if (typeof window !== 'undefined') {
