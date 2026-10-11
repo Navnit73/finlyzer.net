@@ -40,8 +40,18 @@ export default function BatchProcessingModal({
   const mounted = useIsMounted();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen || !mounted) return null;
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isProcessing) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isProcessing, onClose]);
 
+  if (!isOpen || !mounted) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -140,20 +150,28 @@ export default function BatchProcessingModal({
 
   const modalContent = (
     <>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+        onClick={(e) => {
+          if (e.target === e.currentTarget && !isProcessing) {
+            onClose();
+          }
+        }}
+      >
         <div
           className="relative w-full max-w-4xl bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto my-auto shadow-none"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="batch-modal-title"
         >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+            className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
             aria-label="Close dialog"
             disabled={isProcessing}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
 
           {/* Modal Header */}
@@ -164,9 +182,9 @@ export default function BatchProcessingModal({
               </span>
               <span className="text-xs text-[var(--color-text-muted)]">Up to 50 Files / .zip Archive</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+            <h2 id="batch-modal-title" className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
               Batch Financial Statement Extraction
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
               Upload multiple monthly PDF statements to concurrently extract line items and generate a consolidated 12-Month Annual Cashflow Master Report.
             </p>
@@ -174,8 +192,17 @@ export default function BatchProcessingModal({
 
           {/* Dropzone Area */}
           <div
+            role="button"
+            tabIndex={0}
+            aria-label="Choose files or drag and drop multiple financial statements"
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-subtle)] rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-all hover:bg-[var(--color-surface-muted)] group"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+            className="border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-subtle)] rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-all hover:bg-[var(--color-surface-muted)] group focus:outline-none focus:border-[var(--color-ink)]"
           >
             <input
               ref={fileInputRef}
@@ -187,7 +214,7 @@ export default function BatchProcessingModal({
               disabled={isProcessing}
             />
             <div className="w-14 h-14 mx-auto rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center group-hover:scale-105 transition-transform mb-3">
-              <Upload className="w-7 h-7 stroke-[2.5]" />
+              <Upload className="w-7 h-7 stroke-[2.5]" aria-hidden="true" />
             </div>
             <p className="font-bold text-sm text-[var(--color-ink)]">
               Choose files or drag &amp; drop multiple statements
@@ -199,8 +226,8 @@ export default function BatchProcessingModal({
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
+            <div role="alert" className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -228,7 +255,7 @@ export default function BatchProcessingModal({
                     className="flex items-center justify-between p-2.5 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] text-xs"
                   >
                     <div className="flex items-center gap-2 truncate pr-2">
-                      <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-hover)] shrink-0" />
+                      <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
                       <span className="font-medium text-[var(--color-ink)] truncate">{file.name}</span>
                       <span className="text-[var(--color-text-muted)] font-mono shrink-0">
                         ({(file.size / 1024).toFixed(0)} KB)
@@ -329,7 +356,7 @@ export default function BatchProcessingModal({
                       className="p-3 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-2.5 truncate">
-                        <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
                         <div>
                           <p className="font-bold text-[var(--color-ink)] truncate">{item.filename}</p>
                           <p className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-2 font-mono">

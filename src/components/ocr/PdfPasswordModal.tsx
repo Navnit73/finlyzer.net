@@ -26,8 +26,18 @@ export default function PdfPasswordModal({
   const [showPassword, setShowPassword] = useState(false);
   const mounted = useIsMounted();
 
-  if (!isOpen || !mounted) return null;
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isLoading) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLoading, onClose]);
 
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +46,14 @@ export default function PdfPasswordModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isLoading) {
+          onClose();
+        }
+      }}
+    >
       <div
         className="relative w-full max-w-md bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
         role="dialog"
@@ -50,18 +67,18 @@ export default function PdfPasswordModal({
           aria-label="Close dialog"
           disabled={isLoading}
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Header Icon */}
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-lg bg-[var(--color-brand-soft)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
-            <Lock className="w-6 h-6 stroke-[2.5]" />
+            <Lock className="w-6 h-6 stroke-[2.5]" aria-hidden="true" />
           </div>
           <div>
-            <h3 id="password-modal-title" className="text-xl font-bold text-[var(--color-ink)]">
+            <h2 id="password-modal-title" className="text-xl font-bold text-[var(--color-ink)]">
               Encrypted PDF File
-            </h3>
+            </h2>
             <p className="text-xs text-[var(--color-text-secondary)] truncate max-w-[240px]">
               {filename}
             </p>
@@ -74,8 +91,8 @@ export default function PdfPasswordModal({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
+          <div role="alert" className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -83,14 +100,15 @@ export default function PdfPasswordModal({
         {/* Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <label htmlFor="pdf-password-input" className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
               Document Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--color-text-muted)]">
-                <KeyRound className="w-4 h-4" />
+                <KeyRound className="w-4 h-4" aria-hidden="true" />
               </div>
               <input
+                id="pdf-password-input"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -106,7 +124,7 @@ export default function PdfPasswordModal({
                 className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] cursor-pointer"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
               </button>
             </div>
           </div>

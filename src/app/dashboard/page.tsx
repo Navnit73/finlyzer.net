@@ -416,17 +416,19 @@ export default function DashboardOverviewPage() {
                     <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
                       <button
                         onClick={(e) => handleDownload(e, doc.id, 'xlsx')}
-                        className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)]"
+                        aria-label={`Download ${doc.filename} in Excel (.xlsx) format`}
+                        className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] cursor-pointer"
                       >
                         Excel (.xlsx)
                       </button>
 
                       <Link
                         href={`/document/${doc.id}`}
+                        aria-label={`View details and extraction for ${doc.filename}`}
                         className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] flex items-center gap-1"
                       >
                         <span>Details</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3 h-3" aria-hidden="true" />
                       </Link>
                     </div>
                   </div>
@@ -459,22 +461,22 @@ export default function DashboardOverviewPage() {
               </div>
 
               <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
-                <table className="table w-full text-xs">
+                <table className="table w-full text-xs" aria-label="Recent billing invoices">
                   <thead>
                     <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                      <th className="font-bold py-2.5">Order ID</th>
-                      <th className="font-bold">Package</th>
-                      <th className="font-bold">Credits</th>
-                      <th className="font-bold">Amount</th>
-                      <th className="font-bold">Status</th>
-                      <th className="font-bold">Date</th>
-                      <th className="font-bold text-right">Invoice PDF</th>
+                      <th scope="col" className="font-bold py-2.5">Order ID</th>
+                      <th scope="col" className="font-bold">Package</th>
+                      <th scope="col" className="font-bold">Credits</th>
+                      <th scope="col" className="font-bold">Amount</th>
+                      <th scope="col" className="font-bold">Status</th>
+                      <th scope="col" className="font-bold">Date</th>
+                      <th scope="col" className="font-bold text-right">Invoice PDF</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentOrders.map((order) => (
                       <tr key={order.order_id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)]">
-                        <td className="font-mono font-bold text-[var(--color-ink)]">{order.order_id}</td>
+                        <th scope="row" className="font-mono font-bold text-[var(--color-ink)] text-left font-normal">{order.order_id}</th>
                         <td className="font-semibold text-[var(--color-ink)]">{order.plan_name}</td>
                         <td className="font-mono font-bold text-[var(--color-brand-dark)]">+{order.pages_credited.toLocaleString()}</td>
                         <td className="font-bold text-[var(--color-ink)] font-mono">{formatUSD(order.amount_usd)} USD</td>
@@ -488,10 +490,11 @@ export default function DashboardOverviewPage() {
                           <a
                             href={`/api/user/orders/${order.order_id}/receipt`}
                             download={`Finlyzers_Invoice_${order.order_id}.pdf`}
+                            aria-label={`Download PDF invoice for order ${order.order_id}`}
                             className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] inline-flex items-center gap-1"
                             title="Download PDF Invoice"
                           >
-                            <Download className="w-3 h-3" />
+                            <Download className="w-3 h-3" aria-hidden="true" />
                             <span>PDF</span>
                           </a>
                         </td>

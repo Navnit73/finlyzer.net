@@ -143,7 +143,7 @@ export default function AuthModal({
           aria-label="Close sign-in dialog"
           disabled={isLoading}
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Header: logo + context pill */}
@@ -151,12 +151,12 @@ export default function AuthModal({
           <BrandLogo size="sm" href={null} />
           {isPurchase ? (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--media-violet-soft)] text-[var(--media-violet-text)] text-[11px] font-bold">
-              <CreditCard className="w-3 h-3" />
+              <CreditCard className="w-3 h-3" aria-hidden="true" />
               <span>Secure checkout</span>
             </span>
           ) : (
             <span className="feature-badge !text-[11px] !px-2.5 !py-1">
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Free account</span>
             </span>
           )}
@@ -164,9 +164,9 @@ export default function AuthModal({
 
         {/* Title & Description */}
         <div className="space-y-2">
-          <h3 id="auth-modal-title" className="text-2xl font-black text-[var(--color-ink)] tracking-tight leading-tight">
+          <h2 id="auth-modal-title" className="text-2xl font-black text-[var(--color-ink)] tracking-tight leading-tight">
             {titles[reason]}
-          </h3>
+          </h2>
           <p id="auth-modal-description" className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
             {descriptions[reason]}
           </p>
@@ -190,7 +190,7 @@ export default function AuthModal({
         <ul className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-lg border border-[var(--color-border)]">
           {benefits[reason].map((benefit) => (
             <li key={benefit} className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-              <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
               <span>{benefit}</span>
             </li>
           ))}
@@ -221,7 +221,7 @@ export default function AuthModal({
         {/* Footer */}
         <div className="space-y-2 text-center">
           <p className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--color-text-muted)]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-success)]" />
+            <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-success)]" aria-hidden="true" />
             <span>
               {isPurchase
                 ? 'Payment is taken only at checkout, after you sign in'

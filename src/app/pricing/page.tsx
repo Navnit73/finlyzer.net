@@ -309,6 +309,7 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleSelectPlan(plan)}
+                aria-label={`Select ${plan.name} plan for $${plan.price_usd}`}
                 className={`mt-6 w-full !min-h-[42px] !h-[42px] text-xs font-bold whitespace-nowrap flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95 ${
                   highlighted ? 'btn-brand-primary' : 'btn-brand-dark'
                 }`}
@@ -320,7 +321,7 @@ export default function PricingPage() {
                     ? 'Get Document Pass'
                     : `Buy for $${plan.price_usd}`}
                 </span>
-                <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
               </button>
             </div>
           );
@@ -337,12 +338,12 @@ export default function PricingPage() {
         </div>
 
         <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
-          <table className="table w-full text-xs">
+          <table className="table w-full text-xs" aria-label="Plan feature comparison">
             <thead>
               <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                <th className="font-bold py-3">Feature</th>
+                <th scope="col" className="font-bold py-3 text-left">Feature</th>
                 {PRICING_PLANS.map((p) => (
-                  <th key={p.id} className="font-bold text-center whitespace-nowrap">
+                  <th scope="col" key={p.id} className="font-bold text-center whitespace-nowrap">
                     {p.name} (${p.price_usd})
                   </th>
                 ))}
@@ -351,7 +352,7 @@ export default function PricingPage() {
             <tbody>
               {comparisonRows.map((row) => (
                 <tr key={row.label} className="border-b border-[var(--color-border)] last:border-b-0">
-                  <td className="font-semibold text-[var(--color-ink)] whitespace-nowrap">{row.label}</td>
+                  <th scope="row" className="font-semibold text-[var(--color-ink)] whitespace-nowrap text-left">{row.label}</th>
                   {row.values.map((value, i) => (
                     <td
                       key={i}

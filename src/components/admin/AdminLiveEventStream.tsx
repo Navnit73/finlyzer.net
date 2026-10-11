@@ -160,6 +160,7 @@ export default function AdminLiveEventStream() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
+            aria-label="Filter events by type"
             className="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-[11px] font-mono text-zinc-300 focus:outline-none focus:border-[var(--color-brand)]"
           >
             <option value="all">All Events ({events.length})</option>
@@ -171,22 +172,24 @@ export default function AdminLiveEventStream() {
 
           <button
             onClick={() => setIsPaused(!isPaused)}
+            aria-label={isPaused ? 'Resume live event stream' : 'Pause live event stream'}
             className={`btn btn-xs rounded-lg px-2.5 font-mono flex items-center gap-1 text-[11px] cursor-pointer ${
               isPaused
                 ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                 : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300'
             }`}
           >
-            {isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+            {isPaused ? <Play className="w-3 h-3" aria-hidden="true" /> : <Pause className="w-3 h-3" aria-hidden="true" />}
             <span>{isPaused ? 'Resume' : 'Pause'}</span>
           </button>
 
           <button
             onClick={() => setEvents([])}
+            aria-label="Clear stream logs"
             className="btn btn-xs rounded-lg px-2.5 font-mono bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center gap-1 text-[11px] cursor-pointer"
             title="Clear Stream Logs"
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash2 className="w-3 h-3" aria-hidden="true" />
             <span>Clear</span>
           </button>
         </div>
@@ -195,6 +198,9 @@ export default function AdminLiveEventStream() {
       {/* Terminal Log Console */}
       <div
         ref={logContainerRef}
+        role="log"
+        aria-live="polite"
+        aria-label="System event logs"
         className="p-4 font-mono text-xs max-h-[340px] min-h-[220px] overflow-y-auto space-y-2 select-text"
       >
         {filteredEvents.length === 0 ? (

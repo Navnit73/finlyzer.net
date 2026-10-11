@@ -53,9 +53,9 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
       <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs hover:border-[var(--color-brand)] transition-all">
         <div className="flex items-center justify-between mb-3">
           <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-ink)]">
-            <Layers className="w-5 h-5 text-[var(--color-brand-hover)]" />
+            <Layers className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
           </div>
-          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)] uppercase tracking-wider">
+          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] uppercase tracking-wider">
             All Time
           </span>
         </div>
@@ -64,7 +64,7 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
           {totalPages.toLocaleString()} <span className="text-xs font-bold text-[var(--color-text-muted)]">pages</span>
         </p>
         <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-semibold text-[var(--color-text-muted)]">
-          <Clock className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
+          <Clock className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
           <span>Avg processing time: {avgProcessingTime}s / doc</span>
         </div>
       </div>
@@ -72,12 +72,12 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
       {/* 2. Active Jobs & In-Flight Queue */}
       <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs hover:border-[var(--media-violet)] transition-all">
         <div className="flex items-center justify-between mb-3">
-          <div className="w-10 h-10 rounded-xl bg-[var(--media-violet-soft)] border border-[var(--media-violet)]/30 flex items-center justify-center text-[var(--media-violet)]">
-            <Activity className="w-5 h-5 animate-pulse" />
+          <div className="w-10 h-10 rounded-xl bg-[var(--media-violet-soft)] border border-[var(--media-violet)]/30 flex items-center justify-center text-[var(--media-violet-text)]">
+            <Activity className="w-5 h-5 animate-pulse" aria-hidden="true" />
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" aria-hidden="true" />
+            <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider">
               Live
             </span>
           </div>
@@ -86,11 +86,11 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
         <p className="text-2xl font-black text-[var(--color-ink)] mt-1 tracking-tight">
           {processingJobs} <span className="text-xs font-bold text-[var(--color-text-muted)]">processing</span>
           <span className="text-sm font-normal text-[var(--color-text-muted)] mx-1.5">&bull;</span>
-          <span className="text-base font-bold text-[var(--media-violet)]">{queuedJobs}</span>{' '}
+          <span className="text-base font-bold text-[var(--media-violet-text)]">{queuedJobs}</span>{' '}
           <span className="text-xs font-bold text-[var(--color-text-muted)]">queued</span>
         </p>
         <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-semibold text-[var(--color-text-muted)]">
-          <Zap className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+          <Zap className="w-3.5 h-3.5 text-[var(--media-violet-text)]" aria-hidden="true" />
           <span>Worker Pool: {stats?.worker_health?.active_workers || 4} threads running</span>
         </div>
       </div>
@@ -98,10 +98,10 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
       {/* 3. Success & Completion Rate */}
       <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs hover:border-emerald-500 transition-all">
         <div className="flex items-center justify-between mb-3">
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-brand-hover)]">
-            <CheckCircle2 className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-brand-dark)]">
+            <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
           </div>
-          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)] border border-[var(--color-brand)]/30 uppercase tracking-wider">
+          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] border border-[var(--color-brand)]/30 uppercase tracking-wider">
             {successRate}% Success
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
           {completedJobs.toLocaleString()} <span className="text-xs font-bold text-[var(--color-text-muted)]">/ {totalJobs.toLocaleString()}</span>
         </p>
         <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-semibold text-[var(--color-text-muted)]">
-          <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+          <TrendingUp className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
           <span>Failed count: {failedJobs} ({stats?.retry_count_total || 0} retried)</span>
         </div>
       </div>
@@ -119,7 +119,7 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
       <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs hover:border-[var(--color-brand)] transition-all">
         <div className="flex items-center justify-between mb-3">
           <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)]">
-            <Cpu className="w-5 h-5 text-[var(--color-brand-hover)]" />
+            <Cpu className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
           </div>
           <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)] uppercase tracking-wider">
             {stats?.worker_health?.mode || 'Async Worker Pool'}
@@ -136,8 +136,8 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
             <span className="text-xs font-semibold text-[var(--color-text-muted)] ml-1">RAM</span>
           </span>
         </div>
-        <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-semibold text-emerald-600">
-          <CheckCircle2 className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-semibold text-emerald-700">
+          <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Redis &amp; MongoDB Online</span>
         </div>
       </div>

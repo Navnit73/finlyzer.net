@@ -270,7 +270,14 @@ export default function AdminSidebar({
               </span>
             </div>
 
-            <div className="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden">
+            <div
+              role="progressbar"
+              aria-valuenow={Math.round(creditPercent)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Remaining page credit quota"
+              className="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden"
+            >
               <div
                 className="bg-[var(--color-brand)] h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${creditPercent}%` }}
@@ -285,7 +292,7 @@ export default function AdminSidebar({
                 className="text-[var(--color-ink)] font-bold hover:underline flex items-center gap-0.5"
               >
                 <span>Top Up</span>
-                <ChevronRight className="w-3 h-3" />
+                <ChevronRight className="w-3 h-3" aria-hidden="true" />
               </Link>
             </div>
           </div>

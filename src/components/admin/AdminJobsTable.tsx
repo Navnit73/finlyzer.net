@@ -68,7 +68,7 @@ export default function AdminJobsTable({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-ink)]">
-              <Cpu className="w-5 h-5 text-[var(--color-brand-hover)]" />
+              <Cpu className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-base font-black text-[var(--color-ink)]">
@@ -86,7 +86,7 @@ export default function AdminJobsTable({
               disabled={isLoading}
               className="btn btn-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-none cursor-pointer"
             >
-              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--color-brand-hover)]' : ''}`} />
+              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--color-brand-dark)]' : ''}`} aria-hidden="true" />
               <span>Refresh Jobs</span>
             </button>
           </div>
@@ -95,11 +95,12 @@ export default function AdminJobsTable({
         {/* Filter Tabs & Search Bar */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-1">
           {/* Status Tabs */}
-          <div className="flex flex-wrap items-center p-1 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] gap-1">
+          <div role="group" aria-label="Job status filters" className="flex flex-wrap items-center p-1 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] gap-1">
             {STATUS_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => onStatusChange(tab.id)}
+                aria-pressed={activeStatus === tab.id}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   activeStatus === tab.id
                     ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-xs border border-[var(--color-border)]'
@@ -113,12 +114,13 @@ export default function AdminJobsTable({
 
           {/* Search Bar */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by Job ID, Document ID, Filename..."
+              aria-label="Search by Job ID, Document ID, or Filename"
               className="w-full pl-9 pr-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand)]"
             />
           </div>
@@ -127,15 +129,15 @@ export default function AdminJobsTable({
 
       {/* Interactive Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs" aria-label="Background jobs">
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)] font-bold uppercase tracking-wider text-[10px]">
-              <th className="py-3 px-5">Job &amp; Document ID</th>
-              <th className="py-3 px-4">Filename &amp; Pages</th>
-              <th className="py-3 px-4">Status &amp; Progress</th>
-              <th className="py-3 px-4">Stage / Pipeline</th>
-              <th className="py-3 px-4">Created At</th>
-              <th className="py-3 px-5 text-right">Actions</th>
+              <th scope="col" className="py-3 px-5">Job &amp; Document ID</th>
+              <th scope="col" className="py-3 px-4">Filename &amp; Pages</th>
+              <th scope="col" className="py-3 px-4">Status &amp; Progress</th>
+              <th scope="col" className="py-3 px-4">Stage / Pipeline</th>
+              <th scope="col" className="py-3 px-4">Created At</th>
+              <th scope="col" className="py-3 px-5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
@@ -168,7 +170,7 @@ export default function AdminJobsTable({
                     className="hover:bg-[var(--color-surface-subtle)]/70 transition-colors"
                   >
                     {/* Job ID */}
-                    <td className="py-3.5 px-5">
+                    <th scope="row" className="py-3.5 px-5 font-normal text-left">
                       <p className="font-mono font-bold text-[var(--color-ink)] truncate max-w-[140px]">
                         {job.job_id}
                       </p>
@@ -177,7 +179,7 @@ export default function AdminJobsTable({
                           Doc: {job.document_id}
                         </p>
                       )}
-                    </td>
+                    </th>
 
                     {/* Filename & Pages */}
                     <td className="py-3.5 px-4">
@@ -198,7 +200,7 @@ export default function AdminJobsTable({
                               isCompleted
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : isProcessing
-                                ? 'bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]'
+                                ? 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]'
                                 : isQueued
                                 ? 'bg-amber-100 text-amber-800'
                                 : isFailed
@@ -216,7 +218,14 @@ export default function AdminJobsTable({
                         </div>
 
                         {isProcessing && (
-                          <div className="w-full bg-[var(--color-surface-subtle)] h-1.5 rounded-full overflow-hidden border border-[var(--color-border)]">
+                          <div
+                            role="progressbar"
+                            aria-valuenow={job.progress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`Progress for job ${job.job_id}`}
+                            className="w-full bg-[var(--color-surface-subtle)] h-1.5 rounded-full overflow-hidden border border-[var(--color-border)]"
+                          >
                             <div
                               className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300"
                               style={{ width: `${job.progress}%` }}
@@ -254,8 +263,9 @@ export default function AdminJobsTable({
                           onClick={() => onInspectJob(job)}
                           className="p-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] transition cursor-pointer shadow-none"
                           title="Inspect JSON & Metadata"
+                          aria-label={`Inspect job ${job.job_id}`}
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>
 
                         {isProcessing && (
@@ -263,8 +273,9 @@ export default function AdminJobsTable({
                             onClick={() => onCancelJob(job.job_id)}
                             className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition cursor-pointer"
                             title="Cancel Job"
+                            aria-label={`Cancel job ${job.job_id}`}
                           >
-                            <XCircle className="w-3.5 h-3.5" />
+                            <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                         )}
 
@@ -273,8 +284,9 @@ export default function AdminJobsTable({
                             onClick={() => onRetryJob(job.job_id)}
                             className="p-1.5 rounded-lg border border-[var(--color-brand)]/40 bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand-hover)]/20 text-[var(--color-ink)] transition cursor-pointer"
                             title="Retry Job"
+                            aria-label={`Retry job ${job.job_id}`}
                           >
-                            <RotateCw className="w-3.5 h-3.5" />
+                            <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                         )}
 
@@ -283,8 +295,9 @@ export default function AdminJobsTable({
                             href={`/api/export/download/${docId}?format=xlsx`}
                             className="p-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-emerald-600 transition cursor-pointer"
                             title="Download Excel"
+                            aria-label={`Download Excel export for job ${job.job_id}`}
                           >
-                            <FileSpreadsheet className="w-3.5 h-3.5" />
+                            <FileSpreadsheet className="w-3.5 h-3.5" aria-hidden="true" />
                           </a>
                         )}
                       </div>
@@ -309,6 +322,7 @@ export default function AdminJobsTable({
             <button
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
+              aria-label="Previous page"
               className="btn btn-xs rounded-lg border border-[var(--color-border)] disabled:opacity-40 cursor-pointer"
             >
               Previous
@@ -316,6 +330,7 @@ export default function AdminJobsTable({
             <button
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
+              aria-label="Next page"
               className="btn btn-xs rounded-lg border border-[var(--color-border)] disabled:opacity-40 cursor-pointer"
             >
               Next

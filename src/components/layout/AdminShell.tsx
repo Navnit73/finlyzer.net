@@ -49,6 +49,9 @@ export default function AdminShell({ children }: AdminShellProps) {
 
   return (
     <div className="min-h-screen flex bg-[var(--color-surface)] text-[var(--color-ink)]">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       {/* Desktop Fixed Sidebar */}
       <div
         className={`hidden lg:block fixed inset-y-0 left-0 z-40 transition-all duration-300 ${
@@ -94,7 +97,7 @@ export default function AdminShell({ children }: AdminShellProps) {
           onToggleCollapse={toggleCollapse}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
         />
-        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 bg-[var(--color-surface)] max-w-[1600px] w-full mx-auto overflow-x-hidden">
+        <main id="main-content" tabIndex={-1} className="flex-1 p-3.5 sm:p-6 lg:p-8 bg-[var(--color-surface)] max-w-[1600px] w-full mx-auto overflow-x-hidden">
           {children}
         </main>
       </div>

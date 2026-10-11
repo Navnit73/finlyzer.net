@@ -37,6 +37,17 @@ export default function AsyncJobProgressModal({
 }: AsyncJobProgressModalProps) {
   const router = useRouter();
 
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   const isUploading = jobState.status === 'uploading';
@@ -65,25 +76,30 @@ export default function AsyncJobProgressModal({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="async-job-modal-title"
+        className="relative w-full max-w-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         {/* Top Decorative Brand Accent Strip */}
-        <div className="h-1.5 w-full bg-[var(--color-brand)]" />
+        <div className="h-1.5 w-full bg-[var(--color-brand)]" aria-hidden="true" />
 
         {/* Modal Header */}
         <div className="p-5 sm:p-6 border-b border-[var(--color-border)] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center shrink-0">
               {isCompleted ? (
-                <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
+                <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
               ) : isFailed ? (
-                <AlertCircle className="w-5 h-5 text-[var(--color-danger)]" />
+                <AlertCircle className="w-5 h-5 text-[var(--color-danger)]" aria-hidden="true" />
               ) : (
-                <Cpu className="w-5 h-5 text-[var(--color-brand-hover)] animate-pulse" />
+                <Cpu className="w-5 h-5 text-[var(--color-brand-dark)] animate-pulse" aria-hidden="true" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black text-[var(--color-ink)]">
+                <h2 id="async-job-modal-title" className="text-base font-black text-[var(--color-ink)]">
                   {isCompleted
                     ? 'Extraction Complete!'
                     : isFailed
@@ -91,7 +107,7 @@ export default function AsyncJobProgressModal({
                     : isCancelled
                     ? 'Processing Cancelled'
                     : 'Asynchronous OCR Engine'}
-                </h3>
+                </h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
                   100–200 Pages
                 </span>
@@ -109,7 +125,7 @@ export default function AsyncJobProgressModal({
             title="Hide modal and run in background"
             aria-label="Hide modal and run in background"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -119,9 +135,9 @@ export default function AsyncJobProgressModal({
           {(isUploading || isQueued || isProcessing) && (
             <div className="space-y-5">
               {/* Status Header & Live Metrics */}
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between text-xs" aria-live="polite">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-ping" />
+                  <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-ping" aria-hidden="true" />
                   <span className="font-bold text-[var(--color-ink)]">
                     {isUploading
                       ? 'Uploading document to cloud storage...'
@@ -134,7 +150,14 @@ export default function AsyncJobProgressModal({
               </div>
 
               {/* High-Contrast Progress Bar */}
-              <div className="w-full bg-[var(--color-surface-subtle)] h-3 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+              <div
+                role="progressbar"
+                aria-valuenow={activeProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Extraction Progress"
+                className="w-full bg-[var(--color-surface-subtle)] h-3 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
+              >
                 <div
                   className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${activeProgress}%` }}
@@ -145,7 +168,7 @@ export default function AsyncJobProgressModal({
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
                   <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
-                    <Layers className="w-3.5 h-3.5" />
+                    <Layers className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Pages Processed</span>
                   </div>
                   <p className="text-base font-black text-[var(--color-ink)]">
@@ -155,10 +178,10 @@ export default function AsyncJobProgressModal({
 
                 <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
                   <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
-                    <Activity className="w-3.5 h-3.5" />
+                    <Activity className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Current Pipeline Stage</span>
                   </div>
-                  <p className="text-xs font-bold text-[var(--color-brand-hover)] truncate uppercase">
+                  <p className="text-xs font-bold text-[var(--color-brand-dark)] truncate uppercase">
                     {jobState.currentStage.replace(/_/g, ' ')}
                   </p>
                 </div>
@@ -166,7 +189,7 @@ export default function AsyncJobProgressModal({
 
               {/* Webhook & Background Note */}
               <div className="p-3.5 rounded-xl bg-[var(--color-brand-soft)]/50 border border-[var(--color-brand)]/20 text-xs text-[var(--color-ink)] flex items-start gap-2.5">
-                <Clock className="w-4 h-4 text-[var(--color-brand-hover)] shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-[var(--color-brand-dark)] shrink-0 mt-0.5" aria-hidden="true" />
                 <p className="leading-relaxed">
                   <strong className="font-bold">Webhook Auto-Sync Active:</strong> Large documents (100–200 pages) process safely in the background. You can hide this window and continue other work.
                 </p>
@@ -187,7 +210,7 @@ export default function AsyncJobProgressModal({
                   onClick={onClose}
                   className="w-full sm:w-auto btn-brand-primary !min-h-[42px] !h-[42px] !px-5 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
                 >
-                  <Minimize2 className="w-4 h-4" />
+                  <Minimize2 className="w-4 h-4" aria-hidden="true" />
                   <span>Hide &amp; Work in Background</span>
                 </button>
               </div>
@@ -199,7 +222,7 @@ export default function AsyncJobProgressModal({
             <div className="space-y-5">
               <div className="p-4 rounded-xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 flex items-start gap-3.5">
                 <div className="w-8 h-8 rounded-lg bg-white/90 border border-[var(--color-brand)]/60 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                  <CheckCircle2 className="w-4.5 h-4.5 text-[var(--color-brand-hover)]" />
+                  <CheckCircle2 className="w-4.5 h-4.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
                 </div>
                 <div className="space-y-1">
                   <p className="font-extrabold text-sm text-[var(--color-ink)]">

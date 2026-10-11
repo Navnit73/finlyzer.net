@@ -30,16 +30,27 @@ export default function CheckoutModal({
   const mounted = useIsMounted();
   const router = useRouter();
 
-  if (!isOpen || !plan || !mounted) return null;
-
   // The modal stays mounted between opens, so clear the previous purchase's state on close;
   // otherwise reopening it for another plan shows "Credits Added" without any payment.
-  const handleClose = () => {
-    if (isProcessing) return;
+  const handleClose = React.useCallback(() => {
     setOrderCompleted(false);
     setErrorMessage(null);
     onClose();
-  };
+  }, [onClose]);
+
+  // Close on Escape key
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isProcessing) {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isProcessing, handleClose]);
+
+  if (!isOpen || !plan || !mounted) return null;
 
   const handleInitializePayment = async () => {
     setIsProcessing(true);
@@ -97,11 +108,19 @@ export default function CheckoutModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isProcessing) {
+          handleClose();
+        }
+      }}
+    >
       <div
         className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="checkout-modal-title"
       >
         {/* Close Button */}
         <button
@@ -110,18 +129,18 @@ export default function CheckoutModal({
           className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Modal Header */}
         <div className="space-y-1.5 pr-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
             Credit Package Top-Up
           </div>
-          <h3 className="text-2xl font-black text-[var(--color-ink)] tracking-tight">
+          <h2 id="checkout-modal-title" className="text-2xl font-black text-[var(--color-ink)] tracking-tight">
             Checkout — {plan.name}
-          </h3>
+          </h2>
           <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
             {plan.description}
           </p>
@@ -164,7 +183,7 @@ export default function CheckoutModal({
           <div className="space-y-1.5">
             {plan.features.map((feat, i) => (
               <div key={i} className="flex items-center gap-2 text-[var(--color-ink)]">
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
                 <span>{feat}</span>
               </div>
             ))}
@@ -173,16 +192,16 @@ export default function CheckoutModal({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
+          <div role="alert" className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* Order Success Notice */}
         {orderCompleted ? (
-          <div className="p-5 bg-[var(--color-success-soft)] border border-[var(--color-success-border)] rounded-lg text-xs text-[var(--color-success)] space-y-3 text-center">
-            <CheckCircle2 className="w-10 h-10 text-[var(--color-success)] mx-auto" />
+          <div role="status" className="p-5 bg-[var(--color-success-soft)] border border-[var(--color-success-border)] rounded-lg text-xs text-[var(--color-success)] space-y-3 text-center">
+            <CheckCircle2 className="w-10 h-10 text-[var(--color-success)] mx-auto" aria-hidden="true" />
             <div className="space-y-1">
               <p className="font-black text-base text-[var(--color-ink)]">Credits Added Successfully!</p>
               <p className="text-[var(--color-ink)] font-bold">
@@ -209,20 +228,20 @@ export default function CheckoutModal({
             >
               {isProcessing ? (
                 <>
-                  <span className="loading loading-spinner loading-xs"></span>
+                  <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
                   <span>Processing Order...</span>
                 </>
               ) : (
                 <>
-                  <Zap className="w-4 h-4 fill-current" />
+                  <Zap className="w-4 h-4 fill-current" aria-hidden="true" />
                   <span>Pay {formatUSD(plan.price_usd)} USD</span>
-                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                  <ArrowRight className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                 </>
               )}
             </button>
 
             <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--color-text-muted)]">
-              <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" />
+              <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
               <span>256-Bit Encrypted &bull; Instant Page Credits Activation</span>
             </div>
           </div>

@@ -145,7 +145,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/convert"
-                  className="font-bold text-[var(--color-brand-hover)] hover:underline transition-colors flex items-center gap-1"
+                  className="font-bold text-[var(--color-brand-dark)] hover:underline transition-colors flex items-center gap-1"
                 >
                   <span>Browse All Converters</span>
                   <span>&rarr;</span>

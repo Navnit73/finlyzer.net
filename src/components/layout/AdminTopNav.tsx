@@ -102,12 +102,11 @@ export default function AdminTopNav({
           <button
             onClick={onToggleMobileSidebar}
             className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)] cursor-pointer"
-            aria-label="Toggle mobile menu"
+            aria-label="Open mobile navigation menu"
           >
-            <Menu className="w-4 h-4" />
+            <Menu className="w-4 h-4" aria-hidden="true" />
           </button>
 
-          {/* Desktop Sidebar Collapse Toggle */}
           {onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
@@ -116,9 +115,9 @@ export default function AdminTopNav({
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4" />
+                <PanelLeftOpen className="w-4 h-4" aria-hidden="true" />
               ) : (
-                <PanelLeftClose className="w-4 h-4" />
+                <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
               )}
             </button>
           )}
@@ -130,10 +129,10 @@ export default function AdminTopNav({
               return (
                 <React.Fragment key={idx}>
                   {idx > 0 && (
-                    <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" />
+                    <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
                   )}
                   {isLast ? (
-                    <span className="font-black text-[var(--color-ink)] truncate max-w-[180px] sm:max-w-xs">
+                    <span aria-current="page" className="font-black text-[var(--color-ink)] truncate max-w-[180px] sm:max-w-xs">
                       {crumb.label}
                     </span>
                   ) : (
@@ -154,7 +153,7 @@ export default function AdminTopNav({
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Engine Status Badge */}
           <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-bold text-[11px] border border-[var(--color-brand)]/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-dark)] animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-dark)] animate-pulse" aria-hidden="true"></span>
             AI Engine Active
           </span>
 
@@ -163,8 +162,9 @@ export default function AdminTopNav({
             onClick={() => setIsHistoryOpen(true)}
             className="btn btn-ghost btn-sm text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg px-2.5 py-1.5 hidden md:flex items-center gap-1.5 border border-[var(--color-border)] cursor-pointer"
             title="View Document History"
+            aria-label="View Document History"
           >
-            <History className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+            <History className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
             <span>History</span>
           </button>
 
@@ -173,8 +173,8 @@ export default function AdminTopNav({
             href="/pricing"
             className="btn btn-sm rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] text-xs font-bold flex items-center gap-1.5 border border-[var(--color-brand)]/30 px-3 transition-colors cursor-pointer"
           >
-            <Zap className="w-3.5 h-3.5 fill-current text-[var(--color-ink)]" />
-            <span className="hidden sm:inline">Pricing & Credits</span>
+            <Zap className="w-3.5 h-3.5 fill-current text-[var(--color-ink)]" aria-hidden="true" />
+            <span className="hidden sm:inline">Pricing &amp; Credits</span>
             <span className="sm:hidden">Credits</span>
           </Link>
 
@@ -185,6 +185,7 @@ export default function AdminTopNav({
               role="button"
               className="flex items-center gap-2 p-1 rounded-lg hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors border border-[var(--color-border)]"
               aria-label="User profile menu"
+              aria-haspopup="menu"
             >
               {session?.user?.image ? (
                 <Image
@@ -203,7 +204,7 @@ export default function AdminTopNav({
               <span className="text-xs font-bold text-[var(--color-ink)] hidden md:inline max-w-[100px] truncate">
                 {session?.user?.name?.split(' ')[0] || 'Account'}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
             </div>
 
             <ul

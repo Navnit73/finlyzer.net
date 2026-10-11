@@ -216,7 +216,7 @@ export function BeforeAfterSection({
         <div className="min-w-0 p-5 sm:p-6 rounded-xl bg-[var(--color-surface)] border-2 border-[var(--color-brand)] flex flex-col gap-4">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-brand-soft)]">
             <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--color-ink)]">
-              <CheckCircle2 className="w-4 h-4 text-[var(--color-brand-hover)]" />
+              <CheckCircle2 className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
               {fileOutput ? `Finlyzers ${fileOutput.label} output` : 'Finlyzers output'}
             </h3>
             <span className="feature-badge">Balances verified</span>
@@ -227,7 +227,7 @@ export function BeforeAfterSection({
             </pre>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-[13px]">
+              <table className="w-full text-left text-xs sm:text-[13px]" aria-label="Extracted statement transactions preview">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] font-semibold text-[var(--color-text-secondary)]">
                     <th scope="col" className="py-2 px-2">Date</th>
@@ -339,7 +339,7 @@ export function SecuritySection({ title = 'Your Bank Statements Stay Private' }:
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {securityPoints.map((p) => (
           <li key={p.title} className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-2">
-            <p.icon className="w-5 h-5 text-[var(--color-brand-hover)]" aria-hidden="true" />
+            <p.icon className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
             <h3 className="text-base font-bold text-[var(--color-ink)]">{p.title}</h3>
             <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{p.body}</p>
           </li>
@@ -389,7 +389,7 @@ export function ComparisonSection({
         {title}
       </h2>
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <table className="w-full min-w-[640px] text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm" aria-label="Feature comparison between Finlyzers, manual entry, and generic converters">
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-[var(--color-ink)]">
               <th scope="col" className="py-4 px-5 font-semibold">Feature</th>
@@ -404,7 +404,7 @@ export function ComparisonSection({
                 <th scope="row" className="py-3.5 px-5 font-semibold text-[var(--color-ink)]">{feature}</th>
                 <td className="py-3.5 px-5 font-bold text-[var(--color-ink)] bg-[var(--color-brand-soft)]/50">
                   <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-[var(--color-brand-hover)] shrink-0" aria-hidden="true" />
+                    <CheckCircle2 className="w-4 h-4 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
                     {ours}
                   </span>
                 </td>

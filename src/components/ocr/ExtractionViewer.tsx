@@ -280,8 +280,12 @@ export default function ExtractionViewer({
       {/* 3. Interactive Detail Tabs */}
       <div className="space-y-4 sm:space-y-6 bg-transparent sm:bg-[var(--color-surface)] sm:rounded-lg sm:border sm:border-[var(--color-border)] p-0 sm:p-6 md:p-8 sm:shadow-xs">
         {/* Navigation Tabs (Horizontally Scrollable Segmented Bar on Mobile) */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-[var(--color-border)]">
+        <div role="tablist" aria-label="Extraction view options" className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-[var(--color-border)]">
           <button
+            role="tab"
+            id="tab-structured"
+            aria-selected={activeTab === 'structured'}
+            aria-controls="tabpanel-structured"
             onClick={() => setActiveTab('structured')}
             className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'structured'
@@ -289,11 +293,15 @@ export default function ExtractionViewer({
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
             <span>Structured Data ({docType === 'bank_statement' ? `${transactions.length} Rows` : `${items.length} Items`})</span>
           </button>
 
           <button
+            role="tab"
+            id="tab-ai_summary"
+            aria-selected={activeTab === 'ai_summary'}
+            aria-controls="tabpanel-ai_summary"
             onClick={() => setActiveTab('ai_summary')}
             className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'ai_summary'
@@ -301,11 +309,15 @@ export default function ExtractionViewer({
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-[var(--color-brand)]" />
+            <Sparkles className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
             <span>AI Insights &amp; Audit</span>
           </button>
 
           <button
+            role="tab"
+            id="tab-raw_text"
+            aria-selected={activeTab === 'raw_text'}
+            aria-controls="tabpanel-raw_text"
             onClick={() => setActiveTab('raw_text')}
             className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'raw_text'
@@ -313,11 +325,15 @@ export default function ExtractionViewer({
                 : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
           >
-            <FileCode className="w-4 h-4" />
+            <FileCode className="w-4 h-4" aria-hidden="true" />
             <span>OCR Raw Text</span>
           </button>
 
           <button
+            role="tab"
+            id="tab-json"
+            aria-selected={activeTab === 'json'}
+            aria-controls="tabpanel-json"
             onClick={() => setActiveTab('json')}
             className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'json'
@@ -332,20 +348,20 @@ export default function ExtractionViewer({
 
         {/* Tab Content 1: Structured Transactions / Invoice Items */}
         {activeTab === 'structured' && (
-          <div className="space-y-6">
+          <div role="tabpanel" id="tabpanel-structured" aria-labelledby="tab-structured" className="space-y-6">
             {docType === 'bank_statement' ? (
               <TransactionsTable transactions={transactions} currency={currency} />
             ) : (
               /* Invoice / Receipt Line Items Table */
               <div className="space-y-4">
                 <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
-                  <table className="table w-full text-xs sm:text-sm">
+                  <table className="table w-full text-xs sm:text-sm" aria-label="Invoice items">
                     <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] text-[11px] uppercase font-bold">
                       <tr>
-                        <th className="py-3.5 pl-5">Description</th>
-                        <th className="py-3.5 text-center">Quantity</th>
-                        <th className="py-3.5 text-right">Unit Price</th>
-                        <th className="py-3.5 text-right pr-5">Total Amount</th>
+                        <th scope="col" className="py-3.5 pl-5">Description</th>
+                        <th scope="col" className="py-3.5 text-center">Quantity</th>
+                        <th scope="col" className="py-3.5 text-right">Unit Price</th>
+                        <th scope="col" className="py-3.5 text-right pr-5">Total Amount</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
@@ -378,6 +394,7 @@ export default function ExtractionViewer({
                       <button
                         onClick={() => setItemsPage((p) => Math.max(1, p - 1))}
                         disabled={itemsPage === 1}
+                        aria-label="Previous page of items"
                         className="px-2.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
                       >
                         Prev
@@ -388,6 +405,7 @@ export default function ExtractionViewer({
                       <button
                         onClick={() => setItemsPage((p) => Math.min(totalItemPages, p + 1))}
                         disabled={itemsPage === totalItemPages}
+                        aria-label="Next page of items"
                         className="px-2.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
                       >
                         Next
@@ -413,7 +431,7 @@ export default function ExtractionViewer({
                     </div>
                     <div className="flex justify-between pt-2 border-t border-[var(--color-border)] text-sm font-black text-[var(--color-ink)]">
                       <span>Grand Total</span>
-                      <span className="text-[var(--color-brand-hover)] font-mono">
+                      <span className="text-[var(--color-ink)] font-mono font-black">
                         ${(invoiceData.total_amount || receiptData.total_amount || 0).toFixed(2)}
                       </span>
                     </div>
@@ -426,11 +444,11 @@ export default function ExtractionViewer({
 
         {/* Tab Content 2: AI Insights & Cleaned Summary */}
         {activeTab === 'ai_summary' && (
-          <div className="space-y-6">
+          <div role="tabpanel" id="tabpanel-ai_summary" aria-labelledby="tab-ai_summary" className="space-y-6">
             {transactions.length > 0 && (
               balanceCheck.status === 'verified' ? (
                 <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
-                  <Sparkles className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0 mt-0.5" />
+                  <Sparkles className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0 mt-0.5" aria-hidden="true" />
                   <div className="space-y-1 text-xs">
                     <p className="font-bold text-sm">Running balance verified</p>
                     <p className="leading-relaxed">
@@ -443,7 +461,7 @@ export default function ExtractionViewer({
                 </div>
               ) : balanceCheck.status === 'mismatch' ? (
                 <div className="alert bg-[var(--color-warning-soft)] border border-[var(--color-warning-border)] rounded-lg p-4 flex items-start gap-3 text-[var(--color-ink)]">
-                  <AlertTriangle className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" aria-hidden="true" />
                   <div className="space-y-1 text-xs">
                     <p className="font-bold text-sm">Check these rows before exporting</p>
                     <p className="leading-relaxed">
@@ -459,7 +477,7 @@ export default function ExtractionViewer({
                 </div>
               ) : (
                 <div className="alert bg-[var(--color-surface-subtle)] border border-[var(--color-border)] rounded-lg p-4 flex items-start gap-3 text-[var(--color-ink)]">
-                  <Info className="w-5 h-5 text-[var(--color-text-secondary)] shrink-0 mt-0.5" />
+                  <Info className="w-5 h-5 text-[var(--color-text-secondary)] shrink-0 mt-0.5" aria-hidden="true" />
                   <div className="space-y-1 text-xs">
                     <p className="font-bold text-sm">Balance check not available</p>
                     <p className="leading-relaxed text-[var(--color-text-secondary)]">
@@ -473,7 +491,7 @@ export default function ExtractionViewer({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)] flex items-center gap-2">
-                  <Building className="w-4 h-4 text-[var(--color-brand)]" />
+                  <Building className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   Entity Verification
                 </h4>
                 <div className="space-y-2 text-xs">
@@ -537,7 +555,7 @@ export default function ExtractionViewer({
 
         {/* Tab Content 3: Raw OCR Text (Chunked/Paginated for 100+ pages) */}
         {activeTab === 'raw_text' && (
-          <div className="space-y-4">
+          <div role="tabpanel" id="tabpanel-raw_text" aria-labelledby="tab-raw_text" className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-text-secondary)]">
               <span>Raw Optical Character Recognition Output ({data.metadata?.ocr_engine || 'PyMuPDF Engine'})</span>
               <div className="flex items-center gap-2">
@@ -561,6 +579,7 @@ export default function ExtractionViewer({
                   <button
                     onClick={() => setRawTextPage((p) => Math.max(1, p - 1))}
                     disabled={rawTextPage === 1}
+                    aria-label="Previous raw text section"
                     className="px-2.5 py-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
                   >
                     Previous
@@ -568,6 +587,7 @@ export default function ExtractionViewer({
                   <button
                     onClick={() => setRawTextPage((p) => Math.min(rawTextChunks.length, p + 1))}
                     disabled={rawTextPage === rawTextChunks.length}
+                    aria-label="Next raw text section"
                     className="px-2.5 py-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
                   >
                     Next
@@ -584,16 +604,16 @@ export default function ExtractionViewer({
 
         {/* Tab Content 4: JSON Payload (Lazy Loaded) */}
         {activeTab === 'json' && (
-          <div className="space-y-3">
+          <div role="tabpanel" id="tabpanel-json" aria-labelledby="tab-json" className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs text-[var(--color-text-secondary)]">
                 API Standard Response Object (`ExtractionResponse`)
               </span>
               <button
                 onClick={copyJson}
-                className="btn btn-xs rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center gap-1.5"
+                className="btn btn-xs rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
               >
-                {copiedJson ? <Check className="w-3.5 h-3.5 text-[var(--color-success)]" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedJson ? <Check className="w-3.5 h-3.5 text-[var(--color-success)]" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
                 <span>{copiedJson ? 'Copied' : 'Copy JSON'}</span>
               </button>
             </div>

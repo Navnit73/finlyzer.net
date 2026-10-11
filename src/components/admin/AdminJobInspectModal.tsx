@@ -32,6 +32,17 @@ export default function AdminJobInspectModal({
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'extraction' | 'metadata' | 'raw'>('extraction');
 
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!isOpen || !job) return null;
 
   const handleCopy = () => {
@@ -53,19 +64,31 @@ export default function AdminJobInspectModal({
   const docId = job.document_id || job.result?.id;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="job-inspect-modal-title"
+        className="relative w-full max-w-4xl max-h-[90vh] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         {/* Modal Top Bar */}
         <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-ink)]">
-              <Code className="w-5 h-5 text-[var(--color-brand-hover)]" />
+              <Code className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black text-[var(--color-ink)]">
+                <h2 id="job-inspect-modal-title" className="text-base font-black text-[var(--color-ink)]">
                   Job Inspector: {job.job_id}
-                </h3>
+                </h2>
                 <span
                   className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                     isCompleted
@@ -91,22 +114,25 @@ export default function AdminJobInspectModal({
               onClick={handleCopy}
               className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3 cursor-pointer shadow-none"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
               <span>{copied ? 'Copied' : 'Copy JSON'}</span>
             </button>
 
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition cursor-pointer"
+              aria-label="Close dialog"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         {/* Tab Switcher*/}
-        <div className="px-6 pt-3 border-b border-[var(--color-border)] flex items-center gap-4 text-xs font-bold">
+        <div role="tablist" aria-label="Job Data Views" className="px-6 pt-3 border-b border-[var(--color-border)] flex items-center gap-4 text-xs font-bold">
           <button
+            role="tab"
+            aria-selected={activeTab === 'extraction'}
             onClick={() => setActiveTab('extraction')}
             className={`pb-2.5 transition-colors cursor-pointer border-b-2 ${
               activeTab === 'extraction'
@@ -117,6 +143,8 @@ export default function AdminJobInspectModal({
             Extraction Data (JSON)
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'metadata'}
             onClick={() => setActiveTab('metadata')}
             className={`pb-2.5 transition-colors cursor-pointer border-b-2 ${
               activeTab === 'metadata'
@@ -127,6 +155,8 @@ export default function AdminJobInspectModal({
             Job Metadata &amp; Timings
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'raw'}
             onClick={() => setActiveTab('raw')}
             className={`pb-2.5 transition-colors cursor-pointer border-b-2 ${
               activeTab === 'raw'
@@ -139,7 +169,7 @@ export default function AdminJobInspectModal({
         </div>
 
         {/* Modal Body / Code Viewer */}
-        <div className="p-6 flex-1 overflow-y-auto bg-[var(--color-surface-subtle)]">
+        <div role="tabpanel" aria-label={`${activeTab} view`} className="p-6 flex-1 overflow-y-auto bg-[var(--color-surface-subtle)]">
           {activeTab === 'extraction' && (
             <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto leading-relaxed border border-zinc-800">
               {job.result?.extraction

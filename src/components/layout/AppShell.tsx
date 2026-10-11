@@ -64,8 +64,11 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <ActiveJobsProvider>
       <div className="min-h-screen flex flex-col bg-[var(--color-surface)] text-[var(--color-ink)]">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <Header />
-        <main className="flex-1 w-full site-container py-6 sm:py-10">
+        <main id="main-content" tabIndex={-1} className="flex-1 w-full site-container py-6 sm:py-10">
           {children}
         </main>
         <Footer />

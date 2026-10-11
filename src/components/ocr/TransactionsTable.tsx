@@ -109,10 +109,11 @@ export default function TransactionsTable({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
           <input
             type="text"
             placeholder="Search description, ref, date..."
+            aria-label="Search transactions by description, reference, or date"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -129,7 +130,8 @@ export default function TransactionsTable({
               setFilterType('all');
               setCurrentPage(1);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+            aria-pressed={filterType === 'all'}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
               filterType === 'all'
                 ? 'bg-[var(--color-ink)] text-white shadow-xs'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -142,7 +144,8 @@ export default function TransactionsTable({
               setFilterType('credit');
               setCurrentPage(1);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+            aria-pressed={filterType === 'credit'}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
               filterType === 'credit'
                 ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)] shadow-xs'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -155,7 +158,8 @@ export default function TransactionsTable({
               setFilterType('debit');
               setCurrentPage(1);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+            aria-pressed={filterType === 'debit'}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
               filterType === 'debit'
                 ? 'bg-[var(--media-pink)] text-white shadow-xs'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -168,39 +172,60 @@ export default function TransactionsTable({
 
       {/* Single Unified Table View with Smooth Horizontal Scroll on Mobile */}
       <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs -webkit-overflow-scrolling-touch">
-        <table className="w-full text-left text-xs sm:text-sm min-w-[680px]">
+        <table className="w-full text-left text-xs sm:text-sm min-w-[680px]" aria-label="Extracted Transactions">
           <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-b border-[var(--color-border)] text-[11px] uppercase tracking-wider font-bold select-none">
             <tr>
               <th
-                onClick={() => toggleSort('date')}
-                className="cursor-pointer hover:text-[var(--color-ink)] py-3 sm:py-3.5 pl-4 sm:pl-5 whitespace-nowrap"
+                scope="col"
+                aria-sort={sortField === 'date' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                className="py-1 pl-4 sm:pl-5 whitespace-nowrap"
               >
-                <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => toggleSort('date')}
+                  className="flex items-center gap-1.5 py-2 hover:text-[var(--color-ink)] cursor-pointer text-left w-full font-bold uppercase"
+                >
                   <span>Date</span>
-                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" />
-                </div>
+                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" aria-hidden="true" />
+                </button>
               </th>
               <th
-                onClick={() => toggleSort('description')}
-                className="cursor-pointer hover:text-[var(--color-ink)] py-3 sm:py-3.5 px-3 whitespace-nowrap"
+                scope="col"
+                aria-sort={sortField === 'description' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                className="py-1 px-3 whitespace-nowrap"
               >
-                <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => toggleSort('description')}
+                  className="flex items-center gap-1.5 py-2 hover:text-[var(--color-ink)] cursor-pointer text-left w-full font-bold uppercase"
+                >
                   <span>Description &amp; Reference</span>
-                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" />
-                </div>
+                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" aria-hidden="true" />
+                </button>
               </th>
-              <th className="py-3 sm:py-3.5 px-3 whitespace-nowrap">Category</th>
+              <th scope="col" className="py-3 sm:py-3.5 px-3 whitespace-nowrap">
+                Category
+              </th>
               <th
-                onClick={() => toggleSort('amount')}
-                className="cursor-pointer hover:text-[var(--color-ink)] py-3 sm:py-3.5 px-3 text-right whitespace-nowrap"
+                scope="col"
+                aria-sort={sortField === 'amount' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                className="py-1 px-3 text-right whitespace-nowrap"
               >
-                <div className="flex items-center justify-end gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => toggleSort('amount')}
+                  className="flex items-center justify-end gap-1.5 py-2 hover:text-[var(--color-ink)] cursor-pointer text-right w-full font-bold uppercase"
+                >
                   <span>Debit (-)</span>
-                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" />
-                </div>
+                  <ArrowUpDown className="w-3 h-3 text-[var(--color-text-muted)]" aria-hidden="true" />
+                </button>
               </th>
-              <th className="py-3 sm:py-3.5 px-3 text-right whitespace-nowrap">Credit (+)</th>
-              <th className="py-3 sm:py-3.5 pr-4 sm:pr-5 text-right whitespace-nowrap">Running Balance</th>
+              <th scope="col" className="py-3 sm:py-3.5 px-3 text-right whitespace-nowrap">
+                Credit (+)
+              </th>
+              <th scope="col" className="py-3 sm:py-3.5 pr-4 sm:pr-5 text-right whitespace-nowrap">
+                Running Balance
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
@@ -235,9 +260,9 @@ export default function TransactionsTable({
                             aria-label="Copy reference number"
                           >
                             {copiedRef === t.reference ? (
-                              <Check className="w-3 h-3 text-[var(--color-brand-hover)]" />
+                              <Check className="w-3 h-3 text-[var(--color-success)]" aria-hidden="true" />
                             ) : (
-                              <Copy className="w-3 h-3 text-[var(--color-text-muted)] hover:text-[var(--color-ink)]" />
+                              <Copy className="w-3 h-3 text-[var(--color-text-muted)] hover:text-[var(--color-ink)]" aria-hidden="true" />
                             )}
                           </button>
                         </div>
@@ -304,6 +329,7 @@ export default function TransactionsTable({
             </span>
             <span className="text-[var(--color-text-muted)]">&bull;</span>
             <select
+              aria-label="Rows per page"
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
@@ -320,6 +346,7 @@ export default function TransactionsTable({
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
+              aria-label="Previous page"
               className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] disabled:opacity-40 font-semibold cursor-pointer"
             >
               Previous
@@ -330,6 +357,7 @@ export default function TransactionsTable({
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              aria-label="Next page"
               className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] disabled:opacity-40 font-semibold cursor-pointer"
             >
               Next

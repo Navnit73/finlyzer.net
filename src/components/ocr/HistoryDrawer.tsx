@@ -88,9 +88,18 @@ export default function HistoryDrawer({
   }, [isOpen, session, docTypeFilter, searchTerm]);
 
 
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!isOpen || !mounted) return null;
-
-
 
   // Filter guest items by search & type
   const filteredGuestItems = guestHistory.filter((item) => {
@@ -158,23 +167,31 @@ export default function HistoryDrawer({
 
   const drawerContent = (
     <>
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-fade-in">
+      <div
+        className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-fade-in"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
         <div
           className="relative w-full max-w-xl h-full bg-[var(--color-surface)] border-l border-[var(--color-border)] p-6 sm:p-8 flex flex-col justify-between space-y-5 animate-slide-left overflow-y-auto shadow-none"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="history-drawer-title"
         >
           {/* Header */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold">
-                  <History className="w-5 h-5 stroke-[2.5]" />
+                  <History className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[var(--color-ink)]">
+                  <h2 id="history-drawer-title" className="text-xl font-bold text-[var(--color-ink)]">
                     Extraction History
-                  </h3>
+                  </h2>
                   <p className="text-xs text-[var(--color-text-secondary)]">
                     {session?.user
                       ? `${totalCount} Documents Saved in MongoDB`
@@ -184,10 +201,10 @@ export default function HistoryDrawer({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                className="p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                 aria-label="Close drawer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -195,7 +212,7 @@ export default function HistoryDrawer({
             {!session?.user && (
               <div className="p-3.5 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2 text-[var(--color-ink)] font-medium">
-                  <Laptop className="w-4 h-4 text-[var(--color-success)] shrink-0" />
+                  <Laptop className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
                   <span>Free guest storage (Saved in browser &amp; DB)</span>
                 </div>
                 <button
@@ -210,10 +227,11 @@ export default function HistoryDrawer({
             {/* Search and Filters */}
             <div className="space-y-3">
               <div className="relative">
-                <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
                 <input
                   type="text"
                   placeholder="Search past extractions..."
+                  aria-label="Search past extractions"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
@@ -226,6 +244,7 @@ export default function HistoryDrawer({
                   <button
                     key={type}
                     onClick={() => setDocTypeFilter(type)}
+                    aria-pressed={docTypeFilter === type}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors ${
                       docTypeFilter === type
                         ? 'bg-[var(--color-ink)] text-white shadow-xs'
@@ -244,8 +263,8 @@ export default function HistoryDrawer({
             {/* Active In-Flight Background Jobs */}
             {activeJobs.length > 0 && (
               <div className="space-y-2 pb-2 border-b border-[var(--color-border)]">
-                <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-brand-hover)] flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 animate-spin" />
+                <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-brand-dark)] flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                   <span>In-Flight Async Processing ({activeJobs.length})</span>
                 </p>
                 {activeJobs.map((job) => {
@@ -271,7 +290,7 @@ export default function HistoryDrawer({
                           {job.filename}
                         </span>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono font-bold text-[10px] text-[var(--color-brand-hover)]">
+                          <span className="font-mono font-bold text-[10px] text-[var(--color-brand-dark)]">
                             {job.processingProgress}%
                           </span>
                           <button
@@ -279,17 +298,25 @@ export default function HistoryDrawer({
                               e.stopPropagation();
                               removeJob(job.jobId);
                             }}
-                            className="text-[var(--color-text-muted)] hover:text-red-600 px-1"
+                            className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] px-1 cursor-pointer"
+                            aria-label={`Dismiss processing job for ${job.filename}`}
                           >
                             &times;
                           </button>
                         </div>
                       </div>
 
-                      <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
+                      <div
+                        role="progressbar"
+                        aria-valuenow={job.processingProgress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Processing progress for ${job.filename}`}
+                        className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden"
+                      >
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${
-                            isDone ? 'bg-emerald-500' : 'bg-[var(--color-brand)]'
+                            isDone ? 'bg-[var(--color-success)]' : 'bg-[var(--color-brand)]'
                           }`}
                           style={{ width: `${job.processingProgress}%` }}
                         />
@@ -298,8 +325,8 @@ export default function HistoryDrawer({
                       <div className="flex items-center justify-between text-[10px] text-[var(--color-text-secondary)]">
                         <span>{job.message || `${job.processedPages}/${job.totalPages} pages`}</span>
                         {isDone && (
-                          <span className="font-bold text-emerald-700 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Ready &bull; Click to open
+                          <span className="font-bold text-[var(--color-success)] flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Ready &bull; Click to open
                           </span>
                         )}
                       </div>
@@ -335,10 +362,10 @@ export default function HistoryDrawer({
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 truncate">
                           <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
-                            <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-hover)]" />
+                            <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
                           </div>
                           <div className="truncate">
-                            <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-hover)] transition-colors">
+                            <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-dark)] transition-colors">
                               {bankName || vendorName || doc.filename}
                             </p>
                             <p className="text-[11px] text-[var(--color-text-secondary)] flex items-center gap-2 mt-0.5">
@@ -358,7 +385,7 @@ export default function HistoryDrawer({
 
                       <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
                         <span className="flex items-center gap-1 font-mono">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="w-3 h-3" aria-hidden="true" />
                           {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'Recent'}
                         </span>
 
@@ -367,15 +394,17 @@ export default function HistoryDrawer({
                             onClick={(e) => handleDownload(e, doc.id, 'xlsx')}
                             className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                             title="Download Excel (.xlsx)"
+                            aria-label={`Download Excel for ${doc.filename}`}
                           >
-                            <Download className="w-3.5 h-3.5" />
+                            <Download className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                           <button
                             onClick={(e) => handleDelete(e, doc.id)}
                             className="p-1.5 rounded-lg hover:bg-[var(--color-danger-soft)] text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                             title="Delete"
+                            aria-label={`Delete ${doc.filename}`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                         </div>
                       </div>
@@ -403,10 +432,10 @@ export default function HistoryDrawer({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 truncate">
                         <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
-                          <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)]" />
+                          <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
                         </div>
                         <div className="truncate">
-                          <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-hover)] transition-colors">
+                          <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-dark)] transition-colors">
                             {item.filename}
                           </p>
                           <p className="text-[11px] text-[var(--color-text-secondary)] flex items-center gap-2 mt-0.5">
@@ -426,7 +455,7 @@ export default function HistoryDrawer({
 
                     <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
                       <span className="flex items-center gap-1 font-mono">
-                        <Calendar className="w-3 h-3" />
+                        <Calendar className="w-3 h-3" aria-hidden="true" />
                         {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent'}
                       </span>
 
@@ -435,15 +464,17 @@ export default function HistoryDrawer({
                           onClick={(e) => handleDownload(e, item.id, 'xlsx')}
                           className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                           title="Download Excel (.xlsx)"
+                          aria-label={`Download Excel for ${item.filename}`}
                         >
-                          <Download className="w-3.5 h-3.5" />
+                          <Download className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>
                         <button
                           onClick={(e) => handleDelete(e, item.id)}
                           className="p-1.5 rounded-lg hover:bg-[var(--color-danger-soft)] text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                           title="Remove from history"
+                          aria-label={`Remove ${item.filename} from history`}
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>
                       </div>
                     </div>

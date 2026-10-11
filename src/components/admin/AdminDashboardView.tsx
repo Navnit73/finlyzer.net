@@ -164,7 +164,7 @@ export default function AdminDashboardView() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-black text-[var(--color-ink)] flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[var(--color-brand-hover)]" />
+            <Activity className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
             <span>Global Operations Event Stream</span>
           </h3>
           <span className="text-xs text-[var(--color-text-muted)] font-medium">

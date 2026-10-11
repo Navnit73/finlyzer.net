@@ -242,7 +242,16 @@ export default function OcrUploader({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => !isProcessing && fileInputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none ${
+          onKeyDown={(e) => {
+            if (!isProcessing && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={isProcessing ? -1 : 0}
+          aria-label="Upload Bank Statement or PDF"
+          className={`relative border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none focus:outline-none focus:border-[var(--color-brand)] ${
             isDragging
               ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
               : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-subtle)]'
@@ -264,7 +273,7 @@ export default function OcrUploader({
           {isProcessing ? (
             <div className="space-y-6 max-w-md mx-auto py-4">
               <div className="relative w-20 h-20 mx-auto">
-                <div className="w-20 h-20 rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-brand)] animate-spin"></div>
+                <div className="w-20 h-20 rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-brand)] animate-spin" aria-hidden="true"></div>
                 <div className="absolute inset-0 flex items-center justify-center font-bold text-xs text-[var(--color-ink)]">
                   {progress}%
                 </div>
@@ -274,10 +283,17 @@ export default function OcrUploader({
                 <h3 className="text-xl font-black text-[var(--color-ink)] tracking-tight">
                   Processing Financial Document
                 </h3>
-                <p className="text-xs sm:text-sm font-medium text-[var(--color-brand-hover)] animate-pulse">
+                <p aria-live="polite" className="text-xs sm:text-sm font-medium text-[var(--color-brand-dark)] animate-pulse">
                   {processingStage}
                 </p>
-                <div className="w-full bg-[var(--color-border)] h-2 rounded-full overflow-hidden mt-3">
+                <div
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Processing Progress"
+                  className="w-full bg-[var(--color-border)] h-2 rounded-full overflow-hidden mt-3"
+                >
                   <div
                     className="bg-[var(--color-brand)] h-full transition-all duration-300 rounded-full"
                     style={{ width: `${progress}%` }}
@@ -288,8 +304,6 @@ export default function OcrUploader({
           ) : (
             /* Default Dropzone Content */
             <div className="space-y-5 max-w-lg mx-auto">
-             
-
               <div className="space-y-2">
                 <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
                   Upload Bank Statement or PDF
@@ -313,8 +327,8 @@ export default function OcrUploader({
                 <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
                   CSV &bull; XLSX
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center gap-1 text-[var(--color-brand-hover)]">
-                  <Lock className="w-3 h-3" /> Password Protected PDFs
+                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center gap-1 text-[var(--color-brand-dark)] font-bold">
+                  <Lock className="w-3 h-3" aria-hidden="true" /> Password Protected PDFs
                 </span>
               </div>
             </div>
@@ -323,8 +337,8 @@ export default function OcrUploader({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
+          <div role="alert" className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
             <div className="flex-1">
               <p className="font-bold">Extraction Notice</p>
               <p>{errorMessage}</p>
@@ -339,7 +353,7 @@ export default function OcrUploader({
             onClick={onOpenBatchModal}
             className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet-text)] font-bold px-4 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
           >
-            <Layers className="w-4 h-4 text-[var(--media-violet)]" />
+            <Layers className="w-4 h-4 text-[var(--media-violet)]" aria-hidden="true" />
             <span>Bulk Batch Processing</span>
           </button>
 
@@ -349,7 +363,7 @@ export default function OcrUploader({
               onClick={onOpenLongDocModal}
               className="btn btn-sm rounded-full border border-[var(--color-brand)]/40 bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand-hover)]/20 text-[var(--color-ink)] font-bold px-4 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
             >
-              <Cpu className="w-4 h-4 text-[var(--color-brand-hover)]" />
+              <Cpu className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
               <span>Long Doc OCR (100–200 Pages)</span>
             </button>
           )}

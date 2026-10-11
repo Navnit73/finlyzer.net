@@ -27,6 +27,17 @@ export default function GuestUnlockModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const mounted = useIsMounted();
 
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isProcessing) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isProcessing, onClose]);
+
   if (!isOpen || !mounted) return null;
 
   const handleUnlockPayment = async () => {
@@ -90,7 +101,14 @@ export default function GuestUnlockModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/65 animate-fade-in overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/65 animate-fade-in overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isProcessing) {
+          onClose();
+        }
+      }}
+    >
       <div
         className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-xl"
         role="dialog"
@@ -104,20 +122,20 @@ export default function GuestUnlockModal({
           aria-label="Close modal"
           disabled={isProcessing}
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Top Feature Pill */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-xs font-bold">
-          <Zap className="w-3.5 h-3.5 fill-current" />
+          <Zap className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
           <span>11–30 PAGE DOCUMENT UNLOCK</span>
         </div>
 
         {/* Title & Document Badge */}
         <div className="space-y-2">
-          <h3 id="guest-unlock-title" className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+          <h2 id="guest-unlock-title" className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
             Unlock Full Statement Export
-          </h3>
+          </h2>
           <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed">
             This document contains <strong className="text-[var(--color-ink)] font-mono">{pageCount} pages</strong>. Free guest tier covers up to 10 pages. Unlock all 6 export formats for this document with a 1-time micro-pass.
           </p>
@@ -138,21 +156,21 @@ export default function GuestUnlockModal({
         {/* Value Points */}
         <div className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-lg border border-[var(--color-border)]">
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
             <span>Instant download in Excel (.xlsx), CSV, and PDF formats</span>
           </div>
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
             <span>Accounting feeds for QuickBooks (.qbo), Xero (.ofx), and Quicken (.qif)</span>
           </div>
           <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
             <span>Formulas, cash flow categorization, and reconciliation summary included</span>
           </div>
         </div>
 
         {errorMessage && (
-          <div className="p-3 rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] text-xs font-semibold border border-[var(--color-danger-border)]">
+          <div role="alert" className="p-3 rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] text-xs font-semibold border border-[var(--color-danger-border)]">
             {errorMessage}
           </div>
         )}
@@ -165,18 +183,18 @@ export default function GuestUnlockModal({
             className="btn-brand-primary w-full !py-3.5 !px-6 !text-sm !font-black rounded-lg shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
           >
             {isProcessing ? (
-              <span className="loading loading-spinner loading-sm"></span>
+              <span className="loading loading-spinner loading-sm" aria-hidden="true"></span>
             ) : (
-              <Lock className="w-4 h-4" />
+              <Lock className="w-4 h-4" aria-hidden="true" />
             )}
             <span>Pay $10 &amp; Unlock All Formats</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
+            <ArrowRight className="w-4 h-4 ml-1" aria-hidden="true" />
           </button>
         </div>
 
         {/* Security badge */}
         <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--color-text-muted)] pt-1">
-          <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" />
+          <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
           <span>256-Bit SSL Encrypted &bull; Razorpay / Card Secure Checkout</span>
         </div>
       </div>

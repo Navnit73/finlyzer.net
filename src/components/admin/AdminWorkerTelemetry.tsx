@@ -34,7 +34,7 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
       <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Server className="w-4 h-4 text-[var(--color-brand-hover)]" />
+            <Server className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
             <h4 className="text-sm font-black text-[var(--color-ink)]">Infrastructure Services</h4>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">
@@ -46,14 +46,14 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
           {/* MongoDB */}
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
             <div className="flex items-center gap-2.5">
-              <Database className="w-4 h-4 text-emerald-600" />
+              <Database className="w-4 h-4 text-emerald-700" aria-hidden="true" />
               <div>
                 <p className="font-bold text-[var(--color-ink)]">MongoDB Primary Cluster</p>
                 <p className="text-[11px] text-[var(--color-text-muted)]">Extractions &amp; Orders DB</p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 font-bold text-emerald-600">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
               <span>Connected</span>
             </span>
           </div>
@@ -61,14 +61,14 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
           {/* Redis Message Broker */}
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
             <div className="flex items-center gap-2.5">
-              <Radio className="w-4 h-4 text-red-500" />
+              <Radio className="w-4 h-4 text-red-600" aria-hidden="true" />
               <div>
                 <p className="font-bold text-[var(--color-ink)]">Redis Queue &amp; State Broker</p>
                 <p className="text-[11px] text-[var(--color-text-muted)]">Task dispatch &amp; SSE pub/sub</p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 font-bold text-emerald-600">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
               <span>Connected</span>
             </span>
           </div>
@@ -76,7 +76,7 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
           {/* Celery / Async Worker Pool */}
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
             <div className="flex items-center gap-2.5">
-              <Cpu className="w-4 h-4 text-[var(--media-violet)]" />
+              <Cpu className="w-4 h-4 text-[var(--media-violet-text)]" aria-hidden="true" />
               <div>
                 <p className="font-bold text-[var(--color-ink)]">OCR Background Workers</p>
                 <p className="text-[11px] text-[var(--color-text-muted)]">
@@ -84,8 +84,8 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
                 </p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 font-bold text-emerald-600">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
               <span>Active</span>
             </span>
           </div>
@@ -96,7 +96,7 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
       <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[var(--media-violet)]" />
+            <Activity className="w-4 h-4 text-[var(--media-violet-text)]" aria-hidden="true" />
             <h4 className="text-sm font-black text-[var(--color-ink)]">System Load Telemetry</h4>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
@@ -109,11 +109,18 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-bold text-[var(--color-ink)]">
               <span className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" /> CPU Utilization
+                <Cpu className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" /> CPU Utilization
               </span>
               <span>{cpuPercent.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-[var(--color-surface-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+            <div
+              role="progressbar"
+              aria-valuenow={Math.round(cpuPercent)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="CPU Utilization"
+              className="w-full bg-[var(--color-surface-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
+            >
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
                   cpuPercent > 80 ? 'bg-red-500' : 'bg-[var(--color-brand)]'
@@ -127,11 +134,18 @@ export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProp
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-bold text-[var(--color-ink)]">
               <span className="flex items-center gap-1.5">
-                <HardDrive className="w-3.5 h-3.5 text-[var(--media-violet)]" /> RAM / Memory Pool
+                <HardDrive className="w-3.5 h-3.5 text-[var(--media-violet-text)]" aria-hidden="true" /> RAM / Memory Pool
               </span>
               <span>{memoryPercent.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-[var(--color-surface-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+            <div
+              role="progressbar"
+              aria-valuenow={Math.round(memoryPercent)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="RAM and memory utilization"
+              className="w-full bg-[var(--color-surface-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
+            >
               <div
                 className="bg-[var(--media-violet)] h-full rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, memoryPercent)}%` }}

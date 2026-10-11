@@ -188,10 +188,11 @@ export default function ExportActionBar({
             {onConsolidateClick && (
               <button
                 onClick={onConsolidateClick}
-                className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                className="btn btn-xs sm:btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet-text)] text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer"
                 title="Consolidate multiple statements into unified P&L"
+                aria-label="Consolidate multiple statements into unified P&L"
               >
-                <Layers className="w-3.5 h-3.5" />
+                <Layers className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Consolidate P&amp;L</span>
               </button>
             )}
@@ -210,6 +211,7 @@ export default function ExportActionBar({
                 key={opt.format}
                 onClick={() => handleDownload(opt.format)}
                 disabled={downloadingFormat !== null}
+                aria-label={`Export as ${opt.name} (${opt.ext})${requiresUnlock ? ' - Unlock required' : ''}`}
                 className={`p-3 rounded-lg border transition-colors text-left flex flex-col justify-between space-y-2 cursor-pointer group active:scale-95 disabled:opacity-50 shadow-none ${
                   requiresUnlock
                     ? 'bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border-[var(--color-border)] hover:border-[var(--color-ink)]'
@@ -230,11 +232,11 @@ export default function ExportActionBar({
                     }`}
                   >
                     {isDownloading ? (
-                      <span className="loading loading-spinner loading-xs"></span>
+                      <span className="loading loading-spinner loading-xs" aria-label="Downloading"></span>
                     ) : isSuccess ? (
-                      <Check className="w-3.5 h-3.5 text-[var(--color-success)] stroke-[3]" />
+                      <Check className="w-3.5 h-3.5 text-[var(--color-success)] stroke-[3]" aria-hidden="true" />
                     ) : (
-                      <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                      <Icon className="w-3.5 h-3.5 stroke-[2.2]" aria-hidden="true" />
                     )}
                   </div>
 

@@ -61,10 +61,20 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Prevent background scroll when mobile menu is open
+  // Prevent background scroll and handle Escape key when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setIsMobileMenuOpen(false);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = 'unset';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -87,12 +97,20 @@ export default function Header() {
             {/* Center / Navigation Links (Guest Desktop) */}
             {!isLoggedIn && (
               <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
-                <Link href="/convert" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
+                <Link
+                  href="/convert"
+                  aria-current={pathname.startsWith('/convert') ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   <span>All Bank Converters</span>
                 </Link>
-                <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                <Link
+                  href="/pricing"
+                  aria-current={pathname === '/pricing' ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" aria-hidden="true" />
                   <span>Pricing</span>
                 </Link>
               </div>
@@ -101,37 +119,61 @@ export default function Header() {
             {/* Center / Navigation Links (Authenticated Desktop) */}
             {isLoggedIn && (
               <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
-                <Link href="/dashboard" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+                <Link
+                  href="/dashboard"
+                  aria-current={pathname === '/dashboard' ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
                   <span>Dashboard</span>
                 </Link>
 
-                <Link href="/workspace" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-hover)]" />
+                <Link
+                  href="/workspace"
+                  aria-current={pathname === '/workspace' ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   <span>OCR Studio</span>
                 </Link>
 
-                <Link href="/documents" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <FolderLock className="w-3.5 h-3.5 text-[var(--media-blue)]" />
+                <Link
+                  href="/documents"
+                  aria-current={pathname === '/documents' ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <FolderLock className="w-3.5 h-3.5 text-[var(--media-blue-text)]" aria-hidden="true" />
                   <span>Document Vault</span>
                 </Link>
 
-                <Link href="/invoices" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <Receipt className="w-3.5 h-3.5 text-[var(--media-pink)]" />
+                <Link
+                  href="/invoices"
+                  aria-current={pathname === '/invoices' ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <Receipt className="w-3.5 h-3.5 text-[var(--media-pink)]" aria-hidden="true" />
                   <span>Invoices</span>
                 </Link>
 
-                <Link href="/pricing" className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                <Link
+                  href="/pricing"
+                  aria-current={pathname === '/pricing' ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" aria-hidden="true" />
                   <span>Pricing &amp; Credits</span>
                 </Link>
 
                 {/* SuperAdmin Link */}
                 {isAdmin && (
-                <Link href="/superadmin" className="hover:text-[var(--color-ink)] text-[var(--color-text-secondary)] transition-colors flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-hover)]" />
-                  <span>SuperAdmin</span>
-                </Link>
+                  <Link
+                    href="/superadmin"
+                    aria-current={pathname.startsWith('/superadmin') ? 'page' : undefined}
+                    className="hover:text-[var(--color-ink)] text-[var(--color-text-secondary)] transition-colors flex items-center gap-1.5"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-dark)]" aria-hidden="true" />
+                    <span>SuperAdmin</span>
+                  </Link>
                 )}
               </div>
             )}
@@ -147,8 +189,9 @@ export default function Header() {
                 className="md:hidden p-2 rounded-xl text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border)] cursor-pointer transition-colors flex items-center justify-center"
                 aria-label={isMobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
                 aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-navigation-menu"
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
               </button>
             </div>
           </nav>
@@ -156,7 +199,13 @@ export default function Header() {
 
         {/* Mobile Navigation Drawer / Slide-Down Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden fixed inset-x-0 top-16 sm:top-20 bottom-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-md border-t border-[var(--color-border)] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+          <div
+            id="mobile-navigation-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile Navigation Menu"
+            className="md:hidden fixed inset-x-0 top-16 sm:top-20 bottom-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-md border-t border-[var(--color-border)] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
+          >
             <div className="site-container py-6 space-y-6">
               {!isLoggedIn ? (
                 /* Guest Mobile Navigation */
@@ -245,7 +294,7 @@ export default function Header() {
 
                   {/* Free Tier Guarantee Banner */}
                   <div className="p-3.5 rounded-2xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 flex items-center gap-3 text-xs text-[var(--color-on-brand)]">
-                    <ShieldCheck className="w-5 h-5 text-[var(--color-brand-hover)] shrink-0" />
+                    <ShieldCheck className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
                     <div>
                       <p className="font-black">100% Free For 1–10 Pages</p>
                       <p className="text-[11px] opacity-90">No credit card or registration required.</p>
@@ -262,7 +311,7 @@ export default function Header() {
                       }}
                       className="w-full btn-brand-primary !min-h-[46px] !h-[46px] text-sm font-black rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
-                      <User className="w-4 h-4" />
+                      <User className="w-4 h-4" aria-hidden="true" />
                       <span>Sign In with Google</span>
                     </button>
                   </div>
@@ -280,10 +329,10 @@ export default function Header() {
                       className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
                     >
                       <div className="flex items-center gap-3">
-                        <BarChart3 className="w-4 h-4 text-[var(--color-ink)]" />
+                        <BarChart3 className="w-4 h-4 text-[var(--color-ink)]" aria-hidden="true" />
                         <span>Dashboard</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
+                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" aria-hidden="true" />
                     </Link>
 
                     <Link
@@ -292,10 +341,10 @@ export default function Header() {
                       className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
                     >
                       <div className="flex items-center gap-3">
-                        <Sparkles className="w-4 h-4 text-[var(--color-brand-hover)]" />
+                        <Sparkles className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
                         <span>OCR Studio</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
+                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" aria-hidden="true" />
                     </Link>
 
                     <Link

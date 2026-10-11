@@ -49,6 +49,17 @@ function UploadConfigModalDialog({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isLoading) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLoading, onClose]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isEncrypted && !password.trim()) {
@@ -58,7 +69,14 @@ function UploadConfigModalDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3.5 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3.5 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isLoading) {
+          onClose();
+        }
+      }}
+    >
       <div
         className="relative w-full max-w-md bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-5 sm:p-7 space-y-5 animate-scale-up my-auto shadow-none"
         role="dialog"
@@ -73,20 +91,25 @@ function UploadConfigModalDialog({
           className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-50"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Modal Header */}
-        <div className="flex flex-wrap items-center gap-2 pr-6">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" />
-            Document Setup
-          </span>
-          {isEncrypted && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
-              <Lock className="w-3 h-3" /> Password Protected
+        <div>
+          <div className="flex flex-wrap items-center gap-2 pr-6 mb-1">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
+              Document Setup
             </span>
-          )}
+            {isEncrypted && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
+                <Lock className="w-3 h-3" aria-hidden="true" /> Password Protected
+              </span>
+            )}
+          </div>
+          <h2 id="upload-config-modal-title" className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
+            Configure Processing Options
+          </h2>
         </div>
 
         {/* Form Selection Fields */}
@@ -194,8 +217,8 @@ function UploadConfigModalDialog({
               </div>
 
               {passwordError ? (
-                <p className="text-[11px] text-[var(--color-danger)] font-medium flex items-center gap-1.5 mt-1 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] p-2 rounded-lg">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <p role="alert" className="text-[11px] text-[var(--color-danger)] font-medium flex items-center gap-1.5 mt-1 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] p-2 rounded-lg">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>{passwordError}</span>
                 </p>
               ) : (

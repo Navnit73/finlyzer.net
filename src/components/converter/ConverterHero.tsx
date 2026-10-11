@@ -386,7 +386,7 @@ export default function ConverterHero({
           <ul className="hidden sm:grid gap-2.5 max-w-xl mx-auto lg:mx-0">
             {benefits.map((benefit) => (
               <li key={benefit} className="flex items-center justify-center lg:justify-start gap-2.5 text-base text-[var(--color-ink)]">
-                <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-hover)] shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
                 <span>{benefit}</span>
               </li>
             ))}

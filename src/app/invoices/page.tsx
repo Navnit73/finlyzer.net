@@ -72,6 +72,16 @@ export default function InvoicesBillingPage() {
   const totalSpentUsd = completedOrders.reduce((sum, o) => sum + o.amount_usd, 0);
   const totalCreditsBought = completedOrders.reduce((sum, o) => sum + (o.pages_credited || 0), 0);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedReceipt) {
+        setSelectedReceipt(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedReceipt]);
+
   const handlePrintReceipt = () => {
     window.print();
   };
@@ -211,17 +221,17 @@ export default function InvoicesBillingPage() {
             </div>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-              <table className="table w-full text-xs">
+              <table className="table w-full text-xs" aria-label="Billing orders and invoices">
                 <thead>
                   <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                    <th className="font-bold py-3">Order / Invoice ID</th>
-                    <th className="font-bold">Package Name</th>
-                    <th className="font-bold">Credits Added</th>
-                    <th className="font-bold">Amount (USD)</th>
-                    <th className="font-bold">Gateway</th>
-                    <th className="font-bold">Status</th>
-                    <th className="font-bold">Date</th>
-                    <th className="font-bold text-right">Receipt &amp; PDF</th>
+                    <th scope="col" className="font-bold py-3">Order / Invoice ID</th>
+                    <th scope="col" className="font-bold">Package Name</th>
+                    <th scope="col" className="font-bold">Credits Added</th>
+                    <th scope="col" className="font-bold">Amount (USD)</th>
+                    <th scope="col" className="font-bold">Gateway</th>
+                    <th scope="col" className="font-bold">Status</th>
+                    <th scope="col" className="font-bold">Date</th>
+                    <th scope="col" className="font-bold text-right">Receipt &amp; PDF</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -230,9 +240,9 @@ export default function InvoicesBillingPage() {
                       key={order.order_id}
                       className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] transition-colors"
                     >
-                      <td className="font-mono font-bold text-[var(--color-ink)]">
+                      <th scope="row" className="font-mono font-bold text-[var(--color-ink)] text-left font-normal">
                         {order.order_id}
-                      </td>
+                      </th>
                       <td className="font-semibold text-[var(--color-ink)]">
                         {order.plan_name}
                       </td>
@@ -266,13 +276,15 @@ export default function InvoicesBillingPage() {
                             onClick={(e) => handleDownloadPdf(e, order.order_id)}
                             className="btn btn-xs rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold px-2.5 border border-[var(--color-brand)]/30 flex items-center gap-1 cursor-pointer"
                             title="Download Official PDF Invoice"
+                            aria-label={`Download PDF invoice for order ${order.order_id}`}
                           >
-                            <Download className="w-3 h-3" />
+                            <Download className="w-3 h-3" aria-hidden="true" />
                             <span>PDF</span>
                           </button>
 
                           <button
                             onClick={() => setSelectedReceipt(order)}
+                            aria-label={`View receipt for order ${order.order_id}`}
                             className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] cursor-pointer"
                           >
                             View
@@ -291,14 +303,24 @@ export default function InvoicesBillingPage() {
 
       {/* Printable Receipt Modal */}
       {selectedReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fade-in overflow-y-auto">
-          <div className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-2xl">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="receipt-modal-title"
+          onClick={() => setSelectedReceipt(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fade-in overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-2xl"
+          >
             {/* Close */}
             <button
               onClick={() => setSelectedReceipt(null)}
+              aria-label="Close receipt dialog"
               className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
 
             {/* Receipt Header */}
@@ -307,9 +329,9 @@ export default function InvoicesBillingPage() {
                 <span className="badge badge-sm bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-black text-[10px] rounded-lg">
                   Official Payment Receipt
                 </span>
-                <h3 className="text-xl font-black text-[var(--color-ink)]">
+                <h2 id="receipt-modal-title" className="text-xl font-black text-[var(--color-ink)]">
                   Payment Receipt
-                </h3>
+                </h2>
                 <p className="text-xs text-[var(--color-text-secondary)] font-mono">
                   Order Reference: {selectedReceipt.order_id}
                 </p>

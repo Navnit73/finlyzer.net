@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, History, ChevronDown, User, CreditCard, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
@@ -62,7 +63,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
             title="View Stored Documents & History"
             aria-label="View Document History"
           >
-            <History className="w-3.5 h-3.5 text-[var(--color-ink)]" />
+            <History className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
             <span className="hidden sm:inline">History</span>
           </button>
         )}
@@ -94,7 +95,7 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               <span className="text-xs font-bold text-[var(--color-ink)] hidden sm:inline max-w-[120px] truncate">
                 {session.user?.name?.split(' ')[0] || 'Account'}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
             </div>
 
             <ul
@@ -118,24 +119,24 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
 
               {/* Dashboard & Credits Link */}
               <li>
-                <a
+                <Link
                   href="/dashboard"
                   className="py-2 flex items-center gap-2 font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
                 >
-                  <CreditCard className="w-4 h-4 text-[var(--color-brand-dark)]" />
+                  <CreditCard className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   <span>Dashboard & Credits</span>
-                </a>
+                </Link>
               </li>
 
               {/* SuperAdmin System Operations Link */}
               <li>
-                <a
+                <Link
                   href="/superadmin"
                   className="py-2 flex items-center gap-2 font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
                 >
-                  <ShieldAlert className="w-4 h-4 text-[var(--color-brand-hover)]" />
+                  <ShieldAlert className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   <span>SuperAdmin Operations</span>
-                </a>
+                </Link>
               </li>
 
               {onOpenHistory && (

@@ -45,17 +45,26 @@ export default function ActiveJobFloatingTracker() {
       {isMinimized ? (
         /* Minimized Floating Pill */
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={`Expand OCR tracking for ${activeJob.filename}`}
           onClick={() => setIsMinimized(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsMinimized(false);
+            }
+          }}
           className="flex items-center justify-between p-3 rounded-2xl bg-[var(--color-ink)] text-white border border-zinc-700 shadow-2xl cursor-pointer hover:border-[var(--color-brand)] transition-all group"
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="w-7 h-7 rounded-xl bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
               {isCompleted ? (
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-on-brand)]" />
+                <CheckCircle2 className="w-4 h-4 text-[var(--color-on-brand)]" aria-hidden="true" />
               ) : isFailed ? (
-                <AlertCircle className="w-4 h-4 text-[var(--color-on-brand)]" />
+                <AlertCircle className="w-4 h-4 text-[var(--color-on-brand)]" aria-hidden="true" />
               ) : (
-                <Cpu className="w-4 h-4 animate-spin text-[var(--color-on-brand)]" />
+                <Cpu className="w-4 h-4 animate-spin text-[var(--color-on-brand)]" aria-hidden="true" />
               )}
             </span>
             <div className="min-w-0">
@@ -76,7 +85,7 @@ export default function ActiveJobFloatingTracker() {
             <span className="text-[10px] font-bold text-[var(--color-brand)] font-mono">
               {activeJob.processingProgress}%
             </span>
-            <ChevronUp className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+            <ChevronUp className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" aria-hidden="true" />
           </div>
         </div>
       ) : (
@@ -99,10 +108,10 @@ export default function ActiveJobFloatingTracker() {
               <span
                 className={`w-2 h-2 rounded-full ${
                   isCompleted
-                    ? 'bg-[var(--color-brand-hover)]'
+                    ? 'bg-[var(--color-brand-dark)]'
                     : isFailed
                     ? 'bg-[var(--color-danger)]'
-                    : 'bg-[var(--color-brand)] animate-ping'
+                    : 'bg-[var(--color-brand-dark)] animate-ping'
                 }`}
               />
               <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-ink)] truncate">
@@ -112,7 +121,7 @@ export default function ActiveJobFloatingTracker() {
                   ? 'Processing Error'
                   : 'Background OCR Worker'}
               </span>
-              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)] uppercase">
+              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] uppercase">
                 {activeJob.totalPages} Pages
               </span>
             </div>
@@ -122,8 +131,9 @@ export default function ActiveJobFloatingTracker() {
                 onClick={() => setIsMinimized(true)}
                 className="p-1 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)] transition cursor-pointer"
                 title="Minimize Tracker"
+                aria-label="Minimize Tracker"
               >
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
 
               {(isCompleted || isFailed) && (
@@ -131,8 +141,9 @@ export default function ActiveJobFloatingTracker() {
                   onClick={() => removeJob(activeJob.jobId)}
                   className="p-1 rounded-lg text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                   title="Dismiss"
+                  aria-label="Dismiss job notification"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -160,11 +171,16 @@ export default function ActiveJobFloatingTracker() {
                   {activeJob.processingProgress}%
                 </span>
               </div>
-              <div className="w-full bg-[var(--color-surface-subtle)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+              <div
+                role="progressbar"
+                aria-valuenow={activeJob.processingProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Document processing progress"
+                className="w-full bg-[var(--color-surface-subtle)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
+              >
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    isCompleted ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-brand)]'
-                  }`}
+                  className="h-full rounded-full transition-all duration-300 bg-[var(--color-brand)]"
                   style={{ width: `${activeJob.processingProgress}%` }}
                 />
               </div>
@@ -174,10 +190,10 @@ export default function ActiveJobFloatingTracker() {
             {isProcessing && (
               <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-0.5">
                 <span className="flex items-center gap-1 font-mono uppercase">
-                  <Activity className="w-3 h-3 text-[var(--color-brand-hover)]" />
+                  <Activity className="w-3 h-3 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   {activeJob.currentStage.replace(/_/g, ' ')}
                 </span>
-                <span className="text-[var(--color-brand-hover)] font-bold">Auto-syncs on route change</span>
+                <span className="text-[var(--color-brand-dark)] font-bold">Auto-syncs on route change</span>
               </div>
             )}
 
@@ -188,9 +204,9 @@ export default function ActiveJobFloatingTracker() {
                   onClick={handleOpenDoc}
                   className="btn-brand-primary flex-1 !min-h-[38px] !h-[38px] !px-3 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition-transform active:scale-95"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Open Document</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
 
                 {docId && (
@@ -198,8 +214,9 @@ export default function ActiveJobFloatingTracker() {
                     href={`/api/export/download/${docId}?format=xlsx`}
                     className="btn-brand-secondary !min-h-[38px] !h-[38px] !px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)]"
                     title="Download Excel"
+                    aria-label="Download Excel workbook"
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--color-success)]" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--color-success)]" aria-hidden="true" />
                   </a>
                 )}
               </div>
