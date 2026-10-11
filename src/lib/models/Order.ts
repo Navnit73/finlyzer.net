@@ -21,7 +21,9 @@ export async function createOrder(
   extra: Pick<OrderRecord, 'document_id'> = {}
 ): Promise<OrderRecord> {
   const normalizedEmail = userEmail.toLowerCase().trim();
-  const plan = PRICING_PLANS.find((p) => p.id === planId);
+  const plan =
+    PRICING_PLANS.find((p) => p.id === planId) ||
+    (planId === 'single_10' ? PRICING_PLANS.find((p) => p.id === 'guest_doc_unlock') : undefined);
   if (!plan) throw new Error(`Unknown plan: ${planId}`);
 
   const orderId = `order_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;

@@ -45,8 +45,10 @@ export async function POST(req: NextRequest) {
       return errorResponse(parseError || 'Invalid request body', 400, 'BAD_REQUEST');
     }
 
-    // Guest passes are sold through /api/guest/orders and are not account credit packs.
-    const plan = PRICING_PLANS.find((p) => p.id === body.plan_id && p.id !== 'guest_doc_unlock');
+    // Allow all PRICING_PLANS (including the $10 Document Pass) to be ordered.
+    const plan = PRICING_PLANS.find(
+      (p) => p.id === body.plan_id || (body.plan_id === 'single_10' && p.id === 'guest_doc_unlock')
+    );
     if (!plan) {
       return errorResponse('Invalid pricing plan selected.', 400, 'INVALID_PLAN');
     }

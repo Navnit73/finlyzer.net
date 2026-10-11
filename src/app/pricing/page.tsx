@@ -94,7 +94,9 @@ export default function PricingPage() {
     }
 
     if (targetPlanId) {
-      const matchedPlan = PRICING_PLANS.find((p) => p.id === targetPlanId);
+      const matchedPlan = PRICING_PLANS.find(
+        (p) => p.id === targetPlanId || (targetPlanId === 'single_10' && p.id === 'guest_doc_unlock')
+      );
       if (matchedPlan) {
         setSelectedPlan(matchedPlan);
         setIsCheckoutOpen(true);

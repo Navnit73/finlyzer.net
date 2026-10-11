@@ -54,7 +54,9 @@ export default function AuthModal({
 
   if (!isOpen || !mounted) return null;
 
-  const selectedPlan = planId ? PRICING_PLANS.find((p) => p.id === planId) : undefined;
+  const selectedPlan = planId
+    ? PRICING_PLANS.find((p) => p.id === planId || (planId === 'single_10' && p.id === 'guest_doc_unlock'))
+    : undefined;
   const isPurchase = reason === 'pricing';
 
   const handleGoogleSignIn = async () => {

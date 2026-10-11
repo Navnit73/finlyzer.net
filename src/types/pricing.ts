@@ -63,6 +63,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'pack_25',
     name: 'Starter 600',
     price_usd: 25,
+    price_inr: 2075,
     pages: 600,
     description: 'Ideal for small businesses and accountants processing monthly statements.',
     features: [
@@ -78,6 +79,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'pack_50',
     name: 'Pro 1000',
     price_usd: 50,
+    price_inr: 4150,
     pages: 1000,
     description: 'High-volume reconciliation for financial analysts and tax consultants.',
     features: [
@@ -91,6 +93,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'pack_100',
     name: 'Enterprise 5000',
     price_usd: 100,
+    price_inr: 8300,
     pages: 5000,
     description: 'Maximum scale package for auditing firms and corporate finance teams.',
     features: [

@@ -18,9 +18,10 @@ export async function completeAndFulfillOrder(
 
   let purchaseEmail: { name?: string | null } | null = null;
   try {
-    if (order.plan_id === 'guest_doc_unlock') {
-      if (order.document_id) await unlockGuestDocument(order.document_id, order.order_id);
-    } else if (order.pages_credited > 0) {
+    if (order.document_id) {
+      await unlockGuestDocument(order.document_id, order.order_id);
+    }
+    if (order.user_email && order.user_email !== 'guest' && order.pages_credited > 0) {
       const tier = order.plan_id === 'pack_100' ? 'enterprise' : order.plan_id === 'pack_50' ? 'pro' : undefined;
       const user = await addPurchasedPages(order.user_email, order.pages_credited, tier);
       purchaseEmail = { name: user.name };
