@@ -19,6 +19,23 @@ export default function Footer() {
               <ShieldCheck className="w-4 h-4 text-[var(--color-brand-hover)]" />
               <span>Encrypted in transit &bull; Guest uploads auto-deleted in 24h</span>
             </div>
+            <div className="pt-2">
+              <a
+                href="https://www.producthunt.com/products/finlyzers?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-finlyzers"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block hover:opacity-90 transition-opacity"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt="Finlyzers - Convert PDF and scanned bank statements into Exce | Product Hunt"
+                  width="250"
+                  height="54"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1276722&theme=light&t=1791724223623"
+                  className="w-[250px] h-[54px] max-w-full"
+                />
+              </a>
+            </div>
           </div>
 
           {/* Col 2: Export Format Converters */}

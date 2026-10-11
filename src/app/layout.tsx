@@ -72,7 +72,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased selection:bg-[var(--color-brand)] selection:text-[var(--color-on-brand)]">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased selection:bg-[var(--color-brand)] selection:text-[var(--color-on-brand)]"
+      >
         {/* Microsoft Clarity analytics */}
         <Script
           id="microsoft-clarity"
