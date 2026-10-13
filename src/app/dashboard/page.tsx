@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import UserAvatar from '@/components/auth/UserAvatar';
 import { useSession, signOut } from 'next-auth/react';
 import {
   FileText,
@@ -186,20 +186,13 @@ export default function DashboardOverviewPage() {
           {/* User Profile Overview Banner */}
           <div className="p-6 sm:p-7 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-none">
             <div className="flex items-center gap-4">
-              {session.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || 'User'}
-                  width={56}
-                  height={56}
-                  unoptimized
-                  className="w-14 h-14 rounded-lg object-cover ring-2 ring-[var(--color-brand)]"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-black flex items-center justify-center text-lg shadow-xs">
-                  {session.user?.name?.charAt(0) || 'U'}
-                </div>
-              )}
+              <UserAvatar
+                src={session.user?.image}
+                name={session.user?.name}
+                size={56}
+                imageClassName="w-14 h-14 rounded-lg object-cover ring-2 ring-[var(--color-brand)]"
+                fallbackClassName="w-14 h-14 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-black flex items-center justify-center text-lg shadow-xs"
+              />
               <div className="space-y-0.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-xl sm:text-2xl font-black text-[var(--color-ink)] tracking-tight">

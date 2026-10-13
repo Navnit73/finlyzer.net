@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, History, ChevronDown, User, CreditCard, ShieldAlert } from 'lucide-react';
-import Image from 'next/image';
+import UserAvatar from '@/components/auth/UserAvatar';
 import AuthModal from './AuthModal';
 
 interface UserMenuProps {
@@ -78,20 +78,13 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               aria-haspopup="menu"
               className="flex items-center gap-2 p-1.5 rounded-full hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors border border-[var(--color-border)]"
             >
-              {session.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || 'User'}
-                  width={32}
-                  height={32}
-                  unoptimized
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-[var(--color-brand)]"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs">
-                  {session.user?.name?.charAt(0) || 'U'}
-                </div>
-              )}
+              <UserAvatar
+                src={session.user?.image}
+                name={session.user?.name}
+                size={32}
+                imageClassName="w-8 h-8 rounded-full object-cover ring-2 ring-[var(--color-brand)]"
+                fallbackClassName="w-8 h-8 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs"
+              />
               <span className="text-xs font-bold text-[var(--color-ink)] hidden sm:inline max-w-[120px] truncate">
                 {session.user?.name?.split(' ')[0] || 'Account'}
               </span>

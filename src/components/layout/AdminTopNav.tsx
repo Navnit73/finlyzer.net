@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import UserAvatar from '@/components/auth/UserAvatar';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import {
@@ -95,13 +95,13 @@ export default function AdminTopNav({
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 sm:px-6 flex items-center justify-between transition-colors select-none">
+      <header className="sticky top-0 z-30 h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-3 sm:px-6 gap-2 flex items-center justify-between transition-colors select-none">
         {/* Left: Sidebar Collapse/Mobile Toggles + Breadcrumbs */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {/* Mobile Hamburger */}
           <button
             onClick={onToggleMobileSidebar}
-            className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)] cursor-pointer"
+            className="lg:hidden shrink-0 p-2 rounded-lg hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)] cursor-pointer"
             aria-label="Open mobile navigation menu"
           >
             <Menu className="w-4 h-4" aria-hidden="true" />
@@ -123,22 +123,22 @@ export default function AdminTopNav({
           )}
 
           {/* Dynamic Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-xs truncate" aria-label="Breadcrumb">
+          <nav className="flex items-center gap-1.5 text-xs min-w-0" aria-label="Breadcrumb">
             {breadcrumbs.map((crumb, idx) => {
               const isLast = idx === breadcrumbs.length - 1;
               return (
                 <React.Fragment key={idx}>
                   {idx > 0 && (
-                    <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
+                    <ChevronRight className="hidden sm:block w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
                   )}
                   {isLast ? (
-                    <span aria-current="page" className="font-black text-[var(--color-ink)] truncate max-w-[180px] sm:max-w-xs">
+                    <span aria-current="page" className="font-black text-[var(--color-ink)] text-sm sm:text-xs truncate min-w-0 sm:max-w-xs">
                       {crumb.label}
                     </span>
                   ) : (
                     <Link
                       href={crumb.href}
-                      className="font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors truncate"
+                      className="hidden sm:inline font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors truncate shrink-0"
                     >
                       {crumb.label}
                     </Link>
@@ -171,12 +171,12 @@ export default function AdminTopNav({
           {/* Pricing Quick Link */}
           <Link
             href="/pricing"
-            className="btn btn-sm rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] text-xs font-bold flex items-center gap-1.5 border border-[var(--color-brand)]/30 px-3 transition-colors cursor-pointer"
+            className="btn btn-sm rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] text-xs font-bold flex items-center gap-1.5 border border-[var(--color-brand)]/30 px-2.5 sm:px-3 transition-colors cursor-pointer"
+            aria-label="Pricing and credits"
           >
             <Zap className="w-3.5 h-3.5 fill-current text-[var(--color-ink)]" aria-hidden="true" />
             <span className="hidden sm:inline">Pricing &amp; Credits</span>
-            <span className="sm:hidden">Credits</span>
-          </Link>
+                      </Link>
 
           {/* User Account Dropdown */}
           <div className="dropdown dropdown-end">
@@ -187,20 +187,13 @@ export default function AdminTopNav({
               aria-label="User profile menu"
               aria-haspopup="menu"
             >
-              {session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || 'User'}
-                  width={28}
-                  height={28}
-                  unoptimized
-                  className="w-7 h-7 rounded-md object-cover ring-1 ring-[var(--color-brand)]"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-md bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs">
-                  {session?.user?.name?.charAt(0) || 'U'}
-                </div>
-              )}
+              <UserAvatar
+                src={session?.user?.image}
+                name={session?.user?.name}
+                size={28}
+                imageClassName="w-7 h-7 rounded-md object-cover ring-1 ring-[var(--color-brand)]"
+                fallbackClassName="w-7 h-7 rounded-md bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs"
+              />
               <span className="text-xs font-bold text-[var(--color-ink)] hidden md:inline max-w-[100px] truncate">
                 {session?.user?.name?.split(' ')[0] || 'Account'}
               </span>

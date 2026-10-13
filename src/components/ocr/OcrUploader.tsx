@@ -251,7 +251,7 @@ export default function OcrUploader({
           role="button"
           tabIndex={isProcessing ? -1 : 0}
           aria-label="Upload Bank Statement or PDF"
-          className={`relative border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none focus:outline-none focus:border-[var(--color-brand)] ${
+          className={`relative border-2 border-dashed rounded-lg px-4 py-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none focus:outline-none focus:border-[var(--color-brand)] ${
             isDragging
               ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
               : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-subtle)]'
@@ -305,7 +305,7 @@ export default function OcrUploader({
             /* Default Dropzone Content */
             <div className="space-y-5 max-w-lg mx-auto">
               <div className="space-y-2">
-                <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+                <h3 className="text-xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
                   Upload Bank Statement or PDF
                 </h3>
                 <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
@@ -347,7 +347,7 @@ export default function OcrUploader({
         )}
 
         {/* Action CTAs: Bulk Batch & Long Document OCR */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+        <div className="hidden sm:flex flex-wrap items-center justify-center gap-3 pt-1">
           <button
             type="button"
             onClick={onOpenBatchModal}

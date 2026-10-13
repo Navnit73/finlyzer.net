@@ -18,7 +18,7 @@ export default function WorkspacePage() {
         </p>
       </div>
 
-      <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-4 sm:p-6">
+      <div className="sm:bg-[var(--color-surface)] sm:rounded-lg sm:border sm:border-[var(--color-border)] sm:p-6">
         <OcrWorkspace />
       </div>
     </div>
