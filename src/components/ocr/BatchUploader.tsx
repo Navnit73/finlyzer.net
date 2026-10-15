@@ -153,21 +153,13 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
           <h3 className="type-headline">
-            Multi-File Batch Processor & Annual Consolidator
+            Convert many files at once
           </h3>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            Upload up to 50 statements or invoices at once. Automatically reconciles balances and merges all records into a unified master Excel workbook.
+            Upload up to 50 statements or invoices together, then download each one or a single combined Excel workbook.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
-            Max 50 Files
-          </span>
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]">
-            Auto-Consolidate
-          </span>
-        </div>
       </div>
 
       {/* Dropzone Area */}
@@ -185,7 +177,7 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
           role="button"
           tabIndex={0}
           aria-label="Select multiple files for batch processing"
-          className="border border-dashed border-[var(--color-border-hover)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] rounded-2xl px-4 py-10 sm:p-12 text-center cursor-pointer transition-colors duration-200 flex flex-col items-center justify-center gap-4 select-none focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20"
+          className="border-2 border-dashed border-[var(--color-info-border)] bg-[var(--color-brand-soft)] hover:border-[var(--color-brand)] rounded-2xl px-4 py-10 sm:p-12 text-center cursor-pointer transition-colors duration-200 flex flex-col items-center justify-center gap-4 select-none focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20"
         >
           <input
             type="file"
@@ -196,22 +188,22 @@ export default function BatchUploader({ onSelectExtraction }: BatchUploaderProps
             className="hidden"
           />
 
-          <span className="w-11 h-11 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center" aria-hidden="true">
-            <Layers className="w-5 h-5 text-[var(--color-ink)]" />
+          <span className="w-14 h-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-info-border)] flex items-center justify-center" aria-hidden="true">
+            <Layers className="w-7 h-7 text-[var(--color-brand)]" />
           </span>
 
           <div className="space-y-1.5 max-w-md">
             <p className="font-semibold text-[17px] text-[var(--color-ink)]">
-              Drop multiple PDF statements or click to browse
+              Drop your files here, or browse
             </p>
             <p className="text-[13px] text-[var(--color-text-muted)]">
-              Supports Bank Statements (SBI, HDFC, ICICI, Chase, BoA), Invoices, and Multi-page Receipts
+              PDF, PNG, JPG or TIFF · bank statements, invoices and receipts
             </p>
           </div>
 
           <span className="btn-brand-primary pointer-events-none" aria-hidden="true">
             <Upload className="w-4 h-4" />
-            <span>Select Multi-File Queue</span>
+            <span>Choose Files</span>
           </span>
         </div>
       )}

@@ -1,25 +1,38 @@
 'use client';
 
 import React from 'react';
+import { ChevronRight } from 'lucide-react';
 import { AdminStats } from '@/types/ocr';
 
 interface AdminMetricsGridProps {
   stats: AdminStats | null;
   isLoading?: boolean;
+  /** Jumps the jobs table to a status filter when a job-count tile is clicked. */
+  onSelectStatus?: (status: string) => void;
 }
 
-const CELL = 'bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col min-w-0';
+const CELL = 'bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col min-w-0 text-left';
+const CLICKABLE = `${CELL} group transition-colors hover:bg-[var(--color-surface-subtle)] cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-brand)]`;
 const LABEL = 'text-[13px] text-[var(--color-text-muted)]';
 const VALUE = 'mt-2 text-[32px] leading-none font-semibold tracking-tight tabular-nums text-[var(--color-ink)]';
 const UNIT = 'ml-1.5 text-[15px] font-normal tracking-normal text-[var(--color-text-muted)]';
 const FOOTNOTE = 'mt-3 text-[13px] text-[var(--color-text-secondary)] tabular-nums';
 
-/** Formats an optional percentage; renders an em dash when the backend did not report it. */
-function formatPercent(value: number | undefined | null): string {
-  return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : '—';
+function TileLabel({ children, clickable }: { children: React.ReactNode; clickable?: boolean }) {
+  return (
+    <span className="flex items-center justify-between gap-2">
+      <span className={LABEL}>{children}</span>
+      {clickable && (
+        <ChevronRight
+          className="h-4 w-4 text-[var(--color-text-muted)] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+          aria-hidden="true"
+        />
+      )}
+    </span>
+  );
 }
 
-export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridProps) {
+export default function AdminMetricsGrid({ stats, isLoading, onSelectStatus }: AdminMetricsGridProps) {
   if (isLoading && !stats) {
     return (
       <div
@@ -43,91 +56,64 @@ export default function AdminMetricsGrid({ stats, isLoading }: AdminMetricsGridP
   const processingJobs = stats?.processing_jobs || 0;
   const queuedJobs = stats?.queued_jobs || 0;
   const failedJobs = stats?.failed_jobs || 0;
+  const cancelledJobs = stats?.cancelled_jobs || 0;
   const totalPages = stats?.total_pages_processed || 0;
-  const avgProcessingTime = stats?.average_processing_time_ms
-    ? (stats.average_processing_time_ms / 1000).toFixed(1)
-    : '—';
-  const successRate = totalJobs > 0 ? ((completedJobs / totalJobs) * 100).toFixed(1) : '100.0';
-  const health = stats?.worker_health;
-  const servicesOnline = health ? health.redis_connected !== false && health.mongodb_connected !== false : null;
+  const avgSeconds = stats?.average_processing_time_ms ? (stats.average_processing_time_ms / 1000).toFixed(1) : null;
+  // Success rate over finished jobs only, so in-flight work doesn't drag it down.
+  const finishedJobs = completedJobs + failedJobs;
+  const successRate = finishedJobs > 0 ? ((completedJobs / finishedJobs) * 100).toFixed(1) : null;
+
+  const select = (status: string) => onSelectStatus?.(status);
 
   return (
-    <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)]">
-      {/* 1. Total pages processed */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)]">
+      {/* Pages processed */}
       <div className={CELL}>
-        <dt className="flex items-center justify-between gap-2">
-          <span className={LABEL}>Total pages processed</span>
-          <span className="text-[12px] text-[var(--color-text-muted)]">All time</span>
-        </dt>
-        <dd className={VALUE}>
+        <TileLabel>Pages processed</TileLabel>
+        <p className={VALUE}>
           {totalPages.toLocaleString()}
           <span className={UNIT}>pages</span>
-        </dd>
-        <dd className={FOOTNOTE}>Avg processing time: {avgProcessingTime}s / doc</dd>
+        </p>
+        <p className={FOOTNOTE}>{avgSeconds ? `${avgSeconds}s average per document` : 'No timing data yet'}</p>
       </div>
 
-      {/* 2. Active jobs & in-flight queue */}
-      <div className={CELL}>
-        <dt className="flex items-center justify-between gap-2">
-          <span className={LABEL}>Active worker tasks</span>
-          <span className="flex items-center gap-1.5 text-[12px] text-[var(--color-success)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" aria-hidden="true" />
-            Live
-          </span>
-        </dt>
-        <dd className={VALUE}>
+      {/* In flight */}
+      <button type="button" className={CLICKABLE} onClick={() => select('processing')} aria-label={`In flight: ${processingJobs} processing, ${queuedJobs} queued. Show processing jobs.`}>
+        <TileLabel clickable>In flight</TileLabel>
+        <span className={VALUE}>
           {processingJobs.toLocaleString()}
           <span className={UNIT}>processing</span>
-        </dd>
-        <dd className={FOOTNOTE}>
-          <span className="text-[var(--color-ink)]">{queuedJobs.toLocaleString()}</span> queued
+        </span>
+        <span className={FOOTNOTE}>
+          <span className={queuedJobs > 0 ? 'text-[var(--color-warning)]' : undefined}>{queuedJobs.toLocaleString()} queued</span>
           <span className="mx-1.5 text-[var(--color-text-muted)]" aria-hidden="true">·</span>
-          Worker pool: {health?.active_workers ?? '—'} threads running
-        </dd>
-      </div>
+          {stats?.worker_health?.active_workers ?? '—'} workers
+        </span>
+      </button>
 
-      {/* 3. Success & completion rate */}
-      <div className={CELL}>
-        <dt className="flex items-center justify-between gap-2">
-          <span className={LABEL}>Completed documents</span>
-          <span className="text-[12px] tabular-nums text-[var(--color-text-secondary)]">{successRate}% success</span>
-        </dt>
-        <dd className={VALUE}>
-          {completedJobs.toLocaleString()}
-          <span className={UNIT}>/ {totalJobs.toLocaleString()}</span>
-        </dd>
-        <dd className={FOOTNOTE}>
-          Failed count:{' '}
-          <span className={failedJobs > 0 ? 'text-[var(--color-danger)]' : undefined}>{failedJobs.toLocaleString()}</span>{' '}
-          ({(stats?.retry_count_total || 0).toLocaleString()} retried)
-        </dd>
-      </div>
+      {/* Success rate */}
+      <button type="button" className={CLICKABLE} onClick={() => select('completed')} aria-label={`Success rate ${successRate ?? 'not available'}. Show completed jobs.`}>
+        <TileLabel clickable>Success rate</TileLabel>
+        <span className={VALUE}>
+          {successRate ?? '—'}
+          {successRate && <span className={UNIT}>%</span>}
+        </span>
+        <span className={FOOTNOTE}>
+          {completedJobs.toLocaleString()} of {totalJobs.toLocaleString()} jobs completed
+        </span>
+      </button>
 
-      {/* 4. Worker CPU & memory health */}
-      <div className={CELL}>
-        <dt className="flex items-center justify-between gap-2">
-          <span className={LABEL}>Worker telemetry</span>
-          <span className="truncate text-[12px] text-[var(--color-text-muted)]">
-            {health?.mode || 'Async Worker Pool'}
-          </span>
-        </dt>
-        <dd className={VALUE}>
-          {formatPercent(health?.cpu_percent)}%<span className={UNIT}>CPU</span>
-        </dd>
-        <dd className={`${FOOTNOTE} flex flex-wrap items-center gap-x-1.5`}>
-          <span>
-            <span className="text-[var(--color-ink)]">{formatPercent(health?.memory_percent)}%</span> RAM
-          </span>
-          <span className="text-[var(--color-text-muted)]" aria-hidden="true">·</span>
-          <span
-            className={
-              servicesOnline === false ? 'text-[var(--color-danger)]' : servicesOnline ? 'text-[var(--color-success)]' : undefined
-            }
-          >
-            {servicesOnline === false ? 'Redis / MongoDB degraded' : 'Redis & MongoDB online'}
-          </span>
-        </dd>
-      </div>
-    </dl>
+      {/* Failed */}
+      <button type="button" className={CLICKABLE} onClick={() => select('failed')} aria-label={`${failedJobs} failed jobs. Show failed jobs.`}>
+        <TileLabel clickable>Failed</TileLabel>
+        <span className={`${VALUE} ${failedJobs > 0 ? '!text-[var(--color-danger)]' : ''}`}>
+          {failedJobs.toLocaleString()}
+          <span className={UNIT}>jobs</span>
+        </span>
+        <span className={FOOTNOTE}>
+          {(stats?.retry_count_total || 0).toLocaleString()} retries · {cancelledJobs.toLocaleString()} cancelled
+        </span>
+      </button>
+    </div>
   );
 }

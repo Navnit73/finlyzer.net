@@ -16,6 +16,7 @@ import {
   FileText,
   Loader2,
   X,
+  Upload,
 } from 'lucide-react';
 import { useOCRJob } from '@/hooks/useOCRJob';
 import { useActiveJobs } from '@/context/ActiveJobsContext';
@@ -100,7 +101,7 @@ export default function AsyncDocumentProcessor() {
       ),
     },
     { icon: Activity, label: 'Stage', value: <span className="text-sm font-medium capitalize">{jobState.currentStage.replace(/_/g, ' ')}</span> },
-    { icon: Clock, label: 'Sync Protocol', value: <span className="text-sm font-medium">SSE &amp; HMAC Webhook</span> },
+    { icon: Clock, label: 'Runs', value: <span className="text-sm font-medium">In the background</span> },
   ];
 
   return (
@@ -109,14 +110,11 @@ export default function AsyncDocumentProcessor() {
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="type-headline">
-            Long Document OCR &amp; Webhook Engine
+            Long statements and archives
           </h3>
-          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]">
-            100–200 Pages
-          </span>
         </div>
         <p className="text-sm text-[var(--color-text-secondary)]">
-          Processes massive multi-month bank statements and archives with background Celery workers and signed HMAC webhooks.
+          For 100–200 page PDFs, such as a year of statements in one file. Processing runs in the background and shows live progress.
         </p>
       </div>
 
@@ -133,7 +131,7 @@ export default function AsyncDocumentProcessor() {
                 </span>
               </h4>
               <p className="text-[13px] text-[var(--color-text-muted)]">
-                Your files are actively being processed by background Celery workers.
+                These files are still being processed. You can keep working while they finish.
               </p>
             </div>
           </div>
@@ -227,10 +225,10 @@ export default function AsyncDocumentProcessor() {
             role="button"
             tabIndex={0}
             aria-label="Upload a 100–200 page bank statement"
-            className={`border border-dashed rounded-2xl px-4 py-10 sm:p-12 text-center transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20 ${
+            className={`border-2 border-dashed rounded-2xl px-4 py-10 sm:p-12 text-center transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20 ${
               isDragging
                 ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
-                : 'border-[var(--color-border-hover)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)]'
+                : 'border-[var(--color-info-border)] bg-[var(--color-brand-soft)] hover:border-[var(--color-brand)]'
             }`}
           >
             <input
@@ -246,8 +244,8 @@ export default function AsyncDocumentProcessor() {
             />
 
             <div className="space-y-4 max-w-md mx-auto">
-              <span className="mx-auto w-11 h-11 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center" aria-hidden="true">
-                <FileText className="w-5 h-5 text-[var(--color-ink)]" />
+              <span className="mx-auto w-14 h-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-info-border)] flex items-center justify-center" aria-hidden="true">
+                <FileText className="w-7 h-7 text-[var(--color-brand)]" />
               </span>
 
               {selectedFile ? (
@@ -262,11 +260,15 @@ export default function AsyncDocumentProcessor() {
               ) : (
                 <div className="space-y-2">
                   <h4 className="text-xl font-semibold tracking-tight text-[var(--color-ink)]">
-                    Drop 100–200 Page Bank Statement Here
+                    Drop a long statement here, or browse
                   </h4>
                   <p className="text-sm text-[var(--color-text-secondary)]">
-                    Supports high-volume PDFs, encrypted statements, and multi-year financial ledgers.
+                    PDF, scans and photos · password-protected PDFs supported
                   </p>
+                  <span className="btn-brand-primary mt-3 pointer-events-none" aria-hidden="true">
+                    <Upload className="w-4 h-4" />
+                    <span>Choose File</span>
+                  </span>
                 </div>
               )}
             </div>

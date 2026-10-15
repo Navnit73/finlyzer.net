@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { AlertCircle, AlertTriangle, CheckCircle2, ChevronRight, GitCompareArrows, RefreshCw, XCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, BookOpen, CheckCircle2, ChevronRight, GitCompareArrows, Landmark, RefreshCw, XCircle } from 'lucide-react';
 import ReconciliationUploader from '@/components/reconciliation/ReconciliationUploader';
 
 interface ListItem {
@@ -55,6 +55,29 @@ function StatusCell({ item }: { item: ListItem }) {
   );
 }
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
+}
+
+/** Bank file over ledger file, each with its role icon; failed runs show the reason inline. */
+function FilesCell({ item }: { item: ListItem }) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <p className="flex items-center gap-2 min-w-0">
+        <Landmark className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-label="Bank statement" />
+        <span className="font-medium text-[var(--color-ink)] truncate" title={item.bank_filename}>{item.bank_filename}</span>
+      </p>
+      <p className="flex items-center gap-2 min-w-0">
+        <BookOpen className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-label="Ledger" />
+        <span className="text-[13px] text-[var(--color-text-secondary)] truncate" title={item.ledger_filename}>{item.ledger_filename}</span>
+      </p>
+      {item.status === 'failed' && item.error && (
+        <p className="text-xs text-[var(--color-danger)] line-clamp-2">{item.error}</p>
+      )}
+    </div>
+  );
+}
+
 /** Signed-in bank reconciliation: upload two files, and every past reconciliation on the account. */
 export default function ReconciliationsPage() {
   const [items, setItems] = useState<ListItem[]>([]);
@@ -104,19 +127,15 @@ export default function ReconciliationsPage() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="w-full space-y-10 sm:space-y-12 pb-16">
-      <div className="space-y-2 max-w-2xl">
-        <p className="eyebrow inline-flex items-center gap-1.5">
-          <GitCompareArrows className="w-4 h-4" aria-hidden="true" />
-          <span>Bank Reconciliation</span>
-        </p>
-        <h1 className="type-title">Reconcile a bank statement</h1>
-        <p className="text-[15px] sm:text-[17px] leading-relaxed text-[var(--color-text-secondary)]">
+    <div className="w-full space-y-8 sm:space-y-10 pb-16">
+      <header className="space-y-1.5">
+        <h1 className="type-title">Bank reconciliation</h1>
+        <p className="text-[15px] text-[var(--color-text-secondary)] max-w-2xl">
           Upload a bank statement and your ledger or cash book. Pages are taken from your credits when the report is ready.
         </p>
-      </div>
+      </header>
 
-      <ReconciliationUploader layout="split" />
+      <ReconciliationUploader variant="hero" />
 
       <section aria-labelledby="vault-title" className="space-y-4">
         <div className="flex items-center justify-between gap-3">
@@ -126,6 +145,7 @@ export default function ReconciliationsPage() {
           <button
             type="button"
             onClick={fetchList}
+            disabled={isLoading}
             className="btn-brand-secondary !min-h-[44px] sm:!min-h-[36px] !px-4 !text-[13px]"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
@@ -148,73 +168,97 @@ export default function ReconciliationsPage() {
           ) : isLoading && items.length === 0 ? (
             <div className="divide-y divide-[var(--color-border-subtle)]" aria-busy="true" aria-label="Loading reconciliations">
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-6 px-4 py-4">
+                <div key={i} className="flex items-center gap-6 px-4 sm:px-5 py-4">
                   <div className="flex-1 space-y-2">
-                    <div className="skeleton-line h-3.5 w-1/3" />
-                    <div className="skeleton-line h-3 w-1/4" />
+                    <div className="skeleton-line h-3.5 w-1/2 sm:w-1/3" />
+                    <div className="skeleton-line h-3 w-1/3 sm:w-1/4" />
                   </div>
-                  <div className="skeleton-line h-3.5 w-16 hidden sm:block" />
+                  <div className="skeleton-line h-3.5 w-16 hidden md:block" />
                   <div className="skeleton-line h-5 w-20 rounded-full" />
                 </div>
               ))}
             </div>
           ) : items.length === 0 ? (
             <div className="px-6 py-14 text-center space-y-3">
-              <span className="mx-auto w-10 h-10 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)] flex items-center justify-center">
-                <GitCompareArrows className="w-5 h-5" aria-hidden="true" />
+              <span className="mx-auto w-12 h-12 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)] flex items-center justify-center">
+                <GitCompareArrows className="w-6 h-6" aria-hidden="true" />
               </span>
               <p className="text-[17px] font-semibold text-[var(--color-ink)]">No reconciliations yet</p>
-              <p className="text-sm text-[var(--color-text-secondary)]">Add a bank statement and a ledger above to run your first one.</p>
+              <p className="text-sm text-[var(--color-text-secondary)] max-w-sm mx-auto">
+                Add a bank statement and a ledger above. Every report you run is saved here.
+              </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-sm">
-                <thead className="border-b border-[var(--color-border)]">
-                  <tr className="text-left text-[13px] text-[var(--color-text-muted)]">
-                    <th scope="col" className="py-3 px-4 font-normal">Files</th>
-                    <th scope="col" className="py-3 px-4 font-normal">Date</th>
-                    <th scope="col" className="py-3 px-4 font-normal text-right">Pages</th>
-                    <th scope="col" className="py-3 px-4 font-normal text-right">Matched</th>
-                    <th scope="col" className="py-3 px-4 font-normal text-right">Bank only</th>
-                    <th scope="col" className="py-3 px-4 font-normal text-right">Ledger only</th>
-                    <th scope="col" className="py-3 px-4 font-normal">Status</th>
-                    <th scope="col" className="py-3 px-4 font-normal"><span className="sr-only">Open</span></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--color-border-subtle)]">
-                  {items.map((item) => (
-                    <tr key={item.reconciliation_id} className="hover:bg-[var(--color-surface-subtle)] transition-colors">
-                      <td className="py-3 px-4 max-w-[22rem]">
-                        <Link href={`/reconciliation/${item.reconciliation_id}`} className="block min-w-0">
-                          <span className="block font-medium text-[var(--color-ink)] truncate" title={item.bank_filename}>{item.bank_filename}</span>
-                          <span className="block mt-0.5 text-xs text-[var(--color-text-muted)] truncate" title={item.ledger_filename}>vs {item.ledger_filename}</span>
-                        </Link>
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap text-[var(--color-text-secondary)]">
-                        {new Date(item.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                      </td>
-                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.pages}</td>
-                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.matched ?? '—'}</td>
-                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.unmatched_bank ?? '—'}</td>
-                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.unmatched_ledger ?? '—'}</td>
-                      <td className="py-3 px-4 whitespace-nowrap"><StatusCell item={item} /></td>
-                      <td className="py-3 px-4 text-right">
-                        <Link
-                          href={`/reconciliation/${item.reconciliation_id}`}
-                          className="link inline-flex items-center gap-0.5 min-h-[44px] text-[13px]"
-                        >
-                          Open <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
-                        </Link>
-                      </td>
+            <>
+              {/* Phones and tablets: one tappable row per reconciliation, no sideways scrolling. */}
+              <ul className="md:hidden divide-y divide-[var(--color-border-subtle)]">
+                {items.map((item) => (
+                  <li key={item.reconciliation_id}>
+                    <Link
+                      href={`/reconciliation/${item.reconciliation_id}`}
+                      className="flex items-start gap-3 px-4 py-4 hover:bg-[var(--color-surface-subtle)] transition-colors"
+                    >
+                      <div className="min-w-0 flex-1 space-y-2.5">
+                        <FilesCell item={item} />
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[var(--color-text-muted)] tabular-nums">
+                          <StatusCell item={item} />
+                          <span>{formatDate(item.created_at)}</span>
+                          <span>{item.pages} page{item.pages === 1 ? '' : 's'}</span>
+                          {item.summary && <span>{item.summary.matched} matched</span>}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-text-muted)]" aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)]">
+                    <tr className="text-left text-[13px] text-[var(--color-text-muted)]">
+                      <th scope="col" className="py-3 px-5 font-normal">Files</th>
+                      <th scope="col" className="py-3 px-4 font-normal">Date</th>
+                      <th scope="col" className="py-3 px-4 font-normal text-right">Pages</th>
+                      <th scope="col" className="py-3 px-4 font-normal text-right">Matched</th>
+                      <th scope="col" className="py-3 px-4 font-normal text-right">Bank only</th>
+                      <th scope="col" className="py-3 px-4 font-normal text-right">Ledger only</th>
+                      <th scope="col" className="py-3 px-4 font-normal">Status</th>
+                      <th scope="col" className="py-3 px-5 font-normal"><span className="sr-only">Open</span></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-border-subtle)]">
+                    {items.map((item) => (
+                      <tr key={item.reconciliation_id} className="group relative hover:bg-[var(--color-surface-subtle)] transition-colors">
+                        <td className="py-3.5 px-5 max-w-[22rem]">
+                          <FilesCell item={item} />
+                        </td>
+                        <td className="py-3.5 px-4 whitespace-nowrap text-[var(--color-text-secondary)]">{formatDate(item.created_at)}</td>
+                        <td className="py-3.5 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.pages}</td>
+                        <td className="py-3.5 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.matched ?? '—'}</td>
+                        <td className="py-3.5 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.unmatched_bank ?? '—'}</td>
+                        <td className="py-3.5 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.unmatched_ledger ?? '—'}</td>
+                        <td className="py-3.5 px-4 whitespace-nowrap"><StatusCell item={item} /></td>
+                        <td className="py-3.5 px-5 text-right">
+                          {/* The link's ::after covers the row, so the whole row opens the report. */}
+                          <Link
+                            href={`/reconciliation/${item.reconciliation_id}`}
+                            className="inline-flex items-center gap-0.5 min-h-[44px] text-[13px] font-medium text-[var(--color-brand-dark)] after:absolute after:inset-0 after:content-['']"
+                            aria-label={`Open reconciliation of ${item.bank_filename}`}
+                          >
+                            Open <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
 
           {pageCount > 1 && (
-            <div className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center justify-between gap-3 text-[13px]">
+            <div className="px-4 sm:px-5 py-2.5 border-t border-[var(--color-border)] flex items-center justify-between gap-3 text-[13px]">
               <span className="text-[var(--color-text-muted)] tabular-nums">Page {page} of {pageCount}</span>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setPage((p) => p - 1)} disabled={page <= 1 || isLoading} className="btn-brand-secondary !min-h-[44px] sm:!min-h-[32px] !px-4 !text-[13px]">

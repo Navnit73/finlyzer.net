@@ -10,9 +10,9 @@ export default function WorkspacePage() {
   return (
     <div className="w-full space-y-8 pb-16">
       <header className="space-y-1.5">
-        <h1 className="type-title">OCR Studio &amp; Convert</h1>
-        <p className="text-[15px] text-[var(--color-text-secondary)]">
-          Upload bank statements, invoices, or receipts and export to Excel, CSV, QBO, OFX, or QIF.
+        <h1 className="type-title">Convert documents</h1>
+        <p className="text-[15px] text-[var(--color-text-secondary)] max-w-2xl">
+          Upload bank statements, invoices or receipts and export to Excel, CSV, QBO, OFX or QIF. Pages are taken from your credits.
         </p>
       </header>
 

@@ -468,10 +468,17 @@ export default function ReconciliationUploader({
             <ShieldCheck className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
             <span>Encrypted upload (HTTPS)</span>
           </li>
-          <li className="flex items-center gap-1.5">
-            <Trash2 className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
-            <span>Guest reports deleted after {RECONCILIATION_GUEST_RETENTION_DAYS} days</span>
-          </li>
+          {isLoggedIn ? (
+            <li className="flex items-center gap-1.5">
+              <FileText className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+              <span>Reports saved to your account</span>
+            </li>
+          ) : (
+            <li className="flex items-center gap-1.5">
+              <Trash2 className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+              <span>Guest reports deleted after {RECONCILIATION_GUEST_RETENTION_DAYS} days</span>
+            </li>
+          )}
           <li className="flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
             <span>Rule-based matching, not AI</span>

@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cancelJob } from '@/lib/ocr-api';
-import { errorResponse, successResponse } from '@/lib/api-utils';
+import { errorResponse, successResponse, validateAdminAccess } from '@/lib/api-utils';
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Cancelling/retrying any job is a SuperAdmin operation.
+    const auth = await validateAdminAccess(req);
+    if (!auth.authorized) {
+      return errorResponse(auth.reason || 'Access denied', 403, 'FORBIDDEN');
+    }
+
     const { id: jobId } = await params;
     if (!jobId || typeof jobId !== 'string' || !jobId.trim()) {
       return errorResponse('Valid Job ID is required', 400, 'BAD_REQUEST');

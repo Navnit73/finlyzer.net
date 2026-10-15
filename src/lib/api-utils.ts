@@ -47,20 +47,10 @@ export async function safeParseJson<T = Record<string, unknown>>(req: NextReques
 }
 
 /**
- * Validates whether the current request is authorized as an Admin.
- * Checks either:
- * 1. An active session with email listed in process.env.ADMIN_EMAILS
- * 2. An 'X-Admin-Key' or 'Authorization' header matching process.env.OCR_ADMIN_KEY
+ * Validates whether the current request is authorized as an Admin: the signed-in session
+ * must belong to SUPERADMIN_EMAIL (see lib/admin.ts). There is no header/API-key bypass.
  */
-export async function validateAdminAccess(req: NextRequest): Promise<{ authorized: boolean; reason?: string; userEmail?: string }> {
-  // The hardcoded fallback key is a dev convenience only; production requires OCR_ADMIN_KEY.
-  const adminKey = process.env.OCR_ADMIN_KEY || (process.env.NODE_ENV !== 'production' ? 'ocr_admin_secret_2026' : '');
-  const headerKey = req.headers.get('x-admin-key') || req.headers.get('X-Admin-Key');
-
-  if (adminKey && headerKey && headerKey === adminKey) {
-    return { authorized: true, userEmail: 'admin-api-key' };
-  }
-
+export async function validateAdminAccess(_req?: NextRequest): Promise<{ authorized: boolean; reason?: string; userEmail?: string }> {
   let session = null;
   try {
     session = await getServerSession(authOptions);

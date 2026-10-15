@@ -170,11 +170,11 @@ export default function AsyncJobProgressModal({
                 </div>
               </dl>
 
-              {/* Webhook & Background Note */}
+              {/* Background note */}
               <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed flex items-start gap-2">
                 <Clock className="w-4 h-4 text-[var(--color-text-muted)] shrink-0 mt-px" aria-hidden="true" />
                 <span>
-                  <span className="font-medium text-[var(--color-ink)]">Webhook Auto-Sync Active:</span> Large documents (100–200 pages) process safely in the background. You can hide this window and continue other work.
+                  <span className="font-medium text-[var(--color-ink)]">Runs in the background:</span> long documents keep processing if you hide this window, so you can continue other work.
                 </span>
               </p>
 

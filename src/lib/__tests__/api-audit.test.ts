@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { validateAdminAccess, errorResponse, successResponse, safeParseJson } from '../api-utils';
 import { NextRequest } from 'next/server';
+import { isAdminEmail } from '../admin';
 
 async function runApiAuditTests() {
   console.log('🚀 [Next.js API Backend Audit Suite] Starting verification...');
@@ -58,21 +59,17 @@ async function runApiAuditTests() {
 
   // 3. Admin Authorization & Security Guard Tests
   console.log('\n--- 3. Admin Authorization & Security Guards ---');
-  const adminSecret = 'ocr_admin_secret_2026';
-
-  // Test with valid X-Admin-Key header
+  // The X-Admin-Key header is no longer accepted: only the SuperAdmin's signed-in session is.
   const adminKeyReq = new NextRequest('http://localhost:3000/api/admin/stats', {
-    headers: { 'X-Admin-Key': adminSecret },
+    headers: { 'X-Admin-Key': 'ocr_admin_secret_2026' },
   });
   const adminKeyAuth = await validateAdminAccess(adminKeyReq);
-  assert(adminKeyAuth.authorized === true, 'validateAdminAccess authorizes valid X-Admin-Key header');
+  assert(adminKeyAuth.authorized === false, 'validateAdminAccess ignores X-Admin-Key header without session');
 
-  // Test with invalid X-Admin-Key header and no session
-  const invalidKeyReq = new NextRequest('http://localhost:3000/api/admin/stats', {
-    headers: { 'X-Admin-Key': 'wrong_secret_key' },
-  });
-  const invalidKeyAuth = await validateAdminAccess(invalidKeyReq);
-  assert(invalidKeyAuth.authorized === false, 'validateAdminAccess rejects invalid X-Admin-Key without session');
+  assert(isAdminEmail('navnitrai5389@gmail.com'), 'isAdminEmail allows the SuperAdmin email');
+  assert(isAdminEmail('  NavnitRai5389@Gmail.com '), 'isAdminEmail is case/whitespace-insensitive');
+  assert(!isAdminEmail('someone@example.com'), 'isAdminEmail rejects any other email');
+  assert(!isAdminEmail(null), 'isAdminEmail rejects a missing email');
 
   // 4. Razorpay HMAC Signature Verification Algorithm Tests
   console.log('\n--- 4. Payment HMAC-SHA256 Cryptographic Verification ---');

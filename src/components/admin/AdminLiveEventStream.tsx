@@ -9,13 +9,16 @@ export default function AdminLiveEventStream() {
   const [isPaused, setIsPaused] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [isConnected, setIsConnected] = useState(false);
+  const [lastHeartbeatAt, setLastHeartbeatAt] = useState<Date | null>(null);
+  const nextIdRef = useRef(0);
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   const addEvent = useCallback((eventItem: AdminSystemEvent) => {
+    const withId = { ...eventItem, _id: nextIdRef.current++ };
     setEvents((prev) => {
-      const updated = [eventItem, ...prev];
+      const updated = [withId, ...prev];
       return updated.slice(0, 200); // keep last 200 events
     });
   }, []);
@@ -39,7 +42,7 @@ export default function AdminLiveEventStream() {
         addEvent({
           event: 'admin.connected',
           timestamp: new Date().toISOString(),
-          message: 'Connected to Global Admin Live SSE Event Stream.',
+          message: 'Connected to the live event stream.',
         });
       };
 
@@ -79,13 +82,9 @@ export default function AdminLiveEventStream() {
         }
       });
 
-      es.addEventListener('admin.heartbeat', (e: MessageEvent) => {
-        try {
-          const data = JSON.parse(e.data);
-          addEvent({ ...data, event: 'admin.heartbeat' });
-        } catch {
-          // Ignore
-        }
+      // Heartbeats only prove the connection is alive; show them as a timestamp, not log rows.
+      es.addEventListener('admin.heartbeat', () => {
+        setLastHeartbeatAt(new Date());
       });
 
       es.onerror = () => {
@@ -116,18 +115,22 @@ export default function AdminLiveEventStream() {
     : 'bg-[var(--color-warning)] animate-pulse';
 
   const controlClass =
-    'inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] cursor-pointer';
+    'disabled:opacity-40 disabled:cursor-not-allowed inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] cursor-pointer';
 
   return (
     <div className="card-surface overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 py-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="text-sm font-medium text-[var(--color-ink)]">Live global event stream (SSE)</span>
-          <span className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]" role="status">
+          <span className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-secondary)]" role="status">
             <span className={`h-2 w-2 rounded-full ${statusDot}`} aria-hidden="true" />
-            <span>{statusLabel}</span>
+            <span className="font-medium text-[var(--color-ink)]">{statusLabel}</span>
           </span>
+          {isConnected && lastHeartbeatAt && (
+            <span className="hidden text-[12px] tabular-nums text-[var(--color-text-muted)] sm:inline">
+              Last heartbeat {lastHeartbeatAt.toLocaleTimeString()}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -158,6 +161,7 @@ export default function AdminLiveEventStream() {
           <button
             type="button"
             onClick={() => setEvents([])}
+            disabled={events.length === 0}
             aria-label="Clear stream logs"
             className={controlClass}
             title="Clear stream logs"
@@ -182,12 +186,16 @@ export default function AdminLiveEventStream() {
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
               <Radio className="h-5 w-5" aria-hidden="true" />
             </span>
-            <p className="text-[15px] font-semibold text-[var(--color-ink)]">Listening for real-time background OCR worker events…</p>
-            <p className="text-[13px] text-[var(--color-text-muted)]">Events appear live as workers process jobs</p>
+            <p className="text-[15px] font-semibold text-[var(--color-ink)]">
+              {isPaused ? 'Stream paused' : filterType !== 'all' && events.length > 0 ? 'No events of this type yet' : 'Waiting for events…'}
+            </p>
+            <p className="text-[13px] text-[var(--color-text-muted)]">
+              {isPaused ? 'Resume to keep receiving events.' : 'Job starts, progress and results appear here as workers run.'}
+            </p>
           </div>
         ) : (
           <ol className="divide-y divide-[var(--color-border)]">
-            {filteredEvents.map((evt, idx) => {
+            {filteredEvents.map((evt) => {
               const isCompleted = evt.event === 'ocr.job.completed';
               const isFailed = evt.event === 'ocr.job.failed';
               const isProgress = evt.event === 'ocr.job.progress';
@@ -205,7 +213,7 @@ export default function AdminLiveEventStream() {
 
               return (
                 <li
-                  key={idx}
+                  key={evt._id as number}
                   className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-0.5 px-4 py-2 sm:grid-cols-[88px_168px_1fr] sm:px-5"
                 >
                   <time className="tabular-nums text-[var(--color-text-muted)]" dateTime={evt.timestamp}>

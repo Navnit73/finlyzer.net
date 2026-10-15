@@ -2,8 +2,8 @@ import AdminDashboardView from '@/components/admin/AdminDashboardView';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'SuperAdmin System & Worker Monitoring — Finlyzers',
-  description: 'Real-time database metrics, background Celery worker telemetry, and global system event stream.',
+  title: 'System dashboard',
+  description: 'Job volume, worker health and processing queue.',
   robots: { index: false, follow: false },
 };
 

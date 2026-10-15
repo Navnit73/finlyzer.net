@@ -121,16 +121,18 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                 </Link>
               </li>
 
-              {/* SuperAdmin System Operations Link */}
-              <li>
-                <Link
-                  href="/superadmin"
-                  className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] w-full text-left cursor-pointer"
-                >
-                  <ShieldAlert className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
-                  <span>SuperAdmin Operations</span>
-                </Link>
-              </li>
+              {/* SuperAdmin link: only for the SuperAdmin account */}
+              {session?.user?.isAdmin && (
+                <li>
+                  <Link
+                    href="/superadmin"
+                    className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] w-full text-left cursor-pointer"
+                  >
+                    <ShieldAlert className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
+                    <span>SuperAdmin Operations</span>
+                  </Link>
+                </li>
+              )}
 
               {onOpenHistory && (
                 <li>

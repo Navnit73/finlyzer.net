@@ -22,22 +22,22 @@ const TABS: {
   {
     id: 'single',
     icon: Sparkles,
-    label: 'Single Document',
+    label: 'Single document',
     shortLabel: 'Single',
   },
   {
     id: 'long_doc',
     icon: Cpu,
-    label: 'Long Doc (100–200 Pages)',
-    shortLabel: 'Long Doc',
-    badge: 'Webhook',
+    label: 'Long document',
+    shortLabel: 'Long doc',
+    badge: '100–200 pages',
   },
   {
     id: 'batch',
     icon: Layers,
-    label: 'Bulk Batch',
+    label: 'Bulk upload',
     shortLabel: 'Bulk',
-    badge: 'Multi-file',
+    badge: 'Up to 50 files',
   },
 ];
 
@@ -103,11 +103,11 @@ export default function OcrWorkspace() {
           type="button"
           onClick={() => setIsHistoryDrawerOpen(true)}
           className="shrink-0 inline-flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[36px] min-w-[44px] px-3 sm:px-4 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
-          aria-label="Document History"
-          title="Document History"
+          aria-label="Document history"
+          title="Document history"
         >
           <History className="w-4 h-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Document History</span>
+          <span className="hidden sm:inline">History</span>
         </button>
       </div>
 
@@ -116,7 +116,6 @@ export default function OcrWorkspace() {
         <OcrUploader
           onExtractionComplete={handleExtractionComplete}
           onOpenBatchModal={() => setActiveTab('batch')}
-          onOpenLongDocModal={() => setActiveTab('long_doc')}
         />
       ) : activeTab === 'long_doc' ? (
         <AsyncDocumentProcessor />

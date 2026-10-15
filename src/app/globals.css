@@ -727,3 +727,19 @@ kbd,
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 }
+
+/* Printing an open receipt dialog prints only the receipt, not the app behind it. */
+@media print {
+  body:has(.receipt-print-root) > *:not(.receipt-print-root) {
+    display: none !important;
+  }
+  .receipt-print-root {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+  }
+  .receipt-print-root .surface-overlay {
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+}

@@ -1,8 +1,17 @@
 'use client';
 
 import React from 'react';
-import { Search, RotateCw, Eye, FileSpreadsheet, XCircle, FileText } from 'lucide-react';
-import { OCRJob } from '@/types/ocr';
+import { Search, RotateCw, Eye, FileSpreadsheet, XCircle, FileText, AlertCircle } from 'lucide-react';
+import { AdminStats, OCRJob } from '@/types/ocr';
+
+/** Time only for today's jobs; otherwise date + time so older rows aren't ambiguous. */
+function formatCreated(iso: string): string {
+  const d = new Date(iso);
+  const isToday = d.toDateString() === new Date().toDateString();
+  return isToday
+    ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 
 const STATUS_BADGE: Record<OCRJob['status'], string> = {
   completed: 'bg-[var(--color-success-soft)] text-[var(--color-success)]',
@@ -15,7 +24,7 @@ const STATUS_BADGE: Record<OCRJob['status'], string> = {
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]';
 
-const ICON_BUTTON = `inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)] cursor-pointer ${FOCUS_RING}`;
+const ICON_BUTTON = `inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)] cursor-pointer disabled:cursor-wait disabled:opacity-40 ${FOCUS_RING}`;
 
 const TOOL_BUTTON = `inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-subtle)] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer ${FOCUS_RING}`;
 
@@ -24,11 +33,14 @@ const TH = 'sticky top-0 z-10 bg-[var(--color-surface)] px-4 py-2.5 text-[13px] 
 interface AdminJobsTableProps {
   jobs: OCRJob[];
   total: number;
+  stats?: AdminStats | null;
   page: number;
   pageSize: number;
   activeStatus: string;
   searchQuery: string;
   isLoading: boolean;
+  hasError?: boolean;
+  busyJobIds?: Set<string>;
   onPageChange: (page: number) => void;
   onStatusChange: (status: string) => void;
   onSearchChange: (query: string) => void;
@@ -41,11 +53,14 @@ interface AdminJobsTableProps {
 export default function AdminJobsTable({
   jobs,
   total,
+  stats,
   page,
   pageSize,
   activeStatus,
   searchQuery,
   isLoading,
+  hasError = false,
+  busyJobIds,
   onPageChange,
   onStatusChange,
   onSearchChange,
@@ -56,13 +71,13 @@ export default function AdminJobsTable({
 }: AdminJobsTableProps) {
   const totalPages = Math.ceil(total / pageSize) || 1;
 
-  const STATUS_TABS = [
-    { id: 'all', label: 'All jobs' },
-    { id: 'processing', label: 'Processing' },
-    { id: 'queued', label: 'Queued' },
-    { id: 'completed', label: 'Completed' },
-    { id: 'failed', label: 'Failed' },
-    { id: 'cancelled', label: 'Cancelled' },
+  const STATUS_TABS: { id: string; label: string; count?: number }[] = [
+    { id: 'all', label: 'All', count: stats?.total_jobs },
+    { id: 'processing', label: 'Processing', count: stats?.processing_jobs },
+    { id: 'queued', label: 'Queued', count: stats?.queued_jobs },
+    { id: 'completed', label: 'Completed', count: stats?.completed_jobs },
+    { id: 'failed', label: 'Failed', count: stats?.failed_jobs },
+    { id: 'cancelled', label: 'Cancelled', count: stats?.cancelled_jobs },
   ];
 
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -73,17 +88,18 @@ export default function AdminJobsTable({
       {/* Toolbar */}
       <div className="space-y-4 border-b border-[var(--color-border)] p-4 sm:p-5">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h3 className="text-[15px] font-semibold text-[var(--color-ink)]">System background tasks &amp; jobs</h3>
-            <p className="text-[13px] text-[var(--color-text-muted)]">
-              <span className="tabular-nums">{total.toLocaleString()}</span> total background jobs recorded in MongoDB
-            </p>
-          </div>
-
-          <button type="button" onClick={onRefresh} disabled={isLoading} className={`${TOOL_BUTTON} self-start sm:self-auto`}>
-            <RotateCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
-            <span>Refresh jobs</span>
-          </button>
+          <p className="text-[13px] text-[var(--color-text-muted)]" aria-live="polite">
+            {isLoading ? (
+              'Loading jobs…'
+            ) : (
+              <>
+                <span className="tabular-nums text-[var(--color-ink)]">{total.toLocaleString()}</span>{' '}
+                {total === 1 ? 'job' : 'jobs'}
+                {activeStatus !== 'all' && ` · ${activeStatus}`}
+                {searchQuery && ` matching “${searchQuery}”`}
+              </>
+            )}
+          </p>
         </div>
 
         {/* Status filter & search */}
@@ -109,6 +125,15 @@ export default function AdminJobsTable({
                     }`}
                   >
                     {tab.label}
+                    {typeof tab.count === 'number' && (
+                      <span
+                        className={`ml-1.5 tabular-nums ${
+                          tab.id === 'failed' && tab.count > 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-muted)]'
+                        }`}
+                      >
+                        {tab.count.toLocaleString()}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -164,14 +189,40 @@ export default function AdminJobsTable({
                   <td colSpan={7}>Loading background jobs...</td>
                 </tr>
               </>
+            ) : hasError && jobs.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-14 text-center">
+                  <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)]">
+                    <AlertCircle className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <p className="text-[15px] font-semibold text-[var(--color-ink)]">Couldn’t load jobs</p>
+                  <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">The jobs API didn’t respond. It will retry automatically.</p>
+                  <button type="button" onClick={onRefresh} className={`${TOOL_BUTTON} mt-4`}>
+                    <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />
+                    Try now
+                  </button>
+                </td>
+              </tr>
             ) : jobs.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-14 text-center">
                   <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)]">
                     <FileText className="h-5 w-5" aria-hidden="true" />
                   </span>
-                  <p className="text-[15px] font-semibold text-[var(--color-ink)]">No background jobs match the current filter.</p>
+                  <p className="text-[15px] font-semibold text-[var(--color-ink)]">No jobs match</p>
                   <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">Try a different status or search term.</p>
+                  {(activeStatus !== 'all' || searchQuery) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onStatusChange('all');
+                        onSearchChange('');
+                      }}
+                      className={`${TOOL_BUTTON} mt-4`}
+                    >
+                      Clear filters
+                    </button>
+                  )}
                 </td>
               </tr>
             ) : (
@@ -180,10 +231,16 @@ export default function AdminJobsTable({
                 const isProcessing = job.status === 'processing';
                 const isFailed = job.status === 'failed';
                 const docId = job.document_id || job.result?.id;
-                const filename = job.metadata?.filename || 'statement.pdf';
+                const filename = job.metadata?.filename;
+                const pages = job.total_pages || job.result?.metadata?.pages;
+                const isBusy = busyJobIds?.has(job.job_id) ?? false;
 
                 return (
-                  <tr key={job.job_id} className="align-top transition-colors hover:bg-[var(--color-surface-subtle)]">
+                  <tr
+                    key={job.job_id}
+                    onClick={() => onInspectJob(job)}
+                    className={`align-top transition-colors hover:bg-[var(--color-surface-subtle)] cursor-pointer ${isBusy ? 'opacity-60' : ''}`}
+                  >
                     {/* Job ID */}
                     <th scope="row" className="py-3 pl-4 pr-4 text-left font-normal sm:pl-5">
                       <p className="max-w-[180px] truncate font-mono text-[12px] text-[var(--color-text-secondary)]" title={job.job_id}>
@@ -198,14 +255,18 @@ export default function AdminJobsTable({
 
                     {/* Filename */}
                     <td className="px-4 py-3">
-                      <p className="max-w-[220px] truncate text-[var(--color-ink)]" title={filename}>
-                        {filename}
-                      </p>
+                      {filename ? (
+                        <p className="max-w-[220px] truncate text-[var(--color-ink)]" title={filename}>
+                          {filename}
+                        </p>
+                      ) : (
+                        <p className="text-[var(--color-text-muted)]">—</p>
+                      )}
                     </td>
 
                     {/* Pages */}
                     <td className="px-4 py-3 text-right tabular-nums text-[var(--color-ink)]">
-                      {job.total_pages || job.result?.metadata?.pages || 1}
+                      {pages ?? '—'}
                     </td>
 
                     {/* Status & progress */}
@@ -257,17 +318,16 @@ export default function AdminJobsTable({
                     {/* Created at */}
                     <td className="whitespace-nowrap px-4 py-3 text-right text-[13px] tabular-nums text-[var(--color-text-muted)]">
                       <time dateTime={job.created_at} title={new Date(job.created_at).toLocaleString()}>
-                        {new Date(job.created_at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
+                        {formatCreated(job.created_at)}
                       </time>
                     </td>
 
                     {/* Actions */}
-                    <td className="py-2 pl-4 pr-3 text-right sm:pr-4">
+                    <td className="py-2 pl-4 pr-3 text-right sm:pr-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-0.5">
+                        {isBusy && (
+                          <span className="loading loading-spinner mr-1 h-3.5 w-3.5 text-[var(--color-text-muted)]" aria-label="Working" />
+                        )}
                         <button
                           type="button"
                           onClick={() => onInspectJob(job)}
@@ -282,6 +342,7 @@ export default function AdminJobsTable({
                           <button
                             type="button"
                             onClick={() => onCancelJob(job.job_id)}
+                            disabled={isBusy}
                             className={`${ICON_BUTTON} text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] hover:text-[var(--color-danger)]`}
                             title="Cancel job"
                             aria-label={`Cancel job ${job.job_id}`}
@@ -294,6 +355,7 @@ export default function AdminJobsTable({
                           <button
                             type="button"
                             onClick={() => onRetryJob(job.job_id)}
+                            disabled={isBusy}
                             className={`${ICON_BUTTON} text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-dark)]`}
                             title="Retry job"
                             aria-label={`Retry job ${job.job_id}`}

@@ -2,12 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import {
-  Lock,
-  Layers,
-  AlertCircle,
-  Upload,
-} from 'lucide-react';
+import { Lock, AlertCircle, UploadCloud, ArrowRight } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
 import AuthModal from '../auth/AuthModal';
@@ -16,18 +11,15 @@ import { saveToBrowserHistory } from '@/lib/browser-history';
 
 import { useOCRJob } from '@/hooks/useOCRJob';
 import AsyncJobProgressModal from './AsyncJobProgressModal';
-import { Cpu } from 'lucide-react';
 
 interface OcrUploaderProps {
   onExtractionComplete: (data: ExtractionResponse) => void;
   onOpenBatchModal: () => void;
-  onOpenLongDocModal?: () => void;
 }
 
 export default function OcrUploader({
   onExtractionComplete,
   onOpenBatchModal,
-  onOpenLongDocModal,
 }: OcrUploaderProps) {
   const { data: session } = useSession();
   const {
@@ -252,10 +244,10 @@ export default function OcrUploader({
           role="button"
           tabIndex={isProcessing ? -1 : 0}
           aria-label="Upload Bank Statement or PDF"
-          className={`relative border border-dashed rounded-2xl px-4 py-10 sm:px-10 sm:py-14 text-center transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20 ${
+          className={`relative border-2 border-dashed rounded-2xl px-4 py-10 sm:px-10 sm:py-14 text-center transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20 ${
             isDragging
               ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
-              : 'border-[var(--color-border-hover)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)]'
+              : 'border-[var(--color-info-border)] bg-[var(--color-brand-soft)] hover:border-[var(--color-brand)]'
           } ${isProcessing ? 'pointer-events-none' : ''}`}
         >
           <input
@@ -301,35 +293,33 @@ export default function OcrUploader({
           ) : (
             /* Default Dropzone Content */
             <div className="space-y-5 max-w-lg mx-auto">
-              <span className="mx-auto w-11 h-11 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center" aria-hidden="true">
-                <Upload className="w-5 h-5 text-[var(--color-ink)]" />
+              <span className="mx-auto w-14 h-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-info-border)] flex items-center justify-center" aria-hidden="true">
+                <UploadCloud className="w-7 h-7 text-[var(--color-brand)]" />
               </span>
               <div className="space-y-2">
                 <h3 className="text-xl sm:text-2xl font-semibold text-[var(--color-ink)] tracking-tight">
-                  Upload Bank Statement or PDF
+                  Drop your document here, or browse
                 </h3>
                 <p className="text-[15px] text-[var(--color-text-secondary)] leading-relaxed">
-                  Drag &amp; drop your bank statement, invoice, or receipt here, or{' '}
-                  <span className="text-[var(--color-brand-dark)] font-medium">
-                    browse files
-                  </span>
+                  Bank statements, invoices and receipts. Long statements switch to background processing automatically.
                 </p>
               </div>
 
-              <span className="btn-brand-primary pointer-events-none" aria-hidden="true">
-                Choose File
+              <span className="btn-brand-primary !min-h-[50px] !px-8 !text-[17px] pointer-events-none" aria-hidden="true">
+                <span>Choose File</span>
+                <ArrowRight className="w-5 h-5" />
               </span>
 
               {/* Supported formats */}
               <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] text-[var(--color-text-muted)]">
-                <span>PDF (Up to 200 Pages)</span>
+                <span>PDF up to 200 pages</span>
                 <span aria-hidden="true">&middot;</span>
                 <span>PNG &bull; JPG &bull; TIFF</span>
                 <span aria-hidden="true">&middot;</span>
                 <span>CSV &bull; XLSX</span>
                 <span aria-hidden="true">&middot;</span>
                 <span className="inline-flex items-center gap-1">
-                  <Lock className="w-3 h-3" aria-hidden="true" /> Password Protected PDFs
+                  <Lock className="w-3 h-3" aria-hidden="true" /> Password-protected PDFs
                 </span>
               </p>
             </div>
@@ -347,28 +337,6 @@ export default function OcrUploader({
           </div>
         )}
 
-        {/* Action CTAs: Bulk Batch & Long Document OCR */}
-        <div className="hidden sm:flex flex-wrap items-center justify-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenBatchModal}
-            className="inline-flex items-center gap-2 min-h-[36px] px-4 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
-          >
-            <Layers className="w-4 h-4" aria-hidden="true" />
-            <span>Bulk Batch Processing</span>
-          </button>
-
-          {onOpenLongDocModal && (
-            <button
-              type="button"
-              onClick={onOpenLongDocModal}
-              className="inline-flex items-center gap-2 min-h-[36px] px-4 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
-            >
-              <Cpu className="w-4 h-4" aria-hidden="true" />
-              <span>Long Doc OCR (100–200 Pages)</span>
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Upload Configuration & Password Popup */}
