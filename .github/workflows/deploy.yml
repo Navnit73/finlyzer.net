@@ -1,4 +1,3 @@
-
 name: Deploy Finlyzer Frontend
 
 on:
@@ -17,33 +16,31 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
     steps:
-      - name: Deploy over SSH
+      - name: Install password-based SSH client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Deploy to VPS
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
           COMMIT_SHA: ${{ github.sha }}
-        shell: bash
         run: |
           set -euo pipefail
 
-          install -d -m 700 "$HOME/.ssh"
-          printf '%s\n' "$DEPLOY_SSH_KEY" \
-            > "$HOME/.ssh/id_ed25519"
-          chmod 600 "$HOME/.ssh/id_ed25519"
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_PASSWORD"
 
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" \
-            > "$HOME/.ssh/known_hosts"
-          chmod 600 "$HOME/.ssh/known_hosts"
+          export SSHPASS="$DEPLOY_PASSWORD"
 
-          ssh \
-            -i "$HOME/.ssh/id_ed25519" \
-            -o BatchMode=yes \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            -o ConnectTimeout=15 \
+          sshpass -e ssh \
+            -o StrictHostKeyChecking=accept-new \
+            -o PreferredAuthentications=password \
+            -o PubkeyAuthentication=no \
+            -o NumberOfPasswordPrompts=1 \
             "deploy@$DEPLOY_HOST" \
-            "sudo /usr/local/sbin/deploy-finlyzer-frontend '$COMMIT_SHA'"
+            "sudo /usr/local/sbin/deploy-finlyzer-frontend $COMMIT_SHA"
+
+          unset SSHPASS
