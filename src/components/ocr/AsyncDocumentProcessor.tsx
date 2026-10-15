@@ -4,10 +4,8 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
-  Sparkles,
   Layers,
   Lock,
-  Cpu,
   ArrowRight,
   FileSpreadsheet,
   RotateCw,
@@ -16,6 +14,8 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
+  Loader2,
+  X,
 } from 'lucide-react';
 import { useOCRJob } from '@/hooks/useOCRJob';
 import { useActiveJobs } from '@/context/ActiveJobsContext';
@@ -89,125 +89,127 @@ export default function AsyncDocumentProcessor() {
   const activeProgress = isUploading ? jobState.uploadProgress : jobState.processingProgress;
   const docId = jobState.documentId || jobState.result?.id;
 
+  const stats = [
+    {
+      icon: Layers,
+      label: 'Extracted Pages',
+      value: (
+        <>
+          {jobState.processedPages} <span className="text-[13px] font-normal text-[var(--color-text-muted)]">/ {jobState.totalPages}</span>
+        </>
+      ),
+    },
+    { icon: Activity, label: 'Stage', value: <span className="text-sm font-medium capitalize">{jobState.currentStage.replace(/_/g, ' ')}</span> },
+    { icon: Clock, label: 'Sync Protocol', value: <span className="text-sm font-medium">SSE &amp; HMAC Webhook</span> },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Introduction Banner */}
-      <div className="p-6 rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-ink)] shrink-0">
-            <Cpu className="w-6 h-6 text-[var(--color-brand-hover)]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-black text-[var(--color-ink)]">
-                Long Document OCR &amp; Webhook Engine
-              </h3>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] uppercase tracking-wider">
-                100–200 Pages
-              </span>
-            </div>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-              Processes massive multi-month bank statements and archives with background Celery workers and signed HMAC webhooks.
-            </p>
-          </div>
+      {/* Introduction */}
+      <div className="space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="type-headline">
+            Long Document OCR &amp; Webhook Engine
+          </h3>
+          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]">
+            100–200 Pages
+          </span>
         </div>
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Processes massive multi-month bank statements and archives with background Celery workers and signed HMAC webhooks.
+        </p>
       </div>
 
-      {/* In-Flight Active Background Jobs Banner */}
+      {/* In-Flight Active Background Jobs */}
       {!isBusy && activeJobs.length > 0 && (
-        <div className="p-5 rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-brand)] shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0">
-                <Cpu className="w-4 h-4 animate-spin" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-[var(--color-ink)] uppercase tracking-wider flex items-center gap-2">
-                  <span>Active Background Processing ({activeJobs.length})</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-hover)]">
-                    In Progress
-                  </span>
-                </h4>
-                <p className="text-[11px] text-[var(--color-text-secondary)]">
-                  Your files are actively being processed by background Celery workers.
-                </p>
-              </div>
+        <section aria-labelledby="active-bg-jobs-title" className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-start gap-2.5">
+            <Loader2 className="w-4 h-4 mt-0.5 animate-spin text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
+            <div className="min-w-0">
+              <h4 id="active-bg-jobs-title" className="text-[15px] font-semibold text-[var(--color-ink)] flex flex-wrap items-center gap-2">
+                <span>Active Background Processing ({activeJobs.length})</span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--color-info-soft)] text-[var(--color-info)]">
+                  In Progress
+                </span>
+              </h4>
+              <p className="text-[13px] text-[var(--color-text-muted)]">
+                Your files are actively being processed by background Celery workers.
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          <ul className="divide-y divide-[var(--color-border-subtle)]">
             {activeJobs.map((job) => {
               const isDone = job.status === 'completed';
               const isErr = job.status === 'failed';
               const targetDocId = job.documentId || job.result?.id || job.jobId;
 
               return (
-                <div
-                  key={job.jobId}
-                  className={`p-3.5 rounded-xl border text-xs space-y-2 ${
-                    isDone
-                      ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50'
-                      : isErr
-                      ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-border)]'
-                      : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
-                  }`}
-                >
+                <li key={job.jobId} className="px-5 py-3.5 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-bold text-[var(--color-ink)] truncate">{job.filename}</p>
-                      <p className="text-[10px] text-[var(--color-text-secondary)]">
+                      <p className="text-sm font-medium text-[var(--color-ink)] truncate">{job.filename}</p>
+                      <p className={`text-[13px] ${isErr ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-muted)]'}`}>
                         {job.message || `Extracting page ${job.processedPages} of ${job.totalPages}...`}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-mono font-bold text-[11px] text-[var(--color-ink)]">
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-[13px] tabular-nums text-[var(--color-text-secondary)]">
                         {job.processingProgress}%
                       </span>
                       <button
                         type="button"
                         onClick={() => removeJob(job.jobId)}
-                        className="text-[var(--color-text-muted)] hover:text-red-600 px-1"
+                        className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
                         title="Dismiss"
+                        aria-label={`Dismiss processing job for ${job.filename}`}
                       >
-                        &times;
+                        <X className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-valuenow={job.processingProgress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Processing progress for ${job.filename}`}
+                    className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
+                  >
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
-                        isDone ? 'bg-emerald-500' : 'bg-[var(--color-brand)]'
+                        isErr ? 'bg-[var(--color-danger)]' : isDone ? 'bg-[var(--color-success)]' : 'bg-[var(--color-brand)]'
                       }`}
                       style={{ width: `${job.processingProgress}%` }}
                     />
                   </div>
 
                   {isDone && (
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Ready
+                    <div className="flex items-center justify-between gap-3 pt-0.5">
+                      <span className="text-[13px] text-[var(--color-success)] flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Ready
                       </span>
                       <button
                         type="button"
                         onClick={() => router.push(`/document/${targetDocId}`)}
-                        className="btn btn-xs rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center gap-1 px-2.5 shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-1 min-h-[36px] px-3 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
                       >
                         <span>Open Document</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                     </div>
                   )}
-                </div>
+                </li>
               );
             })}
-          </div>
-        </div>
+          </ul>
+        </section>
       )}
 
       {/* Main Upload / State Container */}
       {!isBusy && !isCompleted && !isFailed ? (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -216,10 +218,19 @@ export default function AsyncDocumentProcessor() {
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all cursor-pointer bg-[var(--color-surface)] ${
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Upload a 100–200 page bank statement"
+            className={`border border-dashed rounded-2xl px-4 py-10 sm:p-12 text-center transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20 ${
               isDragging
-                ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]/40'
-                : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-subtle)]'
+                ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
+                : 'border-[var(--color-border-hover)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)]'
             }`}
           >
             <input
@@ -235,25 +246,25 @@ export default function AsyncDocumentProcessor() {
             />
 
             <div className="space-y-4 max-w-md mx-auto">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)]">
-                <FileText className="w-7 h-7 text-[var(--color-brand-hover)]" />
-              </div>
+              <span className="mx-auto w-11 h-11 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center" aria-hidden="true">
+                <FileText className="w-5 h-5 text-[var(--color-ink)]" />
+              </span>
 
               {selectedFile ? (
                 <div className="space-y-1">
-                  <p className="text-sm font-black text-[var(--color-ink)] truncate">
+                  <p className="text-[15px] font-medium text-[var(--color-ink)] truncate">
                     {selectedFile.name}
                   </p>
-                  <p className="text-xs text-[var(--color-brand-hover)] font-bold">
-                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB &bull; ~{estimatedPages} Pages detected
+                  <p className="text-[13px] text-[var(--color-text-muted)] tabular-nums">
+                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB &middot; ~{estimatedPages} Pages detected
                   </p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <h4 className="text-xl font-black text-[var(--color-ink)]">
+                  <h4 className="text-xl font-semibold tracking-tight text-[var(--color-ink)]">
                     Drop 100–200 Page Bank Statement Here
                   </h4>
-                  <p className="text-xs text-[var(--color-text-secondary)]">
+                  <p className="text-sm text-[var(--color-text-secondary)]">
                     Supports high-volume PDFs, encrypted statements, and multi-year financial ledgers.
                   </p>
                 </div>
@@ -263,16 +274,17 @@ export default function AsyncDocumentProcessor() {
 
           {/* Configuration Form Controls */}
           {selectedFile && (
-            <div className="p-5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-4">
+            <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[var(--color-ink)] mb-1.5">
+                  <label htmlFor="async-doc-type" className="block text-[13px] font-medium text-[var(--color-ink)] mb-1.5">
                     Document Classification
                   </label>
                   <select
+                    id="async-doc-type"
                     value={documentType}
                     onChange={(e) => setDocumentType(e.target.value as DocumentType)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+                    className="w-full h-11 px-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[15px] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors cursor-pointer"
                   >
                     <option value="bank_statement">Bank Statement (100–200 Pages)</option>
                     <option value="invoice">Invoice / Accounts Payable</option>
@@ -282,13 +294,14 @@ export default function AsyncDocumentProcessor() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[var(--color-ink)] mb-1.5">
+                  <label htmlFor="async-language" className="block text-[13px] font-medium text-[var(--color-ink)] mb-1.5">
                     Language &amp; Region
                   </label>
                   <select
+                    id="async-language"
                     value={language}
                     onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+                    className="w-full h-11 px-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[15px] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors cursor-pointer"
                   >
                     <option value="en">English (Global Financial Standard)</option>
                     <option value="hi">Hindi (हिंदी)</option>
@@ -300,28 +313,29 @@ export default function AsyncDocumentProcessor() {
               </div>
 
               {isEncrypted && (
-                <div className="pt-2">
-                  <label className="block text-xs font-bold text-[var(--color-ink)] mb-1.5 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-amber-500" />
+                <div>
+                  <label htmlFor="async-password" className="block text-[13px] font-medium text-[var(--color-ink)] mb-1.5 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
                     <span>PDF Password</span>
                   </label>
                   <input
+                    id="async-password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter document password..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+                    className="w-full h-11 px-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[15px] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors placeholder:text-[var(--color-text-muted)]"
                   />
                 </div>
               )}
 
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-1">
                 <button
                   type="submit"
-                  className="btn btn-brand-primary px-8 py-3 text-xs font-bold flex items-center gap-2 cursor-pointer shadow-xs"
+                  className="btn-brand-primary w-full sm:w-auto"
                 >
-                  <Sparkles className="w-4 h-4" />
                   <span>Queue Background OCR Task</span>
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -329,38 +343,34 @@ export default function AsyncDocumentProcessor() {
         </form>
       ) : isBusy ? (
         /* Live Processing View */
-        <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-[var(--color-brand-hover)] animate-pulse" />
-              </div>
-              <div>
-                <h4 className="text-base font-black text-[var(--color-ink)]">
-                  {jobState.message || 'Processing 100–200 page financial statement...'}
-                </h4>
-                <p className="text-xs text-[var(--color-text-secondary)]">
-                  Job ID: {jobState.jobId || 'Allocating worker'} &bull; Document ID: {jobState.documentId || '—'}
-                </p>
-              </div>
+        <div className="p-5 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="min-w-0 space-y-0.5">
+              <h4 className="text-[17px] font-semibold text-[var(--color-ink)]" aria-live="polite">
+                {jobState.message || 'Processing 100–200 page financial statement...'}
+              </h4>
+              <p className="text-[13px] text-[var(--color-text-muted)] break-all">
+                Job ID: {jobState.jobId || 'Allocating worker'} &middot; Document ID: {jobState.documentId || '—'}
+              </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   resetJob();
                   setSelectedFile(null);
                 }}
-                className="btn btn-sm btn-brand-secondary text-xs font-bold flex items-center gap-1.5 border border-[var(--color-border)] cursor-pointer"
+                className="btn-brand-secondary !min-h-[40px] !px-4 !text-sm"
                 title="Process another document while this job runs in the background"
               >
                 <span>Upload Another Doc</span>
               </button>
 
               <button
+                type="button"
                 onClick={cancelJob}
-                className="px-3.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition cursor-pointer"
+                className="min-h-[40px] px-4 rounded-full text-sm font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer"
               >
                 Cancel Job
               </button>
@@ -369,11 +379,18 @@ export default function AsyncDocumentProcessor() {
 
           {/* Progress Bar */}
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-[var(--color-ink)]">
+            <div className="flex justify-between text-[13px] text-[var(--color-text-secondary)]">
               <span>{isUploading ? 'Upload Progress' : 'Extraction Progress'}</span>
-              <span>{activeProgress}%</span>
+              <span className="tabular-nums text-[var(--color-ink)] font-medium">{activeProgress}%</span>
             </div>
-            <div className="w-full bg-[var(--color-surface-subtle)] h-3 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+            <div
+              role="progressbar"
+              aria-valuenow={activeProgress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={isUploading ? 'Upload Progress' : 'Extraction Progress'}
+              className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
+            >
               <div
                 className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${activeProgress}%` }}
@@ -381,81 +398,60 @@ export default function AsyncDocumentProcessor() {
             </div>
           </div>
 
-          {/* Progress Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
-                <Layers className="w-3.5 h-3.5" />
-                <span>Extracted Pages</span>
+          {/* Progress details */}
+          <dl className="grid grid-cols-1 sm:grid-cols-3 border-t border-[var(--color-border-subtle)] sm:divide-x divide-[var(--color-border-subtle)]">
+            {stats.map(({ icon: StatIcon, label, value }) => (
+              <div key={label} className="pt-3 sm:px-4 first:sm:pl-0 min-w-0">
+                <dt className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
+                  <StatIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                  {label}
+                </dt>
+                <dd className="mt-0.5 text-[17px] font-semibold text-[var(--color-ink)] tabular-nums truncate">{value}</dd>
               </div>
-              <p className="text-base font-black text-[var(--color-ink)]">
-                {jobState.processedPages} <span className="text-xs text-[var(--color-text-secondary)]">/ {jobState.totalPages}</span>
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
-                <Activity className="w-3.5 h-3.5" />
-                <span>Stage</span>
-              </div>
-              <p className="text-xs font-bold text-[var(--color-brand-hover)] truncate uppercase">
-                {jobState.currentStage.replace(/_/g, ' ')}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] col-span-2 sm:col-span-1">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
-                <Clock className="w-3.5 h-3.5" />
-                <span>Sync Protocol</span>
-              </div>
-              <p className="text-xs font-bold text-emerald-600 truncate">
-                SSE &amp; HMAC Webhook
-              </p>
-            </div>
-          </div>
+            ))}
+          </dl>
         </div>
       ) : isCompleted ? (
         /* Completed View */
-        <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-6">
-          <div className="p-5 rounded-2xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white/90 border border-[var(--color-brand)]/60 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-              <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-hover)]" />
-            </div>
+        <div className="p-5 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-5">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[var(--color-success)] shrink-0 mt-0.5" aria-hidden="true" />
             <div className="space-y-1">
-              <h4 className="text-base font-extrabold text-[var(--color-ink)]">
+              <h4 className="text-[17px] font-semibold text-[var(--color-ink)]">
                 Large Document Extracted Successfully!
               </h4>
-              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
                 All {jobState.totalPages || jobState.result?.metadata?.pages || 1} pages have been converted into structured accounting transactions.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex flex-col sm:flex-row gap-2.5">
             {docId && (
               <button
+                type="button"
                 onClick={() => router.push(`/document/${docId}`)}
-                className="w-full sm:flex-1 btn-brand-primary !min-h-[46px] !h-[46px] !px-5 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer transition-transform active:scale-95"
+                className="btn-brand-primary w-full sm:flex-1"
               >
-                <Sparkles className="w-4 h-4 shrink-0" />
                 <span>Inspect in Financial Viewer</span>
-                <ArrowRight className="w-4 h-4 shrink-0" />
+                <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
               </button>
             )}
 
             {docId && (
               <a
                 href={`/api/export/download/${docId}?format=xlsx`}
-                className="w-full sm:w-auto btn-brand-secondary !min-h-[46px] !h-[46px] !px-6 text-xs font-bold rounded-xl flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
+                className="btn-brand-secondary w-full sm:w-auto"
               >
-                <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)] shrink-0" />
+                <FileSpreadsheet className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>Download Master Excel</span>
               </a>
             )}
 
             <button
+              type="button"
               onClick={resetJob}
-              className="w-full sm:w-auto btn-brand-secondary !min-h-[46px] !h-[46px] !px-5 text-xs font-bold rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] cursor-pointer"
+              className="btn-brand-secondary w-full sm:w-auto"
             >
               Process Another File
             </button>
@@ -463,33 +459,33 @@ export default function AsyncDocumentProcessor() {
         </div>
       ) : (
         /* Failed View */
-        <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-6">
-          <div className="p-5 rounded-2xl bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white/90 border border-[var(--color-danger-border)] flex items-center justify-center text-[var(--color-danger)] shrink-0 mt-0.5 shadow-xs">
-              <AlertCircle className="w-5 h-5 text-[var(--color-danger)]" />
-            </div>
+        <div className="p-5 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-5">
+          <div role="alert" className="p-4 rounded-xl bg-[var(--color-danger-soft)] flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
             <div className="space-y-1">
-              <h4 className="text-base font-extrabold text-[var(--color-danger)]">
+              <h4 className="text-[15px] font-semibold text-[var(--color-danger)]">
                 Processing Error
               </h4>
-              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+              <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed">
                 {jobState.error || 'The asynchronous OCR worker encountered an issue.'}
               </p>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
             <button
+              type="button"
               onClick={resetJob}
-              className="btn-brand-secondary !min-h-[42px] !h-[42px] !px-5 text-xs font-bold rounded-xl border border-[var(--color-border)] cursor-pointer"
+              className="btn-brand-secondary"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={retryJob}
-              className="btn-brand-primary !min-h-[42px] !h-[42px] !px-6 text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+              className="btn-brand-primary"
             >
-              <RotateCw className="w-4 h-4" />
+              <RotateCw className="w-4 h-4" aria-hidden="true" />
               <span>Retry Task</span>
             </button>
           </div>

@@ -123,20 +123,17 @@ export default function FaqPage() {
     id: g.id,
     heading: g.heading,
     body: (
-      <div className="space-y-2">
+      <div className="border-t border-[var(--color-border)]">
         {g.faqs.map((f) => (
-          <details
-            key={f.q}
-            className="group rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] open:bg-[var(--color-surface-subtle)]"
-          >
-            <summary className="flex items-center gap-3 p-4 cursor-pointer list-none font-bold text-sm text-[var(--color-ink)]">
+          <details key={f.q} className="group border-b border-[var(--color-border)] [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex items-center gap-3 min-h-[56px] py-4 cursor-pointer list-none text-[17px] font-medium text-[var(--color-ink)]">
               <span className="flex-1">{f.q}</span>
               <ChevronDown
                 className="w-4 h-4 text-[var(--color-text-muted)] transition-transform group-open:rotate-180 shrink-0"
                 aria-hidden="true"
               />
             </summary>
-            <p className="px-4 pb-4 -mt-1">{f.rich ?? f.a}</p>
+            <p className="pb-5 pr-8">{f.rich ?? f.a}</p>
           </details>
         ))}
       </div>

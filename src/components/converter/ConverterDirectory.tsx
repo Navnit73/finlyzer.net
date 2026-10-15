@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Search, X } from 'lucide-react';
+import { ArrowRight, ChevronRight, Search, X } from 'lucide-react';
 import type { SEOConverterPage } from '@/types/seo';
 
 export type DirectoryEntry = Pick<SEOConverterPage, 'slug' | 'title' | 'metaDescription' | 'badgeText' | 'category' | 'country' | 'bankName'>;
@@ -19,16 +19,16 @@ function ConverterCard({ page }: { page: DirectoryEntry }) {
   return (
     <Link
       href={`/convert/${page.slug}`}
-      className="group p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-colors flex flex-col gap-3"
+      className="card-surface group p-5 sm:p-6 hover:border-[var(--color-border-hover)] flex flex-col"
     >
-      <span className="feature-badge self-start">{page.badgeText}</span>
-      <div className="flex-1 space-y-1.5">
-        <h3 className="text-base font-bold text-[var(--color-ink)]">{page.title}</h3>
-        <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed line-clamp-2">{page.metaDescription}</p>
+      <span className="inline-flex w-fit rounded-full bg-[var(--color-brand-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-dark)]">{page.badgeText}</span>
+      <div className="flex-1 mt-3">
+        <h3 className="text-[17px] font-semibold leading-snug text-[var(--color-ink)]">{page.title}</h3>
+        <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed line-clamp-2">{page.metaDescription}</p>
       </div>
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink)]">
+      <span className="mt-4 inline-flex items-center gap-0.5 text-sm text-[var(--color-brand-dark)] group-hover:underline underline-offset-[3px]">
         Open converter
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+        <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
       </span>
     </Link>
   );
@@ -56,35 +56,35 @@ export default function ConverterDirectory({ pages }: { pages: DirectoryEntry[] 
   );
 
   const chipClass = (active: boolean) =>
-    `shrink-0 min-h-[44px] px-4 rounded-full border text-sm font-semibold transition-colors ${
+    `shrink-0 min-h-[44px] sm:min-h-9 px-4 rounded-full text-sm font-medium transition-colors ${
       active
-        ? 'bg-[var(--color-ink)] border-[var(--color-ink)] text-[var(--color-on-dark)]'
-        : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-ink)] hover:border-[var(--color-border-hover)]'
+        ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
+        : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink)] hover:border-[var(--color-border-hover)]'
     }`;
 
   return (
-    <div className="space-y-10 sm:space-y-14">
+    <div className="space-y-12 sm:space-y-16">
       {/* Search & filters */}
       <div className="max-w-3xl mx-auto w-full space-y-4">
         <label htmlFor="converter-search" className="sr-only">Search for your bank or format</label>
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none" aria-hidden="true" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--color-text-muted)] pointer-events-none" aria-hidden="true" />
           <input
             id="converter-search"
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search your bank or format, e.g. Chase, CSV, HDFC"
-            className="w-full h-14 pl-12 pr-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border-hover)] text-base text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-brand)]"
+            className="w-full h-12 sm:h-14 pl-11 pr-12 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[17px] text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] transition-[border-color,box-shadow] focus:outline-none focus:border-[var(--color-brand)] focus:shadow-[var(--focus-ring)]"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)]"
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)]"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -109,7 +109,7 @@ export default function ConverterDirectory({ pages }: { pages: DirectoryEntry[] 
 
       {isFiltering ? (
         <section aria-live="polite" className="space-y-5">
-          <p className="text-sm font-semibold text-[var(--color-text-secondary)]">
+          <p className="text-sm text-[var(--color-text-muted)]">
             {results.length} converter{results.length === 1 ? '' : 's'} found
           </p>
           {results.length > 0 ? (
@@ -120,13 +120,13 @@ export default function ConverterDirectory({ pages }: { pages: DirectoryEntry[] 
             </div>
           ) : (
             <div className="intro-panel text-center space-y-3">
-              <h2 className="text-xl font-bold text-[var(--color-ink)]">No dedicated converter for “{query}” yet</h2>
+              <h2 className="type-headline">No dedicated converter for “{query}” yet</h2>
               <p className="text-base text-[var(--color-text-secondary)]">
                 The universal converter reads statements from almost any bank worldwide.
               </p>
               <Link href="/convert/bank-statement-to-excel" className="btn-brand-primary">
                 <span>Use the Universal Converter</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             </div>
           )}
@@ -136,12 +136,12 @@ export default function ConverterDirectory({ pages }: { pages: DirectoryEntry[] 
           const group = pages.filter((p) => p.category === c.id);
           if (!group.length) return null;
           return (
-            <section key={c.id} aria-labelledby={`cat-${c.id}`} className="space-y-5">
-              <div className="flex items-baseline justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
-                <h2 id={`cat-${c.id}`} className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-ink)]">
+            <section key={c.id} aria-labelledby={`cat-${c.id}`} className="space-y-6">
+              <div className="flex items-center justify-between gap-3 pb-4 border-b border-[var(--color-border)]">
+                <h2 id={`cat-${c.id}`} className="type-title">
                   {c.heading}
                 </h2>
-                <span className="text-sm font-semibold text-[var(--color-text-muted)] shrink-0">{group.length}</span>
+                <span className="rounded-full bg-[var(--color-surface-subtle)] px-2.5 py-0.5 text-[13px] font-medium text-[var(--color-text-secondary)] tabular-nums shrink-0">{group.length}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {group.map((page) => (

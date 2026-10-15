@@ -1,21 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Search,
-  Filter,
-  RotateCw,
-  Eye,
-  FileSpreadsheet,
-  XCircle,
-  CheckCircle2,
-  Clock,
-  Layers,
-  FileText,
-  AlertCircle,
-  Cpu,
-} from 'lucide-react';
+import React from 'react';
+import { Search, RotateCw, Eye, FileSpreadsheet, XCircle, FileText } from 'lucide-react';
 import { OCRJob } from '@/types/ocr';
+
+const STATUS_BADGE: Record<OCRJob['status'], string> = {
+  completed: 'bg-[var(--color-success-soft)] text-[var(--color-success)]',
+  processing: 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]',
+  queued: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
+  failed: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]',
+  cancelled: 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]',
+};
+
+const FOCUS_RING =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]';
+
+const ICON_BUTTON = `inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)] cursor-pointer ${FOCUS_RING}`;
+
+const TOOL_BUTTON = `inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-subtle)] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer ${FOCUS_RING}`;
+
+const TH = 'sticky top-0 z-10 bg-[var(--color-surface)] px-4 py-2.5 text-[13px] font-normal text-[var(--color-text-muted)] whitespace-nowrap shadow-[inset_0_-1px_0_var(--color-border)]';
 
 interface AdminJobsTableProps {
   jobs: OCRJob[];
@@ -53,7 +57,7 @@ export default function AdminJobsTable({
   const totalPages = Math.ceil(total / pageSize) || 1;
 
   const STATUS_TABS = [
-    { id: 'all', label: 'All Jobs' },
+    { id: 'all', label: 'All jobs' },
     { id: 'processing', label: 'Processing' },
     { id: 'queued', label: 'Queued' },
     { id: 'completed', label: 'Completed' },
@@ -61,159 +65,162 @@ export default function AdminJobsTable({
     { id: 'cancelled', label: 'Cancelled' },
   ];
 
+  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, total);
+
   return (
-    <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs overflow-hidden space-y-4">
-      {/* Top Header & Search / Filter Controls */}
-      <div className="p-5 border-b border-[var(--color-border)] space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-ink)]">
-              <Cpu className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className="text-base font-black text-[var(--color-ink)]">
-                System Background Tasks &amp; Jobs
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary)]">
-                {total} Total background jobs recorded in MongoDB
-              </p>
-            </div>
+    <div className="card-surface overflow-hidden">
+      {/* Toolbar */}
+      <div className="space-y-4 border-b border-[var(--color-border)] p-4 sm:p-5">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <h3 className="text-[15px] font-semibold text-[var(--color-ink)]">System background tasks &amp; jobs</h3>
+            <p className="text-[13px] text-[var(--color-text-muted)]">
+              <span className="tabular-nums">{total.toLocaleString()}</span> total background jobs recorded in MongoDB
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onRefresh}
-              disabled={isLoading}
-              className="btn btn-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3.5 shadow-none cursor-pointer"
-            >
-              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--color-brand-dark)]' : ''}`} aria-hidden="true" />
-              <span>Refresh Jobs</span>
-            </button>
-          </div>
+          <button type="button" onClick={onRefresh} disabled={isLoading} className={`${TOOL_BUTTON} self-start sm:self-auto`}>
+            <RotateCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+            <span>Refresh jobs</span>
+          </button>
         </div>
 
-        {/* Filter Tabs & Search Bar */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-1">
-          {/* Status Tabs */}
-          <div role="group" aria-label="Job status filters" className="flex flex-wrap items-center p-1 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] gap-1">
-            {STATUS_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onStatusChange(tab.id)}
-                aria-pressed={activeStatus === tab.id}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeStatus === tab.id
-                    ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-xs border border-[var(--color-border)]'
-                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* Status filter & search */}
+        <div className="flex flex-col items-stretch justify-between gap-3 lg:flex-row lg:items-center">
+          <div className="-mx-1 overflow-x-auto px-1">
+            <div
+              role="group"
+              aria-label="Job status filters"
+              className="inline-flex items-center gap-0.5 rounded-lg bg-[var(--color-surface-subtle)] p-0.5"
+            >
+              {STATUS_TABS.map((tab) => {
+                const isActive = activeStatus === tab.id;
+                return (
+                  <button
+                    type="button"
+                    key={tab.id}
+                    onClick={() => onStatusChange(tab.id)}
+                    aria-pressed={isActive}
+                    className={`h-7 whitespace-nowrap rounded-md px-3 text-[13px] transition-colors cursor-pointer ${FOCUS_RING} ${
+                      isActive
+                        ? 'bg-[var(--color-surface)] font-medium text-[var(--color-ink)] ring-1 ring-[var(--color-border)]'
+                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+          <div className="relative w-full lg:max-w-sm">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]"
+              aria-hidden="true"
+            />
             <input
-              type="text"
+              type="search"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search by Job ID, Document ID, Filename..."
+              placeholder="Search by job ID, document ID, filename…"
               aria-label="Search by Job ID, Document ID, or Filename"
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand)]"
+              className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-border-hover)] focus:border-[var(--color-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-soft)]"
             />
           </div>
         </div>
       </div>
 
-      {/* Interactive Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs" aria-label="Background jobs">
+      {/* Table */}
+      <div className="max-h-[70vh] overflow-auto" aria-busy={isLoading}>
+        <table className="w-full min-w-[920px] border-collapse text-left text-sm" aria-label="Background jobs">
           <thead>
-            <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)] font-bold uppercase tracking-wider text-[10px]">
-              <th scope="col" className="py-3 px-5">Job &amp; Document ID</th>
-              <th scope="col" className="py-3 px-4">Filename &amp; Pages</th>
-              <th scope="col" className="py-3 px-4">Status &amp; Progress</th>
-              <th scope="col" className="py-3 px-4">Stage / Pipeline</th>
-              <th scope="col" className="py-3 px-4">Created At</th>
-              <th scope="col" className="py-3 px-5 text-right">Actions</th>
+            <tr>
+              <th scope="col" className={`${TH} pl-4 sm:pl-5`}>Job &amp; document ID</th>
+              <th scope="col" className={TH}>Filename</th>
+              <th scope="col" className={`${TH} text-right`}>Pages</th>
+              <th scope="col" className={TH}>Status &amp; progress</th>
+              <th scope="col" className={TH}>Stage / pipeline</th>
+              <th scope="col" className={`${TH} text-right`}>Created at</th>
+              <th scope="col" className={`${TH} pr-4 text-right sm:pr-5`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--color-border)]">
+          <tbody className="divide-y divide-[var(--color-border-subtle)]">
             {isLoading && jobs.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="py-12 text-center text-[var(--color-text-muted)]">
-                  <RotateCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[var(--color-brand-hover)]" />
-                  <span>Loading background jobs...</span>
-                </td>
-              </tr>
+              <>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} aria-hidden="true">
+                    <td className="py-4 pl-4 pr-4 sm:pl-5"><div className="skeleton-line h-3.5 w-32" /></td>
+                    <td className="p-4"><div className="skeleton-line h-3.5 w-40" /></td>
+                    <td className="p-4"><div className="skeleton-line ml-auto h-3.5 w-8" /></td>
+                    <td className="p-4"><div className="skeleton-line h-5 w-20 rounded-full" /></td>
+                    <td className="p-4"><div className="skeleton-line h-3.5 w-24" /></td>
+                    <td className="p-4"><div className="skeleton-line ml-auto h-3.5 w-16" /></td>
+                    <td className="py-4 pl-4 pr-4 sm:pr-5"><div className="skeleton-line ml-auto h-3.5 w-12" /></td>
+                  </tr>
+                ))}
+                <tr className="sr-only">
+                  <td colSpan={7}>Loading background jobs...</td>
+                </tr>
+              </>
             ) : jobs.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-[var(--color-text-muted)]">
-                  <FileText className="w-8 h-8 mx-auto mb-2 text-[var(--color-text-muted)] opacity-40" />
-                  <span>No background jobs match the current filter.</span>
+                <td colSpan={7} className="px-4 py-14 text-center">
+                  <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)]">
+                    <FileText className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <p className="text-[15px] font-semibold text-[var(--color-ink)]">No background jobs match the current filter.</p>
+                  <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">Try a different status or search term.</p>
                 </td>
               </tr>
             ) : (
               jobs.map((job) => {
                 const isCompleted = job.status === 'completed';
                 const isProcessing = job.status === 'processing';
-                const isQueued = job.status === 'queued';
                 const isFailed = job.status === 'failed';
-                const isCancelled = job.status === 'cancelled';
                 const docId = job.document_id || job.result?.id;
+                const filename = job.metadata?.filename || 'statement.pdf';
 
                 return (
-                  <tr
-                    key={job.job_id}
-                    className="hover:bg-[var(--color-surface-subtle)]/70 transition-colors"
-                  >
+                  <tr key={job.job_id} className="align-top transition-colors hover:bg-[var(--color-surface-subtle)]">
                     {/* Job ID */}
-                    <th scope="row" className="py-3.5 px-5 font-normal text-left">
-                      <p className="font-mono font-bold text-[var(--color-ink)] truncate max-w-[140px]">
+                    <th scope="row" className="py-3 pl-4 pr-4 text-left font-normal sm:pl-5">
+                      <p className="max-w-[180px] truncate font-mono text-[12px] text-[var(--color-text-secondary)]" title={job.job_id}>
                         {job.job_id}
                       </p>
                       {job.document_id && (
-                        <p className="font-mono text-[10px] text-[var(--color-text-muted)] truncate max-w-[140px]">
+                        <p className="max-w-[180px] truncate font-mono text-[12px] text-[var(--color-text-muted)]" title={job.document_id}>
                           Doc: {job.document_id}
                         </p>
                       )}
                     </th>
 
-                    {/* Filename & Pages */}
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-[var(--color-ink)] truncate max-w-[180px]">
-                        {job.metadata?.filename || 'statement.pdf'}
-                      </p>
-                      <p className="text-[11px] text-[var(--color-text-secondary)]">
-                        {job.total_pages || job.result?.metadata?.pages || 1} pages
+                    {/* Filename */}
+                    <td className="px-4 py-3">
+                      <p className="max-w-[220px] truncate text-[var(--color-ink)]" title={filename}>
+                        {filename}
                       </p>
                     </td>
 
-                    {/* Status & Progress */}
-                    <td className="py-3.5 px-4">
-                      <div className="space-y-1.5 max-w-[150px]">
-                        <div className="flex items-center gap-1.5">
+                    {/* Pages */}
+                    <td className="px-4 py-3 text-right tabular-nums text-[var(--color-ink)]">
+                      {job.total_pages || job.result?.metadata?.pages || 1}
+                    </td>
+
+                    {/* Status & progress */}
+                    <td className="px-4 py-3">
+                      <div className="max-w-[160px] space-y-1.5">
+                        <div className="flex items-center gap-2">
                           <span
-                            className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                              isCompleted
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : isProcessing
-                                ? 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]'
-                                : isQueued
-                                ? 'bg-amber-100 text-amber-800'
-                                : isFailed
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-zinc-100 text-zinc-700'
+                            className={`inline-flex rounded-full px-2 py-0.5 text-[12px] font-medium capitalize ${
+                              STATUS_BADGE[job.status] ?? STATUS_BADGE.cancelled
                             }`}
                           >
                             {job.status}
                           </span>
                           {isProcessing && (
-                            <span className="font-bold text-[11px] text-[var(--color-ink)]">
-                              {job.progress}%
-                            </span>
+                            <span className="text-[12px] tabular-nums text-[var(--color-text-secondary)]">{job.progress}%</span>
                           )}
                         </div>
 
@@ -224,10 +231,10 @@ export default function AdminJobsTable({
                             aria-valuemin={0}
                             aria-valuemax={100}
                             aria-label={`Progress for job ${job.job_id}`}
-                            className="w-full bg-[var(--color-surface-subtle)] h-1.5 rounded-full overflow-hidden border border-[var(--color-border)]"
+                            className="h-1 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]"
                           >
                             <div
-                              className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300"
+                              className="h-full rounded-full bg-[var(--color-brand)] transition-[width] duration-300"
                               style={{ width: `${job.progress}%` }}
                             />
                           </div>
@@ -235,69 +242,74 @@ export default function AdminJobsTable({
                       </div>
                     </td>
 
-                    {/* Pipeline Stage */}
-                    <td className="py-3.5 px-4">
-                      <p className="font-mono text-[11px] font-bold text-[var(--color-text-secondary)] uppercase">
+                    {/* Pipeline stage */}
+                    <td className="px-4 py-3">
+                      <p className="text-[13px] text-[var(--color-text-secondary)]">
                         {job.current_stage ? job.current_stage.replace(/_/g, ' ') : '—'}
                       </p>
                       {job.processed_pages !== undefined && job.total_pages ? (
-                        <p className="text-[10px] text-[var(--color-text-muted)]">
+                        <p className="text-[12px] tabular-nums text-[var(--color-text-muted)]">
                           {job.processed_pages} / {job.total_pages} extracted
                         </p>
                       ) : null}
                     </td>
 
-                    {/* Created At */}
-                    <td className="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
-                      {new Date(job.created_at).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      })}
+                    {/* Created at */}
+                    <td className="whitespace-nowrap px-4 py-3 text-right text-[13px] tabular-nums text-[var(--color-text-muted)]">
+                      <time dateTime={job.created_at} title={new Date(job.created_at).toLocaleString()}>
+                        {new Date(job.created_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </time>
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3.5 px-5 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="py-2 pl-4 pr-3 text-right sm:pr-4">
+                      <div className="flex items-center justify-end gap-0.5">
                         <button
+                          type="button"
                           onClick={() => onInspectJob(job)}
-                          className="p-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] transition cursor-pointer shadow-none"
-                          title="Inspect JSON & Metadata"
+                          className={ICON_BUTTON}
+                          title="Inspect JSON & metadata"
                           aria-label={`Inspect job ${job.job_id}`}
                         >
-                          <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                          <Eye className="h-4 w-4" aria-hidden="true" />
                         </button>
 
                         {isProcessing && (
                           <button
+                            type="button"
                             onClick={() => onCancelJob(job.job_id)}
-                            className="p-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition cursor-pointer"
-                            title="Cancel Job"
+                            className={`${ICON_BUTTON} text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] hover:text-[var(--color-danger)]`}
+                            title="Cancel job"
                             aria-label={`Cancel job ${job.job_id}`}
                           >
-                            <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                            <XCircle className="h-4 w-4" aria-hidden="true" />
                           </button>
                         )}
 
                         {isFailed && (
                           <button
+                            type="button"
                             onClick={() => onRetryJob(job.job_id)}
-                            className="p-1.5 rounded-lg border border-[var(--color-brand)]/40 bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand-hover)]/20 text-[var(--color-ink)] transition cursor-pointer"
-                            title="Retry Job"
+                            className={`${ICON_BUTTON} text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-dark)]`}
+                            title="Retry job"
                             aria-label={`Retry job ${job.job_id}`}
                           >
-                            <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
+                            <RotateCw className="h-4 w-4" aria-hidden="true" />
                           </button>
                         )}
 
                         {isCompleted && docId && (
                           <a
                             href={`/api/export/download/${docId}?format=xlsx`}
-                            className="p-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-emerald-600 transition cursor-pointer"
+                            className={ICON_BUTTON}
                             title="Download Excel"
                             aria-label={`Download Excel export for job ${job.job_id}`}
                           >
-                            <FileSpreadsheet className="w-3.5 h-3.5" aria-hidden="true" />
+                            <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
                           </a>
                         )}
                       </div>
@@ -310,33 +322,39 @@ export default function AdminJobsTable({
         </table>
       </div>
 
-      {/* Pagination Footer */}
+      {/* Pagination footer */}
       {totalPages > 1 && (
-        <div className="p-4 border-t border-[var(--color-border)] flex items-center justify-between text-xs">
-          <p className="text-[var(--color-text-muted)]">
-            Showing Page <span className="font-bold text-[var(--color-ink)]">{page}</span> of{' '}
-            <span className="font-bold text-[var(--color-ink)]">{totalPages}</span> ({total} items)
+        <nav
+          aria-label="Jobs pagination"
+          className="flex flex-col gap-3 border-t border-[var(--color-border)] px-4 py-3 text-[13px] sm:flex-row sm:items-center sm:justify-between sm:px-5"
+        >
+          <p className="tabular-nums text-[var(--color-text-muted)]">
+            Showing {rangeStart.toLocaleString()}–{rangeEnd.toLocaleString()} of {total.toLocaleString()} · Page{' '}
+            <span className="text-[var(--color-ink)]">{page}</span> of{' '}
+            <span className="text-[var(--color-ink)]">{totalPages}</span>
           </p>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
               aria-label="Previous page"
-              className="btn btn-xs rounded-lg border border-[var(--color-border)] disabled:opacity-40 cursor-pointer"
+              className={TOOL_BUTTON}
             >
               Previous
             </button>
             <button
+              type="button"
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
               aria-label="Next page"
-              className="btn btn-xs rounded-lg border border-[var(--color-border)] disabled:opacity-40 cursor-pointer"
+              className={TOOL_BUTTON}
             >
               Next
             </button>
           </div>
-        </div>
+        </nav>
       )}
     </div>
   );

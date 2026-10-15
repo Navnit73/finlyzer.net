@@ -14,7 +14,9 @@ import {
   Lock,
   ShieldCheck,
   SlidersHorizontal,
+  Trash2,
   Upload,
+  UploadCloud,
   X,
 } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
@@ -25,6 +27,7 @@ import { saveReconciliationToken } from '@/lib/reconciliation-client';
 import { FREE_PAGE_LIMIT, GUEST_MAX_PAGES, PRICING_PLANS } from '@/types/pricing';
 import { APP_RECONCILIATIONS } from '@/lib/routes';
 import { RECON_MAX_TOTAL_MB, unsupportedFileMessage } from '@/lib/reconciliation-limits';
+import { RECONCILIATION_GUEST_RETENTION_DAYS } from '@/lib/retention';
 
 const ACCEPT = '.pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff,.csv,.xlsx';
 const PASS_PRICE = PRICING_PLANS.find((p) => p.id === 'guest_doc_unlock')?.price_usd ?? 10;
@@ -53,7 +56,10 @@ function FileSlot({
   disabled,
   onPick,
   onClear,
+  large = false,
 }: {
+  /** Tall homepage-style dropzone (public hero) instead of the compact row (app page). */
+  large?: boolean;
   inputId?: string;
   label: string;
   hint: string;
@@ -82,20 +88,44 @@ function FileSlot({
           e.target.value = '';
         }}
       />
-      {picked ? (
-        <div className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-3">
-          <span className="w-10 h-10 rounded-lg bg-[var(--media-violet)] flex items-center justify-center shrink-0">
-            <FileText className="w-5 h-5 text-[var(--color-on-dark)]" aria-hidden="true" />
+      {picked && large ? (
+        // Homepage-style picked state: centered file summary with a text "remove" action.
+        <div className="h-full min-h-[132px] sm:min-h-[184px] rounded-xl border-2 border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-4 py-5 flex flex-col items-center justify-center gap-1.5 text-center">
+          <span className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-success-border)] flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5 text-[var(--color-success)]" aria-hidden="true" />
+          </span>
+          <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">{label}</p>
+          <p className="text-[15px] font-semibold text-[var(--color-ink)] truncate max-w-full" title={picked.file.name}>
+            {picked.file.name}
+          </p>
+          <p className="text-[13px] text-[var(--color-text-secondary)] tabular-nums">
+            {(picked.file.size / (1024 * 1024)).toFixed(2)} MB · {picked.pages} page{picked.pages === 1 ? '' : 's'}
+            {picked.password && ' · Password added'}
+          </p>
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={disabled}
+            className="link text-sm font-medium min-h-[44px] px-3 -mb-2 disabled:opacity-40"
+            aria-label={`Remove ${label.toLowerCase()}`}
+          >
+            Choose a different file
+          </button>
+        </div>
+      ) : picked ? (
+        <div className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-subtle)] px-3.5 py-3">
+          <span className="w-10 h-10 rounded-full bg-[var(--color-brand-soft)] flex items-center justify-center shrink-0">
+            <FileText className="w-[18px] h-[18px] text-[var(--color-brand-dark)]" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{label}</p>
-            <p className="text-sm font-semibold text-[var(--color-ink)] truncate" title={picked.file.name}>
+            <p className="text-xs text-[var(--color-text-muted)]">{label}</p>
+            <p className="text-sm font-medium text-[var(--color-ink)] truncate" title={picked.file.name}>
               {picked.file.name}
             </p>
-            <p className="text-xs text-[var(--color-text-secondary)]">
+            <p className="text-xs text-[var(--color-text-secondary)] tabular-nums">
               {(picked.file.size / (1024 * 1024)).toFixed(2)} MB · {picked.pages} page{picked.pages === 1 ? '' : 's'}
               {picked.password && (
-                <span className="inline-flex items-center gap-1 ml-1.5 font-semibold text-[var(--color-ink)]">
+                <span className="inline-flex items-center gap-1 ml-1.5 font-medium text-[var(--color-ink)]">
                   · <Lock className="w-3 h-3" aria-hidden="true" /> Password added
                 </span>
               )}
@@ -105,7 +135,7 @@ function FileSlot({
             type="button"
             onClick={onClear}
             disabled={disabled}
-            className="p-2.5 rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] disabled:opacity-40"
+            className="w-11 h-11 -mr-1.5 inline-flex items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] transition-colors disabled:opacity-40"
             aria-label={`Remove ${label.toLowerCase()}`}
           >
             <X className="w-4 h-4" aria-hidden="true" />
@@ -134,20 +164,42 @@ function FileSlot({
             const file = e.dataTransfer.files?.[0];
             if (file && !disabled) onPick(file);
           }}
-          className={`rounded-lg border-2 border-dashed p-4 flex items-center gap-3 cursor-pointer transition-colors ${
-            isDragging
-              ? 'border-[var(--media-violet)] bg-[var(--media-violet-hover)]'
-              : 'border-[var(--media-violet-border)] bg-[var(--media-violet-soft)] hover:border-[var(--media-violet)] hover:bg-[var(--media-violet-hover)]'
-          }`}
+          className={
+            large
+              ? `h-full min-h-[132px] sm:min-h-[184px] rounded-xl border-2 border-dashed px-4 py-6 sm:py-8 flex flex-col items-center justify-center gap-2 text-center cursor-pointer transition-colors bg-[var(--color-brand-soft)] ${
+                  isDragging ? 'border-[var(--color-brand)]' : 'border-[var(--color-info-border)] hover:border-[var(--color-brand)]'
+                }`
+              : `group/slot rounded-lg border border-dashed px-3.5 py-4 flex items-center gap-3 cursor-pointer transition-colors ${
+                  isDragging
+                    ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
+                    : 'border-[var(--color-border-hover)] bg-[var(--color-surface-subtle)] hover:border-[var(--color-brand)]'
+                }`
+          }
         >
-          <span className="w-10 h-10 rounded-full bg-[var(--media-violet)] flex items-center justify-center shrink-0">
-            <Icon className="w-5 h-5 text-[var(--color-on-dark)]" aria-hidden="true" />
+          {large ? (
+            <>
+              <span className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-info-border)] flex items-center justify-center">
+                <Icon className="w-6 h-6 text-[var(--color-brand)]" aria-hidden="true" />
+              </span>
+              <p className="mt-1 text-[17px] font-semibold text-[var(--color-ink)]">{label}</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">{hint}</p>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-brand-dark)]">
+                <UploadCloud className="w-4 h-4" aria-hidden="true" />
+                Drop here or browse
+              </p>
+            </>
+          ) : (
+          <>
+          <span className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
+            <Icon className="w-[18px] h-[18px] text-[var(--color-ink)]" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1 text-left">
-            <p className="text-sm font-bold text-[var(--media-violet-text)]">{label}</p>
-            <p className="text-xs text-[var(--media-violet-text)]/80">{hint}</p>
+            <p className="text-sm font-medium text-[var(--color-ink)]">{label}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{hint}</p>
           </div>
-          <Upload className="w-5 h-5 text-[var(--media-violet-text)] shrink-0" aria-hidden="true" />
+          <Upload className="w-[18px] h-[18px] text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
+          </>
+          )}
         </div>
       )}
     </div>
@@ -159,7 +211,15 @@ function FileSlot({
  * guidance. Used by the /reconcile landing pages (guests) and the /reconciliations app page.
  * On success it opens /reconciliation/[id] for the live report.
  */
-export default function ReconciliationUploader({ layout = 'stacked' }: { layout?: 'stacked' | 'split' }) {
+export default function ReconciliationUploader({
+  layout = 'stacked',
+  variant = 'compact',
+}: {
+  layout?: 'stacked' | 'split';
+  /** 'hero': homepage-style card with large side-by-side dropzones, for the public /reconcile pages. */
+  variant?: 'compact' | 'hero';
+}) {
+  const isHero = variant === 'hero';
   const router = useRouter();
   const { status } = useSession();
   const isLoggedIn = status === 'authenticated';
@@ -261,16 +321,15 @@ export default function ReconciliationUploader({ layout = 'stacked' }: { layout?
 
   return (
     <div
-      className={`w-full rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] p-3 sm:p-5 space-y-3 ${
-        layout === 'stacked' ? 'shadow-[0_12px_40px_-16px_rgba(23,23,23,0.18)]' : ''
-      }`}
+      className={`w-full card-surface space-y-3 ${isHero ? 'p-3 sm:p-6 !rounded-[18px] !border-[var(--color-info-border)]' : 'p-4 sm:p-6'}`}
     >
-      <div className={layout === 'split' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-3'}>
+      <div className={isHero ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : layout === 'split' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-3'}>
       <FileSlot
         inputId={UPLOAD_INPUT_ID}
         label="Bank statement"
         hint="PDF, scan, photo, CSV or XLSX"
         icon={Landmark}
+        large={isHero}
         picked={bank}
         disabled={isSubmitting}
         onPick={pick(setBank, 'Bank statement')}
@@ -280,6 +339,7 @@ export default function ReconciliationUploader({ layout = 'stacked' }: { layout?
         label="Business ledger / cash book"
         hint="Excel (.xlsx), CSV or PDF export"
         icon={BookOpen}
+        large={isHero}
         picked={ledger}
         disabled={isSubmitting}
         onPick={pick(setLedger, 'Business ledger')}
@@ -287,16 +347,16 @@ export default function ReconciliationUploader({ layout = 'stacked' }: { layout?
       />
       </div>
 
-      <details className="group rounded-lg border border-[var(--color-border)] px-3 [&_summary::-webkit-details-marker]:hidden">
-        <summary className="flex items-center gap-2 min-h-[44px] cursor-pointer list-none text-sm font-semibold text-[var(--color-ink)]">
+      <details className="group rounded-lg border border-[var(--color-border)] px-3.5 [&_summary::-webkit-details-marker]:hidden">
+        <summary className="flex items-center gap-2 min-h-[44px] cursor-pointer list-none text-sm font-medium text-[var(--color-ink)] rounded-lg">
           <SlidersHorizontal className="w-4 h-4 text-[var(--color-text-secondary)]" aria-hidden="true" />
           Matching options
           <span className="ml-auto text-xs font-normal text-[var(--color-text-muted)]">
             ±{tolerance} day{tolerance === 1 ? '' : 's'} · descriptions {descriptionMatching ? 'on' : 'off'}
           </span>
         </summary>
-        <div className="pb-3 space-y-3">
-          <label className="flex items-center justify-between gap-3 text-sm text-[var(--color-ink)]">
+        <div className="pb-3.5 pt-1 space-y-3 border-t border-[var(--color-border-subtle)]">
+          <label className="flex items-center justify-between gap-3 pt-2.5 text-sm text-[var(--color-ink)]">
             <span>
               Date tolerance
               <span className="block text-xs text-[var(--color-text-secondary)]">Max days between bank and ledger dates</span>
@@ -333,20 +393,20 @@ export default function ReconciliationUploader({ layout = 'stacked' }: { layout?
       {bank && ledger && totalPages > FREE_PAGE_LIMIT && (
         isLoggedIn ? (
           <p className="p-3 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-sm text-[var(--color-ink)]">
-            <strong>{totalPages} pages</strong> will be taken from your page credits once the report is ready.
+            <strong className="font-semibold">{totalPages} pages</strong> will be taken from your page credits once the report is ready.
           </p>
         ) : needsLogin ? (
           <div className="p-3 rounded-lg bg-[var(--color-warning-soft)] border border-[var(--color-warning-border)] flex items-start gap-2.5 text-sm text-[var(--color-ink)]">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[var(--color-warning)]" aria-hidden="true" />
             <p>
-              <strong>{totalPages} pages</strong> in total is above the {GUEST_MAX_PAGES}-page guest limit. Sign in free to reconcile longer documents.
+              <strong className="font-semibold">{totalPages} pages</strong> in total is above the {GUEST_MAX_PAGES}-page guest limit. Sign in free to reconcile longer documents.
             </p>
           </div>
         ) : (
           <div className="p-3 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-start gap-2.5 text-sm text-[var(--color-ink)]">
             <Lock className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
             <p>
-              <strong>{totalPages} pages</strong> in total: see the summary free, then a one-time ${PASS_PRICE} unlock for every transaction and the Excel / CSV report.
+              <strong className="font-semibold">{totalPages} pages</strong> in total: see the summary free, then a one-time ${PASS_PRICE} unlock for every transaction and the Excel / CSV report.
             </p>
           </div>
         )
@@ -381,7 +441,7 @@ export default function ReconciliationUploader({ layout = 'stacked' }: { layout?
         onClick={() => submit()}
         disabled={!bank || !ledger || isSubmitting || tooLarge}
         aria-busy={isSubmitting}
-        className="btn-brand-primary w-full !min-h-[56px] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="btn-brand-primary w-full !min-h-[52px] !text-[17px]"
       >
         {isSubmitting ? (
           <>
@@ -391,26 +451,44 @@ export default function ReconciliationUploader({ layout = 'stacked' }: { layout?
         ) : needsLogin ? (
           <>
             <span>Sign In to Reconcile</span>
-            <ArrowRight className="w-5 h-5" aria-hidden="true" />
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </>
         ) : (
           <>
             <span>{bank && ledger ? 'Reconcile Now' : 'Add Both Files to Reconcile'}</span>
-            <ArrowRight className="w-5 h-5" aria-hidden="true" />
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </>
         )}
       </button>
 
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-[13px] text-[var(--color-text-secondary)]">
-        <li className="flex items-center gap-1.5 sm:justify-center">
-          <ShieldCheck className="w-4 h-4 text-[var(--color-ink)] shrink-0" aria-hidden="true" />
-          <span>Encrypted upload (HTTPS)</span>
-        </li>
-        <li className="flex items-center gap-1.5 sm:justify-center">
-          <CheckCircle2 className="w-4 h-4 text-[var(--color-ink)] shrink-0" aria-hidden="true" />
-          <span>Matching is rule-based, not AI</span>
-        </li>
-      </ul>
+      {isHero ? (
+        // Same trust row as the homepage upload card.
+        <ul className="pt-1 px-1 flex flex-col sm:flex-row sm:flex-wrap sm:justify-center gap-x-6 gap-y-2 text-[13px] text-[var(--color-text-secondary)]">
+          <li className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+            <span>Encrypted upload (HTTPS)</span>
+          </li>
+          <li className="flex items-center gap-1.5">
+            <Trash2 className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+            <span>Guest reports deleted after {RECONCILIATION_GUEST_RETENTION_DAYS} days</span>
+          </li>
+          <li className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+            <span>Rule-based matching, not AI</span>
+          </li>
+        </ul>
+      ) : (
+        <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 pt-1 text-xs sm:text-[13px] text-[var(--color-text-muted)]">
+          <li className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>Encrypted upload (HTTPS)</span>
+          </li>
+          <li className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>Matching is rule-based, not AI</span>
+          </li>
+        </ul>
+      )}
 
       <PdfPasswordModal
         // Remount per file so a password typed for one file never pre-fills the other.

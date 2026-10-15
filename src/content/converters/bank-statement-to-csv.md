@@ -17,12 +17,12 @@ keywords:
   - "bank statement pdf to csv"
   - "convert pdf statement to csv"
 related:
+  - "csv-to-qbo"
+  - "credit-card-statement-to-excel"
+  - "scanned-pdf-ocr-to-excel"
+  - "indian-bank-statement-to-excel"
   - "bank-of-america-statement-to-excel"
   - "wells-fargo-bank-statement-to-excel"
-  - "indian-bank-statement-to-excel"
-  - "credit-card-statement-to-excel"
-  - "bank-statement-to-ofx"
-  - "csv-to-qbo"
 features:
   - title: "Header Row Included"
     description: "Column names in the first line make it easy to map fields when an app asks which column is the date or amount."
@@ -91,7 +91,7 @@ CSV (comma-separated values) is the most widely accepted format for moving trans
 
 - **A header row** naming each column.
 - **One line per transaction**, with multi-line descriptions joined into a single field.
-- **Date, description and reference** columns, plus **debit**, **credit** and **balance** where the statement shows them.
+- **Date** and **description** columns, plus **reference**, **debit**, **credit** and **balance** where the statement shows them.
 - **Values containing commas are quoted**, so a payee such as "SMITH, J" stays in one column.
 
 ## Common Uses for Bank Statement CSVs

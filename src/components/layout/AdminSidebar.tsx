@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import UserAvatar from '@/components/auth/UserAvatar';
 import {
-  TrendingUp,
   Sparkles,
   BarChart3,
   FileText,
@@ -15,11 +14,8 @@ import {
   LogOut,
   Zap,
   Plus,
-  Layers,
   ShieldCheck,
-  ChevronRight,
   GitCompareArrows,
-  ChevronLeft,
   X,
 } from 'lucide-react';
 import BrandLogo from '../BrandLogo';
@@ -74,7 +70,7 @@ export default function AdminSidebar({
 
   const navSections = [
     {
-      title: 'WORKSPACE',
+      title: 'Workspace',
       items: [
         {
           name: 'Dashboard',
@@ -108,7 +104,7 @@ export default function AdminSidebar({
       ],
     },
     {
-      title: 'BILLING & ORDERS',
+      title: 'Billing & orders',
       items: [
         {
           name: 'Buy Credits',
@@ -127,7 +123,7 @@ export default function AdminSidebar({
       ],
     },
     ...(isAdmin ? [{
-      title: 'SYSTEM & OPS',
+      title: 'System & ops',
       items: [
         {
           name: 'SuperAdmin',
@@ -146,135 +142,141 @@ export default function AdminSidebar({
   const totalAllowance = quota?.totalAvailablePages || 0;
   const creditPercent = totalAllowance > 0 ? Math.min(100, (totalCredits / totalAllowance) * 100) : 0;
   const creditLabel = quota ? totalCredits.toLocaleString() : '—';
+  const tierLabel = quota?.tier ?? 'free';
+
+  // In the mobile drawer every target is at least 44px tall.
+  const isDrawer = !!onCloseMobile;
+  const itemHeight = isDrawer ? 'h-11' : 'h-9';
 
   return (
     <aside
-      className={`h-full bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col justify-between select-none transition-all duration-300 ${
-        isCollapsed ? 'w-20' : 'w-64'
+      className={`h-full bg-[var(--color-surface-subtle)] border-r border-[var(--color-border)] flex flex-col justify-between select-none transition-[width] duration-300 ease-[var(--ease-apple)] ${
+        isCollapsed ? 'w-20' : isDrawer ? 'w-full' : 'w-64'
       }`}
     >
       {/* Top Branding & Navigation */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className={`h-16 flex items-center border-b border-[var(--color-border)] px-4 shrink-0 ${
+        <div className={`h-[52px] flex items-center px-4 shrink-0 ${
           isCollapsed ? 'justify-center' : 'justify-between'
         }`}>
           <BrandLogo
-            size="md"
+            size={28}
             href="/dashboard"
             showText={!isCollapsed}
             tag={isAdmin ? 'Admin' : undefined}
             onClick={onCloseMobile}
-            textClassName="!text-lg"
+            textClassName="!text-[17px]"
           />
 
           {/* Mobile Close Button */}
           {onCloseMobile && (
             <button
+              type="button"
               onClick={onCloseMobile}
-              className="lg:hidden p-1.5 rounded-lg hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]"
+              className="lg:hidden -mr-2 w-11 h-11 inline-flex items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
               aria-label="Close sidebar"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           )}
         </div>
 
         {/* Quick Convert Button */}
-        <div className="p-3 border-b border-[var(--color-border)]">
+        <div className="px-3 pt-2 pb-3">
           <Link
             href="/workspace"
             onClick={onCloseMobile}
-            className={`btn-brand-primary !min-h-[38px] !h-[38px] !text-xs font-bold flex items-center justify-center gap-2 shadow-xs rounded-lg ${
-              isCollapsed ? 'w-full !px-0' : 'w-full'
-            }`}
+            className={`btn-brand-primary w-full !text-sm ${isDrawer ? '' : '!min-h-9 !h-9'} ${isCollapsed ? '!px-0' : '!px-4'}`}
             title="New Document OCR"
+            aria-label={isCollapsed ? 'New Document OCR' : undefined}
           >
-            <Plus className="w-4 h-4 stroke-[2.5] shrink-0" />
+            <Plus className="w-4 h-4 shrink-0" strokeWidth={2.25} aria-hidden="true" />
             {!isCollapsed && <span>New Document OCR</span>}
           </Link>
         </div>
 
         {/* Navigation Sections */}
-        <div className="py-4 px-2 space-y-5 overflow-y-auto flex-1 min-h-0">
+        <nav aria-label="App navigation" className="pb-4 px-3 space-y-5 overflow-y-auto flex-1 min-h-0">
           {navSections.map((section, idx) => (
-            <div key={idx} className="space-y-1">
+            <div key={section.title} className="space-y-0.5">
               {isCollapsed ? (
-                idx > 0 && <div className="mx-3 mb-2 border-t border-[var(--color-border)]" aria-hidden="true" />
+                idx > 0 && <div className="mx-2 mb-2 border-t border-[var(--color-border)]" aria-hidden="true" />
               ) : (
-                <p className="px-3 pb-0.5 text-[10px] font-black tracking-wider uppercase text-[var(--color-text-muted)]">
+                <p className="px-3 pb-1 text-xs font-medium text-[var(--color-text-muted)]">
                   {section.title}
                 </p>
               )}
-              <div className="space-y-1">
-                {section.items.map((item, itemIdx) => {
+              <ul className="space-y-0.5">
+                {section.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Link
-                      key={itemIdx}
-                      href={item.href}
-                      onClick={onCloseMobile}
-                      title={isCollapsed ? item.name : undefined}
-                      aria-label={isCollapsed ? item.name : undefined}
-                      aria-current={item.active ? 'page' : undefined}
-                      className={`flex items-center h-9 rounded-lg text-xs font-semibold transition-colors ${
-                        isCollapsed
-                          ? 'justify-center w-full'
-                          : 'justify-between gap-2 px-3'
-                      } ${
-                        item.active
-                          ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold shadow-xs'
-                          : 'text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)]'
-                      }`}
-                    >
-                      <div className={`flex items-center gap-2.5 min-w-0 ${isCollapsed ? 'justify-center' : ''}`}>
-                        <Icon className={`w-4 h-4 shrink-0 ${
-                          item.active ? 'text-[var(--color-on-brand)]' : 'text-[var(--color-text-secondary)]'
-                        }`} />
-                        {!isCollapsed && <span className="truncate">{item.name}</span>}
-                      </div>
-
-                      {!isCollapsed && item.badge && (
-                        <span className={`shrink-0 whitespace-nowrap text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={onCloseMobile}
+                        title={isCollapsed ? item.name : undefined}
+                        aria-label={isCollapsed ? item.name : undefined}
+                        aria-current={item.active ? 'page' : undefined}
+                        className={`group flex items-center ${itemHeight} rounded-lg text-sm transition-colors duration-150 ${
+                          isCollapsed ? 'justify-center w-full' : 'justify-between gap-2 px-3'
+                        } ${
                           item.active
-                            ? 'bg-[var(--color-surface)] text-[var(--color-on-brand)]'
-                            : 'bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]'
-                        }`}>
-                          {item.badge}
+                            ? 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] font-medium'
+                            : 'text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)]'
+                        }`}
+                      >
+                        <span className={`flex items-center gap-3 min-w-0 ${isCollapsed ? 'justify-center' : ''}`}>
+                          <Icon
+                            className={`w-[18px] h-[18px] shrink-0 ${
+                              item.active ? 'text-[var(--color-brand-dark)]' : 'text-[var(--color-text-secondary)]'
+                            }`}
+                            strokeWidth={1.75}
+                            aria-hidden="true"
+                          />
+                          {!isCollapsed && <span className="truncate">{item.name}</span>}
                         </span>
-                      )}
-                    </Link>
+
+                        {!isCollapsed && item.badge && (
+                          <span className={`shrink-0 whitespace-nowrap text-[11px] font-medium leading-none px-1.5 py-1 rounded-full ${
+                            item.active
+                              ? 'bg-[var(--color-surface)] text-[var(--color-brand-dark)]'
+                              : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
           ))}
-        </div>
+        </nav>
       </div>
 
       {/* Bottom Quota & User Profile */}
-      <div className="p-3 border-t border-[var(--color-border)] space-y-3 bg-[var(--color-surface-subtle)]">
+      <div className="px-3 pt-3 pb-3 border-t border-[var(--color-border)] space-y-3">
         {/* Quota Widget */}
         {isCollapsed ? (
           <Link
             href="/pricing"
             onClick={onCloseMobile}
-            className="flex flex-col items-center justify-center p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-colors text-center"
+            className="flex flex-col items-center justify-center py-2 rounded-lg hover:bg-[var(--color-surface-muted)] transition-colors text-center"
             title={`${creditLabel} Pages Remaining (Click to Top Up)`}
+            aria-label={`${creditLabel} pages remaining. Top up credits`}
           >
-            <Zap className="w-4 h-4 text-[var(--color-brand-dark)]" />
-            <span className="font-mono font-black text-[10px] text-[var(--color-ink)] mt-0.5">
+            <Zap className="w-[18px] h-[18px] text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
+            <span className="tabular-nums font-medium text-[11px] text-[var(--color-ink)] mt-1">
               {creditLabel}p
             </span>
           </Link>
         ) : (
-          <div className="p-3 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-[var(--color-ink)]">
-                <Zap className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" />
-                <span>Credit Balance</span>
-              </div>
-              <span className="font-mono font-bold text-[var(--color-ink)]">
-                {creditLabel} Pages
+          <div className="px-3 space-y-2">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[13px] text-[var(--color-text-secondary)]">Credit balance</span>
+              <span className="text-[13px] font-medium tabular-nums text-[var(--color-ink)]">
+                {creditLabel} pages
               </span>
             </div>
 
@@ -284,44 +286,43 @@ export default function AdminSidebar({
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="Remaining page credit quota"
-              className="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden"
+              className="w-full bg-[var(--color-surface-muted)] rounded-full h-1 overflow-hidden"
             >
               <div
-                className="bg-[var(--color-brand)] h-1.5 rounded-full transition-all duration-300"
+                className="bg-[var(--color-brand)] h-1 rounded-full transition-[width] duration-300"
                 style={{ width: `${creditPercent}%` }}
               ></div>
             </div>
 
-            <div className="flex items-center justify-between text-[10px] text-[var(--color-text-secondary)] pt-0.5">
-              <span>{(quota?.tier ?? 'free').toUpperCase()} Tier</span>
+            <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+              <span className="capitalize">{tierLabel} tier</span>
               <Link
                 href="/pricing"
                 onClick={onCloseMobile}
-                className="text-[var(--color-ink)] font-bold hover:underline flex items-center gap-0.5"
+                className={`link font-medium inline-flex items-center ${isDrawer ? 'min-h-11 px-1 -mr-1' : ''}`}
               >
-                <span>Top Up</span>
-                <ChevronRight className="w-3 h-3" aria-hidden="true" />
+                Top up
               </Link>
             </div>
           </div>
         )}
 
         {/* User Card */}
-        <div className={`flex items-center gap-2 ${isCollapsed ? 'flex-col justify-center' : 'justify-between'}`}>
+        <div className={`flex items-center gap-2 ${isCollapsed ? 'flex-col justify-center' : 'justify-between pl-3'}`}>
           <div className={`flex items-center gap-2.5 min-w-0 ${isCollapsed ? 'justify-center' : ''}`}>
             <UserAvatar
               src={session?.user?.image}
               name={session?.user?.name}
               size={32}
-              imageClassName="w-8 h-8 rounded-lg object-cover ring-1 ring-[var(--color-brand)] shrink-0"
-              fallbackClassName="w-8 h-8 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs shadow-xs shrink-0"
+              imageClassName="w-8 h-8 rounded-full object-cover ring-1 ring-[var(--color-border)] shrink-0"
+              fallbackClassName="w-8 h-8 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-medium flex items-center justify-center text-[13px] shrink-0"
             />
             {!isCollapsed && (
               <div className="min-w-0 text-left">
-                <p className="text-xs font-bold text-[var(--color-ink)] truncate leading-tight">
+                <p className="text-[13px] font-medium text-[var(--color-ink)] truncate leading-tight">
                   {session?.user?.name || 'My Account'}
                 </p>
-                <p className="text-[10px] text-[var(--color-text-secondary)] truncate font-mono">
+                <p className="text-xs text-[var(--color-text-muted)] truncate">
                   {session?.user?.email}
                 </p>
               </div>
@@ -329,17 +330,18 @@ export default function AdminSidebar({
           </div>
 
           <button
+            type="button"
             onClick={async () => {
               try {
                 localStorage.removeItem('has_logged_in');
               } catch {}
               await signOut({ callbackUrl: '/' });
             }}
-            className="p-1.5 shrink-0 rounded-lg text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer"
+            className={`${isDrawer ? 'w-11 h-11' : 'w-9 h-9'} shrink-0 inline-flex items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer`}
             title="Sign Out"
             aria-label="Sign Out"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-[18px] h-[18px]" strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
       </div>

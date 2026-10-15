@@ -18,15 +18,12 @@ const TABS: {
   label: string;
   shortLabel: string;
   badge?: string;
-  iconActiveClass: string;
-  badgeClass?: string;
 }[] = [
   {
     id: 'single',
     icon: Sparkles,
     label: 'Single Document',
     shortLabel: 'Single',
-    iconActiveClass: 'text-[var(--color-brand-dark)]',
   },
   {
     id: 'long_doc',
@@ -34,8 +31,6 @@ const TABS: {
     label: 'Long Doc (100–200 Pages)',
     shortLabel: 'Long Doc',
     badge: 'Webhook',
-    iconActiveClass: 'text-[var(--color-brand-hover)]',
-    badgeClass: 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]',
   },
   {
     id: 'batch',
@@ -43,8 +38,6 @@ const TABS: {
     label: 'Bulk Batch',
     shortLabel: 'Bulk',
     badge: 'Multi-file',
-    iconActiveClass: 'text-[var(--media-violet)]',
-    badgeClass: 'bg-[var(--media-violet-soft)] text-[var(--media-violet)]',
   },
 ];
 
@@ -70,32 +63,33 @@ export default function OcrWorkspace() {
   return (
     <div className="space-y-6">
       {/* Workspace Header & Segmented Tab Switcher */}
-      <div className="flex items-stretch sm:items-center justify-between gap-2 sm:gap-4 pb-4 border-b border-[var(--color-border)]">
+      <div className="flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Tab Switcher */}
         <div
           role="tablist"
           aria-label="Processing mode"
-          className="grid grid-cols-3 sm:flex sm:items-center p-1 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex-1 sm:flex-initial gap-1 min-w-0"
+          className="grid grid-cols-3 sm:inline-flex sm:items-center p-1 rounded-full bg-[var(--color-surface-subtle)] flex-1 sm:flex-initial gap-1 min-w-0"
         >
-          {TABS.map(({ id, icon: Icon, label, shortLabel, badge, iconActiveClass, badgeClass }) => {
+          {TABS.map(({ id, icon: Icon, label, shortLabel, badge }) => {
             const isActive = activeTab === id;
             return (
               <button
+                type="button"
                 key={id}
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveTab(id)}
-                className={`min-w-0 px-2 sm:px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer border ${
+                className={`min-w-0 min-h-[40px] sm:min-h-[36px] px-2 sm:px-4 rounded-full text-[13px] sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                   isActive
-                    ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-xs border-[var(--color-border)]'
-                    : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                    ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? iconActiveClass : ''}`} aria-hidden="true" />
+                <Icon className="w-4 h-4 shrink-0 hidden sm:block" aria-hidden="true" />
                 <span className="truncate sm:hidden">{shortLabel}</span>
                 <span className="hidden sm:inline whitespace-nowrap">{label}</span>
                 {badge && (
-                  <span className={`hidden md:inline text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
+                  <span className="hidden md:inline text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]">
                     {badge}
                   </span>
                 )}
@@ -106,12 +100,13 @@ export default function OcrWorkspace() {
 
         {/* Right: History Drawer Trigger */}
         <button
+          type="button"
           onClick={() => setIsHistoryDrawerOpen(true)}
-          className="shrink-0 btn btn-sm h-auto sm:h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3 sm:px-3.5 shadow-none cursor-pointer"
+          className="shrink-0 inline-flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[36px] min-w-[44px] px-3 sm:px-4 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
           aria-label="Document History"
           title="Document History"
         >
-          <History className="w-4 h-4 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
+          <History className="w-4 h-4" aria-hidden="true" />
           <span className="hidden sm:inline">Document History</span>
         </button>
       </div>

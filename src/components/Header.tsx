@@ -2,26 +2,9 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import {
-  TrendingUp,
-  Sparkles,
-  CreditCard,
-  BarChart3,
-  Menu,
-  X,
-  FileSpreadsheet,
-  Layers,
-  ShieldCheck,
-  ChevronRight,
-  FolderLock,
-  Receipt,
-  User,
-  Zap,
-  GitCompareArrows,
-} from 'lucide-react';
+import { Menu, X, ShieldCheck, ChevronRight, User } from 'lucide-react';
 import UserMenu from './auth/UserMenu';
 import HistoryDrawer from './ocr/HistoryDrawer';
 import AuthModal from './auth/AuthModal';
@@ -84,219 +67,131 @@ export default function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  const guestLinks = [
+    { href: '/convert', label: 'All Bank Converters', active: pathname.startsWith('/convert') },
+    { href: '/reconcile/bank-reconciliation-tool', label: 'Bank Reconciliation', active: pathname.startsWith('/reconcile') },
+    { href: '/pricing', label: 'Pricing', active: pathname === '/pricing' },
+  ];
+
+  const appLinks = [
+    { href: '/dashboard', label: 'Dashboard', active: pathname === '/dashboard' },
+    { href: '/workspace', label: 'OCR Studio', active: pathname === '/workspace' },
+    { href: '/documents', label: 'Document Vault', active: pathname === '/documents' },
+    { href: '/invoices', label: 'Invoices', active: pathname === '/invoices' },
+    { href: '/pricing', label: 'Pricing & Credits', active: pathname === '/pricing' },
+    ...(isAdmin ? [{ href: '/superadmin', label: 'SuperAdmin', active: pathname.startsWith('/superadmin') }] : []),
+  ];
+
+  const desktopLinkClass = (active: boolean) =>
+    `inline-flex items-center h-11 px-1 text-sm transition-colors ${
+      active ? 'text-[var(--color-ink)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+    }`;
+
+  // Mobile menu rows: large, quiet, hairline-separated, 52px+ tall.
+  const mobileRowClass =
+    'flex items-center justify-between gap-4 min-h-[52px] py-3 border-b border-[var(--color-border)] text-[var(--color-ink)] transition-colors hover:text-[var(--color-brand-dark)]';
+
+  const mobileGuestLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/convert', label: 'All Bank Converters Hub', hint: 'By bank & export format' },
+    { href: '/reconcile/bank-reconciliation-tool', label: 'Bank Reconciliation', hint: 'Match your statement to your ledger' },
+    { href: '/pricing', label: 'Pricing & Credit Plans', hint: 'Free tier & Pay-as-you-go' },
+  ];
+
+  const mobileAppLinks = [
+    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/workspace', label: 'OCR Studio' },
+    { href: '/documents', label: 'Document Vault' },
+    { href: '/invoices', label: 'Invoices' },
+    { href: '/pricing', label: 'Pricing & Credits' },
+    ...(isAdmin ? [{ href: '/superadmin', label: 'SuperAdmin Operations' }] : []),
+  ];
+
   return (
     <>
-      {/* Global Flat Header */}
-      <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)] transition-colors">
-        <div className="site-container">
-          <nav className="flex items-center justify-between h-16 sm:h-20" aria-label="Main Navigation">
-            {/* Brand Logo */}
-            <div className="flex items-center">
-              <BrandLogo size="lg" priority />
-            </div>
-
-            {/* Center / Navigation Links (Guest Desktop) */}
-            {!isLoggedIn && (
-              <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
-                <Link
-                  href="/convert"
-                  aria-current={pathname.startsWith('/convert') ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
-                  <span>All Bank Converters</span>
-                </Link>
-                <Link
-                  href="/reconcile/bank-reconciliation-tool"
-                  aria-current={pathname.startsWith('/reconcile') ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <GitCompareArrows className="w-3.5 h-3.5 text-[var(--media-blue-text)]" aria-hidden="true" />
-                  <span>Bank Reconciliation</span>
-                </Link>
-                <Link
-                  href="/pricing"
-                  aria-current={pathname === '/pricing' ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" aria-hidden="true" />
-                  <span>Pricing</span>
-                </Link>
+      {/* Global frosted header. The blur lives on an inner layer so the fixed mobile
+          menu below is positioned against the viewport, not the blurred element. */}
+      <header className="sticky top-0 z-40 w-full">
+        <div className="surface-frosted hairline-b">
+          <div className="site-container">
+            <nav className="flex items-center justify-between h-[var(--nav-height)] gap-6" aria-label="Main Navigation">
+              {/* Brand Logo */}
+              <div className="flex items-center shrink-0">
+                <BrandLogo size="sm" textClassName="!text-[19px]" priority />
               </div>
-            )}
 
-            {/* Center / Navigation Links (Authenticated Desktop) */}
-            {isLoggedIn && (
-              <div className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--color-text-secondary)]">
-                <Link
-                  href="/dashboard"
-                  aria-current={pathname === '/dashboard' ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <BarChart3 className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
-                  <span>Dashboard</span>
-                </Link>
-
-                <Link
-                  href="/workspace"
-                  aria-current={pathname === '/workspace' ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
-                  <span>OCR Studio</span>
-                </Link>
-
-                <Link
-                  href="/documents"
-                  aria-current={pathname === '/documents' ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <FolderLock className="w-3.5 h-3.5 text-[var(--media-blue-text)]" aria-hidden="true" />
-                  <span>Document Vault</span>
-                </Link>
-
-                <Link
-                  href="/invoices"
-                  aria-current={pathname === '/invoices' ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <Receipt className="w-3.5 h-3.5 text-[var(--media-pink)]" aria-hidden="true" />
-                  <span>Invoices</span>
-                </Link>
-
-                <Link
-                  href="/pricing"
-                  aria-current={pathname === '/pricing' ? 'page' : undefined}
-                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
-                >
-                  <CreditCard className="w-3.5 h-3.5 text-[var(--media-violet)]" aria-hidden="true" />
-                  <span>Pricing &amp; Credits</span>
-                </Link>
-
-                {/* SuperAdmin Link */}
-                {isAdmin && (
+              {/* Center navigation links (desktop) */}
+              <div className="hidden md:flex items-center gap-7 lg:gap-9">
+                {(isLoggedIn ? appLinks : guestLinks).map((link) => (
                   <Link
-                    href="/superadmin"
-                    aria-current={pathname.startsWith('/superadmin') ? 'page' : undefined}
-                    className="hover:text-[var(--color-ink)] text-[var(--color-text-secondary)] transition-colors flex items-center gap-1.5"
+                    key={link.href}
+                    href={link.href}
+                    aria-current={link.active ? 'page' : undefined}
+                    className={desktopLinkClass(link.active)}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-dark)]" aria-hidden="true" />
-                    <span>SuperAdmin</span>
+                    {link.label}
                   </Link>
-                )}
+                ))}
               </div>
-            )}
 
-            {/* Account Actions, User Menu & Mobile Hamburger Button */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <UserMenu onOpenHistory={isLoggedIn ? () => setIsHistoryOpen(true) : undefined} />
+              {/* Account Actions, User Menu & Mobile Hamburger Button */}
+              <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+                {!isLoggedIn && status !== 'loading' && pathname === '/' && (
+                  <a href="#upload" className="hidden md:inline-flex btn-brand-secondary !min-h-9 !h-9 !px-4 !text-sm">
+                    Start Reconciliation
+                  </a>
+                )}
+                <UserMenu onOpenHistory={isLoggedIn ? () => setIsHistoryOpen(true) : undefined} />
 
-              {/* Hamburger Button (Mobile Only) */}
-              <button
-                type="button"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border)] cursor-pointer transition-colors flex items-center justify-center"
-                aria-label={isMobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-                aria-expanded={isMobileMenuOpen}
-                aria-controls="mobile-navigation-menu"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
-              </button>
-            </div>
-          </nav>
+                {/* Hamburger Button (Mobile Only) */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="md:hidden -mr-2 w-11 h-11 rounded-full text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] cursor-pointer transition-colors flex items-center justify-center"
+                  aria-label={isMobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="mobile-navigation-menu"
+                >
+                  {isMobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
+                </button>
+              </div>
+            </nav>
+          </div>
         </div>
 
-        {/* Mobile Navigation Drawer / Slide-Down Menu */}
+        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div
             id="mobile-navigation-menu"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile Navigation Menu"
-            className="md:hidden fixed inset-x-0 top-16 sm:top-20 bottom-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-md border-t border-[var(--color-border)] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
+            className="md:hidden fixed inset-x-0 top-[var(--nav-height)] bottom-0 z-50 bg-[var(--color-surface)] overflow-y-auto overscroll-contain animate-fade-in"
           >
-            <div className="site-container py-6 space-y-6">
+            <div className="site-container pt-4 pb-10">
               {!isLoggedIn ? (
                 /* Guest Mobile Navigation */
-                <div className="space-y-6">
-                  {/* Primary Nav Links */}
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text-muted)] px-3">
-                      Navigation
-                    </p>
+                <div className="space-y-10">
+                  <ul>
+                    {mobileGuestLinks.map((link) => (
+                      <li key={link.href}>
+                        <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={mobileRowClass}>
+                          <span className="min-w-0">
+                            <span className="block text-[19px] font-semibold tracking-[-0.015em]">{link.label}</span>
+                            {link.hint && (
+                              <span className="block mt-0.5 text-[13px] text-[var(--color-text-muted)]">{link.hint}</span>
+                            )}
+                          </span>
+                          <ChevronRight className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-hidden="true" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
 
-                    <Link
-                      href="/"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-bold text-sm transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-[var(--color-surface)] border border-[var(--color-border)] p-1 flex items-center justify-center">
-                          <Image src="/logo.png" alt="Finlyzers Logo" width={24} height={24} className="w-full h-full object-contain" />
-                        </div>
-                        <span>Home &amp; Instant Extractor</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-
-                    <Link
-                      href="/convert"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-bold text-sm transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center">
-                          <Sparkles className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span>All Bank Converters Hub</span>
-                          <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">By bank &amp; export format</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-
-                    <Link
-                      href="/reconcile/bank-reconciliation-tool"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-bold text-sm transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--media-blue-soft)] text-[var(--media-blue-text)] flex items-center justify-center">
-                          <GitCompareArrows className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span>Bank Reconciliation</span>
-                          <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">Match your statement to your ledger</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-
-                    <Link
-                      href="/pricing"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-bold text-sm transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--media-violet-soft)] text-[var(--media-violet-text)] flex items-center justify-center">
-                          <CreditCard className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span>Pricing &amp; Credit Plans</span>
-                          <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">Free tier &amp; Pay-as-you-go</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-                  </div>
-
-                  {/* Popular Bank Converters Quick Grid */}
-                  <div className="space-y-2.5">
-                    <p className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text-muted)] px-3">
-                      Popular Converters
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
+                  {/* Popular bank converters */}
+                  <div>
+                    <p className="text-[13px] text-[var(--color-text-muted)]">Popular Converters</p>
+                    <ul className="mt-2 grid grid-cols-2 gap-x-6">
                       {[
                         { name: 'Chase to Excel', slug: 'chase-bank-statement-to-excel' },
                         { name: 'Bank of America', slug: 'bank-of-america-statement-to-excel' },
@@ -305,37 +200,35 @@ export default function Header() {
                         { name: 'Indian Banks (HDFC/SBI)', slug: 'indian-bank-statement-to-excel' },
                         { name: 'Scanned PDF OCR', slug: 'scanned-pdf-ocr-to-excel' },
                       ].map((bank) => (
-                        <Link
-                          key={bank.slug}
-                          href={`/convert/${bank.slug}`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="p-3 rounded-xl bg-[var(--color-surface-subtle)]/70 hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] transition-colors flex items-center justify-between"
-                        >
-                          <span className="truncate">{bank.name}</span>
-                          <ChevronRight className="w-3 h-3 text-[var(--color-text-muted)] shrink-0 ml-1" />
-                        </Link>
+                        <li key={bank.slug}>
+                          <Link
+                            href={`/convert/${bank.slug}`}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center min-h-[44px] py-2 border-b border-[var(--color-border)] text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                          >
+                            <span className="truncate">{bank.name}</span>
+                          </Link>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
 
-                  {/* Free Tier Guarantee Banner */}
-                  <div className="p-3.5 rounded-2xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 flex items-center gap-3 text-xs text-[var(--color-on-brand)]">
-                    <ShieldCheck className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
-                    <div>
-                      <p className="font-black">100% Free For 1–10 Pages</p>
-                      <p className="text-[11px] opacity-90">No credit card or registration required.</p>
+                  {/* Free tier note + sign in */}
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck className="w-5 h-5 mt-0.5 text-[var(--color-success)] shrink-0" aria-hidden="true" />
+                      <div>
+                        <p className="text-[15px] font-semibold text-[var(--color-ink)]">100% Free For 1–10 Pages</p>
+                        <p className="text-[13px] text-[var(--color-text-secondary)]">No credit card or registration required.</p>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Sign In Trigger Button */}
-                  <div className="pt-2">
                     <button
                       type="button"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsAuthModalOpen(true);
                       }}
-                      className="w-full btn-brand-primary !min-h-[46px] !h-[46px] text-sm font-black rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                      className="btn-brand-primary w-full !min-h-[50px] !text-[17px] cursor-pointer"
                     >
                       <User className="w-4 h-4" aria-hidden="true" />
                       <span>Sign In with Google</span>
@@ -344,85 +237,18 @@ export default function Header() {
                 </div>
               ) : (
                 /* Authenticated Mobile Navigation */
-                <div className="space-y-4">
-                  <p className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text-muted)] px-3">
-                    Your Workspace
-                  </p>
-                  <div className="space-y-2">
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <BarChart3 className="w-4 h-4 text-[var(--color-ink)]" aria-hidden="true" />
-                        <span>Dashboard</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" aria-hidden="true" />
-                    </Link>
-
-                    <Link
-                      href="/workspace"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Sparkles className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
-                        <span>OCR Studio</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" aria-hidden="true" />
-                    </Link>
-
-                    <Link
-                      href="/documents"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <FolderLock className="w-4 h-4 text-[var(--media-blue-text)]" />
-                        <span>Document Vault</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-
-                    <Link
-                      href="/invoices"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Receipt className="w-4 h-4 text-[var(--media-orange-text)]" />
-                        <span>Invoices</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-
-                    <Link
-                      href="/pricing"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <CreditCard className="w-4 h-4 text-[var(--media-violet)]" />
-                        <span>Pricing &amp; Credits</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-
-                    {isAdmin && (
-                    <Link
-                      href="/superadmin"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] font-bold text-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 rounded-full bg-[var(--color-brand-hover)]" />
-                        <span>SuperAdmin Operations</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    </Link>
-                    )}
-                  </div>
+                <div>
+                  <p className="text-[13px] text-[var(--color-text-muted)]">Your Workspace</p>
+                  <ul className="mt-1">
+                    {mobileAppLinks.map((link) => (
+                      <li key={link.href}>
+                        <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={mobileRowClass}>
+                          <span className="text-[19px] font-semibold tracking-[-0.015em]">{link.label}</span>
+                          <ChevronRight className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-hidden="true" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>

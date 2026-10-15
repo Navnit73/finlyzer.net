@@ -72,7 +72,7 @@ function AmountInput({ id, value, onChange, label }: { id: string; value: string
       onChange={(e) => onChange(e.target.value)}
       placeholder="0.00"
       aria-label={label}
-      className="input input-sm w-full sm:w-36 text-right font-mono tabular-nums bg-[var(--color-surface)] border-[var(--color-border)]"
+      className="input input-sm h-11 sm:h-9 w-full sm:w-36 text-right tabular-nums bg-[var(--color-surface)] border-[var(--color-border)]"
     />
   );
 }
@@ -96,11 +96,11 @@ function LineList({
   return (
     <fieldset className="space-y-2">
       <legend className="w-full flex items-baseline justify-between gap-2">
-        <span className="text-sm font-bold text-[var(--color-ink)]">
-          <span className="font-mono text-[var(--color-text-muted)] mr-1">{sign}</span>
+        <span className="text-sm font-medium text-[var(--color-ink)]">
+          <span className="inline-block w-3 text-[var(--color-text-muted)] mr-1">{sign}</span>
           {title}
         </span>
-        <span className="text-sm font-mono tabular-nums text-[var(--color-text-secondary)]">{formatCents(sumCents(lines))}</span>
+        <span className="text-sm tabular-nums text-[var(--color-text-secondary)]">{formatCents(sumCents(lines))}</span>
       </legend>
       <p className="text-xs text-[var(--color-text-secondary)]">{hint}</p>
       {lines.map((l, i) => (
@@ -110,7 +110,7 @@ function LineList({
             onChange={(e) => update(l.id, { label: e.target.value })}
             placeholder="Description (optional)"
             aria-label={`${title} ${i + 1} description`}
-            className="input input-sm flex-1 min-w-0 bg-[var(--color-surface)] border-[var(--color-border)]"
+            className="input input-sm h-11 sm:h-9 flex-1 min-w-0 bg-[var(--color-surface)] border-[var(--color-border)]"
           />
           <AmountInput
             id={`${baseId}-${l.id}`}
@@ -121,7 +121,7 @@ function LineList({
           <button
             type="button"
             onClick={() => onChange(lines.length > 1 ? lines.filter((x) => x.id !== l.id) : [line()])}
-            className="p-2 rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)]"
+            className="w-11 h-11 sm:w-9 sm:h-9 shrink-0 inline-flex items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-surface-subtle)] transition-colors"
             aria-label={`Remove ${title.toLowerCase()} line ${i + 1}`}
           >
             <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -131,7 +131,7 @@ function LineList({
       <button
         type="button"
         onClick={() => onChange([...lines, line()])}
-        className="inline-flex items-center gap-1.5 min-h-[36px] text-sm font-semibold text-[var(--color-ink)] hover:underline underline-offset-4"
+        className="link inline-flex items-center gap-1 min-h-[44px] sm:min-h-[36px] text-sm font-medium"
       >
         <Plus className="w-4 h-4" aria-hidden="true" />
         Add line
@@ -159,32 +159,32 @@ export default function ReconciliationCalculator() {
   const hasInput = state.bankBalance.trim() !== '' && state.bookBalance.trim() !== '';
 
   return (
-    <section id="calculator" aria-labelledby="calculator-title" className="scroll-mt-24 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div className="space-y-2 max-w-2xl">
-          <h2 id="calculator-title" className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--color-ink)]">
+    <section id="calculator" aria-labelledby="calculator-title" className="scroll-mt-24 intro-panel space-y-8 sm:space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+        <div className="space-y-3 max-w-2xl">
+          <h2 id="calculator-title" className="type-display text-balance">
             Bank Reconciliation Statement Calculator
           </h2>
-          <p className="text-base sm:text-lg text-[var(--color-text-secondary)]">
+          <p className="type-lead">
             Enter both balances and the reconciling items. The example figures show a reconciliation that balances; clear them to start your own.
           </p>
         </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => setState(EMPTY)} className="btn-brand-secondary">
+        <div className="flex gap-2 shrink-0">
+          <button type="button" onClick={() => setState(EMPTY)} className="btn-brand-ghost">
             <RotateCcw className="w-4 h-4" aria-hidden="true" />
             <span>Clear</span>
           </button>
-          <button type="button" onClick={() => setState(EXAMPLE)} className="btn-brand-secondary">
+          <button type="button" onClick={() => setState(EXAMPLE)} className="btn-brand-ghost">
             Example
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <div className="p-5 sm:p-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] space-y-5">
-          <h3 className="text-lg font-bold text-[var(--color-ink)]">Bank side</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+        <div className="card-surface p-5 sm:p-7 space-y-6">
+          <h3 className="type-headline">Bank side</h3>
           <label htmlFor={`${ids}-bank`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="text-sm font-bold text-[var(--color-ink)]">Balance per bank statement</span>
+            <span className="text-[15px] font-medium text-[var(--color-ink)]">Balance per bank statement</span>
             <AmountInput id={`${ids}-bank`} label="Balance per bank statement" value={state.bankBalance} onChange={set('bankBalance')} />
           </label>
           <LineList
@@ -203,21 +203,21 @@ export default function ReconciliationCalculator() {
           />
           <label htmlFor={`${ids}-bank-error`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-sm text-[var(--color-ink)]">
-              <span className="font-bold">± Bank error correction</span>
+              <span className="font-medium">± Bank error correction</span>
               <span className="block text-xs text-[var(--color-text-secondary)]">Positive if the bank under-recorded your balance</span>
             </span>
             <AmountInput id={`${ids}-bank-error`} label="Bank error correction" value={state.bankError} onChange={set('bankError')} />
           </label>
-          <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
-            <span className="text-sm font-bold text-[var(--color-ink)]">Adjusted bank balance</span>
-            <span className="text-lg font-extrabold font-mono tabular-nums text-[var(--color-ink)]">{formatCents(adjustedBank)}</span>
+          <div className="flex items-baseline justify-between pt-5 border-t border-[var(--color-border)]">
+            <span className="text-[15px] font-medium text-[var(--color-ink)]">Adjusted bank balance</span>
+            <span className="text-2xl font-semibold tracking-tight tabular-nums text-[var(--color-ink)]">{formatCents(adjustedBank)}</span>
           </div>
         </div>
 
-        <div className="p-5 sm:p-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] space-y-5">
-          <h3 className="text-lg font-bold text-[var(--color-ink)]">Book side (ledger / cash book)</h3>
+        <div className="card-surface p-5 sm:p-7 space-y-6">
+          <h3 className="type-headline">Book side (ledger / cash book)</h3>
           <label htmlFor={`${ids}-book`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="text-sm font-bold text-[var(--color-ink)]">Balance per books</span>
+            <span className="text-[15px] font-medium text-[var(--color-ink)]">Balance per books</span>
             <AmountInput id={`${ids}-book`} label="Balance per books" value={state.bookBalance} onChange={set('bookBalance')} />
           </label>
           <LineList
@@ -236,35 +236,35 @@ export default function ReconciliationCalculator() {
           />
           <label htmlFor={`${ids}-book-error`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-sm text-[var(--color-ink)]">
-              <span className="font-bold">± Book error correction</span>
+              <span className="font-medium">± Book error correction</span>
               <span className="block text-xs text-[var(--color-text-secondary)]">Positive if your books under-recorded the balance</span>
             </span>
             <AmountInput id={`${ids}-book-error`} label="Book error correction" value={state.bookError} onChange={set('bookError')} />
           </label>
-          <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
-            <span className="text-sm font-bold text-[var(--color-ink)]">Adjusted book balance</span>
-            <span className="text-lg font-extrabold font-mono tabular-nums text-[var(--color-ink)]">{formatCents(adjustedBook)}</span>
+          <div className="flex items-baseline justify-between pt-5 border-t border-[var(--color-border)]">
+            <span className="text-[15px] font-medium text-[var(--color-ink)]">Adjusted book balance</span>
+            <span className="text-2xl font-semibold tracking-tight tabular-nums text-[var(--color-ink)]">{formatCents(adjustedBook)}</span>
           </div>
         </div>
       </div>
 
       <div
         aria-live="polite"
-        className={`p-5 sm:p-6 rounded-xl border-2 flex flex-col sm:flex-row sm:items-center gap-3 ${
+        className={`p-5 sm:p-6 rounded-2xl border flex items-start gap-3.5 ${
           !hasInput
-            ? 'border-[var(--color-border)] bg-[var(--color-surface-subtle)]'
+            ? 'border-[var(--color-border)] bg-[var(--color-surface)]'
             : difference === 0
-              ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
+              ? 'border-[var(--color-success-border)] bg-[var(--color-success-soft)]'
               : 'border-[var(--color-warning-border)] bg-[var(--color-warning-soft)]'
         }`}
       >
         {hasInput && difference === 0 ? (
-          <CheckCircle2 className="w-6 h-6 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
+          <CheckCircle2 className="w-6 h-6 text-[var(--color-success)] shrink-0" aria-hidden="true" />
         ) : (
-          <AlertCircle className="w-6 h-6 text-[var(--color-warning)] shrink-0" aria-hidden="true" />
+          <AlertCircle className={`w-6 h-6 shrink-0 ${hasInput ? 'text-[var(--color-warning)]' : 'text-[var(--color-text-muted)]'}`} aria-hidden="true" />
         )}
-        <div className="flex-1">
-          <p className="text-base font-bold text-[var(--color-ink)]">
+        <div className="flex-1 space-y-1">
+          <p className="text-[17px] font-semibold text-[var(--color-ink)] tabular-nums">
             {!hasInput
               ? 'Enter the bank and book balances to see the result.'
               : difference === 0

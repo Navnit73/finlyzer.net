@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { X, CheckCircle2, ShieldCheck, Sparkles, CreditCard, ArrowRight, AlertCircle, Zap } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, Sparkles, ArrowRight, AlertCircle, Zap } from 'lucide-react';
 import { PricingPlan } from '@/types/pricing';
 import { useIsMounted } from '@/lib/useIsMounted';
 import { formatUSD } from '@/lib/format';
@@ -109,7 +109,7 @@ export default function CheckoutModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-3 sm:p-6 bg-black/30 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isProcessing) {
           handleClose();
@@ -117,133 +117,147 @@ export default function CheckoutModal({
       }}
     >
       <div
-        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-[480px] surface-overlay p-6 sm:p-8 space-y-6 sm:my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="checkout-modal-title"
       >
         {/* Close Button */}
         <button
+          type="button"
           onClick={handleClose}
           disabled={isProcessing}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+          className="absolute top-3 right-3 w-11 h-11 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" aria-hidden="true" />
+          <X className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
         </button>
 
         {/* Modal Header */}
-        <div className="space-y-1.5 pr-8">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
+        <div className="space-y-2 pr-10">
+          <span className="feature-badge !font-medium">
+            <Sparkles className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             Credit Package Top-Up
-          </div>
-          <h2 id="checkout-modal-title" className="text-2xl font-black text-[var(--color-ink)] tracking-tight">
+          </span>
+          <h2 id="checkout-modal-title" className="text-[22px] sm:text-2xl font-semibold text-[var(--color-ink)] tracking-tight leading-tight">
             Checkout — {plan.name}
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
+          <p className="text-[15px] text-[var(--color-text-secondary)] leading-normal">
             {plan.description}
           </p>
         </div>
 
-        {/* Plan Summary Card */}
-        <div className="p-4 sm:p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase font-bold text-[var(--color-text-secondary)] tracking-wider">
-                Selected Package
-              </p>
-              <p className="text-lg font-black text-[var(--color-ink)]">{plan.name}</p>
+        {/* Plan Summary */}
+        <div className="rounded-xl bg-[var(--color-surface-subtle)] px-4 sm:px-5 py-4 space-y-3">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-[var(--color-text-muted)]">Selected Package</p>
+              <p className="text-[17px] font-semibold text-[var(--color-ink)] truncate">{plan.name}</p>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-black text-[var(--color-ink)] font-mono">{formatUSD(plan.price_usd)}</p>
-              <p className="text-[11px] font-bold text-[var(--color-brand-dark)] uppercase">USD One-Time</p>
+            <div className="text-right shrink-0">
+              <p className="text-[28px] leading-none font-semibold text-[var(--color-ink)] tabular-nums">{formatUSD(plan.price_usd)}</p>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">USD one-time</p>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[var(--color-border)] space-y-1.5 text-xs text-[var(--color-text-secondary)]">
-            <div className="flex justify-between">
-              <span>Included Credits:</span>
-              <span className="font-bold text-[var(--color-brand-dark)] font-mono">+{plan.pages.toLocaleString()} Pages</span>
+          <dl className="pt-3 border-t border-[var(--color-border)] space-y-2 text-[13px]">
+            <div className="flex justify-between gap-3">
+              <dt className="text-[var(--color-text-secondary)]">Included credits</dt>
+              <dd className="font-medium text-[var(--color-ink)] tabular-nums">+{plan.pages.toLocaleString()} pages</dd>
             </div>
-            <div className="flex justify-between">
-              <span>Account Billing Email:</span>
-              <span className="font-bold text-[var(--color-ink)] truncate max-w-[200px]">{userEmail || '—'}</span>
+            <div className="flex justify-between gap-3">
+              <dt className="text-[var(--color-text-secondary)] shrink-0">Billing email</dt>
+              <dd className="font-medium text-[var(--color-ink)] truncate">{userEmail || '—'}</dd>
             </div>
-            <div className="flex justify-between">
-              <span>Payment Processing:</span>
-              <span className="font-bold text-[var(--color-ink)]">Instant 256-Bit SSL Checkout</span>
+            <div className="flex justify-between gap-3">
+              <dt className="text-[var(--color-text-secondary)] shrink-0">Payment</dt>
+              <dd className="font-medium text-[var(--color-ink)] text-right">Instant 256-Bit SSL Checkout</dd>
             </div>
-          </div>
+          </dl>
         </div>
 
         {/* Features Checklist */}
-        <div className="space-y-2 text-xs">
-          <p className="font-bold text-[var(--color-ink)] uppercase tracking-wider text-[11px]">Included in this pass:</p>
-          <div className="space-y-1.5">
+        <div className="space-y-2.5">
+          <p className="text-[13px] font-medium text-[var(--color-ink)]">Included in this pass</p>
+          <ul className="space-y-2">
             {plan.features.map((feat, i) => (
-              <div key={i} className="flex items-center gap-2 text-[var(--color-ink)]">
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
+              <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--color-ink)]">
+                <CheckCircle2 className="w-[18px] h-[18px] mt-px text-[var(--color-success)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
                 <span>{feat}</span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div role="alert" className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
+          <div role="alert" className="px-3.5 py-3 bg-[var(--color-danger-soft)] rounded-xl text-[13px] text-[var(--color-danger)] flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={1.75} aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* Order Success Notice */}
         {orderCompleted ? (
-          <div role="status" className="p-5 bg-[var(--color-success-soft)] border border-[var(--color-success-border)] rounded-lg text-xs text-[var(--color-success)] space-y-3 text-center">
-            <CheckCircle2 className="w-10 h-10 text-[var(--color-success)] mx-auto" aria-hidden="true" />
+          <div role="status" className="pt-2 space-y-4 text-center">
+            <span className="mx-auto flex w-12 h-12 items-center justify-center rounded-full bg-[var(--color-success-soft)]">
+              <CheckCircle2 className="w-6 h-6 text-[var(--color-success)]" strokeWidth={1.75} aria-hidden="true" />
+            </span>
             <div className="space-y-1">
-              <p className="font-black text-base text-[var(--color-ink)]">Credits Added Successfully!</p>
-              <p className="text-[var(--color-ink)] font-bold">
+              <p className="font-semibold text-[17px] text-[var(--color-ink)]">Credits Added Successfully!</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 +{plan.pages.toLocaleString()} pages have been credited to your account.
               </p>
             </div>
             <button
+              type="button"
               onClick={() => {
                 handleClose();
                 router.push('/workspace');
               }}
-              className="btn-brand-primary !min-h-[40px] !h-[40px] text-xs font-bold w-full rounded-lg"
+              className="btn-brand-primary w-full"
             >
               Continue to Workspace
             </button>
           </div>
         ) : (
           /* Action Buttons */
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={handleInitializePayment}
-              disabled={isProcessing}
-              className="w-full btn-brand-primary !min-h-[48px] !h-[48px] text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50 rounded-lg"
-            >
-              {isProcessing ? (
-                <>
-                  <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
-                  <span>Processing Order...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4 fill-current" aria-hidden="true" />
-                  <span>Pay {formatUSD(plan.price_usd)} USD</span>
-                  <ArrowRight className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
-                </>
-              )}
-            </button>
-
-            <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--color-text-muted)]">
-              <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
-              <span>256-Bit Encrypted &bull; Instant Page Credits Activation</span>
+          <div className="space-y-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isProcessing}
+                className="btn-brand-secondary w-full sm:w-auto"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleInitializePayment}
+                disabled={isProcessing}
+                aria-busy={isProcessing}
+                className="btn-brand-primary w-full sm:flex-1"
+              >
+                {isProcessing ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
+                    <span>Processing Order...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                    <span>Pay {formatUSD(plan.price_usd)} USD</span>
+                    <ArrowRight className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
+                  </>
+                )}
+              </button>
             </div>
+
+            <p className="flex items-center justify-center gap-1.5 text-xs text-[var(--color-text-muted)]">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+              <span>256-Bit Encrypted &bull; Instant Page Credits Activation</span>
+            </p>
           </div>
         )}
       </div>

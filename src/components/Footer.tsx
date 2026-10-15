@@ -1,30 +1,95 @@
 import Link from "next/link";
-import { ShieldCheck, Sparkles, Lock } from "lucide-react";
+import { ShieldCheck, ChevronRight } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 import { TRUST_PAGES } from "@/lib/trust-pages";
+import { GUEST_RETENTION_HOURS } from "@/lib/retention";
+
+type FooterLink = { href: string; label: string };
+
+const COLUMNS: { heading: string; links: FooterLink[] }[] = [
+  {
+    heading: "Bank Statement to…",
+    links: [
+      ["bank-statement-to-excel", "Excel (.xlsx)"],
+      ["bank-statement-to-csv", "CSV"],
+      ["bank-statement-to-qbo", "QuickBooks (.qbo)"],
+      ["bank-statement-to-ofx", "OFX for Xero"],
+      ["bank-statement-to-qif", "Quicken (.qif)"],
+    ].map(([slug, label]) => ({ href: `/convert/${slug}`, label })),
+  },
+  {
+    heading: "US Banks & Cards",
+    links: [
+      { href: "/convert/chase-bank-statement-to-excel", label: "Chase" },
+      { href: "/convert/bank-of-america-statement-to-excel", label: "Bank of America" },
+      { href: "/convert/wells-fargo-bank-statement-to-excel", label: "Wells Fargo" },
+      { href: "/convert/credit-card-statement-to-excel", label: "Credit card statements" },
+    ],
+  },
+  {
+    heading: "UK, India & More",
+    links: [
+      { href: "/convert/barclays-bank-statement-to-excel", label: "Barclays (UK)" },
+      { href: "/convert/hdfc-bank-statement-to-excel", label: "HDFC Bank (India)" },
+      { href: "/convert/indian-bank-statement-to-excel", label: "SBI, ICICI, Axis & Kotak" },
+      { href: "/convert/pdf-to-excel-converter", label: "Invoices & other financial PDFs" },
+      { href: "/convert/scanned-pdf-ocr-to-excel", label: "Scanned statements (OCR)" },
+    ],
+  },
+  {
+    heading: "Reconciliation",
+    links: [
+      ["bank-reconciliation-tool", "Bank reconciliation tool"],
+      ["bank-statement-vs-ledger", "Bank statement vs ledger"],
+      ["bank-statement-matching-tool", "Transaction matching"],
+      ["bank-reconciliation-calculator", "Reconciliation calculator"],
+    ].map(([slug, label]) => ({ href: `/reconcile/${slug}`, label })),
+  },
+  {
+    heading: "Product & Directory",
+    links: [
+      { href: "/pricing", label: "Pricing & Page Credits" },
+      { href: "/", label: "Bank Statement Converter" },
+      { href: "/convert/csv-to-qbo", label: "CSV & Excel to QBO" },
+      { href: "/guides/import-excel-into-quickbooks", label: "Guide: Import Excel into QuickBooks" },
+      { href: "/about", label: "About Us & Contact" },
+      { href: "/faq", label: "FAQ" },
+      { href: "/editorial-policy", label: "Methodology & Accuracy" },
+    ],
+  },
+];
+
+const linkClass =
+  "inline-flex py-1.5 text-[14px] sm:text-[13px] leading-snug text-[var(--color-text-secondary)] hover:text-[var(--color-brand-dark)] transition-colors";
+
+const legalLinkClass =
+  "inline-flex items-center min-h-[32px] text-[var(--color-text-secondary)] hover:text-[var(--color-brand-dark)] transition-colors";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-t border-[var(--color-border)] py-12 mt-auto">
-      <div className="site-container space-y-10">
-        {/* Top Multi-Column Link Directory for SEO & Crawlers */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8">
-          {/* Col 1: Brand Info */}
-          <div className="space-y-3">
-            <BrandLogo size="sm" textClassName="!text-lg" />
-            <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+    <footer className="w-full section-parchment hairline-t mt-auto text-[13px] leading-[1.5] text-[var(--color-text-secondary)]">
+      <div className="site-container pt-12 sm:pt-16 pb-8 sm:pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,20rem)_1fr] gap-10 lg:gap-16">
+          {/* Brand */}
+          <div className="space-y-5 max-w-md">
+            <BrandLogo size="sm" textClassName="!text-[17px]" />
+            <p className="text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
               Converts PDF and scanned bank statements into Excel, CSV, QBO, OFX and QIF, with every transaction checked against the statement balance.
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] pt-1">
-              <ShieldCheck className="w-4 h-4 text-[var(--color-brand-hover)]" />
-              <span>Encrypted in transit &bull; Guest uploads auto-deleted in 24h</span>
-            </div>
-            <div className="pt-2">
+            <p className="inline-flex items-start gap-2 rounded-lg bg-[var(--color-success-soft)] border border-[var(--color-success-border)] px-3 py-2 text-[12px] text-[var(--color-text-secondary)]">
+              <ShieldCheck className="w-4 h-4 shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+              <span>Encrypted in transit &bull; Guest uploads auto-deleted in {GUEST_RETENTION_HOURS}h</span>
+            </p>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link href="/convert" className="link inline-flex items-center gap-0.5 min-h-[44px] text-[14px] font-medium">
+                <span>Browse All Converters</span>
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
               <a
                 href="https://www.producthunt.com/products/finlyzers?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-finlyzers"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block hover:opacity-90 transition-opacity"
+                className="inline-block rounded-md hover:opacity-90 transition-opacity"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -32,226 +97,47 @@ export default function Footer() {
                   width="250"
                   height="54"
                   src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1276722&theme=light&t=1791724223623"
-                  className="w-[250px] h-[54px] max-w-full"
+                  className="w-[180px] h-auto max-w-full"
                 />
               </a>
             </div>
           </div>
 
-          {/* Col 2: Export Format Converters */}
-          <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              Bank Statement to…
-            </p>
-            <ul className="space-y-2 text-xs">
-              {[
-                ['bank-statement-to-excel', 'Excel (.xlsx)'],
-                ['bank-statement-to-csv', 'CSV'],
-                ['bank-statement-to-qbo', 'QuickBooks (.qbo)'],
-                ['bank-statement-to-ofx', 'OFX for Xero'],
-                ['bank-statement-to-qif', 'Quicken (.qif)'],
-              ].map(([slug, label]) => (
-                <li key={slug}>
-                  <Link
-                    href={`/convert/${slug}`}
-                    className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Col 3: US Bank Statement Converters */}
-          <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              US Banks &amp; Cards
-            </p>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link
-                  href="/convert/chase-bank-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Chase
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/bank-of-america-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Bank of America
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/wells-fargo-bank-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Wells Fargo
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/credit-card-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Credit card statements
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: UK & Global Bank Converters */}
-          <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              UK, India &amp; More
-            </p>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link
-                  href="/convert/barclays-bank-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Barclays (UK)
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/hdfc-bank-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  HDFC Bank (India)
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/indian-bank-statement-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  SBI, ICICI, Axis &amp; Kotak
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/pdf-to-excel-converter"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Invoices &amp; other financial PDFs
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/convert/scanned-pdf-ocr-to-excel"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Scanned statements (OCR)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 5: Bank Reconciliation */}
-          <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              Reconciliation
-            </p>
-            <ul className="space-y-2 text-xs">
-              {[
-                ['bank-reconciliation-tool', 'Bank reconciliation tool'],
-                ['bank-statement-vs-ledger', 'Bank statement vs ledger'],
-                ['bank-statement-matching-tool', 'Transaction matching'],
-                ['bank-reconciliation-calculator', 'Reconciliation calculator'],
-              ].map(([slug, label]) => (
-                <li key={slug}>
-                  <Link
-                    href={`/reconcile/${slug}`}
-                    className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Col 6: Resources & Directory */}
-          <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
-              Product &amp; Directory
-            </p>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link
-                  href="/convert"
-                  className="font-bold text-[var(--color-brand-dark)] hover:underline transition-colors flex items-center gap-1"
-                >
-                  <span>Browse All Converters</span>
-                  <span>&rarr;</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/pricing"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Pricing &amp; Page Credits
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Bank Statement Converter
-                </Link>
-              </li>
-              <li>
-                <Link href="/convert/csv-to-qbo" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
-                  CSV &amp; Excel to QBO
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/guides/import-excel-into-quickbooks"
-                  className="hover:text-[var(--color-ink)] hover:underline transition-colors"
-                >
-                  Guide: Import Excel into QuickBooks
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="hover:text-[var(--color-ink)] hover:underline transition-colors font-medium">
-                  About Us &amp; Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link href="/editorial-policy" className="hover:text-[var(--color-ink)] hover:underline transition-colors">
-                  Methodology &amp; Accuracy
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Link directory for visitors and crawlers */}
+          <nav aria-label="Footer" className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 sm:gap-x-8 gap-y-10">
+            {COLUMNS.map((col) => (
+              <div key={col.heading} className="min-w-0">
+                <p className="text-[13px] font-semibold text-[var(--color-ink)]">{col.heading}</p>
+                <ul className="mt-3 space-y-0.5">
+                  {col.links.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className={linkClass}>
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        {/* Bottom Copyright Bar */}
-        <div className="pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
+        {/* Fine print */}
+        <div className="mt-12 sm:mt-14 pt-6 hairline-t flex flex-col-reverse md:flex-row md:items-center justify-between gap-4 text-[12px] text-[var(--color-text-muted)]">
           <p>&copy; {new Date().getFullYear()} Finlyzers (NAVNIT RAI). All rights reserved.</p>
-          <nav aria-label="Legal" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            {['/about', '/security', '/privacy-policy', '/terms', '/disclaimer'].map((path) => {
-              const page = TRUST_PAGES.find((p) => p.path === path)!;
-              return (
-                <Link key={path} href={path} className="hover:text-[var(--color-ink)] hover:underline transition-colors">
-                  {page.shortTitle}
-                </Link>
-              );
-            })}
+          <nav aria-label="Legal">
+            <ul className="flex flex-wrap items-center gap-x-5 gap-y-1">
+              {["/about", "/security", "/privacy-policy", "/terms", "/disclaimer"].map((path) => {
+                const page = TRUST_PAGES.find((p) => p.path === path)!;
+                return (
+                  <li key={path}>
+                    <Link href={path} className={legalLinkClass}>
+                      {page.shortTitle}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
         </div>
       </div>

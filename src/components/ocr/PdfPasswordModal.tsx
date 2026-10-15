@@ -47,7 +47,7 @@ export default function PdfPasswordModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/40 animate-fade-in overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isLoading) {
           onClose();
@@ -55,52 +55,53 @@ export default function PdfPasswordModal({
       }}
     >
       <div
-        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-md surface-overlay p-6 sm:p-7 space-y-5 animate-scale-up my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="password-modal-title"
       >
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-40"
           aria-label="Close dialog"
           disabled={isLoading}
         >
-          <X className="w-5 h-5" aria-hidden="true" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
 
-        {/* Header Icon */}
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-lg bg-[var(--color-brand-soft)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
-            <Lock className="w-6 h-6 stroke-[2.5]" aria-hidden="true" />
-          </div>
-          <div>
-            <h2 id="password-modal-title" className="text-xl font-bold text-[var(--color-ink)]">
+        {/* Header */}
+        <div className="space-y-3 pr-12">
+          <span className="w-10 h-10 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center text-[var(--color-ink)]" aria-hidden="true">
+            <Lock className="w-[18px] h-[18px]" />
+          </span>
+          <div className="space-y-0.5">
+            <h2 id="password-modal-title" className="text-[21px] font-semibold tracking-tight text-[var(--color-ink)]">
               Encrypted PDF File
             </h2>
-            <p className="text-xs text-[var(--color-text-secondary)] truncate max-w-[240px]">
+            <p className="text-[13px] text-[var(--color-text-muted)] truncate" title={filename}>
               {filename}
             </p>
           </div>
         </div>
 
-        <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+        <p className="text-[15px] text-[var(--color-text-secondary)] leading-relaxed">
           This document is protected with a password. Please enter the decryption password (e.g. date of birth, PAN, or account code) to unlock and extract data.
         </p>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div role="alert" className="p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
+          <div role="alert" className="p-3 bg-[var(--color-danger-soft)] rounded-xl text-[13px] text-[var(--color-danger)] flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
-            <label htmlFor="pdf-password-input" className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <label htmlFor="pdf-password-input" className="text-[13px] font-medium text-[var(--color-ink)]">
               Document Password
             </label>
             <div className="relative">
@@ -116,12 +117,13 @@ export default function PdfPasswordModal({
                 required
                 autoFocus
                 disabled={isLoading}
-                className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all font-mono"
+                aria-invalid={errorMessage ? true : undefined}
+                className="w-full h-11 pl-10 pr-12 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] cursor-pointer"
+                className="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] cursor-pointer"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
@@ -129,23 +131,23 @@ export default function PdfPasswordModal({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 py-3 px-4 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] transition-colors cursor-pointer"
+              className="btn-brand-secondary flex-1"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !password.trim()}
-              className="flex-1 py-3 px-4 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] text-sm font-bold hover:bg-[var(--color-brand-hover)] transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              className="btn-brand-primary flex-1"
             >
               {isLoading ? (
                 <>
-                  <span className="loading loading-spinner loading-xs"></span>
+                  <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
                   <span>Decrypting...</span>
                 </>
               ) : (

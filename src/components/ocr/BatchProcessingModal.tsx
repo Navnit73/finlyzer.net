@@ -151,7 +151,7 @@ export default function BatchProcessingModal({
   const modalContent = (
     <>
       <div
-        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/40 animate-fade-in overflow-y-auto"
         onClick={(e) => {
           if (e.target === e.currentTarget && !isProcessing) {
             onClose();
@@ -159,33 +159,34 @@ export default function BatchProcessingModal({
         }}
       >
         <div
-          className="relative w-full max-w-4xl bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto my-auto shadow-none"
+          className="relative w-full max-w-3xl surface-overlay p-6 sm:p-8 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto my-auto"
           role="dialog"
           aria-modal="true"
           aria-labelledby="batch-modal-title"
         >
           {/* Close Button */}
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-40"
             aria-label="Close dialog"
             disabled={isProcessing}
           >
-            <X className="w-5 h-5" aria-hidden="true" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
 
           {/* Modal Header */}
-          <div className="space-y-1 pr-8">
-            <div className="flex items-center gap-2">
-              <span className="badge bg-[var(--media-violet)] text-white font-bold text-xs border-none px-2.5 py-1">
-                BULK PROCESSING
+          <div className="space-y-1.5 pr-12">
+            <div className="flex flex-wrap items-center gap-2 text-[13px] text-[var(--color-text-muted)]">
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]">
+                Bulk processing
               </span>
-              <span className="text-xs text-[var(--color-text-muted)]">Up to 50 Files / .zip Archive</span>
+              <span>Up to 50 Files / .zip Archive</span>
             </div>
-            <h2 id="batch-modal-title" className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+            <h2 id="batch-modal-title" className="type-title">
               Batch Financial Statement Extraction
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
+            <p className="text-[15px] text-[var(--color-text-secondary)]">
               Upload multiple monthly PDF statements to concurrently extract line items and generate a consolidated 12-Month Annual Cashflow Master Report.
             </p>
           </div>
@@ -202,7 +203,7 @@ export default function BatchProcessingModal({
                 fileInputRef.current?.click();
               }
             }}
-            className="border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-subtle)] rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-all hover:bg-[var(--color-surface-muted)] group focus:outline-none focus:border-[var(--color-ink)]"
+            className="border border-dashed border-[var(--color-border-hover)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] rounded-2xl px-4 py-8 sm:p-10 text-center cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20"
           >
             <input
               ref={fileInputRef}
@@ -213,21 +214,21 @@ export default function BatchProcessingModal({
               onChange={handleFileChange}
               disabled={isProcessing}
             />
-            <div className="w-14 h-14 mx-auto rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center group-hover:scale-105 transition-transform mb-3">
-              <Upload className="w-7 h-7 stroke-[2.5]" aria-hidden="true" />
-            </div>
-            <p className="font-bold text-sm text-[var(--color-ink)]">
+            <span className="mx-auto mb-3 w-11 h-11 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center" aria-hidden="true">
+              <Upload className="w-5 h-5 text-[var(--color-ink)]" />
+            </span>
+            <p className="font-semibold text-[17px] text-[var(--color-ink)]">
               Choose files or drag &amp; drop multiple statements
             </p>
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            <p className="text-[13px] text-[var(--color-text-muted)] mt-1">
               Supports PDF, Scanned Images &amp; .ZIP archives (Up to 50 files)
             </p>
           </div>
 
           {/* Error Banner */}
           {errorMessage && (
-            <div role="alert" className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
+            <div role="alert" className="p-3.5 bg-[var(--color-danger-soft)] rounded-xl text-[13px] text-[var(--color-danger)] flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-px" aria-hidden="true" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -235,62 +236,81 @@ export default function BatchProcessingModal({
           {/* Selected File List */}
           {selectedFiles.length > 0 && !batchResult && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-[var(--color-ink)]">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium text-[var(--color-text-muted)]">
                   Selected Files ({selectedFiles.length})
                 </span>
                 <button
+                  type="button"
                   onClick={() => setSelectedFiles([])}
-                  className="text-[var(--color-danger)] hover:underline font-semibold cursor-pointer"
+                  className="min-h-[36px] px-3 -mr-3 rounded-full text-[13px] font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer disabled:opacity-40"
                   disabled={isProcessing}
                 >
                   Clear All
                 </button>
               </div>
 
-              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+              <ul className="max-h-48 overflow-y-auto rounded-2xl border border-[var(--color-border)] divide-y divide-[var(--color-border-subtle)]">
                 {selectedFiles.map((file, i) => (
-                  <div
+                  <li
                     key={i}
-                    className="flex items-center justify-between p-2.5 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] text-xs"
+                    className="flex items-center justify-between gap-3 pl-4 pr-2 py-1.5 text-sm"
                   >
-                    <div className="flex items-center gap-2 truncate pr-2">
-                      <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-dark)] shrink-0" aria-hidden="true" />
-                      <span className="font-medium text-[var(--color-ink)] truncate">{file.name}</span>
-                      <span className="text-[var(--color-text-muted)] font-mono shrink-0">
-                        ({(file.size / 1024).toFixed(0)} KB)
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <FileSpreadsheet className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
+                      <span className="text-[var(--color-ink)] truncate">{file.name}</span>
+                      <span className="text-xs text-[var(--color-text-muted)] tabular-nums shrink-0">
+                        {(file.size / 1024).toFixed(0)} KB
                       </span>
                     </div>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFile(i);
                       }}
                       disabled={isProcessing}
-                      className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] p-1 transition-colors cursor-pointer"
-                      aria-label="Remove file"
+                      className="w-11 h-11 sm:w-8 sm:h-8 shrink-0 flex items-center justify-center rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-danger-soft)] hover:text-[var(--color-danger)] transition-colors cursor-pointer disabled:opacity-40"
+                      aria-label={`Remove ${file.name}`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
                     </button>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
+
+              {isProcessing && (
+                <div
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Batch processing progress"
+                  className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
+                >
+                  <div
+                    className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
 
               {/* Action Button */}
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
+                  type="button"
                   onClick={startBatchExtraction}
                   disabled={isProcessing}
-                  className="w-full btn-brand-primary !min-h-[52px] shadow-sm flex items-center justify-center gap-2 font-bold"
+                  className="w-full btn-brand-primary"
                 >
                   {isProcessing ? (
                     <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      <span>Processing Batch ({progress}%)...</span>
+                      <span className="loading loading-spinner loading-sm" aria-hidden="true"></span>
+                      <span className="tabular-nums">Processing Batch ({progress}%)...</span>
                     </>
                   ) : (
                     <>
-                      <Layers className="w-5 h-5" />
+                      <Layers className="w-4 h-4" aria-hidden="true" />
                       <span>Process &amp; Reconcile {selectedFiles.length} Statements</span>
                     </>
                   )}
@@ -301,7 +321,7 @@ export default function BatchProcessingModal({
 
           {/* Batch Result View */}
           {batchResult && (
-            <div className="space-y-6 pt-2">
+            <div className="space-y-6">
               {/* Consolidated Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <FinancialMetricCard
@@ -328,42 +348,43 @@ export default function BatchProcessingModal({
               </div>
 
               {/* Master Download CTA */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg">
-                <div className="text-xs text-[var(--color-on-brand)]">
-                  <p className="font-bold text-sm">12-Month Master Consolidated P&amp;L Ready</p>
-                  <p className="text-[var(--color-text-secondary)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--color-surface-subtle)] rounded-2xl">
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-[15px] text-[var(--color-ink)]">12-Month Master Consolidated P&amp;L Ready</p>
+                  <p className="text-[13px] text-[var(--color-text-secondary)]">
                     All monthly statements reconciled into a multi-sheet audited Excel master model.
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={downloadConsolidatedMasterExcel}
-                  className="btn-brand-primary !min-h-[44px] !py-0 !px-5 !text-xs font-bold shrink-0 shadow-xs flex items-center gap-2"
+                  className="btn-brand-primary shrink-0"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4" aria-hidden="true" />
                   <span>Download Master Excel (.xlsx)</span>
                 </button>
               </div>
 
               {/* Batch Item Breakdown List */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]">
+                <h4 className="text-[13px] font-medium text-[var(--color-text-muted)]">
                   Individual Statement Items ({batchResult.items.length})
                 </h4>
-                <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+                <ul className="max-h-60 overflow-y-auto rounded-2xl border border-[var(--color-border)] divide-y divide-[var(--color-border-subtle)]">
                   {batchResult.items.map((item) => (
-                    <div
+                    <li
                       key={item.id}
-                      className="p-3 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs"
+                      className="px-4 py-2.5 flex items-center justify-between gap-3"
                     >
-                      <div className="flex items-center gap-2.5 truncate">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
-                        <div>
-                          <p className="font-bold text-[var(--color-ink)] truncate">{item.filename}</p>
-                          <p className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-2 font-mono">
-                            <span>{item.extraction?.statement_period || 'Period Reconciled'}</span>
-                            <span>&bull;</span>
-                            <span className="flex items-center gap-0.5">
-                              <Clock className="w-3 h-3" /> {item.processing_time_ms}ms
+                        <div className="min-w-0">
+                          <p className="text-sm text-[var(--color-ink)] truncate">{item.filename}</p>
+                          <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1.5 tabular-nums">
+                            <span className="truncate">{item.extraction?.statement_period || 'Period Reconciled'}</span>
+                            <span aria-hidden="true">&middot;</span>
+                            <span className="flex items-center gap-0.5 shrink-0">
+                              <Clock className="w-3 h-3" aria-hidden="true" /> {item.processing_time_ms}ms
                             </span>
                           </p>
                         </div>
@@ -371,28 +392,30 @@ export default function BatchProcessingModal({
 
                       {onSelectExtraction && (
                         <button
+                          type="button"
                           onClick={() => {
                             onSelectExtraction(item.id);
                             onClose();
                           }}
-                          className="btn btn-xs rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-semibold shrink-0"
+                          className="shrink-0 min-h-[36px] px-3 -mr-2 rounded-full text-[13px] font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
                         >
                           View Details &rarr;
                         </button>
                       )}
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
 
               {/* Reset Button */}
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end">
                 <button
+                  type="button"
                   onClick={() => {
                     setBatchResult(null);
                     setSelectedFiles([]);
                   }}
-                  className="btn btn-sm rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border-[var(--color-border)] text-xs font-bold px-4"
+                  className="btn-brand-secondary"
                 >
                   Start New Batch
                 </button>

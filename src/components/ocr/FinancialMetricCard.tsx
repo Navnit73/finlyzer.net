@@ -28,65 +28,27 @@ export default function FinancialMetricCard({
       }).format(value)
     : value;
 
-  const variantStyles = {
-    brand: {
-      bg: 'bg-[var(--color-brand-soft)]',
-      border: 'border-[var(--color-brand)]',
-      accent: 'text-[var(--color-ink)]',
-      iconBg: 'bg-[var(--color-brand)] text-[var(--color-on-brand)]',
-    },
-    blue: {
-      bg: 'bg-[var(--media-blue-soft)]',
-      border: 'border-[var(--media-blue-border)]',
-      accent: 'text-[var(--media-blue-text)]',
-      iconBg: 'bg-[var(--media-blue)] text-white',
-    },
-    violet: {
-      bg: 'bg-[var(--media-violet-soft)]',
-      border: 'border-[var(--media-violet-border)]',
-      accent: 'text-[var(--media-violet)]',
-      iconBg: 'bg-[var(--media-violet)] text-white',
-    },
-    pink: {
-      bg: 'bg-[var(--media-pink-soft)]',
-      border: 'border-[var(--media-pink-border)]',
-      accent: 'text-[var(--media-pink)]',
-      iconBg: 'bg-[var(--media-pink)] text-white',
-    },
-    neutral: {
-      bg: 'bg-[var(--color-surface)]',
-      border: 'border-[var(--color-border)]',
-      accent: 'text-[var(--color-ink)]',
-      iconBg: 'bg-[var(--color-surface-subtle)] text-[var(--color-ink)]',
-    },
-  };
-
-  const style = variantStyles[variant];
+  // Variants are kept for API compatibility. The Apple-style KPI is intentionally
+  // restrained: one neutral hairline card; "brand" only tints the label.
+  const labelColor =
+    variant === 'brand' ? 'text-[var(--color-brand-dark)]' : 'text-[var(--color-text-muted)]';
 
   return (
-    <div
-      className={`p-3.5 sm:p-4.5 rounded-lg border ${style.border} ${style.bg} flex flex-col justify-between space-y-2 sm:space-y-3 transition-colors min-w-0 overflow-hidden shadow-none`}
-    >
-      <div className="flex items-center justify-between gap-1">
-        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]/70 truncate">
-          {title}
-        </span>
-        {Icon && (
-          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${style.iconBg} flex items-center justify-center shrink-0 shadow-xs`}>
-            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
-          </div>
-        )}
+    <div className="p-4 sm:p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col justify-between gap-2 min-w-0 overflow-hidden">
+      <div className={`flex items-center gap-1.5 min-w-0 ${labelColor}`}>
+        {Icon && <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
+        <span className="text-[13px] font-medium truncate">{title}</span>
       </div>
 
       <div className="min-w-0">
         <p
-          className="text-lg sm:text-2xl lg:text-3xl font-black text-[var(--color-ink)] tracking-tight truncate"
+          className="text-xl sm:text-2xl lg:text-[28px] font-semibold text-[var(--color-ink)] tracking-tight tabular-nums truncate leading-tight"
           title={String(formattedValue)}
         >
           {formattedValue || '—'}
         </p>
         {subtitle && (
-          <p className="text-[10px] sm:text-xs text-[var(--color-ink)]/60 mt-0.5 font-medium truncate">
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 truncate">
             {subtitle}
           </p>
         )}
@@ -94,4 +56,3 @@ export default function FinancialMetricCard({
     </div>
   );
 }
-

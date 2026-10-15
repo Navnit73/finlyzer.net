@@ -42,33 +42,35 @@ export default function LegalPage({ path, title, description, intro, sections, j
   const related = TRUST_PAGES.filter((p) => p.path !== path);
 
   return (
-    <article className="max-w-6xl mx-auto w-full pb-16">
+    <article className="max-w-6xl mx-auto w-full pb-16 sm:pb-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: graph }} />
 
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] mb-6">
-        <Link href="/" className="hover:text-[var(--color-ink)]">Home</Link>
-        <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
-        <span className="font-bold text-[var(--color-ink)]">{title}</span>
-      </nav>
+      <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,720px)] lg:justify-center gap-x-16">
+        <div className="lg:col-start-2 min-w-0">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)] mb-8 sm:mb-10">
+            <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">Home</Link>
+            <ChevronRight className="w-3 h-3" aria-hidden="true" />
+            <span className="text-[var(--color-text-secondary)]">{title}</span>
+          </nav>
 
-      <header className="intro-panel space-y-3 mb-10">
-        <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-ink)] tracking-tight">{title}</h1>
-        <div className="text-sm sm:text-base text-[var(--color-text-secondary)] leading-relaxed max-w-3xl">{intro}</div>
-        <p className="text-xs text-[var(--color-text-muted)]">
-          Last updated: <time dateTime={POLICIES_LAST_UPDATED}>{updatedLabel}</time>
-        </p>
-      </header>
+          <header className="space-y-4 pb-10 sm:pb-12 mb-10 sm:mb-12 border-b border-[var(--color-border)]">
+            <h1 className="type-display text-balance">{title}</h1>
+            <div className="type-lead [&_strong]:font-semibold [&_strong]:text-[var(--color-ink)] [&_a]:text-[var(--color-brand-dark)]">{intro}</div>
+            <p className="type-caption">
+              Last updated: <time dateTime={POLICIES_LAST_UPDATED}>{updatedLabel}</time>
+            </p>
+          </header>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-10">
         {/* Table of contents */}
-        <aside className="hidden lg:block">
-          <nav aria-label="On this page" className="sticky top-24 space-y-1">
-            <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-text-muted)] mb-2">On this page</p>
+        <aside className="hidden lg:block lg:col-start-1 lg:row-start-2">
+          <nav aria-label="On this page" className="sticky top-24 border-l border-[var(--color-border)]">
+            <p className="pl-4 mb-2 text-[13px] font-semibold text-[var(--color-ink)]">On this page</p>
             {sections.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="block text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] py-1 leading-snug"
+                className="block -ml-px pl-4 py-1.5 border-l border-transparent text-[13px] leading-snug text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] hover:border-[var(--color-ink)] transition-colors"
               >
                 {s.heading}
               </a>
@@ -76,27 +78,26 @@ export default function LegalPage({ path, title, description, intro, sections, j
           </nav>
         </aside>
 
-        <div className="min-w-0 space-y-10">
+        <div className="min-w-0 space-y-12 sm:space-y-14 lg:col-start-2 lg:row-start-2">
           {sections.map((s) => (
-            <section key={s.id} id={s.id} className="scroll-mt-24 space-y-3">
-              <h2 className="text-xl font-black text-[var(--color-ink)] tracking-tight">{s.heading}</h2>
-              <div className="legal-prose">{s.body}</div>
+            <section key={s.id} id={s.id} className="scroll-mt-24 space-y-4">
+              <h2 className="text-2xl sm:text-[28px] leading-tight font-semibold text-[var(--color-ink)] tracking-tight">{s.heading}</h2>
+              <div className="legal-prose text-[17px] leading-[1.6]">{s.body}</div>
             </section>
           ))}
 
-          <footer className="pt-8 border-t border-[var(--color-border)] space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-text-muted)]">Related</p>
-            <div className="flex flex-wrap gap-2">
+          <footer className="pt-10 border-t border-[var(--color-border)] space-y-4">
+            <h2 className="text-[17px] font-semibold text-[var(--color-ink)]">Related</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
               {related.map((p) => (
-                <Link
-                  key={p.path}
-                  href={p.path}
-                  className="px-3 py-1.5 rounded-full text-xs font-bold bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-[var(--color-ink)] hover:border-[var(--color-border-hover)]"
-                >
-                  {p.title}
-                </Link>
+                <li key={p.path} className="border-b border-[var(--color-border-subtle)]">
+                  <Link href={p.path} className="link flex items-center justify-between gap-2 min-h-[44px] py-2 text-[15px]">
+                    <span>{p.title}</span>
+                    <ChevronRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </footer>
         </div>
       </div>

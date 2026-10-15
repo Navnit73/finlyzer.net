@@ -8,47 +8,23 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Design System & Component Guidelines (VEED-Inspired Financial Tool Hub)
+# Design System & Component Guidelines (Apple-Inspired)
 
-Whenever creating or modifying new UI components, layouts, or pages, **ALWAYS USE THE CSS VARIABLE COLORS AND TOKENS DEFINED IN `src/app/globals.css`** (as specified in `design.md`).
+Whenever creating or modifying UI components, layouts, or pages, **ALWAYS USE THE CSS VARIABLE COLORS AND TOKENS DEFINED IN `src/app/globals.css`**, following `design.md` (adapted from `apple/DESIGN.md`).
 
 ## Core Color Variables & Usage Rules
 
-1. **Brand Action Color (Primary CTA / Accents):**
-   - Main Action: `var(--color-brand)` (`#70F000` vivid lime) or Tailwind `bg-brand` / `text-brand`
-   - Text on Brand: `var(--color-on-brand)` (`#141414`)
-   - Hover State: `var(--color-brand-hover)` (`#61D900`)
-   - Soft Highlight / Badges: `var(--color-brand-soft)` (`#E9FFD6`)
-   - *Rule:* Reserve lime for primary actions, active indicators, and small UI accents. Do NOT use lime as a page-wide background.
+1. **Action Blue (the single accent):** `var(--color-brand)` (`#0071e3`) for primary buttons, active indicators and focus; `var(--color-brand-dark)` (`#0066cc`) for blue text and links; `var(--color-brand-soft)` (`#e8f2fd`) for selected/info tints paired with `--color-brand-dark` text. `var(--color-on-brand)` (white) only on `--color-brand` fills. Never use blue decoratively.
+2. **Ink & text:** `var(--color-ink)` (`#1d1d1f`) headings and emphasis; `var(--color-text-secondary)` (`#515154`) body; `var(--color-text-muted)` (`#6e6e73`) metadata.
+3. **Surfaces:** `var(--color-surface)` white canvas; `var(--color-surface-subtle)` (`#f5f5f7`) parchment bands, sidebar, footer; `var(--color-surface-muted)` (`#e8e8ed`) neutral fills; `var(--color-border)` (`#e0e0e5`) hairlines.
+4. **Status:** `--color-success|danger|warning|info` with `-soft` and `-border` variants. Status only.
+5. **Dark tiles:** wrap in `.surface-dark`; tokens re-scope automatically.
 
-2. **Typography & Dark Elements (Ink):**
-   - Primary Text & Dark Surfaces: `var(--color-ink)` (`#171717`) or Tailwind `text-ink` / `bg-ink`
-   - Charcoal Cards (Dark Sections): `var(--color-ink-soft)` (`#303030`)
-   - Supporting Body Text: `var(--color-text-secondary)` (`#777777`)
-   - Muted Metadata / Helper Copy: `var(--color-text-muted)` (`#969696`)
-   - Text on Dark Backgrounds: `var(--color-on-dark)` (`#FFFFFF`)
+## Ready-to-Use UI Classes
 
-3. **Surfaces & Borders (Canvas):**
-   - Main Background: `var(--color-surface)` (`#FFFFFF`)
-   - Subtle Neutral Panels: `var(--color-surface-subtle)` (`#F5F5F5`)
-   - Grouped Card Surfaces: `var(--color-surface-muted)` (`#EFEFEF`)
-   - Dividers & Outlines: `var(--color-border)` (`#E5E5E5`)
+- Buttons: `.btn-brand-primary` (blue pill), `.btn-brand-secondary` (neutral pill), `.btn-brand-dark` (ink pill), `.btn-brand-ghost` (blue outline pill). daisyUI `btn` for compact utility actions.
+- Layout: `.site-container` (1200px), `.site-container-wide` (1440px), `.site-container-text` (720px), `.section`, `.section-parchment`, `.hairline-t`, `.hairline-b`.
+- Type: `.type-hero`, `.type-display`, `.type-title`, `.type-headline`, `.type-lead`, `.type-body`, `.type-caption`, `.eyebrow`, `.link`.
+- Surfaces: `.card-surface`, `.intro-panel`, `.surface-overlay`, `.surface-frosted`, `.surface-dark`, `.feature-badge`, `.skeleton-line`.
 
-4. **Supporting Financial / Chart Accents:**
-   - Blue: `var(--media-blue)` (`#8FC5EE`)
-   - Violet: `var(--media-violet)` (`#7654E8`)
-   - Pink: `var(--media-pink)` (`#F25D9A`)
-   - Orange: `var(--media-orange)` (`#FF6B55`)
-   - Deep Purple: `var(--media-deep-purple)` (`#52106B`)
-
-## Ready-to-Use UI Utility Classes
-
-- `.btn-brand-primary` — Rounded pill lime button with dark text (`#70F000` / `#141414`)
-- `.btn-brand-secondary` — Light gray neutral pill button (`#F5F5F5` / `#171717`)
-- `.btn-brand-dark` — Dark rounded pill button (`#171717` / `#FFFFFF`)
-- `.site-container` — 1440px max-width container with responsive fluid padding
-- `.intro-panel` — Light gray grouped panel (`#F5F5F5`, 20px radius)
-- `.dark-editorial-section` & `.dark-editorial-card` — Charcoal card grid on near-black background
-- `.feature-badge` — Pill tag with soft lime background and dark text
-
-**Rule for New Components:** Never hardcode random arbitrary colors. Always use the CSS variables or Tailwind theme classes above.
+**Rules:** no hardcoded hex, no `font-bold`/`font-extrabold`/`font-black` (use `font-semibold` max), no uppercase eyebrows, no decorative shadows or gradients, radius ≤ 18px (`rounded-2xl`). Prefer whitespace and hairlines over cards.

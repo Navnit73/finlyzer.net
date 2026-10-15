@@ -56,12 +56,16 @@ sampleRows:
     result: "Only on bank statement"
 features:
   - title: "Any Ledger Layout"
+    icon: "layout"
     description: "Spreadsheet headers such as Date, Narration, Particulars, Debit, Credit, Withdrawal, Deposit or a signed Amount column are recognised automatically."
   - title: "Book Convention Detected"
+    icon: "direction"
     description: "Accounting books often record a bank deposit as a debit. Both readings are tried and the one that matches clearly more entries is used."
   - title: "Mismatches, Not Just Gaps"
+    icon: "compare"
     description: "Entries linked by reference or a similar description but with a different amount or the opposite direction are reported as mismatches."
   - title: "Ledger Balances Checked Too"
+    icon: "balance"
     description: "Opening, closing and running balances are verified for the ledger as well as the bank statement."
 faqs:
   - question: "What is the difference between a bank statement and a ledger?"

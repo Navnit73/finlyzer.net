@@ -12,7 +12,7 @@ import {
   Trash2,
   Calendar,
   Laptop,
-  Cpu,
+  Loader2,
   CheckCircle2,
 } from 'lucide-react';
 import { DocumentListResponse, StoredDocument, ExportFormat } from '@/types/ocr';
@@ -165,10 +165,89 @@ export default function HistoryDrawer({
     }
   };
 
+  // One hairline list row, shared by signed-in documents and guest browser history.
+  const renderRow = (row: {
+    id: string;
+    title: string;
+    filename: string;
+    documentType: string;
+    pages?: number;
+    createdAt?: string;
+    amount?: number | null;
+    deleteTitle: string;
+    deleteLabel: string;
+  }) => {
+    const open = () => {
+      onSelectDocument(row.id);
+      onClose();
+    };
+    return (
+      <li key={row.id}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={open}
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              open();
+            }
+          }}
+          className="group flex items-center gap-3 px-3 py-3 -mx-3 rounded-xl hover:bg-[var(--color-surface-subtle)] focus-visible:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors"
+        >
+          <FileSpreadsheet className="w-5 h-5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[15px] text-[var(--color-ink)] truncate">
+                {row.title}
+              </p>
+              {row.amount !== undefined && row.amount !== null && (
+                <span className="text-sm font-medium tabular-nums text-[var(--color-ink)] shrink-0">
+                  {formatUSD(row.amount)}
+                </span>
+              )}
+            </div>
+            <p className="text-[13px] text-[var(--color-text-muted)] flex items-center gap-1.5 mt-0.5 tabular-nums">
+              <span className="capitalize">{row.documentType.replace('_', ' ')}</span>
+              <span aria-hidden="true">&middot;</span>
+              <span>{row.pages || 1} Page{row.pages !== 1 ? 's' : ''}</span>
+              <span aria-hidden="true">&middot;</span>
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="w-3 h-3" aria-hidden="true" />
+                {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'Recent'}
+              </span>
+            </p>
+          </div>
+          <div className="flex items-center shrink-0 sm:opacity-60 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
+            <button
+              type="button"
+              onClick={(e) => handleDownload(e, row.id, 'xlsx')}
+              className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors cursor-pointer hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)]"
+              title="Download Excel (.xlsx)"
+              aria-label={`Download Excel for ${row.filename}`}
+            >
+              <Download className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleDelete(e, row.id)}
+              className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors cursor-pointer hover:bg-[var(--color-danger-soft)] hover:text-[var(--color-danger)]"
+              title={row.deleteTitle}
+              aria-label={row.deleteLabel}
+            >
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </li>
+    );
+  };
+
   const drawerContent = (
     <>
       <div
-        className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-fade-in"
+        className="fixed inset-0 z-50 flex justify-end bg-black/40 animate-fade-in"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             onClose();
@@ -176,48 +255,45 @@ export default function HistoryDrawer({
         }}
       >
         <div
-          className="relative w-full max-w-xl h-full bg-[var(--color-surface)] border-l border-[var(--color-border)] p-6 sm:p-8 flex flex-col justify-between space-y-5 animate-slide-left overflow-y-auto shadow-none"
+          className="relative w-full max-w-lg h-full bg-[var(--color-surface)] border-l border-[var(--color-border)] shadow-2xl flex flex-col animate-slide-left"
           role="dialog"
           aria-modal="true"
           aria-labelledby="history-drawer-title"
         >
           {/* Header */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center font-bold">
-                  <History className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
-                </div>
-                <div>
-                  <h2 id="history-drawer-title" className="text-xl font-bold text-[var(--color-ink)]">
-                    Extraction History
-                  </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)]">
-                    {session?.user
-                      ? `${totalCount} Documents Saved in MongoDB`
-                      : `${totalCount} Document${totalCount === 1 ? '' : 's'} Stored in Browser`}
-                  </p>
-                </div>
+          <div className="shrink-0 px-5 sm:px-6 pt-5 sm:pt-6 pb-4 space-y-4 border-b border-[var(--color-border)]">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h2 id="history-drawer-title" className="text-[21px] font-semibold tracking-tight text-[var(--color-ink)]">
+                  Extraction History
+                </h2>
+                <p className="text-[13px] text-[var(--color-text-muted)] tabular-nums">
+                  {session?.user
+                    ? `${totalCount} Documents Saved in MongoDB`
+                    : `${totalCount} Document${totalCount === 1 ? '' : 's'} Stored in Browser`}
+                </p>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+                className="shrink-0 w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                 aria-label="Close drawer"
               >
-                <X className="w-5 h-5" aria-hidden="true" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
             {/* Guest Info Banner (Shows for non-logged in users) */}
             {!session?.user && (
-              <div className="p-3.5 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-[var(--color-ink)] font-medium">
-                  <Laptop className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
+              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-subtle)]">
+                <div className="flex items-center gap-2 text-[13px] text-[var(--color-text-secondary)] min-w-0">
+                  <Laptop className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
                   <span>Free guest storage (Saved in browser &amp; DB)</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="btn btn-xs rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold border-none hover:bg-[var(--color-brand-hover)] shrink-0 px-3 cursor-pointer"
+                  className="btn-brand-primary !min-h-[36px] !px-3.5 !text-[13px] shrink-0"
                 >
                   Sign In to Sync
                 </button>
@@ -227,267 +303,185 @@ export default function HistoryDrawer({
             {/* Search and Filters */}
             <div className="space-y-3">
               <div className="relative">
-                <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+                <Search className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
                 <input
-                  type="text"
+                  type="search"
                   placeholder="Search past extractions..."
                   aria-label="Search past extractions"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)]"
+                  className="w-full h-11 pl-10 pr-4 rounded-xl bg-[var(--color-surface-subtle)] border border-transparent text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors"
                 />
               </div>
 
-              {/* Filter Tabs */}
-              <div className="flex flex-wrap gap-1 p-1 bg-[var(--color-surface-subtle)] rounded-lg border border-[var(--color-border)]">
-                {['all', 'bank_statement', 'invoice', 'receipt'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setDocTypeFilter(type)}
-                    aria-pressed={docTypeFilter === type}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors ${
-                      docTypeFilter === type
-                        ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-                    }`}
-                  >
-                    {type === 'all' ? 'All' : type.replace('_', ' ')}
-                  </button>
-                ))}
+              {/* Filter segmented control */}
+              <div className="overflow-x-auto no-scrollbar">
+                <div className="inline-flex gap-1 p-1 bg-[var(--color-surface-subtle)] rounded-full" role="group" aria-label="Filter by document type">
+                  {['all', 'bank_statement', 'invoice', 'receipt'].map((type) => (
+                    <button
+                      type="button"
+                      key={type}
+                      onClick={() => setDocTypeFilter(type)}
+                      aria-pressed={docTypeFilter === type}
+                      className={`min-h-[32px] px-3.5 rounded-full text-[13px] font-medium capitalize whitespace-nowrap transition-colors cursor-pointer ${
+                        docTypeFilter === type
+                          ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                      }`}
+                    >
+                      {type === 'all' ? 'All' : type.replace('_', ' ')}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Documents List */}
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-[250px]">
+          <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-3 min-h-[250px]">
             {/* Active In-Flight Background Jobs */}
             {activeJobs.length > 0 && (
-              <div className="space-y-2 pb-2 border-b border-[var(--color-border)]">
-                <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-brand-dark)] flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+              <div className="pb-3 mb-1 border-b border-[var(--color-border)]">
+                <h3 className="py-2 text-[13px] font-medium text-[var(--color-text-muted)] flex items-center gap-1.5">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                   <span>In-Flight Async Processing ({activeJobs.length})</span>
-                </p>
-                {activeJobs.map((job) => {
-                  const isDone = job.status === 'completed';
-                  const docTargetId = job.documentId || job.result?.id || job.jobId;
-                  return (
-                    <div
-                      key={job.jobId}
-                      onClick={() => {
-                        if (isDone && docTargetId) {
-                          onSelectDocument(docTargetId);
-                          onClose();
-                        }
-                      }}
-                      className={`p-3 rounded-lg border text-xs space-y-2 transition-all ${
-                        isDone
-                          ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50 cursor-pointer'
-                          : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[var(--color-ink)] truncate max-w-[200px]">
-                          {job.filename}
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono font-bold text-[10px] text-[var(--color-brand-dark)]">
-                            {job.processingProgress}%
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeJob(job.jobId);
-                            }}
-                            className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] px-1 cursor-pointer"
-                            aria-label={`Dismiss processing job for ${job.filename}`}
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      </div>
-
-                      <div
-                        role="progressbar"
-                        aria-valuenow={job.processingProgress}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={`Processing progress for ${job.filename}`}
-                        className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden"
+                </h3>
+                <ul className="divide-y divide-[var(--color-border-subtle)]">
+                  {activeJobs.map((job) => {
+                    const isDone = job.status === 'completed';
+                    const docTargetId = job.documentId || job.result?.id || job.jobId;
+                    const openJob = () => {
+                      if (isDone && docTargetId) {
+                        onSelectDocument(docTargetId);
+                        onClose();
+                      }
+                    };
+                    return (
+                      <li
+                        key={job.jobId}
+                        onClick={openJob}
+                        onKeyDown={(e) => {
+                          if (isDone && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                            e.preventDefault();
+                            openJob();
+                          }
+                        }}
+                        role={isDone ? 'button' : undefined}
+                        tabIndex={isDone ? 0 : undefined}
+                        className={`py-3 space-y-2 ${isDone ? 'cursor-pointer' : ''}`}
                       >
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            isDone ? 'bg-[var(--color-success)]' : 'bg-[var(--color-brand)]'
-                          }`}
-                          style={{ width: `${job.processingProgress}%` }}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between text-[10px] text-[var(--color-text-secondary)]">
-                        <span>{job.message || `${job.processedPages}/${job.totalPages} pages`}</span>
-                        {isDone && (
-                          <span className="font-bold text-[var(--color-success)] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Ready &bull; Click to open
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm text-[var(--color-ink)] truncate">
+                            {job.filename}
                           </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-[13px] tabular-nums text-[var(--color-text-secondary)]">
+                              {job.processingProgress}%
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeJob(job.jobId);
+                              }}
+                              className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors cursor-pointer hover:bg-[var(--color-surface-subtle)] hover:text-[var(--color-ink)]"
+                              aria-label={`Dismiss processing job for ${job.filename}`}
+                            >
+                              <X className="w-3.5 h-3.5" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div
+                          role="progressbar"
+                          aria-valuenow={job.processingProgress}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`Processing progress for ${job.filename}`}
+                          className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
+                        >
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              isDone ? 'bg-[var(--color-success)]' : 'bg-[var(--color-brand)]'
+                            }`}
+                            style={{ width: `${job.processingProgress}%` }}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
+                          <span className="truncate">{job.message || `${job.processedPages}/${job.totalPages} pages`}</span>
+                          {isDone && (
+                            <span className="text-[var(--color-success)] flex items-center gap-1 shrink-0">
+                              <CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Ready &middot; Click to open
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             )}
 
             {session?.user ? (
               /* Authenticated User Documents */
               isLoading ? (
-                <div className="flex flex-col items-center justify-center py-16 text-xs text-[var(--color-text-secondary)] space-y-2">
-                  <span className="loading loading-spinner loading-md text-[var(--color-brand)]"></span>
+                <div className="flex flex-col items-center justify-center py-16 text-[13px] text-[var(--color-text-muted)] gap-3">
+                  <span className="loading loading-spinner loading-md text-[var(--color-text-muted)]" aria-hidden="true"></span>
                   <span>Loading saved documents...</span>
                 </div>
               ) : documents.length > 0 ? (
-                documents.map((doc) => {
-                  const bankName = (doc.extraction as { bank_name?: string })?.bank_name;
-                  const vendorName = (doc.extraction as { vendor_name?: string })?.vendor_name;
-                  const balance = (doc.extraction as { closing_balance?: number })?.closing_balance;
-                  const total = (doc.extraction as { total_amount?: number })?.total_amount;
-
-                  return (
-                    <div
-                      key={doc.id}
-                      onClick={() => {
-                        onSelectDocument(doc.id);
-                        onClose();
-                      }}
-                      className="p-4 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 truncate">
-                          <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
-                            <FileSpreadsheet className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
-                          </div>
-                          <div className="truncate">
-                            <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-dark)] transition-colors">
-                              {bankName || vendorName || doc.filename}
-                            </p>
-                            <p className="text-[11px] text-[var(--color-text-secondary)] flex items-center gap-2 mt-0.5">
-                              <span className="capitalize">{doc.document_type.replace('_', ' ')}</span>
-                              <span>&bull;</span>
-                              <span>{doc.pages || 1} Page{doc.pages !== 1 ? 's' : ''}</span>
-                            </p>
-                          </div>
-                        </div>
-
-                        {(balance !== undefined || total !== undefined) && (
-                          <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
-                            {formatUSD(balance ?? total)}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
-                        <span className="flex items-center gap-1 font-mono">
-                          <Calendar className="w-3 h-3" aria-hidden="true" />
-                          {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'Recent'}
-                        </span>
-
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={(e) => handleDownload(e, doc.id, 'xlsx')}
-                            className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-                            title="Download Excel (.xlsx)"
-                            aria-label={`Download Excel for ${doc.filename}`}
-                          >
-                            <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                          </button>
-                          <button
-                            onClick={(e) => handleDelete(e, doc.id)}
-                            className="p-1.5 rounded-lg hover:bg-[var(--color-danger-soft)] text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-                            title="Delete"
-                            aria-label={`Delete ${doc.filename}`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
+                <ul className="divide-y divide-[var(--color-border-subtle)]">
+                  {documents.map((doc) => {
+                    const bankName = (doc.extraction as { bank_name?: string })?.bank_name;
+                    const vendorName = (doc.extraction as { vendor_name?: string })?.vendor_name;
+                    const balance = (doc.extraction as { closing_balance?: number })?.closing_balance;
+                    const total = (doc.extraction as { total_amount?: number })?.total_amount;
+                    return renderRow({
+                      id: doc.id,
+                      title: bankName || vendorName || doc.filename,
+                      filename: doc.filename,
+                      documentType: doc.document_type,
+                      pages: doc.pages,
+                      createdAt: doc.created_at,
+                      amount: balance ?? total,
+                      deleteTitle: 'Delete',
+                      deleteLabel: `Delete ${doc.filename}`,
+                    });
+                  })}
+                </ul>
               ) : (
-                <div className="text-center py-16 space-y-2 text-[var(--color-text-secondary)]">
-                  <p className="font-bold text-sm text-[var(--color-ink)]">No documents found</p>
-                  <p className="text-xs">Upload your first bank statement or invoice to start building history.</p>
+                <div className="text-center py-16 space-y-1">
+                  <p className="font-semibold text-[17px] text-[var(--color-ink)]">No documents found</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">Upload your first bank statement or invoice to start building history.</p>
                 </div>
               )
             ) : (
               /* Free Guest User Browser History */
               filteredGuestItems.length > 0 ? (
-                filteredGuestItems.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      onSelectDocument(item.id);
-                      onClose();
-                    }}
-                    className="p-4 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-brand)] cursor-pointer transition-all space-y-3 group shadow-xs"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3 truncate">
-                        <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-ink)] shrink-0">
-                          <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
-                        </div>
-                        <div className="truncate">
-                          <p className="font-bold text-xs sm:text-sm text-[var(--color-ink)] truncate group-hover:text-[var(--color-brand-dark)] transition-colors">
-                            {item.filename}
-                          </p>
-                          <p className="text-[11px] text-[var(--color-text-secondary)] flex items-center gap-2 mt-0.5">
-                            <span className="capitalize">{item.document_type.replace('_', ' ')}</span>
-                            <span>&bull;</span>
-                            <span>{item.pages || 1} Page{item.pages !== 1 ? 's' : ''}</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      {item.closing_balance !== undefined && item.closing_balance !== null && (
-                        <span className="font-mono font-bold text-xs text-[var(--color-ink)] bg-[var(--color-surface)] px-2.5 py-1 rounded-lg border border-[var(--color-border)] shrink-0">
-                          {formatUSD(item.closing_balance)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
-                      <span className="flex items-center gap-1 font-mono">
-                        <Calendar className="w-3 h-3" aria-hidden="true" />
-                        {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent'}
-                      </span>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => handleDownload(e, item.id, 'xlsx')}
-                          className="p-1.5 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-                          title="Download Excel (.xlsx)"
-                          aria-label={`Download Excel for ${item.filename}`}
-                        >
-                          <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(e, item.id)}
-                          className="p-1.5 rounded-lg hover:bg-[var(--color-danger-soft)] text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-                          title="Remove from history"
-                          aria-label={`Remove ${item.filename} from history`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                <ul className="divide-y divide-[var(--color-border-subtle)]">
+                  {filteredGuestItems.map((item) =>
+                    renderRow({
+                      id: item.id,
+                      title: item.filename,
+                      filename: item.filename,
+                      documentType: item.document_type,
+                      pages: item.pages,
+                      createdAt: item.created_at,
+                      amount: item.closing_balance,
+                      deleteTitle: 'Remove from history',
+                      deleteLabel: `Remove ${item.filename} from history`,
+                    })
+                  )}
+                </ul>
               ) : (
-                <div className="text-center py-16 space-y-3 text-[var(--color-text-secondary)]">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)]">
-                    <History className="w-5 h-5" />
+                <div className="text-center py-16 space-y-3">
+                  <div className="w-10 h-10 mx-auto rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center text-[var(--color-text-muted)]">
+                    <History className="w-5 h-5" aria-hidden="true" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-bold text-sm text-[var(--color-ink)]">No documents in browser history</p>
-                    <p className="text-xs max-w-xs mx-auto">
+                    <p className="font-semibold text-[17px] text-[var(--color-ink)]">No documents in browser history</p>
+                    <p className="text-sm text-[var(--color-text-secondary)] max-w-xs mx-auto">
                       Any document you upload (up to 10 pages for free) will automatically be saved here so you can download or review it later.
                     </p>
                   </div>
@@ -497,11 +491,12 @@ export default function HistoryDrawer({
           </div>
 
           {/* Drawer Footer */}
-          <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+          <div className="shrink-0 px-5 sm:px-6 py-3 border-t border-[var(--color-border)] flex items-center justify-between text-[13px] text-[var(--color-text-muted)]">
             <span>Powered by AI Financial Engine</span>
             <button
+              type="button"
               onClick={onClose}
-              className="font-bold text-[var(--color-ink)] hover:underline"
+              className="min-h-[44px] px-2 font-medium text-[var(--color-brand-dark)] hover:underline underline-offset-4 cursor-pointer"
             >
               Close
             </button>

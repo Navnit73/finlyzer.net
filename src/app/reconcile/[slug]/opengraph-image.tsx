@@ -4,13 +4,13 @@ import { getAllReconciliationPages, getReconciliationPageBySlug } from '@/lib/se
 // Per-page share image for /reconcile/[slug] (overrides the root opengraph-image.png).
 // Satori can't read CSS variables, so these mirror the tokens in src/app/globals.css.
 const TOKENS = {
-  ink: '#171717', // --color-ink
-  textSecondary: '#777777', // --color-text-secondary
-  surfaceSubtle: '#f5f5f5', // --color-surface-subtle
-  border: '#e5e5e5', // --color-border
-  brand: '#70f000', // --color-brand
-  brandSoft: '#e9ffd6', // --color-brand-soft
-  onBrand: '#141414', // --color-on-brand
+  ink: '#1d1d1f', // --color-ink
+  textSecondary: '#6e6e73', // --color-text-muted
+  surfaceSubtle: '#f5f5f7', // --color-surface-subtle
+  border: '#e0e0e5', // --color-border
+  brand: '#0071e3', // --color-brand
+  brandSoft: '#e8f2fd', // --color-brand-soft
+  brandDark: '#0066cc', // --color-brand-dark
   surface: '#ffffff', // --color-surface
 };
 
@@ -40,14 +40,13 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '72px 80px',
-          background: TOKENS.surfaceSubtle,
-          borderBottom: `16px solid ${TOKENS.brand}`,
+          background: TOKENS.surface,
           fontFamily: 'sans-serif',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 20, height: 20, borderRadius: 999, background: TOKENS.brand }} />
-          <div style={{ fontSize: 36, fontWeight: 800, color: TOKENS.ink }}>Finlyzers</div>
+          <div style={{ width: 16, height: 16, borderRadius: 999, background: TOKENS.brand }} />
+          <div style={{ fontSize: 36, fontWeight: 600, color: TOKENS.ink }}>Finlyzers</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -58,14 +57,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               padding: '10px 22px',
               borderRadius: 999,
               background: TOKENS.brandSoft,
-              color: TOKENS.onBrand,
+              color: TOKENS.brandDark,
               fontSize: 26,
-              fontWeight: 700,
+              fontWeight: 500,
             }}
           >
             {badge}
           </div>
-          <div style={{ fontSize: 72, fontWeight: 800, lineHeight: 1.05, color: TOKENS.ink, letterSpacing: -2 }}>
+          <div style={{ fontSize: 72, fontWeight: 600, lineHeight: 1.05, color: TOKENS.ink, letterSpacing: -2.5 }}>
             {title}
           </div>
         </div>
@@ -79,10 +78,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 padding: '8px 20px',
                 borderRadius: 999,
                 border: `2px solid ${TOKENS.border}`,
-                background: TOKENS.surface,
+                background: TOKENS.surfaceSubtle,
                 color: TOKENS.ink,
                 fontSize: 24,
-                fontWeight: 700,
+                fontWeight: 500,
               }}
             >
               {fmt}

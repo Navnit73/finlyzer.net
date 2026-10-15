@@ -1,17 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  ShieldAlert,
-  RotateCw,
-  Activity,
-  Layers,
-  Sparkles,
-  Cpu,
-  Server,
-  Download,
-  CheckCircle2,
-} from 'lucide-react';
+import { RotateCw } from 'lucide-react';
 import { AdminStats, OCRJob } from '@/types/ocr';
 import AdminMetricsGrid from './AdminMetricsGrid';
 import AdminWorkerTelemetry from './AdminWorkerTelemetry';
@@ -116,70 +106,69 @@ export default function AdminDashboardView() {
     }
   };
 
+  const isSyncing = isLoadingStats || isLoadingJobs;
+
   return (
-    <div className="space-y-8 pb-12">
-      {/* SuperAdmin Top Header */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-12 pb-12">
+      {/* Page header */}
+      <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <div className="flex items-center gap-2.5">
-            <span className="w-9 h-9 rounded-xl bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shadow-xs">
-              <ShieldAlert className="w-5 h-5 stroke-[2.5]" />
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
-              SuperAdmin System &amp; Worker Dashboard
-            </h1>
-          </div>
-          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-3xl">
+          <h1 className="type-title">SuperAdmin system &amp; worker dashboard</h1>
+          <p className="max-w-3xl text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
             Real database metrics, background Celery &amp; async worker pool health, live Redis/MongoDB telemetry, and global SSE event stream.
           </p>
         </div>
 
-        {/* Live Status & Refresh Button */}
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <span className="font-bold text-[var(--color-ink)]">
-              Refreshed: {lastRefreshedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        {/* Live status & refresh */}
+        <div className="flex shrink-0 flex-wrap items-center gap-4">
+          <p className="flex items-center gap-2 text-[13px] text-[var(--color-text-muted)]" aria-live="polite">
+            <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" aria-hidden="true" />
+            <span>
+              Refreshed{' '}
+              <time className="tabular-nums text-[var(--color-text-secondary)]" dateTime={lastRefreshedAt.toISOString()}>
+                {lastRefreshedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </time>
             </span>
-          </div>
+          </p>
 
           <button
+            type="button"
             onClick={handleRefreshAll}
-            disabled={isLoadingStats || isLoadingJobs}
-            className="btn btn-brand-primary px-5 py-2.5 text-xs font-bold flex items-center gap-2 shadow-xs cursor-pointer"
+            disabled={isSyncing}
+            className="btn-brand-primary"
           >
-            <RotateCw className={`w-4 h-4 ${isLoadingStats || isLoadingJobs ? 'animate-spin' : ''}`} />
-            <span>Sync Live Data</span>
+            <RotateCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} aria-hidden="true" />
+            <span>Sync live data</span>
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* 1. Core KPIs Metric Cards */}
-      <AdminMetricsGrid stats={stats} isLoading={isLoadingStats} />
+      {/* 1. Core KPIs */}
+      <section aria-labelledby="admin-overview-heading" className="space-y-4">
+        <h2 id="admin-overview-heading" className="type-headline">Overview</h2>
+        <AdminMetricsGrid stats={stats} isLoading={isLoadingStats} />
+      </section>
 
-      {/* 2. Worker Infrastructure & Resource Telemetry */}
-      <AdminWorkerTelemetry stats={stats} />
+      {/* 2. Worker infrastructure & resource telemetry */}
+      <section aria-labelledby="admin-telemetry-heading" className="space-y-4">
+        <h2 id="admin-telemetry-heading" className="type-headline">Worker telemetry</h2>
+        <AdminWorkerTelemetry stats={stats} />
+      </section>
 
-      {/* 3. Global Real-time SSE Event Stream (Terminal Console) */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-black text-[var(--color-ink)] flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
-            <span>Global Operations Event Stream</span>
-          </h3>
-          <span className="text-xs text-[var(--color-text-muted)] font-medium">
+      {/* 3. Global real-time SSE event stream */}
+      <section aria-labelledby="admin-events-heading" className="space-y-4">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+          <h2 id="admin-events-heading" className="type-headline">Global operations event stream</h2>
+          <p className="text-[13px] text-[var(--color-text-muted)]">
             Live Server-Sent Events pushed from FastAPI worker node
-          </span>
+          </p>
         </div>
         <AdminLiveEventStream />
-      </div>
+      </section>
 
-      {/* 4. Background Jobs Table & Management */}
-      <div className="space-y-3">
-        <h3 className="text-base font-black text-[var(--color-ink)] flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[var(--media-violet)]" />
-          <span>System Job Registry &amp; Queue Management</span>
-        </h3>
+      {/* 4. Background jobs table & management */}
+      <section aria-labelledby="admin-jobs-heading" className="space-y-4">
+        <h2 id="admin-jobs-heading" className="type-headline">System job registry &amp; queue management</h2>
         <AdminJobsTable
           jobs={jobs}
           total={totalJobsCount}
@@ -202,9 +191,9 @@ export default function AdminDashboardView() {
           onRetryJob={handleRetryJob}
           onRefresh={handleRefreshAll}
         />
-      </div>
+      </section>
 
-      {/* 5. Job JSON Inspection Modal */}
+      {/* 5. Job inspection modal */}
       <AdminJobInspectModal
         job={selectedInspectJob}
         isOpen={!!selectedInspectJob}

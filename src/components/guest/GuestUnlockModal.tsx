@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, X, CheckCircle2, ShieldCheck, Lock, CreditCard, ArrowRight, Zap } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, Lock, ArrowRight, Zap } from 'lucide-react';
 import { useIsMounted } from '@/lib/useIsMounted';
 import { openRazorpayCheckout, RazorpayCheckoutOptions } from '@/lib/razorpay-client';
 
@@ -102,7 +102,7 @@ export default function GuestUnlockModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/65 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-3 sm:p-6 bg-black/30 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isProcessing) {
           onClose();
@@ -110,92 +110,103 @@ export default function GuestUnlockModal({
       }}
     >
       <div
-        className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-xl"
+        className="relative w-full max-w-[480px] surface-overlay p-6 sm:p-8 space-y-6 sm:my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="guest-unlock-title"
       >
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+          className="absolute top-3 right-3 w-11 h-11 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Close modal"
           disabled={isProcessing}
         >
-          <X className="w-5 h-5" aria-hidden="true" />
+          <X className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
         </button>
 
-        {/* Top Feature Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-xs font-bold">
-          <Zap className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
-          <span>11–30 PAGE DOCUMENT UNLOCK</span>
-        </div>
-
         {/* Title & Document Badge */}
-        <div className="space-y-2">
-          <h2 id="guest-unlock-title" className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+        <div className="space-y-2 pr-10">
+          <span className="feature-badge !font-medium">
+            <Zap className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+            <span>11–30 page document unlock</span>
+          </span>
+          <h2 id="guest-unlock-title" className="text-[22px] sm:text-2xl font-semibold text-[var(--color-ink)] tracking-tight leading-tight">
             Unlock Full Statement Export
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed">
-            This document contains <strong className="text-[var(--color-ink)] font-mono">{pageCount} pages</strong>. Free guest tier covers up to 10 pages. Unlock all 6 export formats for this document with a 1-time micro-pass.
+          <p className="text-[15px] text-[var(--color-text-secondary)] leading-normal">
+            This document contains <strong className="text-[var(--color-ink)] font-medium tabular-nums">{pageCount} pages</strong>. Free guest tier covers up to 10 pages. Unlock all 6 export formats for this document with a 1-time micro-pass.
           </p>
         </div>
 
-        {/* File Information Card */}
-        <div className="p-3.5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center justify-between text-xs">
-          <div className="space-y-0.5 min-w-0 pr-2">
-            <p className="font-bold text-[var(--color-ink)] truncate">{filename}</p>
-            <p className="text-[11px] text-[var(--color-text-secondary)] font-mono">{pageCount} pages parsed &bull; AI Reconciled</p>
+        {/* File Information */}
+        <div className="px-4 py-3.5 rounded-xl bg-[var(--color-surface-subtle)] flex items-center justify-between gap-3">
+          <div className="space-y-0.5 min-w-0">
+            <p className="text-sm font-medium text-[var(--color-ink)] truncate">{filename}</p>
+            <p className="text-xs text-[var(--color-text-muted)] tabular-nums">{pageCount} pages parsed &bull; AI Reconciled</p>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-lg font-black text-[var(--color-ink)] font-mono">$10</span>
-            <span className="text-[10px] text-[var(--color-text-secondary)] block">One-time fee</span>
+            <span className="block text-xl leading-none font-semibold text-[var(--color-ink)] tabular-nums">$10</span>
+            <span className="mt-1 block text-xs text-[var(--color-text-muted)]">One-time fee</span>
           </div>
         </div>
 
         {/* Value Points */}
-        <div className="space-y-2.5 bg-[var(--color-surface-subtle)] p-4 rounded-lg border border-[var(--color-border)]">
-          <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
-            <span>Instant download in Excel (.xlsx), CSV, and PDF formats</span>
-          </div>
-          <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
-            <span>Accounting feeds for QuickBooks (.qbo), Xero (.ofx), and Quicken (.qif)</span>
-          </div>
-          <div className="flex items-center gap-2.5 text-xs text-[var(--color-ink)] font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" />
-            <span>Formulas, cash flow categorization, and reconciliation summary included</span>
-          </div>
-        </div>
+        <ul className="space-y-2">
+              <li className="flex items-start gap-2.5 text-sm text-[var(--color-ink)]">
+                <CheckCircle2 className="w-[18px] h-[18px] mt-px text-[var(--color-success)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                <span>Instant download in Excel (.xlsx), CSV, and PDF formats</span>
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-[var(--color-ink)]">
+                <CheckCircle2 className="w-[18px] h-[18px] mt-px text-[var(--color-success)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                <span>Accounting feeds for QuickBooks (.qbo), Xero (.ofx), and Quicken (.qif)</span>
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-[var(--color-ink)]">
+                <CheckCircle2 className="w-[18px] h-[18px] mt-px text-[var(--color-success)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                <span>Formulas, cash flow categorization, and reconciliation summary included</span>
+              </li>
+        </ul>
 
         {errorMessage && (
-          <div role="alert" className="p-3 rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] text-xs font-semibold border border-[var(--color-danger-border)]">
+          <div role="alert" className="px-3.5 py-3 rounded-xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] text-[13px]">
             {errorMessage}
           </div>
         )}
 
         {/* Unlock Action Button */}
-        <div className="space-y-3 pt-1">
-          <button
-            onClick={handleUnlockPayment}
-            disabled={isProcessing}
-            className="btn-brand-primary w-full !py-3.5 !px-6 !text-sm !font-black rounded-lg shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
-          >
-            {isProcessing ? (
-              <span className="loading loading-spinner loading-sm" aria-hidden="true"></span>
-            ) : (
-              <Lock className="w-4 h-4" aria-hidden="true" />
-            )}
-            <span>Pay $10 &amp; Unlock All Formats</span>
-            <ArrowRight className="w-4 h-4 ml-1" aria-hidden="true" />
-          </button>
-        </div>
+        <div className="space-y-3">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isProcessing}
+              className="btn-brand-secondary w-full sm:w-auto"
+            >
+              Not now
+            </button>
+            <button
+              type="button"
+              onClick={handleUnlockPayment}
+              disabled={isProcessing}
+              aria-busy={isProcessing}
+              className="btn-brand-primary w-full sm:flex-1"
+            >
+              {isProcessing ? (
+                <span className="loading loading-spinner loading-sm" aria-hidden="true"></span>
+              ) : (
+                <Lock className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+              )}
+              <span>Pay $10 &amp; Unlock All Formats</span>
+              <ArrowRight className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
+            </button>
+          </div>
 
-        {/* Security badge */}
-        <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--color-text-muted)] pt-1">
-          <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
-          <span>256-Bit SSL Encrypted &bull; Razorpay / Card Secure Checkout</span>
+          {/* Security badge */}
+          <p className="flex items-center justify-center gap-1.5 text-xs text-[var(--color-text-muted)] text-center">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+            <span>256-Bit SSL Encrypted &bull; Razorpay / Card Secure Checkout</span>
+          </p>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Mail, Phone, ShieldCheck, CheckCircle2, Building2 } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import LegalPage, { type LegalSection } from '@/components/legal/LegalPage';
 import { pageMetadata } from '@/lib/seo-config';
 
@@ -62,7 +62,7 @@ const sections: LegalSection[] = [
             <tr>
               <td>Official Contact Email</td>
               <td>
-                <a href="mailto:navnitrai5389@gmail.com" className="font-semibold text-[var(--color-ink)] underline">
+                <a href="mailto:navnitrai5389@gmail.com">
                   navnitrai5389@gmail.com
                 </a>
               </td>
@@ -70,7 +70,7 @@ const sections: LegalSection[] = [
             <tr>
               <td>Helpline / Phone Number</td>
               <td>
-                <a href="tel:+917355087072" className="font-semibold text-[var(--color-ink)] underline">
+                <a href="tel:+917355087072">
                   +91 7355087072
                 </a>
               </td>
@@ -78,7 +78,7 @@ const sections: LegalSection[] = [
             <tr>
               <td>Billing &amp; Invoice Inquiries</td>
               <td>
-                <a href="mailto:billing@finlyzers.com" className="font-semibold text-[var(--color-ink)] underline">
+                <a href="mailto:billing@finlyzers.com">
                   billing@finlyzers.com
                 </a>
               </td>
@@ -106,43 +106,29 @@ const sections: LegalSection[] = [
           have questions about your page credits or billing, or wish to inquire about high-volume enterprise conversions, our team
           is ready to help.
         </p>
-        <div className="my-4 grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose">
-          <div className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs">
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center">
-                <Mail className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Email Us</p>
-                <a
-                  href="mailto:navnitrai5389@gmail.com"
-                  className="text-sm font-bold text-[var(--color-ink)] hover:underline"
-                >
-                  navnitrai5389@gmail.com
-                </a>
-              </div>
-            </div>
-            <p className="text-xs text-[var(--color-text-muted)]">
+        <div className="not-prose !mt-6 grid grid-cols-1 sm:grid-cols-2 border-y border-[var(--color-border)] divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border)]">
+          <div className="py-5 sm:pr-6 space-y-2">
+            <p className="flex items-center gap-2 text-[13px] text-[var(--color-text-muted)]">
+              <Mail className="w-4 h-4" aria-hidden="true" />
+              Email Us
+            </p>
+            <a href="mailto:navnitrai5389@gmail.com" className="block text-[17px] font-medium break-all">
+              navnitrai5389@gmail.com
+            </a>
+            <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
               For general support, billing queries, refunds, and legal inquiries. Typical response within 24 hours.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs">
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--media-blue-soft)] text-[var(--media-blue-text)] flex items-center justify-center">
-                <Phone className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Call / WhatsApp</p>
-                <a
-                  href="tel:+917355087072"
-                  className="text-sm font-bold text-[var(--color-ink)] hover:underline"
-                >
-                  +91 7355087072
-                </a>
-              </div>
-            </div>
-            <p className="text-xs text-[var(--color-text-muted)]">
+          <div className="py-5 sm:pl-6 space-y-2">
+            <p className="flex items-center gap-2 text-[13px] text-[var(--color-text-muted)]">
+              <Phone className="w-4 h-4" aria-hidden="true" />
+              Call / WhatsApp
+            </p>
+            <a href="tel:+917355087072" className="block text-[17px] font-medium tabular-nums">
+              +91 7355087072
+            </a>
+            <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
               Direct line for urgent conversion issues and merchant support. Available Mon–Sat during business hours.
             </p>
           </div>
@@ -162,7 +148,7 @@ const sections: LegalSection[] = [
         <ul>
           <li>
             <strong>Row-by-Row Running Balance Checks:</strong> Every extracted row is verified mathematically against the statement’s
-            printed balance column (<code className="text-xs bg-[var(--color-surface-subtle)] px-1 py-0.5 rounded">Previous Balance + Credits − Debits = Current Balance</code>).
+            printed balance column (<code className="text-[14px] bg-[var(--color-surface-subtle)] px-1.5 py-0.5 rounded-md">Previous Balance + Credits − Debits = Current Balance</code>).
           </li>
           <li>
             <strong>Discrepancy Highlighting:</strong> Any math mismatch or missing transaction is immediately flagged for user review

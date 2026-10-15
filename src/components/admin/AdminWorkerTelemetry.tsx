@@ -1,214 +1,204 @@
 'use client';
 
 import React from 'react';
-import {
-  Server,
-  Database,
-  Radio,
-  Cpu,
-  HardDrive,
-  Activity,
-  AlertTriangle,
-  Clock,
-  ShieldCheck,
-} from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { AdminStats } from '@/types/ocr';
 
 interface AdminWorkerTelemetryProps {
   stats: AdminStats | null;
 }
 
+type ServiceState = 'up' | 'down' | 'unknown';
+
+function toState(flag: boolean | undefined): ServiceState {
+  if (flag === true) return 'up';
+  if (flag === false) return 'down';
+  return 'unknown';
+}
+
+const STATE_STYLES: Record<ServiceState, { dot: string; text: string }> = {
+  up: { dot: 'bg-[var(--color-success)]', text: 'text-[var(--color-success)]' },
+  down: { dot: 'bg-[var(--color-danger)]', text: 'text-[var(--color-danger)]' },
+  unknown: { dot: 'bg-[var(--color-border-hover)]', text: 'text-[var(--color-text-muted)]' },
+};
+
+function ServiceRow({
+  name,
+  description,
+  state,
+  upLabel,
+}: {
+  name: string;
+  description: string;
+  state: ServiceState;
+  upLabel: string;
+}) {
+  const style = STATE_STYLES[state];
+  const label = state === 'up' ? upLabel : state === 'down' ? 'Disconnected' : 'Unknown';
+  return (
+    <li className="flex items-center justify-between gap-4 py-3">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-[var(--color-ink)]">{name}</p>
+        <p className="truncate text-[13px] text-[var(--color-text-muted)]">{description}</p>
+      </div>
+      <span className={`flex shrink-0 items-center gap-1.5 text-[13px] ${style.text}`}>
+        <span className={`h-2 w-2 rounded-full ${style.dot}`} aria-hidden="true" />
+        <span>{label}</span>
+      </span>
+    </li>
+  );
+}
+
+function UsageMeter({ label, value }: { label: string; value: number | null }) {
+  const pct = value === null ? 0 : Math.min(100, Math.max(0, value));
+  const isHigh = value !== null && value > 80;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between text-sm">
+        <span className="text-[var(--color-text-secondary)]">{label}</span>
+        <span className={`tabular-nums font-medium ${isHigh ? 'text-[var(--color-danger)]' : 'text-[var(--color-ink)]'}`}>
+          {value === null ? '—' : `${value.toFixed(1)}%`}
+        </span>
+      </div>
+      <div
+        role="progressbar"
+        aria-valuenow={Math.round(pct)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={label}
+        className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]"
+      >
+        <div
+          className={`h-full rounded-full transition-[width] duration-500 ${
+            isHigh ? 'bg-[var(--color-danger)]' : 'bg-[var(--color-brand)]'
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+const PANEL = 'card-surface p-5 sm:p-6 flex flex-col min-w-0';
+const PANEL_HEADER = 'flex items-baseline justify-between gap-3 pb-3 border-b border-[var(--color-border)]';
+const PANEL_TITLE = 'text-[15px] font-semibold text-[var(--color-ink)]';
+const PANEL_META = 'text-[13px] text-[var(--color-text-muted)] tabular-nums';
+
 export default function AdminWorkerTelemetry({ stats }: AdminWorkerTelemetryProps) {
   const health = stats?.worker_health;
   const recentErrors = stats?.recent_errors || [];
 
-  const cpuPercent = health?.cpu_percent || 24.5;
-  const memoryPercent = health?.memory_percent || 41.2;
-  const uptimeHours = health?.uptime_seconds
-    ? (health.uptime_seconds / 3600).toFixed(1)
-    : '24.0';
+  const cpuPercent = typeof health?.cpu_percent === 'number' ? health.cpu_percent : null;
+  const memoryPercent = typeof health?.memory_percent === 'number' ? health.memory_percent : null;
+  const uptimeHours = health?.uptime_seconds ? (health.uptime_seconds / 3600).toFixed(1) : '—';
+
+  const mongoState = toState(health?.mongodb_connected);
+  const redisState = toState(health?.redis_connected);
+  const workerState: ServiceState = !health ? 'unknown' : (health.active_workers ?? 0) > 0 ? 'up' : 'down';
+  const states = [mongoState, redisState, workerState];
+  const summary = states.includes('down')
+    ? { label: 'Degraded', className: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]' }
+    : states.every((s) => s === 'up')
+    ? { label: 'All operational', className: 'bg-[var(--color-success-soft)] text-[var(--color-success)]' }
+    : { label: 'Checking', className: 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]' };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* 1. Infrastructure Services Connectivity */}
-      <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Server className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
-            <h4 className="text-sm font-black text-[var(--color-ink)]">Infrastructure Services</h4>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">
-            All Operational
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+      {/* 1. Infrastructure services connectivity */}
+      <section className={PANEL} aria-labelledby="telemetry-services-heading">
+        <div className={PANEL_HEADER}>
+          <h3 id="telemetry-services-heading" className={PANEL_TITLE}>Infrastructure services</h3>
+          <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${summary.className}`}>
+            {summary.label}
           </span>
         </div>
 
-        <div className="space-y-3 pt-1">
-          {/* MongoDB */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
-            <div className="flex items-center gap-2.5">
-              <Database className="w-4 h-4 text-emerald-700" aria-hidden="true" />
-              <div>
-                <p className="font-bold text-[var(--color-ink)]">MongoDB Primary Cluster</p>
-                <p className="text-[11px] text-[var(--color-text-muted)]">Extractions &amp; Orders DB</p>
-              </div>
-            </div>
-            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
-              <span>Connected</span>
+        <ul className="divide-y divide-[var(--color-border-subtle)]">
+          <ServiceRow
+            name="MongoDB primary cluster"
+            description="Extractions & Orders DB"
+            state={mongoState}
+            upLabel="Connected"
+          />
+          <ServiceRow
+            name="Redis queue & state broker"
+            description="Task dispatch & SSE pub/sub"
+            state={redisState}
+            upLabel="Connected"
+          />
+          <ServiceRow
+            name="OCR background workers"
+            description={`${health?.active_workers ?? '—'} concurrency workers active`}
+            state={workerState}
+            upLabel="Active"
+          />
+        </ul>
+      </section>
+
+      {/* 2. Worker resources */}
+      <section className={PANEL} aria-labelledby="telemetry-load-heading">
+        <div className={PANEL_HEADER}>
+          <h3 id="telemetry-load-heading" className={PANEL_TITLE}>System load telemetry</h3>
+          <span className={PANEL_META}>Uptime {uptimeHours}h</span>
+        </div>
+
+        <div className="space-y-5 pt-4">
+          <UsageMeter label="CPU utilization" value={cpuPercent} />
+          <UsageMeter label="RAM / memory pool" value={memoryPercent} />
+        </div>
+
+        <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-[var(--color-border)] pt-4">
+          <div>
+            <dt className="text-[13px] text-[var(--color-text-muted)]">Queue depth</dt>
+            <dd className="mt-1 text-sm font-medium tabular-nums text-[var(--color-ink)]">
+              {(health?.queue_size || 0).toLocaleString()} tasks
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[13px] text-[var(--color-text-muted)]">Security auth</dt>
+            <dd className="mt-1 flex items-center gap-1.5 text-sm font-medium text-[var(--color-ink)]">
+              <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
+              API key &amp; HMAC
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      {/* 3. Recent exceptions */}
+      <section className={PANEL} aria-labelledby="telemetry-errors-heading">
+        <div className={PANEL_HEADER}>
+          <h3 id="telemetry-errors-heading" className={PANEL_TITLE}>Recent exceptions</h3>
+          <span className={PANEL_META}>{recentErrors.length} logged</span>
+        </div>
+
+        {recentErrors.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 py-8 text-center">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)]">
+              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </span>
+            <p className="text-[13px] text-[var(--color-text-secondary)]">Zero recent worker exceptions reported.</p>
           </div>
-
-          {/* Redis Message Broker */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
-            <div className="flex items-center gap-2.5">
-              <Radio className="w-4 h-4 text-red-600" aria-hidden="true" />
-              <div>
-                <p className="font-bold text-[var(--color-ink)]">Redis Queue &amp; State Broker</p>
-                <p className="text-[11px] text-[var(--color-text-muted)]">Task dispatch &amp; SSE pub/sub</p>
-              </div>
-            </div>
-            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
-              <span>Connected</span>
-            </span>
-          </div>
-
-          {/* Celery / Async Worker Pool */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
-            <div className="flex items-center gap-2.5">
-              <Cpu className="w-4 h-4 text-[var(--media-violet-text)]" aria-hidden="true" />
-              <div>
-                <p className="font-bold text-[var(--color-ink)]">OCR Background Workers</p>
-                <p className="text-[11px] text-[var(--color-text-muted)]">
-                  {health?.active_workers || 4} Concurrency Workers Active
-                </p>
-              </div>
-            </div>
-            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
-              <span>Active</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Worker Resources & Gauge Meters */}
-      <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[var(--media-violet-text)]" aria-hidden="true" />
-            <h4 className="text-sm font-black text-[var(--color-ink)]">System Load Telemetry</h4>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-            Uptime: {uptimeHours}h
-          </span>
-        </div>
-
-        <div className="space-y-4 pt-1">
-          {/* CPU Load */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs font-bold text-[var(--color-ink)]">
-              <span className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" /> CPU Utilization
-              </span>
-              <span>{cpuPercent.toFixed(1)}%</span>
-            </div>
-            <div
-              role="progressbar"
-              aria-valuenow={Math.round(cpuPercent)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="CPU Utilization"
-              className="w-full bg-[var(--color-surface-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
-            >
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  cpuPercent > 80 ? 'bg-red-500' : 'bg-[var(--color-brand)]'
-                }`}
-                style={{ width: `${Math.min(100, cpuPercent)}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Memory Utilization */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs font-bold text-[var(--color-ink)]">
-              <span className="flex items-center gap-1.5">
-                <HardDrive className="w-3.5 h-3.5 text-[var(--media-violet-text)]" aria-hidden="true" /> RAM / Memory Pool
-              </span>
-              <span>{memoryPercent.toFixed(1)}%</span>
-            </div>
-            <div
-              role="progressbar"
-              aria-valuenow={Math.round(memoryPercent)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="RAM and memory utilization"
-              className="w-full bg-[var(--color-surface-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
-            >
-              <div
-                className="bg-[var(--media-violet)] h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, memoryPercent)}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Queue & Security Stats */}
-          <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-              <p className="text-[10px] font-bold text-[var(--color-text-muted)]">Queue Depth</p>
-              <p className="text-sm font-black text-[var(--color-ink)] mt-0.5">
-                {health?.queue_size || 0} tasks
-              </p>
-            </div>
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-              <p className="text-[10px] font-bold text-[var(--color-text-muted)]">Security Auth</p>
-              <p className="text-sm font-black text-emerald-600 mt-0.5 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> API Key &amp; HMAC
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Recent Exceptions & Error Triage */}
-      <div className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <h4 className="text-sm font-black text-[var(--color-ink)]">Recent Exceptions</h4>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-            {recentErrors.length} Logged
-          </span>
-        </div>
-
-        <div className="space-y-2.5 max-h-[190px] overflow-y-auto pr-1">
-          {recentErrors.length === 0 ? (
-            <div className="p-4 rounded-xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 text-center text-xs text-[var(--color-ink)]">
-              <ShieldCheck className="w-5 h-5 text-[var(--color-brand-hover)] mx-auto mb-1" />
-              <span>Zero recent worker exceptions reported.</span>
-            </div>
-          ) : (
-            recentErrors.map((err, idx) => (
-              <div
-                key={idx}
-                className="p-3 rounded-xl bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] text-xs text-[var(--color-ink)] space-y-1"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-[11px] text-[var(--color-danger)]">{err.job_id}</span>
-                  <span className="text-[10px] text-[var(--color-text-muted)]">
-                    {new Date(err.timestamp).toLocaleTimeString()}
+        ) : (
+          <ul className="max-h-[220px] divide-y divide-[var(--color-border-subtle)] overflow-y-auto">
+            {recentErrors.map((err, idx) => (
+              <li key={`${err.job_id}-${idx}`} className="space-y-1 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-danger)]" aria-hidden="true" />
+                    <span className="truncate font-mono text-[12px] text-[var(--color-text-secondary)]">{err.job_id}</span>
                   </span>
+                  <time className="shrink-0 text-[12px] tabular-nums text-[var(--color-text-muted)]" dateTime={err.timestamp}>
+                    {new Date(err.timestamp).toLocaleTimeString()}
+                  </time>
                 </div>
-                <p className="text-[11px] text-[var(--color-text-secondary)] font-medium truncate">
+                <p className="truncate pl-3.5 text-[13px] text-[var(--color-ink)]" title={err.error}>
                   {err.error}
                 </p>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

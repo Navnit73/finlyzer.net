@@ -1,11 +1,13 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { ChevronRight, UploadCloud, GitCompareArrows, Download, FileSpreadsheet, ShieldCheck, ArrowDown } from 'lucide-react';
+import BreadcrumbStrip from '@/components/layout/BreadcrumbStrip';
+import { UploadCloud, GitCompareArrows, Download, FileSpreadsheet, ShieldCheck, ArrowDown } from 'lucide-react';
 import { getAllReconciliationPages, getReconciliationPageBySlug } from '@/lib/seo-markdown';
 import {
-  WEBAPP_ID,
+  ORGANIZATION_ID,
+  SITE_URL,
+  absoluteUrl,
   getBreadcrumbJsonLd,
   getFaqJsonLd,
   getWebPageJsonLd,
@@ -20,16 +22,17 @@ import {
   HowItWorksSection,
   FeatureGridSection,
   EditorialSection,
-  SecuritySection,
   ConverterLinksSection,
   FaqSection,
   FinalCtaSection,
+  SectionBand,
+  type BandTone,
 } from '@/components/converter/sections';
 import {
   ReportContentsSection,
   SampleMatchSection,
+  reconciliationFeatureIcons,
   reconciliationMetrics,
-  reconciliationSecurityPoints,
 } from '@/components/reconciliation/sections';
 import { RECONCILIATION_GUEST_RETENTION_DAYS } from '@/lib/retention';
 import { FREE_PAGE_LIMIT } from '@/types/pricing';
@@ -41,6 +44,35 @@ const ctaFacts = [
   { icon: FileSpreadsheet, label: 'Excel & CSV report' },
   { icon: ShieldCheck, label: `Guest reports deleted after ${RECONCILIATION_GUEST_RETENTION_DAYS} days` },
 ];
+
+// The reconciliation tool is its own app entity; the site-wide #webapp node describes the converter.
+const RECONCILIATION_APP_ID = `${SITE_URL}/#reconciliation-app`;
+
+const reconciliationAppJsonLd = {
+  '@type': 'WebApplication',
+  '@id': RECONCILIATION_APP_ID,
+  name: 'Finlyzers Bank Reconciliation Tool',
+  url: absoluteUrl('/reconcile/bank-reconciliation-tool'),
+  description:
+    'Matches bank statement transactions against a ledger or cash book and reports matched, missing, mismatched and duplicate entries with balance checks.',
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any (web browser)',
+  publisher: { '@id': ORGANIZATION_ID },
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: `Free for reconciliations up to ${FREE_PAGE_LIMIT} pages`,
+  },
+  featureList: [
+    'Reads PDF, scanned, CSV and Excel (.xlsx) bank statements and ledgers',
+    'Rule-based matching by amount, direction, date, reference and description',
+    'Matched, missing, mismatched and duplicate transactions in one report',
+    'Opening, closing and running balance checks for both documents',
+    'Excel and CSV report download',
+    `Guest reconciliations deleted after ${RECONCILIATION_GUEST_RETENTION_DAYS} days`,
+  ],
+};
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -83,9 +115,10 @@ export default async function ReconciliationLandingPage({ params }: PageProps) {
   const faqs = page.faqs.map((faq) => ({ q: faq.question, a: faq.answer }));
 
   const jsonLd = serializeJsonLd([
+    reconciliationAppJsonLd,
     {
       ...getWebPageJsonLd({ path, name: page.title, description: page.metaDescription, dateModified: page.dateModified || undefined }),
-      about: { '@id': WEBAPP_ID },
+      about: { '@id': RECONCILIATION_APP_ID },
     },
     getBreadcrumbJsonLd([
       { name: 'Home', path: '/' },
@@ -94,15 +127,98 @@ export default async function ReconciliationLandingPage({ params }: PageProps) {
     ...(faqs.length > 0 ? [getFaqJsonLd(faqs)] : []),
   ]);
 
+  // Content bands in page order. White and parchment alternate automatically (skipping
+  // sections this page doesn't have); the feature grid is always the dark band.
+  const bands: { key: string; tone?: 'dark'; node: React.ReactNode }[] = [
+    ...(page.steps.length > 0
+      ? [{
+          key: 'how',
+          node: (
+            <HowItWorksSection
+              title="How It Works"
+              subtitle="Two files in, one reconciliation report out. Spreadsheets finish in seconds; long scanned PDFs take a few minutes."
+              steps={page.steps.map((step, i) => ({ ...step, icon: stepIcons[i % stepIcons.length] }))}
+              ctaLabel="Upload Your Files"
+            />
+          ),
+        }]
+      : []),
+    ...(page.sampleRows.length > 0
+      ? [{
+          key: 'sample',
+          node: (
+            <SampleMatchSection
+              title="Example: Bank Statement vs Ledger"
+              subtitle="How individual lines come out of the comparison (illustrative data)."
+              rows={page.sampleRows}
+            />
+          ),
+        }]
+      : []),
+    { key: 'report', node: <ReportContentsSection /> },
+    ...(page.features.length > 0
+      ? [{
+          key: 'features',
+          tone: 'dark' as const,
+          node: (
+            <FeatureGridSection
+              title="Built for Real Statements and Ledgers"
+              subtitle="Handles the formats and bookkeeping conventions that break manual matching."
+              features={page.features.map((f) => ({ ...f, icon: f.icon ? reconciliationFeatureIcons[f.icon] : undefined }))}
+              bare
+            />
+          ),
+        }]
+      : []),
+    ...(page.contentHtml ? [{ key: 'editorial', node: <EditorialSection html={page.contentHtml} /> }] : []),
+    ...(related.length > 0
+      ? [{
+          key: 'related',
+          node: (
+            <ConverterLinksSection
+              title="More Reconciliation Tools"
+              basePath="/reconcile"
+              allLink={{ href: '/convert', label: 'Bank statement converters' }}
+              links={related.slice(0, 4).map((p) => ({ name: p.title, slug: p.slug, badge: p.badgeText }))}
+            />
+          ),
+        }]
+      : []),
+    ...(faqs.length > 0
+      ? [{
+          key: 'faq',
+          node: (
+            <FaqSection title={`${page.shortTitle} FAQ`} subtitle="Common questions about reconciling bank statements with your books." faqs={faqs} />
+          ),
+        }]
+      : []),
+    {
+      key: 'final-cta',
+      node: (
+        <FinalCtaSection
+          title="Reconcile Your Bank Statement Now"
+          subtitle={`Upload a bank statement and your ledger. Reconciliations up to ${FREE_PAGE_LIMIT} pages are free, with no signup.`}
+          ctaLabel="Choose Your Files"
+          facts={ctaFacts}
+        />
+      ),
+    },
+  ];
+
+  let lightIndex = 0;
+  const bandTones: BandTone[] = bands.map((band) => {
+    if (band.tone === 'dark') {
+      lightIndex = 1; // the band after a dark band starts white again
+      return 'dark';
+    }
+    return lightIndex++ % 2 === 0 ? 'parchment' : 'white';
+  });
+
   return (
-    <div className="w-full">
+    <div className="w-full -mb-6 sm:-mb-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
 
-      <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] min-w-0">
-        <Link href="/" className="hover:text-[var(--color-ink)] transition-colors shrink-0">Home</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-        <span className="text-[var(--color-ink)] font-semibold truncate" aria-current="page">{page.shortTitle}</span>
-      </nav>
+      <BreadcrumbStrip items={[{ label: 'Home', href: '/' }, { label: page.shortTitle }]} />
 
       <ReconciliationHero
         badge={`${page.badgeText} · Free up to ${FREE_PAGE_LIMIT} pages`}
@@ -113,7 +229,7 @@ export default async function ReconciliationLandingPage({ params }: PageProps) {
         {page.showCalculator && (
           <a
             href="#calculator"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-brand)] decoration-2 min-h-[44px]"
+            className="link inline-flex items-center gap-1 text-[15px] min-h-[44px]"
           >
             Only need the calculation? Use the calculator below
             <ArrowDown className="w-4 h-4" aria-hidden="true" />
@@ -121,60 +237,15 @@ export default async function ReconciliationLandingPage({ params }: PageProps) {
         )}
       </ReconciliationHero>
 
-      <div className="w-full space-y-16 sm:space-y-24 pt-8 sm:pt-12 pb-8 sm:pb-16">
+      <div className="pt-10 sm:pt-16 pb-[var(--section-y)]">
         {page.showCalculator ? <ReconciliationCalculator /> : <MetricsStrip items={reconciliationMetrics} />}
-
-        {page.steps.length > 0 && (
-          <HowItWorksSection
-            title="How It Works"
-            subtitle="Two files in, one reconciliation report out. Spreadsheets finish in seconds; long scanned PDFs take a few minutes."
-            steps={page.steps.map((step, i) => ({ ...step, icon: stepIcons[i % stepIcons.length] }))}
-            ctaLabel="Upload Your Files"
-          />
-        )}
-
-        {page.sampleRows.length > 0 && (
-          <SampleMatchSection
-            title="Example: Bank Statement vs Ledger"
-            subtitle="How individual lines come out of the comparison (illustrative data)."
-            rows={page.sampleRows}
-          />
-        )}
-
-        <ReportContentsSection />
-
-        {page.features.length > 0 && (
-          <FeatureGridSection
-            title="Built for Real Statements and Ledgers"
-            subtitle="Handles the formats and bookkeeping conventions that break manual matching."
-            features={page.features}
-          />
-        )}
-
-        {page.contentHtml && <EditorialSection html={page.contentHtml} />}
-
-        <SecuritySection title="Is It Safe to Upload My Bank Statement and Ledger?" points={reconciliationSecurityPoints} />
-
-        {related.length > 0 && (
-          <ConverterLinksSection
-            title="More Reconciliation Tools"
-            basePath="/reconcile"
-            allLink={{ href: '/convert', label: 'Bank statement converters' }}
-            links={related.slice(0, 4).map((p) => ({ name: p.title, slug: p.slug, badge: p.badgeText }))}
-          />
-        )}
-
-        {faqs.length > 0 && (
-          <FaqSection title={`${page.shortTitle} FAQ`} subtitle="Common questions about reconciling bank statements with your books." faqs={faqs} />
-        )}
-
-        <FinalCtaSection
-          title="Reconcile Your Bank Statement Now"
-          subtitle={`Upload a bank statement and your ledger. Reconciliations up to ${FREE_PAGE_LIMIT} pages are free, with no signup.`}
-          ctaLabel="Choose Your Files"
-          facts={ctaFacts}
-        />
       </div>
+
+      {bands.map((band, i) => (
+        <SectionBand key={band.key} tone={bandTones[i]}>
+          {band.node}
+        </SectionBand>
+      ))}
 
       <MobileStickyCta label="Reconcile Free" note={`Free up to ${FREE_PAGE_LIMIT} pages · No signup`} />
     </div>

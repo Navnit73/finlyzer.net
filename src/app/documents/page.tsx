@@ -13,15 +13,14 @@ import {
   RefreshCw,
   Lock,
   UserCheck,
-  FileSpreadsheet,
   Layers,
   Building,
   Receipt,
   FileCheck2,
-  AlertCircle,
   CheckCircle2,
   Cpu,
   ArrowRight,
+  X,
 } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 import { StoredDocument, ExportFormat } from '@/types/ocr';
@@ -134,62 +133,65 @@ export default function DocumentsVaultPage() {
   const totalInvoices = documents.filter((d) => d.document_type === 'invoice').length;
   const totalReceipts = documents.filter((d) => d.document_type === 'receipt').length;
 
+  const pillBtn =
+    'inline-flex items-center justify-center gap-1.5 h-9 sm:h-8 px-3 rounded-full text-[13px] font-medium bg-[var(--color-surface-muted)] text-[var(--color-ink)] hover:bg-[var(--color-border)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap';
+
+  const metrics = [
+    { label: 'Total Documents', value: documents.length },
+    { label: 'Bank Statements', value: totalBankStatements },
+    { label: 'Invoices', value: totalInvoices },
+    { label: 'Receipts', value: totalReceipts },
+  ];
+
   return (
-    <div className="w-full space-y-6 pb-16">
-      {/* Top Breadcrumb & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)]">
-            <FileCheck2 className="w-3.5 h-3.5" />
+    <div className="w-full space-y-8 pb-16">
+      {/* Page header */}
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-1.5 min-w-0">
+          <p className="inline-flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
+            <FileCheck2 className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             <span>MongoDB Document Vault</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
-            Converted Documents & Audit History
-          </h1>
-          <p className="text-xs text-[var(--color-text-secondary)]">
+          </p>
+          <h1 className="type-title">Converted Documents & Audit History</h1>
+          <p className="text-[15px] text-[var(--color-text-secondary)]">
             Review, search, export in 6 financial formats, or delete all statements processed through your account.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <button
+            type="button"
             onClick={() => fetchDocuments()}
-            className="btn-brand-secondary !min-h-[36px] !h-[36px] !px-3 text-xs font-bold flex items-center gap-1.5 cursor-pointer rounded-lg"
+            className="btn-brand-secondary !min-h-9 !h-9 !px-4 !text-sm"
             title="Refresh list"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} strokeWidth={1.75} aria-hidden="true" />
             <span>Refresh</span>
           </button>
 
-          <Link
-            href="/workspace"
-            className="btn-brand-primary !min-h-[36px] !h-[36px] !px-4 text-xs font-bold flex items-center gap-1.5 rounded-lg shadow-xs"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
+          <Link href="/workspace" className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm">
+            <Sparkles className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             <span>Convert New File</span>
           </Link>
         </div>
-      </div>
+      </header>
 
       {/* Guest Sign-In Notice */}
       {!isLoggedIn && status !== 'loading' && (
-        <div className="p-8 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-center space-y-4 max-w-xl mx-auto shadow-none my-8">
-          <div className="w-12 h-12 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] flex items-center justify-center mx-auto shadow-xs">
-            <Lock className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-xl font-black text-[var(--color-ink)]">
+        <div className="py-16 sm:py-20 text-center max-w-md mx-auto space-y-4">
+          <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
+            <Lock className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+          </span>
+          <div className="space-y-1.5">
+            <h2 className="text-[17px] font-semibold text-[var(--color-ink)]">
               Sign In to Access Your Document History
             </h2>
-            <p className="text-xs text-[var(--color-text-secondary)]">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               Your parsed statements, invoices, and accounting exports are stored securely in your private cloud vault.
             </p>
           </div>
-          <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="btn-brand-dark !min-h-[40px] !h-[40px] !px-6 text-xs font-bold inline-flex items-center gap-2 cursor-pointer shadow-xs rounded-lg"
-          >
-            <UserCheck className="w-4 h-4" />
+          <button type="button" onClick={() => setIsAuthModalOpen(true)} className="btn-brand-primary">
+            <UserCheck className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             <span>Sign In with Google</span>
           </button>
         </div>
@@ -199,64 +201,57 @@ export default function DocumentsVaultPage() {
         <>
           {/* Active In-Flight Background Jobs Banner */}
           {activeJobs.length > 0 && (
-            <div className="p-5 rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-brand)] shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0">
-                    <Cpu className="w-4 h-4 animate-spin" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-[var(--color-ink)] flex items-center gap-2">
-                      <span>Active Background OCR Tasks</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] uppercase">
-                        {activeJobs.length} In Progress
-                      </span>
-                    </h3>
-                    <p className="text-[11px] text-[var(--color-text-secondary)]">
-                      Large documents (100–200 pages) keep processing automatically even when you browse or switch tabs.
-                    </p>
-                  </div>
+            <section aria-labelledby="vault-active-jobs" className="rounded-2xl bg-[var(--color-surface-subtle)] p-4 sm:p-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <Cpu className="w-5 h-5 mt-0.5 text-[var(--color-brand-dark)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                <div className="min-w-0 space-y-0.5">
+                  <h2 id="vault-active-jobs" className="text-[15px] font-semibold text-[var(--color-ink)] flex flex-wrap items-center gap-2">
+                    <span>Active Background OCR Tasks</span>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] tabular-nums">
+                      {activeJobs.length} In Progress
+                    </span>
+                  </h2>
+                  <p className="text-[13px] text-[var(--color-text-secondary)]">
+                    Large documents (100–200 pages) keep processing automatically even when you browse or switch tabs.
+                  </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                 {activeJobs.map((job) => {
                   const isDone = job.status === 'completed';
                   const isErr = job.status === 'failed';
                   const docTargetId = job.documentId || job.result?.id || job.jobId;
 
                   return (
-                    <div
+                    <li
                       key={job.jobId}
-                      className={`p-4 rounded-xl border transition-all ${
-                        isDone
-                          ? 'bg-[var(--color-brand-soft)]/60 border-[var(--color-brand)]/50'
-                          : isErr
+                      className={`p-4 rounded-xl border ${
+                        isErr
                           ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-border)]'
-                          : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
+                          : 'bg-[var(--color-surface)] border-[var(--color-border)]'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-start justify-between gap-2 mb-2.5">
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[var(--color-ink)] truncate">
-                            {job.filename}
-                          </p>
-                          <p className="text-[10px] text-[var(--color-text-secondary)]">
+                          <p className="text-sm font-medium text-[var(--color-ink)] truncate">{job.filename}</p>
+                          <p className={`text-xs ${isErr ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-secondary)]'}`}>
                             {job.message || `${job.processedPages}/${job.totalPages} pages processed`}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="font-mono text-xs font-black text-[var(--color-ink)]">
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="tabular-nums text-[13px] font-medium text-[var(--color-ink)]">
                             {job.processingProgress}%
                           </span>
                           <button
+                            type="button"
                             onClick={() => removeJob(job.jobId)}
-                            className="text-[10px] text-[var(--color-text-muted)] hover:text-red-600 px-1 py-0.5"
+                            className="-mr-2 -mt-1 w-8 h-8 inline-flex items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
                             title="Dismiss"
                             aria-label={`Dismiss background task for ${job.filename}`}
                           >
-                            &times;
+                            <X className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                           </button>
                         </div>
                       </div>
@@ -268,11 +263,11 @@ export default function DocumentsVaultPage() {
                         aria-valuemin={0}
                         aria-valuemax={100}
                         aria-label={`Processing progress for ${job.filename}`}
-                        className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden mb-2"
+                        className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
                       >
                         <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            isDone ? 'bg-emerald-500' : 'bg-[var(--color-brand)]'
+                          className={`h-full rounded-full transition-[width] duration-300 ${
+                            isDone ? 'bg-[var(--color-success)]' : isErr ? 'bg-[var(--color-danger)]' : 'bg-[var(--color-brand)]'
                           }`}
                           style={{ width: `${job.processingProgress}%` }}
                         />
@@ -280,82 +275,56 @@ export default function DocumentsVaultPage() {
 
                       {/* Completed Action */}
                       {isDone && (
-                        <div className="flex items-center justify-between pt-1">
-                          <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Ready in Vault
+                        <div className="flex items-center justify-between pt-3">
+                          <span className="text-[13px] font-medium text-[var(--color-success)] flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" /> Ready in Vault
                           </span>
-                          <Link
-                            href={`/document/${docTargetId}`}
-                            className="btn btn-xs rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center gap-1 px-2.5"
-                          >
+                          <Link href={`/document/${docTargetId}`} className="btn-brand-primary !min-h-8 !h-8 !px-3.5 !text-[13px] !gap-1">
                             <span>Open</span>
-                            <ArrowRight className="w-3 h-3" />
+                            <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} aria-hidden="true" />
                           </Link>
                         </div>
                       )}
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
-            </div>
+              </ul>
+            </section>
           )}
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Total Documents
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {documents.length}
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--media-blue)]">
-                Bank Statements
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {totalBankStatements}
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--media-violet)]">
-                Invoices
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {totalInvoices}
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--media-pink)]">
-                Receipts
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {totalReceipts}
-              </p>
-            </div>
-          </div>
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)]">
+            {metrics.map((m) => (
+              <div key={m.label} className="bg-[var(--color-surface)] px-4 py-4 sm:px-5 space-y-1">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">{m.label}</dt>
+                <dd className="text-2xl font-semibold tracking-tight text-[var(--color-ink)] tabular-nums">
+                  {isLoading ? <span className="skeleton-line block h-7 w-10" aria-hidden="true" /> : m.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
           {/* Search & Filter Bar */}
-          <div className="p-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             {/* Filter Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" role="group" aria-label="Filter documents by type">
+            <div className="flex items-center gap-1.5 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0" role="group" aria-label="Filter documents by type">
               {(['all', 'bank_statement', 'invoice', 'receipt'] as const).map((type) => (
                 <button
+                  type="button"
                   key={type}
                   onClick={() => setActiveFilter(type)}
                   aria-pressed={activeFilter === type}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  className={`h-11 md:h-9 px-3.5 rounded-full text-[13px] whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                     activeFilter === type
-                      ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
-                      : 'bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[var(--color-border)] border border-[var(--color-border)]'
+                      ? 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] font-medium'
+                      : 'bg-[var(--color-surface-subtle)] text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)]'
                   }`}
                 >
-                  {type === 'bank_statement' && <Building className="w-3.5 h-3.5" aria-hidden="true" />}
-                  {type === 'invoice' && <Receipt className="w-3.5 h-3.5" aria-hidden="true" />}
-                  {type === 'receipt' && <FileCheck2 className="w-3.5 h-3.5" aria-hidden="true" />}
-                  {type === 'all' && <Layers className="w-3.5 h-3.5" aria-hidden="true" />}
-                  <span>
+                  {type === 'bank_statement' && <Building className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
+                  {type === 'invoice' && <Receipt className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
+                  {type === 'receipt' && <FileCheck2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
+                  {type === 'all' && <Layers className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
+                  <span className="tabular-nums">
                     {type === 'all'
                       ? `All (${documents.length})`
                       : type === 'bank_statement'
@@ -369,133 +338,141 @@ export default function DocumentsVaultPage() {
             </div>
 
             {/* Search Input */}
-            <div className="relative w-full md:w-72">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]" aria-hidden="true" />
+            <div className="relative w-full md:w-80 shrink-0">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" strokeWidth={1.75} aria-hidden="true" />
               <input
-                type="text"
+                type="search"
                 placeholder="Search documents by name or bank..."
                 aria-label="Search documents by name or bank"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input input-sm w-full pl-9 pr-3 rounded-lg bg-[var(--color-surface)] border-[var(--color-border)] text-xs text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)]"
+                className="input w-full h-11 pl-10 pr-3 rounded-lg bg-[var(--color-surface)] border-[var(--color-border)] text-sm text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)]"
               />
             </div>
           </div>
 
           {/* Documents Content */}
           {isLoading ? (
-            <div className="p-16 text-center rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-3">
-              <span className="loading loading-spinner loading-md text-[var(--color-brand)]"></span>
-              <p className="text-xs text-[var(--color-text-secondary)]">Loading your converted documents...</p>
+            <div role="status" aria-label="Loading your converted documents" className="border-t border-[var(--color-border)]">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="py-5 border-b border-[var(--color-border-subtle)] space-y-2.5">
+                  <span className="skeleton-line block h-4 w-64 max-w-full" />
+                  <span className="skeleton-line block h-3 w-40" />
+                </div>
+              ))}
+              <span className="sr-only">Loading your converted documents...</span>
             </div>
           ) : documents.length === 0 ? (
-            <div className="p-16 text-center rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
-              <FileText className="w-12 h-12 text-[var(--color-text-secondary)] mx-auto opacity-50" aria-hidden="true" />
-              <p className="font-bold text-sm text-[var(--color-ink)]">No Converted Documents Found</p>
-              <p className="text-xs text-[var(--color-text-secondary)] max-w-sm mx-auto">
+            <div className="py-16 text-center space-y-3 rounded-2xl bg-[var(--color-surface-subtle)]">
+              <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]">
+                <FileText className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <p className="text-[17px] font-semibold text-[var(--color-ink)]">No Converted Documents Found</p>
+              <p className="text-sm text-[var(--color-text-secondary)] max-w-sm mx-auto px-4">
                 {searchQuery || activeFilter !== 'all'
                   ? 'No documents match your filter. Try adjusting your search keywords.'
                   : 'Start by uploading a bank statement or invoice in the OCR Converter.'}
               </p>
-              <Link
-                href="/workspace"
-                className="btn-brand-primary !min-h-[36px] !h-[36px] !px-4 text-xs font-bold inline-flex items-center gap-1.5 mt-2 rounded-lg"
-              >
-                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Go to Converter</span>
-              </Link>
+              <div className="pt-1">
+                <Link href="/workspace" className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm">
+                  <Sparkles className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  <span>Go to Converter</span>
+                </Link>
+              </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <ul className="border-t border-[var(--color-border)]">
               {documents.map((doc) => {
                 const isDeleting = deletingId === doc.id;
                 const isBank = doc.document_type === 'bank_statement';
                 const isInvoice = doc.document_type === 'invoice';
 
                 return (
-                  <div
+                  <li
                     key={doc.id}
-                    className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-ink)] transition-colors space-y-3"
+                    className="-mx-3 px-3 py-4 rounded-lg border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors space-y-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       {/* Document Details */}
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-black text-sm text-[var(--color-ink)]">
+                          <span className="font-medium text-[15px] text-[var(--color-ink)] break-all">
                             {doc.filename}
                           </span>
-                          <span className={`badge badge-sm font-bold uppercase text-[9px] rounded-lg inline-flex items-center gap-1 ${
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
                             isBank
-                              ? 'bg-[var(--media-blue)]/20 text-[var(--color-ink)] border border-[var(--media-blue)]/40'
+                              ? 'bg-[var(--media-blue-soft)] text-[var(--media-blue-text)]'
                               : isInvoice
-                              ? 'bg-[var(--media-violet)]/20 text-[var(--color-ink)] border border-[var(--media-violet)]/40'
-                              : 'bg-[var(--media-pink)]/20 text-[var(--color-ink)] border border-[var(--media-pink)]/40'
+                              ? 'bg-[var(--color-surface-muted)] text-[var(--color-ink)]'
+                              : 'bg-[var(--media-pink-soft)] text-[var(--media-pink-text)]'
                           }`}>
-                            {isBank && <Building className="w-2.5 h-2.5" aria-hidden="true" />}
-                            {isInvoice && <Receipt className="w-2.5 h-2.5" aria-hidden="true" />}
-                            {!isBank && !isInvoice && <FileCheck2 className="w-2.5 h-2.5" aria-hidden="true" />}
+                            {isBank && <Building className="w-3 h-3" strokeWidth={1.75} aria-hidden="true" />}
+                            {isInvoice && <Receipt className="w-3 h-3" strokeWidth={1.75} aria-hidden="true" />}
+                            {!isBank && !isInvoice && <FileCheck2 className="w-3 h-3" strokeWidth={1.75} aria-hidden="true" />}
                             <span>{doc.document_type.replace('_', ' ')}</span>
                           </span>
-                          <span className="text-[11px] text-[var(--color-text-secondary)] font-mono">
+                          <span className="text-[13px] text-[var(--color-text-muted)] tabular-nums">
                             {doc.pages || 1} {doc.pages === 1 ? 'page' : 'pages'}
                           </span>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--color-text-secondary)]">
-                          <span>Doc ID: <code className="font-mono text-[11px] text-[var(--color-ink)]">{doc.id}</code></span>
-                          <span>&bull;</span>
-                          <span>{new Date(doc.created_at).toLocaleDateString()} at {new Date(doc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-[var(--color-text-muted)]">
+                          <span>Doc ID: <code className="font-mono text-xs text-[var(--color-text-secondary)]">{doc.id}</code></span>
+                          <span aria-hidden="true">&middot;</span>
+                          <span className="tabular-nums">{new Date(doc.created_at).toLocaleDateString()} at {new Date(doc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                       </div>
 
                       {/* Top Action Buttons */}
-                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <Link
                           href={`/document/${doc.id}`}
                           aria-label={`View statement ${doc.filename}`}
-                          className="btn btn-xs sm:btn-sm rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-3 border border-[var(--color-border)] flex items-center gap-1.5"
+                          className={pillBtn}
                         >
                           <span>View Statement</span>
-                          <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                          <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
                         </Link>
 
                         <button
+                          type="button"
                           onClick={() => handleDelete(doc.id, doc.filename)}
                           disabled={isDeleting}
-                          className="btn btn-xs sm:btn-sm rounded-lg bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger-border)] text-[var(--color-danger)] font-bold px-2.5 border border-[var(--color-danger-border)] flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          className="w-9 h-9 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer disabled:opacity-40"
                           title="Delete from database"
                           aria-label={`Delete ${doc.filename} from database`}
                         >
                           {isDeleting ? (
-                            <span className="loading loading-spinner loading-xs"></span>
+                            <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
                           ) : (
-                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                            <Trash2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                           )}
                         </button>
                       </div>
                     </div>
 
                     {/* Multi-Format Export Bar */}
-                    <div className="pt-3 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] font-bold">
-                        <Download className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
+                        <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
                         <span>Download Financial Format:</span>
-                      </div>
+                      </span>
 
-                      <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1">
                         {(['xlsx', 'csv', 'pdf', 'qbo', 'ofx', 'qif'] as const).map((fmt) => {
                           const isDown = downloadingFormat?.id === doc.id && downloadingFormat?.format === fmt;
                           return (
                             <button
+                              type="button"
                               key={fmt}
                               onClick={(e) => handleDownload(e, doc.id, fmt)}
                               disabled={isDown}
-                              className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] border border-[var(--color-border)] transition-colors cursor-pointer flex items-center gap-1"
+                              className="min-w-11 h-9 sm:h-7 px-2.5 rounded-md text-xs font-medium font-mono bg-[var(--color-surface)] text-[var(--color-ink)] border border-[var(--color-border)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand-dark)] transition-colors cursor-pointer inline-flex items-center justify-center disabled:opacity-60"
                               title={`Download as .${fmt}`}
                               aria-label={`Download ${doc.filename} as .${fmt}`}
                             >
                               {isDown ? (
-                                <span className="loading loading-spinner loading-xs"></span>
+                                <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
                               ) : (
                                 <span>.{fmt}</span>
                               )}
@@ -504,10 +481,10 @@ export default function DocumentsVaultPage() {
                         })}
                       </div>
                     </div>
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
         </>
       )}

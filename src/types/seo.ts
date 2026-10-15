@@ -75,6 +75,11 @@ export interface SEOGuidePage {
   contentHtml: string;
 }
 
+/** A /reconcile feature; `icon` is a key of reconciliationFeatureIcons. */
+export interface SEOReconFeature extends SEOFeature {
+  icon?: string;
+}
+
 /** One illustrative bank-vs-ledger pair for the sample comparison table on reconciliation pages. */
 export interface SEOReconSampleRow {
   date: string;
@@ -101,7 +106,7 @@ export interface SEOReconciliationPage {
   /** Slugs of other reconciliation pages to cross-link, in display order. */
   related: string[];
   benefits: string[];
-  features: SEOFeature[];
+  features: SEOReconFeature[];
   steps: SEOStep[];
   sampleRows: SEOReconSampleRow[];
   faqs: SEOFAQ[];

@@ -12,16 +12,11 @@ import {
   ExternalLink,
   Sparkles,
   Zap,
-  ShieldCheck,
-  Layers,
   ArrowRight,
   RefreshCw,
   Lock,
   UserCheck,
-  FileCheck2,
   Receipt,
-  BarChart3,
-  Clock,
   AlertTriangle,
 } from 'lucide-react';
 import { StoredDocument, ExportFormat } from '@/types/ocr';
@@ -155,27 +150,45 @@ export default function DashboardOverviewPage() {
     }
   };
 
+  const pillBtn =
+    'inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full text-[13px] font-medium bg-[var(--color-surface-muted)] text-[var(--color-ink)] hover:bg-[var(--color-border)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap';
+
+  const shortcuts = [
+    { href: '/workspace', label: 'Convert Document', icon: Sparkles },
+    { href: '/documents', label: 'Document Vault', icon: FileText },
+    { href: '/pricing', label: 'Credit Packages', icon: CreditCard },
+    { href: '/invoices', label: 'Billing Invoices', icon: Receipt },
+  ];
+
+  const metricValue = (value: number) =>
+    isLoading ? (
+      <span className="skeleton-line block h-8 w-20 my-0.5" aria-hidden="true" />
+    ) : (
+      value.toLocaleString()
+    );
+
   return (
-    <div className="w-full space-y-8 pb-16">
+    <div className="w-full space-y-10 sm:space-y-12 pb-16" aria-busy={isLoading}>
       {/* Guest Sign-In */}
       {!isLoggedIn && status !== 'loading' && (
-        <div className="p-8 sm:p-10 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-center space-y-4 max-w-2xl mx-auto shadow-none my-8">
-          <div className="w-14 h-14 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] flex items-center justify-center mx-auto shadow-xs">
-            <Lock className="w-7 h-7" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-2xl font-black text-[var(--color-ink)] tracking-tight">
+        <div className="py-16 sm:py-24 text-center max-w-md mx-auto space-y-4">
+          <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
+            <Lock className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+          </span>
+          <div className="space-y-1.5">
+            <h2 className="text-[17px] font-semibold text-[var(--color-ink)]">
               Sign in to Access Your Dashboard
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] max-w-md mx-auto">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               View your private account stats, credit balance, converted records, and billing history.
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setIsAuthModalOpen(true)}
-            className="btn-brand-dark !min-h-[44px] !h-[44px] !px-6 text-xs sm:text-sm font-bold inline-flex items-center gap-2 cursor-pointer shadow-xs rounded-lg"
+            className="btn-brand-primary"
           >
-            <UserCheck className="w-4 h-4" />
+            <UserCheck className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             <span>Sign In with Google</span>
           </button>
         </div>
@@ -183,311 +196,255 @@ export default function DashboardOverviewPage() {
 
       {isLoggedIn && (
         <>
-          {/* User Profile Overview Banner */}
-          <div className="p-6 sm:p-7 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-none">
-            <div className="flex items-center gap-4">
+          {/* Page header */}
+          <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+            <div className="flex items-center gap-4 min-w-0">
               <UserAvatar
                 src={session.user?.image}
                 name={session.user?.name}
                 size={56}
-                imageClassName="w-14 h-14 rounded-lg object-cover ring-2 ring-[var(--color-brand)]"
-                fallbackClassName="w-14 h-14 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] font-black flex items-center justify-center text-lg shadow-xs"
+                imageClassName="w-14 h-14 rounded-full object-cover ring-1 ring-[var(--color-border)] shrink-0"
+                fallbackClassName="w-14 h-14 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-medium flex items-center justify-center text-xl shrink-0"
               />
-              <div className="space-y-0.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl sm:text-2xl font-black text-[var(--color-ink)] tracking-tight">
-                    {session.user?.name || 'My Account'}
-                  </h1>
-                  <span className="badge badge-sm bg-[var(--color-brand)] text-[var(--color-on-brand)] font-black uppercase text-[10px] px-2 py-0.5 rounded-lg border-none">
+              <div className="min-w-0 space-y-1">
+                <h1 className="type-title truncate">
+                  {session.user?.name || 'My Account'}
+                </h1>
+                <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                  <span className="truncate">{session.user?.email}</span>
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] text-xs font-medium capitalize">
                     {stats.tier} Tier
                   </span>
                 </div>
-                <p className="text-xs text-[var(--color-text-secondary)] font-mono">
-                  {session.user?.email}
-                </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <button
+                type="button"
                 onClick={() => fetchDashboardData()}
-                className="btn-brand-secondary !min-h-[38px] !h-[38px] !px-3 text-xs font-bold flex items-center gap-1.5 rounded-lg cursor-pointer"
+                className="btn-brand-secondary !min-h-9 !h-9 !px-4 !text-sm"
                 title="Refresh dashboard stats"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} strokeWidth={1.75} aria-hidden="true" />
                 <span>Refresh</span>
               </button>
 
-              <Link
-                href="/pricing"
-                className="btn-brand-primary !min-h-[38px] !h-[38px] !px-4 text-xs font-bold flex items-center gap-1.5 rounded-lg shadow-xs"
-              >
-                <Zap className="w-3.5 h-3.5 fill-current" />
+              <Link href="/pricing" className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm">
+                <Zap className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                 <span>Top-Up Credits</span>
               </Link>
             </div>
-          </div>
+          </header>
 
-          {/* 4 Key Stat Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Metric 1: Remaining Credits */}
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border-2 border-[var(--color-brand)] shadow-none flex flex-col justify-between space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
-                  Available Credits
-                </span>
-                <span className="w-8 h-8 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-[var(--color-ink)]" />
-                </span>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-[var(--color-ink)] font-mono">
-                  {isLoading ? '...' : stats.creditsRemaining.toLocaleString()}
-                </p>
-                <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5">
+          {/* Key metrics — one hairline group, no icon tiles */}
+          <section aria-label="Account summary">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)]">
+              <div className="bg-[var(--color-surface)] p-5 sm:p-6 space-y-1.5">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">Available Credits</dt>
+                <dd className="text-[32px] leading-tight font-semibold tracking-tight text-[var(--color-ink)] tabular-nums">
+                  {metricValue(stats.creditsRemaining)}
+                </dd>
+                <dd className="text-xs text-[var(--color-text-secondary)] tabular-nums">
                   {stats.freeCredits} free + {stats.purchasedCredits} purchased pages
-                </p>
+                </dd>
               </div>
-            </div>
 
-            {/* Metric 2: Pages Processed */}
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-none flex flex-col justify-between space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
-                  Pages Processed
-                </span>
-                <span className="w-8 h-8 rounded-lg bg-[var(--color-surface-subtle)] text-[var(--color-ink)] flex items-center justify-center border border-[var(--color-border)]">
-                  <Layers className="w-4 h-4" />
-                </span>
+              <div className="bg-[var(--color-surface)] p-5 sm:p-6 space-y-1.5">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">Pages Processed</dt>
+                <dd className="text-[32px] leading-tight font-semibold tracking-tight text-[var(--color-ink)] tabular-nums">
+                  {metricValue(stats.totalPagesProcessed)}
+                </dd>
+                <dd className="text-xs text-[var(--color-text-secondary)]">Lifetime extracted statements</dd>
               </div>
-              <div>
-                <p className="text-3xl font-black text-[var(--color-ink)] font-mono">
-                  {isLoading ? '...' : stats.totalPagesProcessed.toLocaleString()}
-                </p>
-                <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5">
-                  Lifetime extracted statements
-                </p>
-              </div>
-            </div>
 
-            {/* Metric 3: Total Saved Documents */}
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-none flex flex-col justify-between space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
-                  Documents in Vault
-                </span>
-                <span className="w-8 h-8 rounded-lg bg-[var(--color-surface-subtle)] text-[var(--color-ink)] flex items-center justify-center border border-[var(--color-border)]">
-                  <FileText className="w-4 h-4" />
-                </span>
+              <div className="bg-[var(--color-surface)] p-5 sm:p-6 space-y-1.5">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">Documents in Vault</dt>
+                <dd className="text-[32px] leading-tight font-semibold tracking-tight text-[var(--color-ink)] tabular-nums">
+                  {metricValue(stats.totalDocuments)}
+                </dd>
+                <dd className="text-xs text-[var(--color-text-secondary)]">Stored in MongoDB Cloud</dd>
               </div>
-              <div>
-                <p className="text-3xl font-black text-[var(--color-ink)] font-mono">
-                  {isLoading ? '...' : stats.totalDocuments.toLocaleString()}
-                </p>
-                <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5">
-                  Stored in MongoDB Cloud
-                </p>
-              </div>
-            </div>
 
-            {/* Metric 4: AI Model SLA */}
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-none flex flex-col justify-between space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
-                  AI Model SLA
-                </span>
-                <span className="w-8 h-8 rounded-lg bg-[var(--color-surface-subtle)] text-[var(--color-success)] flex items-center justify-center border border-[var(--color-border)]">
-                  <ShieldCheck className="w-4 h-4" />
-                </span>
-              </div>
-              <div>
-                <p className="text-xl font-black text-[var(--color-ink)]">
+              <div className="bg-[var(--color-surface)] p-5 sm:p-6 space-y-1.5">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">AI Model SLA</dt>
+                <dd className="text-[17px] leading-[2.5rem] font-semibold text-[var(--color-ink)]">
                   AI Financial Engine
-                </p>
-                <p className="text-[11px] text-[var(--color-success)] font-bold mt-0.5 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-success)]"></span>
+                </dd>
+                <dd className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]" aria-hidden="true"></span>
                   99.8% Precision Rate
-                </p>
+                </dd>
               </div>
-            </div>
-          </div>
+            </dl>
+          </section>
 
-          {/* Quick Actions Panel */}
-          <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-3">
-            <h3 className="font-black text-sm text-[var(--color-ink)] uppercase tracking-wider text-[11px]">
+          {/* Quick Actions */}
+          <section aria-labelledby="dashboard-shortcuts" className="space-y-3">
+            <h2 id="dashboard-shortcuts" className="text-[17px] font-semibold text-[var(--color-ink)]">
               Quick Shortcuts
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Link
-                href="/workspace"
-                className="p-3.5 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand-soft)] border border-[var(--color-border)] transition-colors flex flex-col items-center text-center gap-2 group"
-              >
-                <Sparkles className="w-5 h-5 text-[var(--color-brand-dark)] group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-[var(--color-ink)]">Convert Document</span>
-              </Link>
-
-              <Link
-                href="/documents"
-                className="p-3.5 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-ink)] transition-colors flex flex-col items-center text-center gap-2 group"
-              >
-                <FileText className="w-5 h-5 text-[var(--media-blue)] group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-[var(--color-ink)]">Document Vault</span>
-              </Link>
-
-              <Link
-                href="/pricing"
-                className="p-3.5 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-ink)] transition-colors flex flex-col items-center text-center gap-2 group"
-              >
-                <CreditCard className="w-5 h-5 text-[var(--media-violet)] group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-[var(--color-ink)]">Credit Packages</span>
-              </Link>
-
-              <Link
-                href="/invoices"
-                className="p-3.5 rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-ink)] transition-colors flex flex-col items-center text-center gap-2 group"
-              >
-                <Receipt className="w-5 h-5 text-[var(--media-pink)] group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-[var(--color-ink)]">Billing Invoices</span>
-              </Link>
-            </div>
-          </div>
+            </h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {shortcuts.map(({ href, label, icon: Icon }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="group flex items-center gap-3 min-h-12 px-4 py-3 rounded-xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] transition-colors"
+                  >
+                    <Icon className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                    <span className="flex-1 text-sm font-medium text-[var(--color-ink)]">{label}</span>
+                    <ArrowRight className="w-4 h-4 text-[var(--color-text-muted)] transition-transform group-hover:translate-x-0.5" strokeWidth={1.75} aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           {/* Recent Converted Documents Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <section aria-labelledby="dashboard-recent-docs" className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
               <div className="space-y-0.5">
-                <h2 className="text-lg font-black text-[var(--color-ink)] tracking-tight">
+                <h2 id="dashboard-recent-docs" className="type-headline">
                   Recent Converted Statements
                 </h2>
-                <p className="text-xs text-[var(--color-text-secondary)]">
+                <p className="text-sm text-[var(--color-text-secondary)]">
                   Latest files parsed with AI Financial OCR.
                 </p>
               </div>
 
-              <Link
-                href="/documents"
-                className="btn btn-xs sm:btn-sm rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-3 border border-[var(--color-border)] flex items-center gap-1"
-              >
+              <Link href="/documents" className="link text-sm font-medium inline-flex items-center gap-1 shrink-0 min-h-11 sm:min-h-0">
                 <span>View All ({stats.totalDocuments})</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} aria-hidden="true" />
               </Link>
             </div>
 
-            {recentDocs.length === 0 ? (
-              <div className="p-8 text-center rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-2">
-                <FileText className="w-8 h-8 text-[var(--color-text-secondary)] mx-auto opacity-50" />
-                <p className="text-xs font-bold text-[var(--color-ink)]">No documents converted yet</p>
-                <Link
-                  href="/workspace"
-                  className="btn-brand-primary !min-h-[32px] !h-[32px] !px-3 text-xs font-bold inline-flex items-center gap-1 rounded-lg shadow-xs"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
+            {isLoading && recentDocs.length === 0 ? (
+              <ul className="border-t border-[var(--color-border)]" aria-hidden="true">
+                {[0, 1, 2].map((i) => (
+                  <li key={i} className="py-4 border-b border-[var(--color-border-subtle)] space-y-2">
+                    <span className="skeleton-line block h-4 w-56 max-w-full" />
+                    <span className="skeleton-line block h-3 w-32" />
+                  </li>
+                ))}
+              </ul>
+            ) : recentDocs.length === 0 ? (
+              <div className="py-12 text-center space-y-3 rounded-2xl bg-[var(--color-surface-subtle)]">
+                <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]">
+                  <FileText className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <p className="text-[17px] font-semibold text-[var(--color-ink)]">No documents converted yet</p>
+                <Link href="/workspace" className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm">
+                  <Sparkles className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                   <span>Start Extraction</span>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <ul className="border-t border-[var(--color-border)]">
                 {recentDocs.map((doc) => (
-                  <div
+                  <li
                     key={doc.id}
-                    className="p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-ink)] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    className="-mx-3 px-3 py-3.5 rounded-lg border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-[var(--color-ink)] text-sm truncate max-w-xs">{doc.filename}</span>
-                        <span className="badge badge-sm font-bold uppercase text-[9px] rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] border-none">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                        <span className="font-medium text-[var(--color-ink)] text-sm truncate">{doc.filename}</span>
+                        <span className="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
                           {doc.document_type.replace('_', ' ')}
                         </span>
                       </div>
-                      <div className="text-[11px] text-[var(--color-text-secondary)] flex items-center gap-2 font-mono">
+                      <div className="pl-6 text-[13px] text-[var(--color-text-muted)] flex items-center gap-1.5 tabular-nums">
                         <span>{new Date(doc.created_at).toLocaleDateString()}</span>
-                        <span>&bull;</span>
+                        <span aria-hidden="true">&middot;</span>
                         <span>{doc.pages || 1} pages</span>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+                    <div className="flex flex-wrap items-center gap-2 pl-6 sm:pl-0 shrink-0">
                       <button
+                        type="button"
                         onClick={(e) => handleDownload(e, doc.id, 'xlsx')}
+                        disabled={downloadingFormat?.id === doc.id}
                         aria-label={`Download ${doc.filename} in Excel (.xlsx) format`}
-                        className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] cursor-pointer"
+                        className={pillBtn}
                       >
+                        {downloadingFormat?.id === doc.id ? (
+                          <span className="loading loading-spinner loading-xs" aria-hidden="true" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+                        )}
                         Excel (.xlsx)
                       </button>
 
                       <Link
                         href={`/document/${doc.id}`}
                         aria-label={`View details and extraction for ${doc.filename}`}
-                        className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] flex items-center gap-1"
+                        className={pillBtn}
                       >
                         <span>Details</span>
-                        <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                        <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
                       </Link>
                     </div>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
-          </div>
+          </section>
 
           {/* Recent Orders Section */}
           {recentOrders.length > 0 && (
-            <div className="space-y-4 pt-2">
-              <div className="flex items-center justify-between">
+            <section aria-labelledby="dashboard-recent-orders" className="space-y-4">
+              <div className="flex items-end justify-between gap-4">
                 <div className="space-y-0.5">
-                  <h2 className="text-lg font-black text-[var(--color-ink)] tracking-tight flex items-center gap-2">
-                    <Receipt className="w-4 h-4 text-[var(--media-pink)]" />
-                    <span>Recent Billing Invoices</span>
+                  <h2 id="dashboard-recent-orders" className="type-headline">
+                    Recent Billing Invoices
                   </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)]">
+                  <p className="text-sm text-[var(--color-text-secondary)]">
                     Latest page package purchases.
                   </p>
                 </div>
 
-                <Link
-                  href="/invoices"
-                  className="btn btn-xs sm:btn-sm rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-3 border border-[var(--color-border)] flex items-center gap-1"
-                >
+                <Link href="/invoices" className="link text-sm font-medium inline-flex items-center gap-1 shrink-0 min-h-11 sm:min-h-0">
                   <span>All Invoices</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} aria-hidden="true" />
                 </Link>
               </div>
 
-              <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
-                <table className="table w-full text-xs" aria-label="Recent billing invoices">
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <table className="w-full min-w-[720px] text-sm border-collapse" aria-label="Recent billing invoices">
                   <thead>
-                    <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                      <th scope="col" className="font-bold py-2.5">Order ID</th>
-                      <th scope="col" className="font-bold">Package</th>
-                      <th scope="col" className="font-bold">Credits</th>
-                      <th scope="col" className="font-bold">Amount</th>
-                      <th scope="col" className="font-bold">Status</th>
-                      <th scope="col" className="font-bold">Date</th>
-                      <th scope="col" className="font-bold text-right">Invoice PDF</th>
+                    <tr className="border-b border-[var(--color-border)] text-[13px] text-[var(--color-text-muted)] text-left">
+                      <th scope="col" className="font-medium py-2.5 pr-4">Order ID</th>
+                      <th scope="col" className="font-medium py-2.5 pr-4">Package</th>
+                      <th scope="col" className="font-medium py-2.5 pr-4 text-right">Credits</th>
+                      <th scope="col" className="font-medium py-2.5 pr-4 text-right">Amount</th>
+                      <th scope="col" className="font-medium py-2.5 pr-4">Status</th>
+                      <th scope="col" className="font-medium py-2.5 pr-4">Date</th>
+                      <th scope="col" className="font-medium py-2.5 text-right">Invoice PDF</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentOrders.map((order) => (
-                      <tr key={order.order_id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)]">
-                        <th scope="row" className="font-mono font-bold text-[var(--color-ink)] text-left font-normal">{order.order_id}</th>
-                        <td className="font-semibold text-[var(--color-ink)]">{order.plan_name}</td>
-                        <td className="font-mono font-bold text-[var(--color-brand-dark)]">+{order.pages_credited.toLocaleString()}</td>
-                        <td className="font-bold text-[var(--color-ink)] font-mono">{formatUSD(order.amount_usd)} USD</td>
-                        <td>
-                          <span className="badge badge-xs font-bold uppercase rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] border-none">
+                      <tr key={order.order_id} className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors">
+                        <th scope="row" className="py-3 pr-4 font-mono text-[13px] font-normal text-[var(--color-text-secondary)] text-left">{order.order_id}</th>
+                        <td className="py-3 pr-4 font-medium text-[var(--color-ink)]">{order.plan_name}</td>
+                        <td className="py-3 pr-4 text-right tabular-nums text-[var(--color-ink)]">+{order.pages_credited.toLocaleString()}</td>
+                        <td className="py-3 pr-4 text-right tabular-nums text-[var(--color-ink)]">{formatUSD(order.amount_usd)} USD</td>
+                        <td className="py-3 pr-4">
+                          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize bg-[var(--color-success-soft)] text-[var(--color-success)]">
                             {order.status}
                           </span>
                         </td>
-                        <td className="text-[var(--color-text-secondary)] font-mono">{new Date(order.created_at).toLocaleDateString()}</td>
-                        <td className="text-right">
+                        <td className="py-3 pr-4 text-[var(--color-text-secondary)] tabular-nums">{new Date(order.created_at).toLocaleDateString()}</td>
+                        <td className="py-3 text-right">
                           <a
                             href={`/api/user/orders/${order.order_id}/receipt`}
                             download={`Finlyzers_Invoice_${order.order_id}.pdf`}
                             aria-label={`Download PDF invoice for order ${order.order_id}`}
-                            className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-brand)] hover:text-[var(--color-on-brand)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] inline-flex items-center gap-1"
+                            className={pillBtn}
                             title="Download PDF Invoice"
                           >
-                            <Download className="w-3 h-3" aria-hidden="true" />
+                            <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
                             <span>PDF</span>
                           </a>
                         </td>
@@ -496,38 +453,37 @@ export default function DashboardOverviewPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </section>
           )}
 
           {/* Privacy & Account Data Deletion (GDPR / Right to be Forgotten) */}
-          <div className="p-6 rounded-lg bg-[var(--color-surface)] border border-[var(--color-danger-border)]/50 space-y-4">
+          <section aria-labelledby="dashboard-erasure" className="pt-8 border-t border-[var(--color-border)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-[var(--color-danger)]" />
-                  <h3 className="font-bold text-sm text-[var(--color-ink)]">
-                    Privacy &amp; Data Erasure (Right to be Forgotten)
-                  </h3>
-                </div>
-                <p className="text-xs text-[var(--color-text-secondary)] max-w-xl">
+                <h2 id="dashboard-erasure" className="flex items-center gap-2 text-[17px] font-semibold text-[var(--color-ink)]">
+                  <AlertTriangle className="w-4 h-4 text-[var(--color-danger)]" strokeWidth={1.75} aria-hidden="true" />
+                  Privacy &amp; Data Erasure (Right to be Forgotten)
+                </h2>
+                <p className="text-sm text-[var(--color-text-secondary)] max-w-xl">
                   Permanently wipe your account profile, all converted financial statements, OCR extractions, and order history from our servers.
                 </p>
               </div>
 
               <button
+                type="button"
                 onClick={handleDeleteAccount}
                 disabled={isDeletingAccount}
-                className="btn btn-sm rounded-lg bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger)] text-[var(--color-danger)] hover:text-[var(--color-on-dark)] font-bold border border-[var(--color-danger-border)] px-4 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 min-h-11 sm:min-h-9 px-4 rounded-full text-sm font-medium bg-[var(--color-danger-soft)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-[var(--color-on-dark)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
               >
                 {isDeletingAccount ? (
-                  <span className="loading loading-spinner loading-xs"></span>
+                  <span className="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 ) : (
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                 )}
                 <span>Delete Account &amp; All Data</span>
               </button>
             </div>
-          </div>
+          </section>
         </>
       )}
 

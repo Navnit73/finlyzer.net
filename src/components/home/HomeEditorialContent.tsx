@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { FileText, FileSpreadsheet, Users } from 'lucide-react';
 import {
   MetricsStrip,
   HowItWorksSection,
@@ -11,7 +12,7 @@ import {
   ComparisonSection,
   FaqSection,
   FinalCtaSection,
-  SectionHeading,
+  SectionBand,
 } from '@/components/converter/sections';
 import { FREE_PAGE_LIMIT } from '@/types/pricing';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
@@ -72,64 +73,111 @@ export const faqs = [
   },
 ];
 
-const linkClass =
-  'font-semibold text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-brand)] decoration-2';
+const linkClass = 'link';
 
 /** Server-rendered introduction that frames the broad intent and links to the specific converters. */
 function HomeIntroSection() {
+  const paragraphClass = 'text-base sm:text-[17px] leading-[1.65] text-[var(--color-text-secondary)]';
+  const rowClass = 'flex gap-4 sm:gap-5 py-6 sm:py-7 first:pt-0 last:pb-0';
+  const iconClass = 'w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] flex items-center justify-center shrink-0';
+
   return (
-    <section className="max-w-3xl mx-auto space-y-6">
-      <SectionHeading title="Turn Bank Statements Into Usable Data" />
-      <div className="space-y-4 text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed">
-        <p>
-          Banks, lenders and accountants still exchange statements as PDFs. They are easy to read but hard to work
-          with: copying a statement into a spreadsheet merges columns, splits descriptions across rows and turns
-          amounts into text. Finlyzers reads the statement, extracts each transaction with its date, description,
-          debit, credit and balance, and checks the result against the statement&apos;s own running balance.
-        </p>
-        <p>
-          Digital PDFs are read from their text layer, while scanned statements and phone photos go through OCR first.
-          Once the transactions are extracted, you can download them as a{' '}
-          <Link href="/convert/bank-statement-to-excel" className={linkClass}>spreadsheet in Excel</Link>, a{' '}
-          <Link href="/convert/bank-statement-to-csv" className={linkClass}>CSV file</Link> for imports, a{' '}
-          <Link href="/convert/bank-statement-to-qbo" className={linkClass}>QBO file for QuickBooks</Link>, an{' '}
-          <Link href="/convert/bank-statement-to-ofx" className={linkClass}>OFX file for Xero</Link> or a{' '}
-          <Link href="/convert/bank-statement-to-qif" className={linkClass}>QIF file for Quicken</Link>. If your
-          transactions are already in a spreadsheet, the{' '}
-          <Link href="/convert/csv-to-qbo" className={linkClass}>CSV and Excel to QBO converter</Link> prepares them for
-          QuickBooks, and the{' '}
-          <Link href="/guides/import-excel-into-quickbooks" className={linkClass}>QuickBooks import guide</Link> covers
-          both import methods.
-        </p>
-        <p>
-          Bookkeepers use it to backfill accounting software when a bank feed is missing history, small businesses use
-          it to prepare tax figures, and lenders and analysts use it to review transaction histories. Read how
-          extraction and verification work on the{' '}
-          <Link href="/editorial-policy" className={linkClass}>methodology page</Link>, and how uploads are handled on
-          the <Link href="/security" className={linkClass}>security page</Link>.
-        </p>
+    <section className="grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-8 sm:gap-10 lg:gap-16 items-start">
+      <div className="lg:sticky lg:top-[calc(var(--nav-height)+32px)]">
+        <h2 className="type-display max-w-md">Turn Bank Statements Into Usable Data</h2>
+      </div>
+
+      <div className="divide-y divide-[var(--color-border)]">
+        <div className={rowClass}>
+          <span className={iconClass}>
+            <FileText className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+          </span>
+          <p className={paragraphClass}>
+            Banks, lenders and accountants still exchange statements as PDFs. They are easy to read but hard to work
+            with: copying a statement into a spreadsheet merges columns, splits descriptions across rows and turns
+            amounts into text. Finlyzers reads the statement, extracts each transaction with its date, description,
+            debit, credit and balance, and checks the result against the statement&apos;s own running balance.
+          </p>
+        </div>
+
+        <div className={rowClass}>
+          <span className={iconClass}>
+            <FileSpreadsheet className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+          </span>
+          <p className={paragraphClass}>
+            Digital PDFs are read from their text layer, while scanned statements and phone photos go through OCR first.
+            Once the transactions are extracted, you can download them as a{' '}
+            <Link href="/convert/bank-statement-to-excel" className={linkClass}>spreadsheet in Excel</Link>, a{' '}
+            <Link href="/convert/bank-statement-to-csv" className={linkClass}>CSV file</Link> for imports, a{' '}
+            <Link href="/convert/bank-statement-to-qbo" className={linkClass}>QBO file for QuickBooks</Link>, an{' '}
+            <Link href="/convert/bank-statement-to-ofx" className={linkClass}>OFX file for Xero</Link> or a{' '}
+            <Link href="/convert/bank-statement-to-qif" className={linkClass}>QIF file for Quicken</Link>. If your
+            transactions are already in a spreadsheet, the{' '}
+            <Link href="/convert/csv-to-qbo" className={linkClass}>CSV and Excel to QBO converter</Link> prepares them for
+            QuickBooks, and the{' '}
+            <Link href="/guides/import-excel-into-quickbooks" className={linkClass}>QuickBooks import guide</Link> covers
+            both import methods.
+          </p>
+        </div>
+
+        <div className={rowClass}>
+          <span className={iconClass}>
+            <Users className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+          </span>
+          <p className={paragraphClass}>
+            Bookkeepers use it to backfill accounting software when a bank feed is missing history, small businesses use
+            it to prepare tax figures, and lenders and analysts use it to review transaction histories. Read how
+            extraction and verification work on the{' '}
+            <Link href="/editorial-policy" className={linkClass}>methodology page</Link>, and how uploads are handled on
+            the <Link href="/security" className={linkClass}>security page</Link>.
+          </p>
+        </div>
       </div>
     </section>
   );
 }
 
 export default function HomeEditorialContent() {
+  // Bands alternate white / parchment; the feature grid is the one dark band.
+  // The negative bottom margin lets the last band meet the footer edge-to-edge.
   return (
-    <div className="w-full space-y-16 sm:space-y-24 pt-8 sm:pt-12 pb-8 sm:pb-16">
-      <MetricsStrip />
-      <HomeIntroSection />
-      <HowItWorksSection />
-      <BeforeAfterSection />
-      <FeatureGridSection />
-      <ExportFormatsSection
-        title="Choose an Output Format"
-        subtitle="Every upload can be downloaded in any of these formats. Each guide explains how to use the file."
-      />
-      <SecuritySection />
-      <ConverterLinksSection title="Guides for Popular Banks & Statement Types" links={featuredBankConverters} />
-      <ComparisonSection />
-      <FaqSection faqs={faqs} />
-      <FinalCtaSection />
+    <div className="w-full -mb-6 sm:-mb-10">
+      <div className="pt-10 sm:pt-16 pb-[var(--section-y)]">
+        <MetricsStrip />
+      </div>
+      <SectionBand tone="parchment">
+        <HomeIntroSection />
+      </SectionBand>
+      <SectionBand>
+        <HowItWorksSection />
+      </SectionBand>
+      <SectionBand tone="parchment">
+        <BeforeAfterSection />
+      </SectionBand>
+      <SectionBand tone="dark">
+        <FeatureGridSection bare />
+      </SectionBand>
+      <SectionBand>
+        <ExportFormatsSection
+          title="Choose an Output Format"
+          subtitle="Every upload can be downloaded in any of these formats. Each guide explains how to use the file."
+        />
+      </SectionBand>
+      <SectionBand tone="parchment">
+        <SecuritySection bare />
+      </SectionBand>
+      <SectionBand>
+        <ConverterLinksSection title="Guides for Popular Banks & Statement Types" links={featuredBankConverters} />
+      </SectionBand>
+      <SectionBand tone="parchment">
+        <ComparisonSection />
+      </SectionBand>
+      <SectionBand>
+        <FaqSection faqs={faqs} />
+      </SectionBand>
+      <SectionBand tone="parchment">
+        <FinalCtaSection />
+      </SectionBand>
     </div>
   );
 }

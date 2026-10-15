@@ -2,7 +2,7 @@
 slug: "bank-statement-to-qbo"
 title: "PDF to QBO Converter: Bank Statements to QuickBooks"
 metaTitle: "PDF to QBO Converter: Bank Statements to QuickBooks | Finlyzers"
-metaDescription: "Convert PDF bank and credit card statements to QBO (Web Connect) files and import them into QuickBooks Online or Desktop. Online, no download, free up to 10 pages."
+metaDescription: "Convert PDF bank and credit card statements to QBO (Web Connect) files for QuickBooks Online or Desktop. Online, nothing to install, free up to 10 pages."
 intro: "Turn PDF bank statements into QBO (QuickBooks Web Connect) files, then import the transactions into QuickBooks Online or QuickBooks Desktop without retyping or mapping columns."
 category: "formats"
 bankName: "Bank"

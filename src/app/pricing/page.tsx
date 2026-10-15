@@ -6,9 +6,8 @@ import { useSession } from 'next-auth/react';
 import {
   CreditCard,
   CheckCircle2,
-  ArrowRight,
+  Check,
   ShieldCheck,
-  HelpCircle,
   ChevronDown,
   Layers,
   FileSpreadsheet,
@@ -25,6 +24,11 @@ function PlanQueryReader({ onPlan }: { onPlan: (planId: string | null) => void }
     onPlan(planId);
   }, [planId, onPlan]);
   return null;
+}
+
+/** Plan badges are stored in capitals; show them in sentence case. */
+function sentenceCase(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
 function formatPerPage(plan: PricingPlan): string {
@@ -170,201 +174,182 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto w-full space-y-10 pb-16">
+    <div className="max-w-6xl mx-auto w-full space-y-16 sm:space-y-24 pb-16">
       <Suspense fallback={null}>
         <PlanQueryReader onPlan={setQueryPlanId} />
       </Suspense>
 
-      {/* Header */}
-      {isLoggedIn ? (
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
-              Pricing &amp; Credits
-            </h1>
-            <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
-              Top up page credits whenever you need them. No subscriptions, credits never expire.
+      <div className="space-y-10 sm:space-y-14">
+        {/* Header */}
+        {isLoggedIn ? (
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2">
+              <h1 className="type-title">Pricing &amp; Credits</h1>
+              <p className="text-[15px] sm:text-[17px] text-[var(--color-text-secondary)]">
+                Top up page credits whenever you need them. No subscriptions, credits never expire.
+              </p>
+            </div>
+
+            <dl className="grid grid-cols-3 w-full md:w-auto card-surface divide-x divide-[var(--color-border)]">
+              <div className="px-4 py-3 sm:px-5 min-w-0">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">Balance</dt>
+                <dd className="mt-0.5 text-xl sm:text-2xl font-semibold tracking-tight tabular-nums text-[var(--color-ink)] whitespace-nowrap">
+                  {totalBalance.toLocaleString()} <span className="text-xs font-normal text-[var(--color-text-secondary)]">pages</span>
+                </dd>
+              </div>
+              <div className="px-4 py-3 sm:px-5 min-w-0">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">Used</dt>
+                <dd className="mt-0.5 text-xl sm:text-2xl font-semibold tracking-tight tabular-nums text-[var(--color-ink)] whitespace-nowrap">
+                  {quota.totalPagesProcessed.toLocaleString()} <span className="text-xs font-normal text-[var(--color-text-secondary)]">pages</span>
+                </dd>
+              </div>
+              <div className="px-4 py-3 sm:px-5 min-w-0">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">Tier</dt>
+                <dd className="mt-0.5 text-xl sm:text-2xl font-semibold tracking-tight text-[var(--color-ink)] truncate capitalize">{quota.tier}</dd>
+              </div>
+            </dl>
+          </div>
+        ) : (
+          <div className="text-center space-y-4 max-w-3xl mx-auto pt-4 sm:pt-10">
+            <p className="eyebrow inline-flex items-center gap-1.5">
+              <CreditCard className="w-4 h-4" aria-hidden="true" />
+              <span>Pay-As-You-Go Pricing</span>
+            </p>
+            <h1 className="type-hero text-balance">Bank Statement Converter Pricing</h1>
+            <p className="type-lead max-w-2xl mx-auto">
+              Free up to {FREE_PAGE_LIMIT} pages. Pay only when a statement is longer. No monthly lock-ins.
             </p>
           </div>
+        )}
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full md:w-auto">
-            <div className="p-3 sm:px-4 rounded-lg bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/30 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-on-brand)]/70">Balance</p>
-              <p className="text-lg sm:text-xl font-black font-mono text-[var(--color-on-brand)] whitespace-nowrap">
-                {totalBalance.toLocaleString()} <span className="text-xs font-bold">pages</span>
-              </p>
-            </div>
-            <div className="p-3 sm:px-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Used</p>
-              <p className="text-lg sm:text-xl font-black font-mono text-[var(--color-ink)] whitespace-nowrap">
-                {quota.totalPagesProcessed.toLocaleString()} <span className="text-xs font-bold">pages</span>
-              </p>
-            </div>
-            <div className="p-3 sm:px-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Tier</p>
-              <p className="text-lg sm:text-xl font-black text-[var(--color-ink)] uppercase truncate">{quota.tier}</p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="feature-badge">
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>Pay-As-You-Go Pricing</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-ink)] tracking-tight">
-            Bank Statement Converter Pricing
-          </h1>
-          <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
-            Free up to {FREE_PAGE_LIMIT} pages. Pay only when a statement is longer. No monthly lock-ins.
-          </p>
-        </div>
-      )}
-
-      {/* How pricing works */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {rules.map((rule) => {
-          const Icon = rule.icon;
-          return (
-            <div
-              key={rule.range}
-              className={`p-4 rounded-lg border flex items-start gap-3 ${
-                rule.highlight
-                  ? 'bg-[var(--color-brand-soft)] border-[var(--color-brand)]/40'
-                  : 'bg-[var(--color-surface-subtle)] border-[var(--color-border)]'
-              }`}
-            >
-              <span className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
-                <Icon className="w-4 h-4 text-[var(--color-ink)]" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-[var(--color-text-secondary)]">{rule.range}</p>
-                <p className="text-xl font-black text-[var(--color-ink)] leading-tight">{rule.price}</p>
-                <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5">{rule.note}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Plan cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2">
-        {PRICING_PLANS.map((plan) => {
-          const isPopular = !!plan.popular;
-          const isSelected = selectedPlan?.id === plan.id;
-          const isPass = plan.id === 'guest_doc_unlock';
-          const highlighted = isSelected || isPopular;
-
-          return (
-            <div
-              key={plan.id}
-              className={`relative p-5 sm:p-6 rounded-lg bg-[var(--color-surface)] flex flex-col transition-colors ${
-                highlighted
-                  ? 'border-2 border-[var(--color-brand)]'
-                  : 'border border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
-              }`}
-            >
-              {(plan.badge || isSelected) && (
-                <span
-                  className={`absolute -top-2.5 left-5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    isSelected || isPopular
-                      ? 'bg-[var(--color-brand)] text-[var(--color-on-brand)]'
-                      : 'bg-[var(--media-violet)] text-[var(--color-on-dark)]'
-                  }`}
-                >
-                  {isSelected ? 'Selected' : plan.badge}
-                </span>
-              )}
-
-              <div className="space-y-1">
-                <h3 className="text-lg font-black text-[var(--color-ink)]">{plan.name}</h3>
-                <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed min-h-[36px]">
-                  {plan.description}
-                </p>
-              </div>
-
-              <div className="py-4 my-4 border-y border-[var(--color-border)]">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-[var(--color-ink)] font-mono">${plan.price_usd}</span>
-                  <span className="text-xs text-[var(--color-text-secondary)] font-medium">
-                    {isPass ? 'per document' : 'one-time'}
-                  </span>
+        {/* How pricing works */}
+        <ul className="grid grid-cols-1 sm:grid-cols-3 border-y border-[var(--color-border)] divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border)]">
+          {rules.map((rule) => {
+            const Icon = rule.icon;
+            return (
+              <li key={rule.range} className="flex items-start gap-3 py-5 sm:py-6 sm:px-6 first:sm:pl-0 last:sm:pr-0">
+                <Icon className="w-5 h-5 mt-0.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
+                <div className="min-w-0">
+                  <p className="text-[13px] text-[var(--color-text-muted)]">{rule.range}</p>
+                  <p className="mt-0.5 text-2xl font-semibold tracking-tight text-[var(--color-ink)] leading-tight">{rule.price}</p>
+                  <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{rule.note}</p>
                 </div>
-                <div className="flex items-center justify-between text-[11px] mt-1.5">
-                  <span className="font-bold text-[var(--color-ink)] font-mono">
-                    {isPass ? 'Up to 30 pages' : `${plan.pages.toLocaleString()} pages`}
-                  </span>
-                  <span className="text-[var(--color-text-muted)] font-mono">{formatPerPage(plan)}</span>
-                </div>
-              </div>
+              </li>
+            );
+          })}
+        </ul>
 
-              <ul className="space-y-2 text-xs flex-1">
-                {plan.features.map((feat) => (
-                  <li key={feat} className="flex items-start gap-2 text-[var(--color-ink)]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] shrink-0 mt-0.5" />
-                    <span className="text-[11px] leading-relaxed">{feat}</span>
-                  </li>
-                ))}
-              </ul>
+        {/* Plan columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)]">
+          {PRICING_PLANS.map((plan) => {
+            const isPopular = !!plan.popular;
+            const isSelected = selectedPlan?.id === plan.id;
+            const isPass = plan.id === 'guest_doc_unlock';
+            const highlighted = isSelected || isPopular;
+            const marker = isSelected ? 'Selected' : plan.badge ? sentenceCase(plan.badge) : null;
 
-              <button
-                onClick={() => handleSelectPlan(plan)}
-                aria-label={`Select ${plan.name} plan for $${plan.price_usd}`}
-                className={`mt-6 w-full !min-h-[42px] !h-[42px] text-xs font-bold whitespace-nowrap flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95 ${
-                  highlighted ? 'btn-brand-primary' : 'btn-brand-dark'
-                }`}
+            return (
+              <div
+                key={plan.id}
+                className={`flex flex-col p-6 sm:p-7 ${isPopular ? 'bg-[var(--color-surface-subtle)]' : 'bg-[var(--color-surface)]'}`}
               >
-                <span>
-                  {isSelected && isLoggedIn
-                    ? `Checkout $${plan.price_usd}`
-                    : isPass
-                    ? 'Get Document Pass'
-                    : `Buy for $${plan.price_usd}`}
-                </span>
-                <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
-              </button>
-            </div>
-          );
-        })}
+                <div className={`h-6 mb-3 ${marker ? '' : 'hidden sm:block'}`}>
+                  {marker && (
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        isSelected
+                          ? 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]'
+                          : 'bg-[var(--color-surface)] text-[var(--color-ink)] border border-[var(--color-border)]'
+                      }`}
+                    >
+                      {marker}
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="type-headline">{plan.name}</h3>
+                <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed sm:min-h-[4.875rem]">{plan.description}</p>
+
+                <div className="mt-6 flex items-baseline gap-1.5">
+                  <span className="text-5xl font-semibold tracking-tight tabular-nums text-[var(--color-ink)] leading-none">
+                    ${plan.price_usd}
+                  </span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">{isPass ? 'per document' : 'one-time'}</span>
+                </div>
+                <p className="mt-2 text-[13px] text-[var(--color-text-muted)] tabular-nums">
+                  <span className="text-[var(--color-ink)]">{isPass ? 'Up to 30 pages' : `${plan.pages.toLocaleString()} pages`}</span>
+                  {' · '}
+                  {formatPerPage(plan)}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan(plan)}
+                  aria-label={`Select ${plan.name} plan for $${plan.price_usd}`}
+                  className={`mt-6 w-full ${highlighted ? 'btn-brand-primary' : 'btn-brand-ghost'}`}
+                >
+                  <span>
+                    {isSelected && isLoggedIn
+                      ? `Checkout $${plan.price_usd}`
+                      : isPass
+                      ? 'Get Document Pass'
+                      : `Buy for $${plan.price_usd}`}
+                  </span>
+                </button>
+
+                <ul className="mt-6 pt-6 border-t border-[var(--color-border)] space-y-2.5 flex-1">
+                  {plan.features.map((feat) => (
+                    <li key={feat} className="flex items-start gap-2 text-sm leading-snug text-[var(--color-ink)]">
+                      <Check className="w-4 h-4 text-[var(--color-text-muted)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Comparison table */}
-      <div className="space-y-4 pt-4">
-        <div className="space-y-1">
-          <h2 className="text-xl font-black text-[var(--color-ink)]">Compare plans</h2>
-          <p className="text-xs text-[var(--color-text-secondary)]">
-            Every option includes the same AI extraction engine and all export formats.
-          </p>
+      <section aria-labelledby="compare-title" className="space-y-6 sm:space-y-8">
+        <div className="text-center space-y-3">
+          <h2 id="compare-title" className="type-display">Compare plans</h2>
+          <p className="type-lead">Every option includes the same AI extraction engine and all export formats.</p>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
-          <table className="table w-full text-xs" aria-label="Plan feature comparison">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm" aria-label="Plan feature comparison">
             <thead>
-              <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                <th scope="col" className="font-bold py-3 text-left">Feature</th>
+              <tr className="border-b border-[var(--color-border)]">
+                <th scope="col" className="py-4 pr-4 text-left text-[13px] font-normal text-[var(--color-text-muted)]">Feature</th>
                 {PRICING_PLANS.map((p) => (
-                  <th scope="col" key={p.id} className="font-bold text-center whitespace-nowrap">
-                    {p.name} (${p.price_usd})
+                  <th scope="col" key={p.id} className="py-4 px-4 text-center whitespace-nowrap">
+                    <span className="block text-[15px] font-semibold text-[var(--color-ink)]">{p.name}</span>
+                    <span className="block text-[13px] font-normal text-[var(--color-text-muted)] tabular-nums">${p.price_usd}</span>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--color-border-subtle)]">
               {comparisonRows.map((row) => (
-                <tr key={row.label} className="border-b border-[var(--color-border)] last:border-b-0">
-                  <th scope="row" className="font-semibold text-[var(--color-ink)] whitespace-nowrap text-left">{row.label}</th>
+                <tr key={row.label}>
+                  <th scope="row" className="py-4 pr-4 font-normal text-[var(--color-ink)] whitespace-nowrap text-left">{row.label}</th>
                   {row.values.map((value, i) => (
-                    <td
-                      key={i}
-                      className={`text-center font-mono whitespace-nowrap ${
-                        value === '✓'
-                          ? 'text-[var(--color-success)] font-bold'
-                          : value === '—'
-                          ? 'text-[var(--color-text-muted)]'
-                          : 'text-[var(--color-ink)]'
-                      }`}
-                    >
-                      {value}
+                    <td key={i} className="py-4 px-4 text-center tabular-nums whitespace-nowrap text-[var(--color-ink)]">
+                      {value === '✓' ? (
+                        <>
+                          <Check className="w-4 h-4 mx-auto text-[var(--color-ink)]" aria-hidden="true" />
+                          <span className="sr-only">Included</span>
+                        </>
+                      ) : value === '—' ? (
+                        <>
+                          <span className="text-[var(--color-text-muted)]" aria-hidden="true">—</span>
+                          <span className="sr-only">Not included</span>
+                        </>
+                      ) : (
+                        value
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -372,32 +357,28 @@ export default function PricingPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       {/* FAQ */}
-      <div className="space-y-4 pt-4 max-w-3xl mx-auto">
-        <h2 className="text-xl font-black text-[var(--color-ink)] text-center">Frequently asked questions</h2>
-        <div className="space-y-2">
+      <section aria-labelledby="pricing-faq-title" className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
+        <h2 id="pricing-faq-title" className="type-display text-center">Frequently asked questions</h2>
+        <div className="border-t border-[var(--color-border)]">
           {faqs.map((faq) => (
-            <details
-              key={faq.q}
-              className="group p-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] open:bg-[var(--color-surface-subtle)]"
-            >
-              <summary className="font-bold text-xs text-[var(--color-ink)] flex items-center gap-2 cursor-pointer list-none">
-                <HelpCircle className="w-3.5 h-3.5 text-[var(--color-brand-dark)] shrink-0" />
+            <details key={faq.q} className="group border-b border-[var(--color-border)] [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center gap-3 min-h-[56px] py-4 cursor-pointer list-none text-[17px] font-medium text-[var(--color-ink)]">
                 <span className="flex-1">{faq.q}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-muted)] transition-transform group-open:rotate-180" />
+                <ChevronDown className="w-4 h-4 text-[var(--color-text-muted)] shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
               </summary>
-              <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed pl-5 pt-2">{faq.a}</p>
+              <p className="pb-5 pr-8 text-[15px] text-[var(--color-text-secondary)] leading-relaxed">{faq.a}</p>
             </details>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--color-text-muted)]">
-        <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" />
+      <p className="flex items-center justify-center gap-1.5 text-[13px] text-[var(--color-text-muted)] text-center">
+        <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
         <span>256-bit encrypted checkout &bull; Failed extractions are never charged</span>
-      </div>
+      </p>
 
       <CheckoutModal
         isOpen={isCheckoutOpen}

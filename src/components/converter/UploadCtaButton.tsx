@@ -25,7 +25,7 @@ export default function UploadCtaButton({
   return (
     <button type="button" onClick={openUploadPicker} className={className}>
       <span>{label}</span>
-      <ArrowRight className="w-5 h-5" />
+      <ArrowRight className="w-[18px] h-[18px]" aria-hidden="true" />
     </button>
   );
 }

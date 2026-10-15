@@ -3,6 +3,7 @@ import path from 'path';
 import {
   SEOConverterPage,
   SEOFeature,
+  SEOReconFeature,
   SEOFAQ,
   SEOGuidePage,
   SEOReconSampleRow,
@@ -311,7 +312,7 @@ export function getAllReconciliationPages(): SEOReconciliationPage[] {
           keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
           related: Array.isArray(data.related) ? (data.related as string[]) : [],
           benefits: Array.isArray(data.benefits) ? (data.benefits as string[]) : [],
-          features: Array.isArray(data.features) ? (data.features as SEOFeature[]) : [],
+          features: Array.isArray(data.features) ? (data.features as SEOReconFeature[]) : [],
           steps: Array.isArray(data.steps) ? (data.steps as SEOStep[]) : [],
           sampleRows: Array.isArray(data.sampleRows) ? (data.sampleRows as SEOReconSampleRow[]) : [],
           faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],

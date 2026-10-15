@@ -37,10 +37,10 @@ export default function BrandLogo({
   const customInlineStyle = typeof size === 'number' ? { width: `${size}px`, height: `${size}px` } : undefined;
 
   const content = (
-    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
+    <div className={`inline-flex items-center gap-2 select-none ${className}`}>
       <div
         style={customInlineStyle}
-        className={`relative ${sizeClass} shrink-0 overflow-hidden rounded-lg ${imageClassName}`}
+        className={`relative ${sizeClass} shrink-0 overflow-hidden rounded-md ${imageClassName}`}
       >
         <Image
           src="/logo.png"
@@ -52,11 +52,10 @@ export default function BrandLogo({
         />
       </div>
       {showText && (
-        <span className={`flex items-center text-xl font-black tracking-tight text-[var(--color-ink)] ${textClassName}`}>
-          <span className="text-[var(--color-brand-hover)]">Fin</span>
-          <span className="text-[var(--color-ink)]">lyzers</span>
+        <span className={`flex items-center text-xl font-semibold tracking-[-0.02em] text-[var(--color-ink)] ${textClassName}`}>
+          <span>Finlyzers</span>
           {tag && (
-            <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] rounded-md">
+            <span className="ml-2 px-1.5 py-0.5 text-[11px] font-medium bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] rounded-md tracking-normal">
               {tag}
             </span>
           )}
@@ -70,7 +69,7 @@ export default function BrandLogo({
       <Link
         href={href}
         onClick={onClick}
-        className="inline-flex items-center hover:opacity-90 transition-opacity"
+        className="inline-flex items-center min-h-[44px] rounded-md hover:opacity-80 transition-opacity"
         aria-label="Finlyzers Home"
       >
         {content}

@@ -2,7 +2,7 @@
 slug: "bank-statement-to-excel"
 title: "Bank Statement to Excel Converter"
 metaTitle: "PDF Bank Statement to Excel Converter (Free) | Finlyzers"
-metaDescription: "Convert PDF bank statements to Excel online. One row per transaction, separate debit, credit and balance columns, balances checked. Free up to 10 pages, no software to install."
+metaDescription: "Convert PDF bank statements to Excel online: one row per transaction, separate debit, credit and balance columns, balances checked. Free up to 10 pages."
 intro: "Convert a PDF bank statement into an .xlsx workbook online with one row per transaction and separate debit, credit and balance columns, ready for formulas, pivot tables and reconciliation."
 category: "formats"
 bankName: "Bank"

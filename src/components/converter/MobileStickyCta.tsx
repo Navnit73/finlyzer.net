@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { openUploadPicker } from './UploadCtaButton';
+import { FREE_PAGE_LIMIT } from '@/types/pricing';
 
 /**
  * Mobile-only bottom bar that appears once the hero upload card has scrolled
@@ -10,7 +11,7 @@ import { openUploadPicker } from './UploadCtaButton';
  */
 export default function MobileStickyCta({
   label = 'Convert a Statement Free',
-  note = 'Free up to 10 pages · No signup',
+  note = `Free up to ${FREE_PAGE_LIMIT} pages · No signup`,
 }: {
   label?: string;
   note?: string;
@@ -40,7 +41,7 @@ export default function MobileStickyCta({
   return (
     <div
       aria-hidden={!isVisible}
-      className={`sm:hidden fixed inset-x-0 bottom-0 z-30 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-[var(--color-surface)]/95 backdrop-blur border-t border-[var(--color-border)] transition-transform duration-200 ${
+      className={`sm:hidden fixed inset-x-0 bottom-0 z-30 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] surface-frosted hairline-t transition-transform duration-300 ease-[var(--ease-apple)] ${
         isVisible ? 'translate-y-0' : 'translate-y-full pointer-events-none'
       }`}
     >
@@ -48,7 +49,7 @@ export default function MobileStickyCta({
         type="button"
         tabIndex={isVisible ? 0 : -1}
         onClick={openUploadPicker}
-        className="btn-brand-primary w-full !min-h-[52px]"
+        className="btn-brand-primary w-full !min-h-[50px] !text-[17px]"
       >
         {label}
       </button>

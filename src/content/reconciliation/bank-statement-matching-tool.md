@@ -55,12 +55,16 @@ sampleRows:
     result: "Unmatched: 6 days apart"
 features:
   - title: "Transparent Scoring"
+    icon: "rules"
     description: "100 points for the amount, up to 30 for date closeness, 50 for a matching reference and up to 40 for description similarity."
   - title: "Reference Normalisation"
+    icon: "reference"
     description: "Cheque numbers, UTRs and transaction IDs are compared as letters and digits only, so 'CHQ-004512' and 'chq 004512' match."
   - title: "Missing Dates Handled"
+    icon: "dates"
     description: "A row with an unreadable date can still match on amount, at a lower score, and is flagged in the report."
   - title: "Duplicates Flagged"
+    icon: "duplicates"
     description: "Entries repeated within one document with the same date, amount, direction, description and reference are grouped for review."
 faqs:
   - question: "How does automatic transaction matching work?"

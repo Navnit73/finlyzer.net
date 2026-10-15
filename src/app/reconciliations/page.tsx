@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, ChevronRight, GitCompareArrows, RefreshCw, XCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, ChevronRight, GitCompareArrows, RefreshCw, XCircle } from 'lucide-react';
 import ReconciliationUploader from '@/components/reconciliation/ReconciliationUploader';
 
 interface ListItem {
@@ -26,29 +26,31 @@ interface ListItem {
 
 const PAGE_SIZE = 20;
 
+const badge = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap';
+
 function StatusCell({ item }: { item: ListItem }) {
   if (item.status === 'failed') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-danger)]" title={item.error || undefined}>
-        <XCircle className="w-4 h-4" aria-hidden="true" /> Failed
+      <span className={`${badge} bg-[var(--color-danger-soft)] text-[var(--color-danger)]`} title={item.error || undefined}>
+        <XCircle className="w-3.5 h-3.5" aria-hidden="true" /> Failed
       </span>
     );
   }
   if (item.status !== 'completed' || !item.summary) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-text-secondary)]">
-        <span className="loading loading-spinner loading-xs" aria-hidden="true" /> Processing
+      <span className={`${badge} bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]`}>
+        <span className="loading loading-spinner w-3 h-3" aria-hidden="true" /> Processing
       </span>
     );
   }
   const issues = item.summary.unmatched_bank + item.summary.unmatched_ledger + item.summary.amount_mismatches;
   return issues === 0 ? (
-    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-success)]">
-      <CheckCircle2 className="w-4 h-4" aria-hidden="true" /> All matched
+    <span className={`${badge} bg-[var(--color-success-soft)] text-[var(--color-success)]`}>
+      <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> All matched
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-warning)]">
-      <AlertTriangle className="w-4 h-4" aria-hidden="true" /> {issues} to review
+    <span className={`${badge} bg-[var(--color-warning-soft)] text-[var(--color-warning)]`}>
+      <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" /> {issues} to review
     </span>
   );
 }
@@ -102,83 +104,104 @@ export default function ReconciliationsPage() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="w-full space-y-8 pb-16">
-      <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)]">
-          <GitCompareArrows className="w-3.5 h-3.5" aria-hidden="true" />
+    <div className="w-full space-y-10 sm:space-y-12 pb-16">
+      <div className="space-y-2 max-w-2xl">
+        <p className="eyebrow inline-flex items-center gap-1.5">
+          <GitCompareArrows className="w-4 h-4" aria-hidden="true" />
           <span>Bank Reconciliation</span>
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">Reconcile a bank statement</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
+        </p>
+        <h1 className="type-title">Reconcile a bank statement</h1>
+        <p className="text-[15px] sm:text-[17px] leading-relaxed text-[var(--color-text-secondary)]">
           Upload a bank statement and your ledger or cash book. Pages are taken from your credits when the report is ready.
         </p>
       </div>
 
       <ReconciliationUploader layout="split" />
 
-      <section aria-labelledby="vault-title" className="space-y-3">
+      <section aria-labelledby="vault-title" className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="vault-title" className="text-lg font-black text-[var(--color-ink)]">
-            Your reconciliations {total > 0 && <span className="text-[var(--color-text-muted)] font-bold">({total})</span>}
+          <h2 id="vault-title" className="type-headline">
+            Your reconciliations {total > 0 && <span className="text-[var(--color-text-muted)] font-normal tabular-nums">({total})</span>}
           </h2>
           <button
             type="button"
             onClick={fetchList}
-            className="btn-brand-secondary !min-h-[36px] !h-[36px] !px-3 text-xs font-bold rounded-lg"
+            className="btn-brand-secondary !min-h-[44px] sm:!min-h-[36px] !px-4 !text-[13px]"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
             <span>Refresh</span>
           </button>
         </div>
 
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="card-surface overflow-hidden">
           {error ? (
-            <p role="alert" className="p-6 text-sm text-center text-[var(--color-danger)]">{error}</p>
+            <div role="alert" className="px-6 py-14 text-center space-y-3">
+              <span className="mx-auto w-10 h-10 rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] flex items-center justify-center">
+                <AlertCircle className="w-5 h-5" aria-hidden="true" />
+              </span>
+              <p className="text-[17px] font-semibold text-[var(--color-ink)]">Couldn&apos;t load your reconciliations</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">{error}</p>
+              <button type="button" onClick={fetchList} className="btn-brand-ghost mt-2">
+                Try again
+              </button>
+            </div>
           ) : isLoading && items.length === 0 ? (
-            <div className="p-10 flex justify-center" aria-busy="true">
-              <span className="loading loading-spinner loading-md text-[var(--color-text-muted)]" />
+            <div className="divide-y divide-[var(--color-border-subtle)]" aria-busy="true" aria-label="Loading reconciliations">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-6 px-4 py-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="skeleton-line h-3.5 w-1/3" />
+                    <div className="skeleton-line h-3 w-1/4" />
+                  </div>
+                  <div className="skeleton-line h-3.5 w-16 hidden sm:block" />
+                  <div className="skeleton-line h-5 w-20 rounded-full" />
+                </div>
+              ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="p-10 text-center space-y-1">
-              <p className="text-sm font-bold text-[var(--color-ink)]">No reconciliations yet</p>
+            <div className="px-6 py-14 text-center space-y-3">
+              <span className="mx-auto w-10 h-10 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)] flex items-center justify-center">
+                <GitCompareArrows className="w-5 h-5" aria-hidden="true" />
+              </span>
+              <p className="text-[17px] font-semibold text-[var(--color-ink)]">No reconciliations yet</p>
               <p className="text-sm text-[var(--color-text-secondary)]">Add a bank statement and a ledger above to run your first one.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-sm">
-                <thead className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)]">
-                  <tr className="text-left text-xs font-semibold text-[var(--color-text-secondary)]">
-                    <th scope="col" className="py-3 px-4">Files</th>
-                    <th scope="col" className="py-3 px-4">Date</th>
-                    <th scope="col" className="py-3 px-4 text-right">Pages</th>
-                    <th scope="col" className="py-3 px-4 text-right">Matched</th>
-                    <th scope="col" className="py-3 px-4 text-right">Bank only</th>
-                    <th scope="col" className="py-3 px-4 text-right">Ledger only</th>
-                    <th scope="col" className="py-3 px-4">Status</th>
-                    <th scope="col" className="py-3 px-4"><span className="sr-only">Open</span></th>
+                <thead className="border-b border-[var(--color-border)]">
+                  <tr className="text-left text-[13px] text-[var(--color-text-muted)]">
+                    <th scope="col" className="py-3 px-4 font-normal">Files</th>
+                    <th scope="col" className="py-3 px-4 font-normal">Date</th>
+                    <th scope="col" className="py-3 px-4 font-normal text-right">Pages</th>
+                    <th scope="col" className="py-3 px-4 font-normal text-right">Matched</th>
+                    <th scope="col" className="py-3 px-4 font-normal text-right">Bank only</th>
+                    <th scope="col" className="py-3 px-4 font-normal text-right">Ledger only</th>
+                    <th scope="col" className="py-3 px-4 font-normal">Status</th>
+                    <th scope="col" className="py-3 px-4 font-normal"><span className="sr-only">Open</span></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--color-border)]">
+                <tbody className="divide-y divide-[var(--color-border-subtle)]">
                   {items.map((item) => (
                     <tr key={item.reconciliation_id} className="hover:bg-[var(--color-surface-subtle)] transition-colors">
                       <td className="py-3 px-4 max-w-[22rem]">
                         <Link href={`/reconciliation/${item.reconciliation_id}`} className="block min-w-0">
-                          <span className="block font-semibold text-[var(--color-ink)] truncate" title={item.bank_filename}>{item.bank_filename}</span>
-                          <span className="block text-xs text-[var(--color-text-secondary)] truncate" title={item.ledger_filename}>vs {item.ledger_filename}</span>
+                          <span className="block font-medium text-[var(--color-ink)] truncate" title={item.bank_filename}>{item.bank_filename}</span>
+                          <span className="block mt-0.5 text-xs text-[var(--color-text-muted)] truncate" title={item.ledger_filename}>vs {item.ledger_filename}</span>
                         </Link>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-[var(--color-text-secondary)]">
                         {new Date(item.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">{item.pages}</td>
-                      <td className="py-3 px-4 text-right tabular-nums">{item.summary?.matched ?? '—'}</td>
-                      <td className="py-3 px-4 text-right tabular-nums">{item.summary?.unmatched_bank ?? '—'}</td>
-                      <td className="py-3 px-4 text-right tabular-nums">{item.summary?.unmatched_ledger ?? '—'}</td>
+                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.pages}</td>
+                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.matched ?? '—'}</td>
+                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.unmatched_bank ?? '—'}</td>
+                      <td className="py-3 px-4 text-right tabular-nums text-[var(--color-ink)]">{item.summary?.unmatched_ledger ?? '—'}</td>
                       <td className="py-3 px-4 whitespace-nowrap"><StatusCell item={item} /></td>
                       <td className="py-3 px-4 text-right">
                         <Link
                           href={`/reconciliation/${item.reconciliation_id}`}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-ink)] hover:underline underline-offset-4"
+                          className="link inline-flex items-center gap-0.5 min-h-[44px] text-[13px]"
                         >
                           Open <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
                         </Link>
@@ -191,13 +214,13 @@ export default function ReconciliationsPage() {
           )}
 
           {pageCount > 1 && (
-            <div className="p-3 border-t border-[var(--color-border)] flex items-center justify-between text-sm">
-              <span className="text-[var(--color-text-secondary)]">Page {page} of {pageCount}</span>
+            <div className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center justify-between gap-3 text-[13px]">
+              <span className="text-[var(--color-text-muted)] tabular-nums">Page {page} of {pageCount}</span>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setPage((p) => p - 1)} disabled={page <= 1 || isLoading} className="btn-brand-secondary !min-h-[32px] !h-[32px] !px-3 text-xs disabled:opacity-40">
+                <button type="button" onClick={() => setPage((p) => p - 1)} disabled={page <= 1 || isLoading} className="btn-brand-secondary !min-h-[44px] sm:!min-h-[32px] !px-4 !text-[13px]">
                   Previous
                 </button>
-                <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page >= pageCount || isLoading} className="btn-brand-secondary !min-h-[32px] !h-[32px] !px-3 text-xs disabled:opacity-40">
+                <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page >= pageCount || isLoading} className="btn-brand-secondary !min-h-[44px] sm:!min-h-[32px] !px-4 !text-[13px]">
                   Next
                 </button>
               </div>

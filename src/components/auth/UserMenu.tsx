@@ -59,11 +59,11 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
         {onOpenHistory && (
           <button
             onClick={onOpenHistory}
-            className="btn btn-ghost btn-sm text-xs font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-full px-3 py-1.5 flex items-center gap-1.5 border border-[var(--color-border)] cursor-pointer"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[13px] font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
             title="View Stored Documents & History"
             aria-label="View Document History"
           >
-            <History className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
+            <History className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
             <span className="hidden sm:inline">History</span>
           </button>
         )}
@@ -76,35 +76,35 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               role="button"
               aria-label="User account menu"
               aria-haspopup="menu"
-              className="flex items-center gap-2 p-1.5 rounded-full hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors border border-[var(--color-border)]"
+              className="flex items-center gap-1.5 h-11 sm:h-9 pl-1 pr-1 sm:pr-2 rounded-full hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors"
             >
               <UserAvatar
                 src={session.user?.image}
                 name={session.user?.name}
-                size={32}
-                imageClassName="w-8 h-8 rounded-full object-cover ring-2 ring-[var(--color-brand)]"
-                fallbackClassName="w-8 h-8 rounded-full bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs"
+                size={28}
+                imageClassName="w-7 h-7 rounded-full object-cover ring-1 ring-[var(--color-border)]"
+                fallbackClassName="w-7 h-7 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-medium flex items-center justify-center text-xs"
               />
-              <span className="text-xs font-bold text-[var(--color-ink)] hidden sm:inline max-w-[120px] truncate">
+              <span className="text-[13px] font-medium text-[var(--color-ink)] hidden sm:inline max-w-[120px] truncate">
                 {session.user?.name?.split(' ')[0] || 'Account'}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+              <ChevronDown className="hidden sm:block w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
             </div>
 
             <ul
               tabIndex={0}
               role="menu"
-              className="dropdown-content z-50 menu p-3 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg w-64 text-xs space-y-1.5 mt-2"
+              className="dropdown-content surface-overlay z-50 p-1.5 w-72 mt-2"
             >
               {/* Profile Header */}
-              <li className="p-2 border-b border-[var(--color-border)] pb-3">
-                <p className="font-bold text-[var(--color-ink)] text-sm truncate">{session.user?.name}</p>
-                <p className="text-[var(--color-text-muted)] truncate">{session.user?.email}</p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="badge badge-sm bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold border-none uppercase text-[10px]">
+              <li role="none" className="px-2.5 pt-2 pb-3 mb-1 border-b border-[var(--color-border-subtle)]">
+                <p className="font-medium text-[var(--color-ink)] text-sm truncate">{session.user?.name}</p>
+                <p className="text-xs text-[var(--color-text-muted)] truncate">{session.user?.email}</p>
+                <div className="mt-2.5 flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] font-medium capitalize text-xs">
                     {quota.tier} Plan
                   </span>
-                  <span className="text-[11px] text-[var(--color-text-secondary)] font-mono font-bold">
+                  <span className="text-xs text-[var(--color-text-secondary)] tabular-nums">
                     {`${quota.freePagesRemaining.toLocaleString()} Pages Remaining`}
                   </span>
                 </div>
@@ -114,9 +114,9 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               <li>
                 <Link
                   href="/dashboard"
-                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
+                  className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] w-full text-left cursor-pointer"
                 >
-                  <CreditCard className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
+                  <CreditCard className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
                   <span>Dashboard & Credits</span>
                 </Link>
               </li>
@@ -125,9 +125,9 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
               <li>
                 <Link
                   href="/superadmin"
-                  className="py-2 flex items-center gap-2 font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left"
+                  className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] w-full text-left cursor-pointer"
                 >
-                  <ShieldAlert className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
+                  <ShieldAlert className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
                   <span>SuperAdmin Operations</span>
                 </Link>
               </li>
@@ -136,15 +136,15 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                 <li>
                   <button
                     onClick={onOpenHistory}
-                    className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left cursor-pointer"
+                    className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] w-full text-left cursor-pointer"
                   >
-                    <History className="w-4 h-4 text-[var(--color-ink)]" />
+                    <History className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
                     <span>My Document History</span>
                   </button>
                 </li>
               )}
 
-              <li>
+              <li className="mt-1 pt-1 border-t border-[var(--color-border-subtle)]">
                 <button
                   onClick={async () => {
                     try {
@@ -152,9 +152,9 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
                     } catch {}
                     await signOut({ callbackUrl: '/' });
                   }}
-                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg w-full text-left cursor-pointer"
+                  className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] w-full text-left cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                   <span>Sign Out</span>
                 </button>
               </li>
@@ -164,17 +164,17 @@ export default function UserMenu({ onOpenHistory }: UserMenuProps) {
           /* Single Clean Sign In CTA across all viewports */
           <div className="flex items-center gap-2 sm:gap-3">
             {/* 10-Page Quota Pill on Desktop */}
-            <div className="hidden md:flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] text-xs font-bold border border-[var(--color-brand)]/20">
+            <div className="hidden md:flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] text-xs font-medium">
               <span>10 Free Pages</span>
             </div>
 
             {/* Exactly ONE Sign In Button */}
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="btn-brand-dark flex items-center gap-2 !min-h-[38px] !h-[38px] !py-0 !px-4 !text-xs sm:!text-sm font-semibold rounded-full shadow-xs cursor-pointer transition-transform active:scale-95"
+              className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm !gap-1.5"
               aria-label="Sign In with Google"
             >
-              <User className="w-3.5 h-3.5" />
+              <User className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
               <span>Sign In</span>
             </button>
           </div>

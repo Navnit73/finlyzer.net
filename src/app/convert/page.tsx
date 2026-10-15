@@ -1,6 +1,8 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import BreadcrumbStrip from "@/components/layout/BreadcrumbStrip";
+import { FREE_PAGE_LIMIT } from "@/types/pricing";
 import { getAllLandingPages } from "@/lib/seo-markdown";
 import {
   absoluteUrl,
@@ -9,11 +11,11 @@ import {
   pageMetadata,
   serializeJsonLd,
 } from "@/lib/seo-config";
-import { ChevronRight, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ConverterDirectory, {
   type DirectoryEntry,
 } from "@/components/converter/ConverterDirectory";
-import { FinalCtaSection } from "@/components/converter/sections";
+import { FinalCtaSection, SectionBand } from "@/components/converter/sections";
 
 const title = "Bank Statement Converters by Bank & Format | Finlyzers";
 const description =
@@ -68,100 +70,72 @@ export default function ConvertersDirectoryPage() {
   ]);
 
   return (
-    <div className="w-full">
+    <div className="w-full -mb-6 sm:-mb-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: directoryJsonLd }}
       />
 
-      <nav
-        aria-label="Breadcrumbs"
-        className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]"
-      >
-        <Link
-          href="/"
-          className="hover:text-[var(--color-ink)] transition-colors"
-        >
-          Home
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
-        <span
-          className="text-[var(--color-ink)] font-semibold"
-          aria-current="page"
-        >
-          Converters
-        </span>
-      </nav>
+      <BreadcrumbStrip items={[{ label: "Home", href: "/" }, { label: "Converters" }]} />
 
-      <div className="space-y-16 sm:space-y-24 pt-6 sm:pt-10 pb-8 sm:pb-16">
-        {/* Hero */}
-        <div className="space-y-8 sm:space-y-10">
-          <header className="text-center max-w-3xl mx-auto space-y-4 sm:space-y-5">
-            <span className="feature-badge">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{pages.length} converters · Free up to 10 pages</span>
-            </span>
-            <h1 className="text-[2rem] leading-[1.08] sm:text-5xl lg:text-[3.5rem] lg:leading-[1.04] font-extrabold tracking-tight text-[var(--color-ink)]">
-              Converters by Bank &amp; Format
-            </h1>
-            <p className="text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed max-w-2xl mx-auto">
-              Pick the export format you need, or your bank for a guide to its
-              statement layout. Every converter splits debits and credits and
-              checks balances before you download.
-            </p>
-          </header>
+      {/* Hero + directory: the hero sits on a parchment band, the search bar straddles its edge. */}
+      <header className="text-center pt-10 sm:pt-16 pb-10 sm:pb-14 bg-[var(--color-surface-subtle)] shadow-[0_0_0_100vmax_var(--color-surface-subtle)] [clip-path:inset(0_-100vmax)]">
+        <p className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-soft)] border border-[var(--color-info-border)] px-3.5 py-1.5 text-[13px] font-medium text-[var(--color-brand-dark)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]" aria-hidden="true" />
+          {pages.length} converters · Free up to {FREE_PAGE_LIMIT} pages
+        </p>
+        <h1 className="type-hero !text-[clamp(2rem,6.5vw,3.5rem)] mt-4 max-w-3xl mx-auto text-balance">
+          Converters by Bank &amp; <span className="text-[var(--color-brand)]">Format</span>
+        </h1>
+        <p className="mt-4 max-w-xl mx-auto text-[13px] sm:text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
+          Pick the export format you need, or your bank for a guide to its
+          statement layout. Every converter splits debits and credits and
+          checks balances before you download.
+        </p>
+      </header>
 
-          <ConverterDirectory pages={entries} />
-        </div>
+      <div className="pt-8 sm:pt-12 pb-[var(--section-y)]">
+        <ConverterDirectory pages={entries} />
+      </div>
 
-        {/* Fallback for banks without a dedicated page */}
-        <section className="intro-panel grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-ink)]">
-              Don&apos;t See Your Bank?
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--color-text-secondary)]">
+      {/* Fallback for banks without a dedicated page, and QuickBooks import help */}
+      <SectionBand tone="parchment">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-0 lg:divide-x lg:divide-[var(--color-border)]">
+          <section className="lg:pr-14 flex flex-col items-start">
+            <h2 className="type-title">Don&apos;t See Your Bank?</h2>
+            <p className="type-body mt-3">
               The bank statement converter adapts to most statement layouts,
               including scanned PDFs and photos. No bank-specific page is needed.
             </p>
-          </div>
-          <Link
-            href="/#upload"
-            className="btn-brand-dark !min-h-[52px] w-full lg:w-auto lg:justify-self-end"
-          >
-            <span>Open the Bank Statement Converter</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </section>
+            <Link href="/#upload" className="btn-brand-primary mt-6 w-full sm:w-auto">
+              <span>Open the Bank Statement Converter</span>
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </section>
 
-        {/* QuickBooks import help for visitors who already have a spreadsheet */}
-        <section className="intro-panel grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-center">
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-ink)]">
-              Importing a Spreadsheet Into QuickBooks?
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--color-text-secondary)]">
+          <section className="lg:pl-14 flex flex-col items-start">
+            <h2 className="type-title">Importing a Spreadsheet Into QuickBooks?</h2>
+            <p className="type-body mt-3">
               Upload a CSV or Excel file to the{" "}
-              <Link
-                href="/convert/csv-to-qbo"
-                className="font-semibold text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-brand)] decoration-2"
-              >
+              <Link href="/convert/csv-to-qbo" className="link">
                 CSV and Excel to QBO converter
               </Link>
               , or follow the step-by-step guide for QuickBooks Online and Desktop.
             </p>
-          </div>
-          <Link
-            href="/guides/import-excel-into-quickbooks"
-            className="btn-brand-secondary !min-h-[52px] w-full lg:w-auto lg:justify-self-end"
-          >
-            <span>Read the QuickBooks Import Guide</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </section>
+            <Link
+              href="/guides/import-excel-into-quickbooks"
+              className="btn-brand-ghost mt-6 w-full sm:w-auto"
+            >
+              <span>Read the QuickBooks Import Guide</span>
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </section>
+        </div>
+      </SectionBand>
 
+      <SectionBand>
         <FinalCtaSection href="/#upload" />
-      </div>
+      </SectionBand>
     </div>
   );
 }

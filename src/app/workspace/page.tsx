@@ -8,17 +8,15 @@ export const metadata: Metadata = {
 
 export default function WorkspacePage() {
   return (
-    <div className="w-full space-y-6 pb-16">
-      <div className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
-          OCR Studio &amp; Convert
-        </h1>
-        <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
+    <div className="w-full space-y-8 pb-16">
+      <header className="space-y-1.5">
+        <h1 className="type-title">OCR Studio &amp; Convert</h1>
+        <p className="text-[15px] text-[var(--color-text-secondary)]">
           Upload bank statements, invoices, or receipts and export to Excel, CSV, QBO, OFX, or QIF.
         </p>
-      </div>
+      </header>
 
-      <div className="sm:bg-[var(--color-surface)] sm:rounded-lg sm:border sm:border-[var(--color-border)] sm:p-6">
+      <div>
         <OcrWorkspace />
       </div>
     </div>

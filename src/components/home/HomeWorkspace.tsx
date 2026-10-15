@@ -13,7 +13,7 @@ export default function HomeWorkspace() {
   if (isLoggedIn) {
     return (
       <div className="w-full space-y-6">
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-4 sm:p-8 shadow-xs">
+        <div className="card-surface p-4 sm:p-8">
           <OcrWorkspace />
         </div>
       </div>
@@ -22,7 +22,10 @@ export default function HomeWorkspace() {
 
   return (
     <>
-      <ConverterHero />
+      {/* Cancel <main>'s top padding so the parchment hero meets the header. */}
+      <div className="-mt-6 sm:-mt-10">
+        <ConverterHero />
+      </div>
       <MobileStickyCta />
     </>
   );

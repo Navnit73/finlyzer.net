@@ -54,7 +54,7 @@ export default function AdminShell({ children }: AdminShellProps) {
       </a>
       {/* Desktop Fixed Sidebar */}
       <div
-        className={`hidden lg:block fixed inset-y-0 left-0 z-40 transition-all duration-300 ${
+        className={`hidden lg:block fixed inset-y-0 left-0 z-40 transition-[width] duration-300 ease-[var(--ease-apple)] ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
@@ -64,20 +64,20 @@ export default function AdminShell({ children }: AdminShellProps) {
       {/* Mobile Slide-Over Drawer */}
       {isMobileSidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-50 flex animate-fade-in"
+          className="lg:hidden fixed inset-0 z-50 flex"
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation Sidebar"
         >
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/30 transition-opacity"
             onClick={() => setIsMobileSidebarOpen(false)}
             aria-hidden="true"
           />
 
           {/* Drawer Content */}
-          <div className="relative z-10 w-72 max-w-[85vw] h-full bg-[var(--color-surface)] shadow-2xl animate-slide-right flex flex-col">
+          <div className="relative z-10 w-80 max-w-[85vw] h-full bg-[var(--color-surface-subtle)] shadow-2xl flex flex-col">
             <AdminSidebar
               isCollapsed={false}
               onCloseMobile={() => setIsMobileSidebarOpen(false)}
@@ -88,7 +88,7 @@ export default function AdminShell({ children }: AdminShellProps) {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ${
+        className={`flex-1 flex flex-col min-w-0 min-h-screen transition-[padding] duration-300 ease-[var(--ease-apple)] ${
           isCollapsed ? 'lg:pl-20' : 'lg:pl-64'
         }`}
       >
@@ -97,7 +97,7 @@ export default function AdminShell({ children }: AdminShellProps) {
           onToggleCollapse={toggleCollapse}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
         />
-        <main id="main-content" tabIndex={-1} className="flex-1 p-3.5 sm:p-6 lg:p-8 bg-[var(--color-surface)] max-w-[1600px] w-full mx-auto overflow-x-hidden">
+        <main id="main-content" tabIndex={-1} className="flex-1 px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 bg-[var(--color-surface)] max-w-[1440px] w-full mx-auto overflow-x-hidden focus:outline-none">
           {children}
         </main>
       </div>

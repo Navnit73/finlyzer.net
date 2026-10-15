@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   X,
@@ -13,7 +12,6 @@ import {
   Clock,
   Layers,
   Activity,
-  Cpu,
   Minimize2,
 } from 'lucide-react';
 import { OCRJobState } from '@/types/ocr';
@@ -74,133 +72,118 @@ export default function AsyncJobProgressModal({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 animate-fade-in"
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="async-job-modal-title"
-        className="relative w-full max-w-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-lg surface-overlay overflow-hidden animate-scale-up"
       >
-        {/* Top Decorative Brand Accent Strip */}
-        <div className="h-1.5 w-full bg-[var(--color-brand)]" aria-hidden="true" />
-
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b border-[var(--color-border)] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center shrink-0">
-              {isCompleted ? (
-                <CheckCircle2 className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
-              ) : isFailed ? (
-                <AlertCircle className="w-5 h-5 text-[var(--color-danger)]" aria-hidden="true" />
-              ) : (
-                <Cpu className="w-5 h-5 text-[var(--color-brand-dark)] animate-pulse" aria-hidden="true" />
-              )}
+        <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 id="async-job-modal-title" className="text-[21px] font-semibold tracking-tight text-[var(--color-ink)]">
+                {isCompleted
+                  ? 'Extraction Complete!'
+                  : isFailed
+                  ? 'Processing Error'
+                  : isCancelled
+                  ? 'Processing Cancelled'
+                  : 'Asynchronous OCR Engine'}
+              </h2>
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
+                100–200 Pages
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 id="async-job-modal-title" className="text-base font-black text-[var(--color-ink)]">
-                  {isCompleted
-                    ? 'Extraction Complete!'
-                    : isFailed
-                    ? 'Processing Error'
-                    : isCancelled
-                    ? 'Processing Cancelled'
-                    : 'Asynchronous OCR Engine'}
-                </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-                  100–200 Pages
-                </span>
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)] truncate max-w-xs sm:max-w-md">
-                {filename || 'Long Financial Bank Statement / Document'}
-              </p>
-            </div>
+            <p className="text-[13px] text-[var(--color-text-muted)] truncate">
+              {filename || 'Long Financial Bank Statement / Document'}
+            </p>
           </div>
 
           {/* Close / Hide Button — Always accessible to unblock the user */}
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition cursor-pointer"
+            className="shrink-0 w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] transition-colors cursor-pointer"
             title="Hide modal and run in background"
             aria-label="Hide modal and run in background"
           >
-            <X className="w-5 h-5" aria-hidden="true" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 space-y-6">
+        <div className="px-6 pb-6 space-y-6">
           {/* 1. In-Progress & Queued State */}
           {(isUploading || isQueued || isProcessing) && (
             <div className="space-y-5">
-              {/* Status Header & Live Metrics */}
-              <div className="flex items-center justify-between text-xs" aria-live="polite">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-ping" aria-hidden="true" />
-                  <span className="font-bold text-[var(--color-ink)]">
+              <div className="space-y-2.5">
+                {/* Status line & live percentage */}
+                <div className="flex items-baseline justify-between gap-3" aria-live="polite">
+                  <span className="text-sm text-[var(--color-ink)]">
                     {isUploading
                       ? 'Uploading document to cloud storage...'
                       : isQueued
                       ? 'Job queued — Assigning OCR background worker...'
                       : jobState.message || 'Extracting & verifying transactions with AI...'}
                   </span>
+                  <span className="text-sm font-medium text-[var(--color-ink)] tabular-nums shrink-0">{activeProgress}%</span>
                 </div>
-                <span className="font-extrabold text-[var(--color-ink)] text-sm">{activeProgress}%</span>
-              </div>
 
-              {/* High-Contrast Progress Bar */}
-              <div
-                role="progressbar"
-                aria-valuenow={activeProgress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="Extraction Progress"
-                className="w-full bg-[var(--color-surface-subtle)] h-3 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
-              >
                 <div
-                  className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${activeProgress}%` }}
-                />
+                  role="progressbar"
+                  aria-valuenow={activeProgress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Extraction Progress"
+                  className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
+                >
+                  <div
+                    className="bg-[var(--color-brand)] h-full rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${activeProgress}%` }}
+                  />
+                </div>
               </div>
 
-              {/* Progress Detail Cards */}
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
+              {/* Progress details */}
+              <dl className="grid grid-cols-2 border-y border-[var(--color-border-subtle)] divide-x divide-[var(--color-border-subtle)]">
+                <div className="py-3 pr-4">
+                  <dt className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
                     <Layers className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>Pages Processed</span>
-                  </div>
-                  <p className="text-base font-black text-[var(--color-ink)]">
-                    {jobState.processedPages} <span className="text-xs font-semibold text-[var(--color-text-secondary)]">/ {jobState.totalPages > 0 ? jobState.totalPages : '—'}</span>
-                  </p>
+                    Pages Processed
+                  </dt>
+                  <dd className="mt-0.5 text-[17px] font-semibold text-[var(--color-ink)] tabular-nums">
+                    {jobState.processedPages} <span className="text-[13px] font-normal text-[var(--color-text-muted)]">/ {jobState.totalPages > 0 ? jobState.totalPages : '—'}</span>
+                  </dd>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-text-muted)] mb-1">
+                <div className="py-3 pl-4 min-w-0">
+                  <dt className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
                     <Activity className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>Current Pipeline Stage</span>
-                  </div>
-                  <p className="text-xs font-bold text-[var(--color-brand-dark)] truncate uppercase">
+                    Current Pipeline Stage
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium text-[var(--color-ink)] truncate capitalize">
                     {jobState.currentStage.replace(/_/g, ' ')}
-                  </p>
+                  </dd>
                 </div>
-              </div>
+              </dl>
 
               {/* Webhook & Background Note */}
-              <div className="p-3.5 rounded-xl bg-[var(--color-brand-soft)]/50 border border-[var(--color-brand)]/20 text-xs text-[var(--color-ink)] flex items-start gap-2.5">
-                <Clock className="w-4 h-4 text-[var(--color-brand-dark)] shrink-0 mt-0.5" aria-hidden="true" />
-                <p className="leading-relaxed">
-                  <strong className="font-bold">Webhook Auto-Sync Active:</strong> Large documents (100–200 pages) process safely in the background. You can hide this window and continue other work.
-                </p>
-              </div>
+              <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed flex items-start gap-2">
+                <Clock className="w-4 h-4 text-[var(--color-text-muted)] shrink-0 mt-px" aria-hidden="true" />
+                <span>
+                  <span className="font-medium text-[var(--color-ink)]">Webhook Auto-Sync Active:</span> Large documents (100–200 pages) process safely in the background. You can hide this window and continue other work.
+                </span>
+              </p>
 
               {/* Action Buttons: Cancel or Run in Background */}
-              <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-xl border border-[var(--color-danger-border)] transition cursor-pointer"
+                  className="min-h-[44px] px-4 rounded-full text-[15px] font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors cursor-pointer"
                 >
                   Cancel Background Job
                 </button>
@@ -208,7 +191,7 @@ export default function AsyncJobProgressModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full sm:w-auto btn-brand-primary !min-h-[42px] !h-[42px] !px-5 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
+                  className="btn-brand-primary"
                 >
                   <Minimize2 className="w-4 h-4" aria-hidden="true" />
                   <span>Hide &amp; Work in Background</span>
@@ -220,37 +203,35 @@ export default function AsyncJobProgressModal({
           {/* 2. Completed State */}
           {isCompleted && (
             <div className="space-y-5">
-              <div className="p-4 rounded-xl bg-[var(--color-brand-soft)]/60 border border-[var(--color-brand)]/40 flex items-start gap-3.5">
-                <div className="w-8 h-8 rounded-lg bg-white/90 border border-[var(--color-brand)]/60 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                  <CheckCircle2 className="w-4.5 h-4.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
-                </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-[var(--color-success)] shrink-0 mt-0.5" aria-hidden="true" />
                 <div className="space-y-1">
-                  <p className="font-extrabold text-sm text-[var(--color-ink)]">
+                  <p className="font-semibold text-[15px] text-[var(--color-ink)]">
                     Document Successfully Processed &amp; Structured!
                   </p>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                  <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed">
                     All pages have been extracted, reconciled, and indexed with DeepSeek AI financial entity parsing.
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2.5">
                 <button
+                  type="button"
                   onClick={handleViewResults}
-                  className="w-full sm:flex-1 btn-brand-primary !min-h-[46px] !h-[46px] !px-5 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer transition-transform active:scale-95"
+                  className="btn-brand-primary w-full sm:flex-1"
                 >
-                  <Sparkles className="w-4 h-4 shrink-0" />
                   <span>Open Financial Workspace</span>
-                  <ArrowRight className="w-4 h-4 shrink-0" />
+                  <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
                 </button>
 
                 {docId && (
                   <a
                     href={`/api/export/download/${docId}?format=xlsx`}
-                    className="w-full sm:w-auto btn-brand-secondary !min-h-[46px] !h-[46px] !px-5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
+                    className="btn-brand-secondary w-full sm:w-auto"
                   >
-                    <FileSpreadsheet className="w-4 h-4 text-[var(--color-success)] shrink-0" />
+                    <FileSpreadsheet className="w-4 h-4 shrink-0" aria-hidden="true" />
                     <span>Download Excel</span>
                   </a>
                 )}
@@ -261,30 +242,30 @@ export default function AsyncJobProgressModal({
           {/* 3. Failed State */}
           {isFailed && (
             <div className="space-y-5">
-              <div className="p-4 rounded-xl bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] flex items-start gap-3.5">
-                <div className="w-8 h-8 rounded-lg bg-white/90 border border-[var(--color-danger-border)] flex items-center justify-center text-[var(--color-danger)] shrink-0 mt-0.5 shadow-xs">
-                  <AlertCircle className="w-4.5 h-4.5 text-[var(--color-danger)]" />
-                </div>
+              <div role="alert" className="p-4 rounded-xl bg-[var(--color-danger-soft)] flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
                 <div className="space-y-1">
-                  <p className="font-extrabold text-sm text-[var(--color-danger)]">Processing Failed</p>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                  <p className="font-semibold text-[15px] text-[var(--color-danger)]">Processing Failed</p>
+                  <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed">
                     {jobState.error || 'An unexpected error occurred during extraction. Please check the file and try again.'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-2">
+              <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:justify-end">
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="btn-brand-secondary !min-h-[42px] !h-[42px] !px-5 text-xs font-bold rounded-xl border border-[var(--color-border)] cursor-pointer"
+                  className="btn-brand-secondary"
                 >
                   Close
                 </button>
                 <button
+                  type="button"
                   onClick={onRetry}
-                  className="btn-brand-primary !min-h-[42px] !h-[42px] !px-5 text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+                  className="btn-brand-primary"
                 >
-                  <RotateCw className="w-4 h-4" />
+                  <RotateCw className="w-4 h-4" aria-hidden="true" />
                   <span>Retry Processing</span>
                 </button>
               </div>
@@ -293,22 +274,24 @@ export default function AsyncJobProgressModal({
 
           {/* 4. Cancelled State */}
           {isCancelled && (
-            <div className="space-y-5 text-center py-4">
-              <p className="text-sm font-bold text-[var(--color-text-secondary)]">
+            <div className="space-y-5">
+              <p className="text-[15px] text-[var(--color-text-secondary)]">
                 The background processing job was cancelled.
               </p>
-              <div className="flex justify-center gap-3">
+              <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:justify-end">
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="btn-brand-secondary !min-h-[42px] !h-[42px] !px-6 text-xs font-bold rounded-xl border border-[var(--color-border)] cursor-pointer"
+                  className="btn-brand-secondary"
                 >
                   Dismiss
                 </button>
                 <button
+                  type="button"
                   onClick={onRetry}
-                  className="btn-brand-primary !min-h-[42px] !h-[42px] !px-6 text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+                  className="btn-brand-primary"
                 >
-                  <RotateCw className="w-4 h-4" />
+                  <RotateCw className="w-4 h-4" aria-hidden="true" />
                   <span>Restart Job</span>
                 </button>
               </div>

@@ -98,10 +98,10 @@ export default async function GuidePage({ params }: PageProps) {
     <div className="w-full">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
 
-      <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] min-w-0">
+      <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)] min-w-0">
         <Link href="/" className="hover:text-[var(--color-ink)] transition-colors shrink-0">Home</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-        <span className="text-[var(--color-ink)] font-semibold truncate" aria-current="page">{guide.shortTitle}</span>
+        <ChevronRight className="w-3 h-3 shrink-0" aria-hidden="true" />
+        <span className="text-[var(--color-text-secondary)] truncate" aria-current="page">{guide.shortTitle}</span>
       </nav>
 
       <ConverterHero
@@ -114,9 +114,9 @@ export default async function GuidePage({ params }: PageProps) {
         acceptSpreadsheets={guide.acceptsSpreadsheets}
       />
 
-      <div className="w-full space-y-16 sm:space-y-24 pt-8 sm:pt-12 pb-8 sm:pb-16">
-        <div className="space-y-4">
-          <p className="max-w-3xl mx-auto text-sm text-[var(--color-text-muted)]">
+      <div className="w-full space-y-20 sm:space-y-28 pt-8 sm:pt-12 pb-8 sm:pb-16">
+        <div className="space-y-6">
+          <p className="max-w-3xl mx-auto type-caption pb-6 border-b border-[var(--color-border)]">
             Updated <time dateTime={guide.dateModified}>{formatDate(guide.dateModified)}</time>. QuickBooks menus
             change between releases; if a menu name differs, use the closest match in your version.
           </p>

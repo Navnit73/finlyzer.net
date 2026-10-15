@@ -6,6 +6,7 @@ import {
   Lock,
   Layers,
   AlertCircle,
+  Upload,
 } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
@@ -251,11 +252,11 @@ export default function OcrUploader({
           role="button"
           tabIndex={isProcessing ? -1 : 0}
           aria-label="Upload Bank Statement or PDF"
-          className={`relative border-2 border-dashed rounded-lg px-4 py-8 sm:p-12 text-center transition-colors cursor-pointer bg-[var(--color-surface)] shadow-none focus:outline-none focus:border-[var(--color-brand)] ${
+          className={`relative border border-dashed rounded-2xl px-4 py-10 sm:px-10 sm:py-14 text-center transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:border-[var(--color-brand)] focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/20 ${
             isDragging
               ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)]'
-              : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-surface-subtle)]'
-          } ${isProcessing ? 'pointer-events-none opacity-90' : ''}`}
+              : 'border-[var(--color-border-hover)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)]'
+          } ${isProcessing ? 'pointer-events-none' : ''}`}
         >
           <input
             ref={fileInputRef}
@@ -271,89 +272,89 @@ export default function OcrUploader({
 
           {/* Processing Overlay / State */}
           {isProcessing ? (
-            <div className="space-y-6 max-w-md mx-auto py-4">
-              <div className="relative w-20 h-20 mx-auto">
-                <div className="w-20 h-20 rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-brand)] animate-spin" aria-hidden="true"></div>
-                <div className="absolute inset-0 flex items-center justify-center font-bold text-xs text-[var(--color-ink)]">
-                  {progress}%
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-[var(--color-ink)] tracking-tight">
+            <div className="space-y-5 max-w-md mx-auto py-2 text-left sm:text-center">
+              <div className="space-y-1.5">
+                <h3 className="text-[17px] font-semibold text-[var(--color-ink)] tracking-tight">
                   Processing Financial Document
                 </h3>
-                <p aria-live="polite" className="text-xs sm:text-sm font-medium text-[var(--color-brand-dark)] animate-pulse">
+                <p aria-live="polite" className="text-sm text-[var(--color-text-secondary)]">
                   {processingStage}
                 </p>
+              </div>
+              <div className="space-y-2">
                 <div
                   role="progressbar"
                   aria-valuenow={progress}
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-label="Processing Progress"
-                  className="w-full bg-[var(--color-border)] h-2 rounded-full overflow-hidden mt-3"
+                  className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
                 >
                   <div
                     className="bg-[var(--color-brand)] h-full transition-all duration-300 rounded-full"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
+                <p className="text-[13px] text-[var(--color-text-muted)] tabular-nums">{progress}%</p>
               </div>
             </div>
           ) : (
             /* Default Dropzone Content */
             <div className="space-y-5 max-w-lg mx-auto">
+              <span className="mx-auto w-11 h-11 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center" aria-hidden="true">
+                <Upload className="w-5 h-5 text-[var(--color-ink)]" />
+              </span>
               <div className="space-y-2">
-                <h3 className="text-xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-[var(--color-ink)] tracking-tight">
                   Upload Bank Statement or PDF
                 </h3>
-                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                <p className="text-[15px] text-[var(--color-text-secondary)] leading-relaxed">
                   Drag &amp; drop your bank statement, invoice, or receipt here, or{' '}
-                  <span className="text-[var(--color-ink)] font-bold underline decoration-[var(--color-brand)] decoration-2 underline-offset-2">
+                  <span className="text-[var(--color-brand-dark)] font-medium">
                     browse files
                   </span>
                 </p>
               </div>
 
-              {/* Supported Format Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs text-[var(--color-text-muted)] font-medium">
-                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-                  PDF (Up to 200 Pages)
-                </span>
-                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-                  PNG &bull; JPG &bull; TIFF
-                </span>
-                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)]">
-                  CSV &bull; XLSX
-                </span>
-                <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex items-center gap-1 text-[var(--color-brand-dark)] font-bold">
+              <span className="btn-brand-primary pointer-events-none" aria-hidden="true">
+                Choose File
+              </span>
+
+              {/* Supported formats */}
+              <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] text-[var(--color-text-muted)]">
+                <span>PDF (Up to 200 Pages)</span>
+                <span aria-hidden="true">&middot;</span>
+                <span>PNG &bull; JPG &bull; TIFF</span>
+                <span aria-hidden="true">&middot;</span>
+                <span>CSV &bull; XLSX</span>
+                <span aria-hidden="true">&middot;</span>
+                <span className="inline-flex items-center gap-1">
                   <Lock className="w-3 h-3" aria-hidden="true" /> Password Protected PDFs
                 </span>
-              </div>
+              </p>
             </div>
           )}
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div role="alert" className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-xs text-[var(--color-danger)] flex items-start gap-3">
+          <div role="alert" className="p-4 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] rounded-lg text-sm text-[var(--color-danger)] flex items-start gap-3">
             <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" aria-hidden="true" />
             <div className="flex-1">
-              <p className="font-bold">Extraction Notice</p>
-              <p>{errorMessage}</p>
+              <p className="font-semibold">Extraction Notice</p>
+              <p className="text-[13px]">{errorMessage}</p>
             </div>
           </div>
         )}
 
         {/* Action CTAs: Bulk Batch & Long Document OCR */}
-        <div className="hidden sm:flex flex-wrap items-center justify-center gap-3 pt-1">
+        <div className="hidden sm:flex flex-wrap items-center justify-center gap-2">
           <button
             type="button"
             onClick={onOpenBatchModal}
-            className="btn btn-sm rounded-full border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet-text)] font-bold px-4 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+            className="inline-flex items-center gap-2 min-h-[36px] px-4 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
           >
-            <Layers className="w-4 h-4 text-[var(--media-violet)]" aria-hidden="true" />
+            <Layers className="w-4 h-4" aria-hidden="true" />
             <span>Bulk Batch Processing</span>
           </button>
 
@@ -361,9 +362,9 @@ export default function OcrUploader({
             <button
               type="button"
               onClick={onOpenLongDocModal}
-              className="btn btn-sm rounded-full border border-[var(--color-brand)]/40 bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand-hover)]/20 text-[var(--color-ink)] font-bold px-4 py-2 flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+              className="inline-flex items-center gap-2 min-h-[36px] px-4 rounded-full text-sm font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors cursor-pointer"
             >
-              <Cpu className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
+              <Cpu className="w-4 h-4" aria-hidden="true" />
               <span>Long Doc OCR (100–200 Pages)</span>
             </button>
           )}

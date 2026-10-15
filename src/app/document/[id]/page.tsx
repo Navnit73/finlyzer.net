@@ -118,101 +118,103 @@ export default function DocumentPage({ params }: DocumentPageProps) {
   return (
     <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
       {/* Top Control Bar */}
-      <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--color-border)]">
+      <div className="flex items-center justify-between gap-2 pb-4 border-b border-[var(--color-border)]">
         {/* Left: Back button + Document Name */}
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <Link
             href={isLoggedIn ? "/documents" : "/"}
-            className="btn btn-sm btn-ghost rounded-lg border border-[var(--color-border)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] flex items-center gap-1.5 px-3 shrink-0 h-9 cursor-pointer"
+            className="link inline-flex items-center gap-1 text-sm font-medium shrink-0 min-h-11 sm:min-h-9 pr-1"
             aria-label={isLoggedIn ? "Back to Documents Vault" : "Back to Free Converter"}
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             <span>{isLoggedIn ? "Vault" : "Back to Converter"}</span>
           </Link>
 
-          <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block"></span>
+          <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block" aria-hidden="true"></span>
 
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-secondary)] min-w-0 truncate">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] shrink-0 animate-pulse"></span>
-            <span className="truncate text-[var(--color-ink)] font-bold text-xs">
-              {documentData?.filename || `Doc #${docId.slice(0, 8)}`}
-            </span>
-          </div>
+          <p className="min-w-0 truncate text-sm font-medium text-[var(--color-ink)]">
+            {documentData?.filename || `Doc #${docId.slice(0, 8)}`}
+          </p>
         </div>
 
         {/* Right: Actions (Authenticated Only) */}
         {isLoggedIn && (
           <div className="flex items-center gap-1.5 shrink-0">
             <button
+              type="button"
               onClick={() => setIsBatchModalOpen(true)}
-              className="btn btn-sm rounded-lg border border-[var(--media-violet)]/40 bg-[var(--media-violet-soft)] hover:bg-[var(--media-violet-hover)] text-[var(--media-violet)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-11 sm:h-9 px-3 sm:px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-muted)] hover:bg-[var(--color-border)] text-[var(--color-ink)] transition-colors cursor-pointer"
               title="Bulk Batch Extraction"
             >
-              <Layers className="w-3.5 h-3.5" />
+              <Layers className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
               <span className="hidden sm:inline">Bulk Batch</span>
-              <span className="sm:hidden text-[11px]">Batch</span>
+              <span className="sm:hidden">Batch</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setIsHistoryDrawerOpen(true)}
-              className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1 px-2.5 sm:px-3.5 h-9 cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-11 sm:h-9 px-3 sm:px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-muted)] hover:bg-[var(--color-border)] text-[var(--color-ink)] transition-colors cursor-pointer"
               title="Document History"
+              aria-label="Document History"
             >
-              <History className="w-3.5 h-3.5" />
+              <History className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
               <span className="hidden sm:inline">History</span>
             </button>
           </div>
         )}
       </div>
 
-
-
-        {/* Content Area */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-28 space-y-4">
-            <div className="relative w-16 h-16">
-              <div className="w-16 h-16 rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-brand)] animate-spin"></div>
-            </div>
-            <div className="text-center space-y-1">
-              <h3 className="text-base font-bold text-[var(--color-ink)]">
-                Loading Extracted Statement...
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary)]">
-                Retrieving reconciled data and financial metrics from database
-              </p>
-            </div>
+      {/* Content Area */}
+      {isLoading ? (
+        <div role="status" aria-live="polite" className="space-y-6">
+          <span className="sr-only">Loading Extracted Statement...</span>
+          <div className="space-y-2.5">
+            <span className="skeleton-line block h-7 w-72 max-w-full" />
+            <span className="skeleton-line block h-4 w-96 max-w-full" />
           </div>
-        ) : errorMessage ? (
-          <div className="max-w-lg mx-auto py-16 text-center space-y-6">
-            <div className="w-16 h-16 mx-auto rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)] flex items-center justify-center">
-              <AlertCircle className="w-8 h-8" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-[var(--color-ink)] tracking-tight">
-                Document Not Found
-              </h3>
-              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                {errorMessage}
-              </p>
-            </div>
-            <Link
-              href={isLoggedIn ? '/workspace' : '/'}
-              className="btn-brand-primary inline-flex items-center gap-2 py-2.5 px-6 text-xs font-bold"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Upload New Document</span>
-            </Link>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="skeleton-line block h-20 !rounded-xl" />
+            ))}
           </div>
-        ) : documentData ? (
-          /* Render Full Extraction Viewer Component */
-          <div className="space-y-6">
-            <ExtractionViewer
-              data={documentData}
-              onNewScan={() => router.push(isLoggedIn ? '/workspace' : '/')}
-              onConsolidateClick={() => setIsBatchModalOpen(true)}
-            />
+          <div className="space-y-3 pt-2">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <span key={i} className="skeleton-line block h-4" style={{ width: `${92 - i * 7}%` }} />
+            ))}
           </div>
-        ) : null}
+          <p className="text-[13px] text-[var(--color-text-muted)]" aria-hidden="true">
+            Retrieving reconciled data and financial metrics from database
+          </p>
+        </div>
+      ) : errorMessage ? (
+        <div role="alert" className="max-w-md mx-auto py-20 text-center space-y-4">
+          <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)]">
+            <AlertCircle className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+          </span>
+          <div className="space-y-1.5">
+            <h1 className="text-[17px] font-semibold text-[var(--color-ink)]">
+              Document Not Found
+            </h1>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              {errorMessage}
+            </p>
+          </div>
+          <Link href={isLoggedIn ? '/workspace' : '/'} className="btn-brand-primary">
+            <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            <span>Upload New Document</span>
+          </Link>
+        </div>
+      ) : documentData ? (
+        /* Render Full Extraction Viewer Component */
+        <div className="space-y-6">
+          <ExtractionViewer
+            data={documentData}
+            onNewScan={() => router.push(isLoggedIn ? '/workspace' : '/')}
+            onConsolidateClick={() => setIsBatchModalOpen(true)}
+          />
+        </div>
+      ) : null}
 
       {/* Batch Processing Modal */}
       <BatchProcessingModal

@@ -18,7 +18,6 @@ import {
   History,
   PanelLeftClose,
   PanelLeftOpen,
-  Home,
   FileText,
 } from 'lucide-react';
 import HistoryDrawer from '../ocr/HistoryDrawer';
@@ -93,37 +92,42 @@ export default function AdminTopNav({
 
   const breadcrumbs = getBreadcrumbs();
 
+  const menuItemClass = 'flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] active:bg-[var(--color-surface-muted)] w-full text-left cursor-pointer';
+  const menuIconClass = 'w-4 h-4 text-[var(--color-text-secondary)]';
+
   return (
     <>
-      <header className="sticky top-0 z-30 h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-3 sm:px-6 gap-2 flex items-center justify-between transition-colors select-none">
+      <header className="sticky top-0 z-30 h-[52px] surface-frosted hairline-b px-3 sm:px-6 gap-2 flex items-center justify-between select-none">
         {/* Left: Sidebar Collapse/Mobile Toggles + Breadcrumbs */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
           {/* Mobile Hamburger */}
           <button
+            type="button"
             onClick={onToggleMobileSidebar}
-            className="lg:hidden shrink-0 p-2 rounded-lg hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)] cursor-pointer"
+            className="lg:hidden shrink-0 -ml-1 w-11 h-11 inline-flex items-center justify-center rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] cursor-pointer transition-colors"
             aria-label="Open mobile navigation menu"
           >
-            <Menu className="w-4 h-4" aria-hidden="true" />
+            <Menu className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
           </button>
 
           {onToggleCollapse && (
             <button
+              type="button"
               onClick={onToggleCollapse}
-              className="hidden lg:flex p-2 rounded-lg hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] border border-[var(--color-border)] transition-colors cursor-pointer"
+              className="hidden lg:inline-flex -ml-2 w-8 h-8 items-center justify-center rounded-md hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4" aria-hidden="true" />
+                <PanelLeftOpen className="w-[18px] h-[18px]" strokeWidth={1.75} aria-hidden="true" />
               ) : (
-                <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
+                <PanelLeftClose className="w-[18px] h-[18px]" strokeWidth={1.75} aria-hidden="true" />
               )}
             </button>
           )}
 
           {/* Dynamic Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-xs min-w-0" aria-label="Breadcrumb">
+          <nav className="flex items-center gap-1 text-sm min-w-0" aria-label="Breadcrumb">
             {breadcrumbs.map((crumb, idx) => {
               const isLast = idx === breadcrumbs.length - 1;
               return (
@@ -132,13 +136,13 @@ export default function AdminTopNav({
                     <ChevronRight className="hidden sm:block w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
                   )}
                   {isLast ? (
-                    <span aria-current="page" className="font-black text-[var(--color-ink)] text-sm sm:text-xs truncate min-w-0 sm:max-w-xs">
+                    <span aria-current="page" className="font-medium text-[var(--color-ink)] truncate min-w-0 sm:max-w-xs">
                       {crumb.label}
                     </span>
                   ) : (
                     <Link
                       href={crumb.href}
-                      className="hidden sm:inline font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors truncate shrink-0"
+                      className="hidden sm:inline text-[var(--color-text-muted)] hover:text-[var(--color-ink)] transition-colors truncate shrink-0"
                     >
                       {crumb.label}
                     </Link>
@@ -150,40 +154,41 @@ export default function AdminTopNav({
         </div>
 
         {/* Right: Quick Actions & Profile Dropdown */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Engine Status Badge */}
-          <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-bold text-[11px] border border-[var(--color-brand)]/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-dark)] animate-pulse" aria-hidden="true"></span>
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Engine Status */}
+          <span className="hidden xl:inline-flex items-center gap-1.5 px-2 text-xs text-[var(--color-text-muted)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]" aria-hidden="true"></span>
             AI Engine Active
           </span>
 
           {/* History Drawer Trigger */}
           <button
+            type="button"
             onClick={() => setIsHistoryOpen(true)}
-            className="btn btn-ghost btn-sm text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] rounded-lg px-2.5 py-1.5 hidden md:flex items-center gap-1.5 border border-[var(--color-border)] cursor-pointer"
+            className="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[13px] font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
             title="View Document History"
             aria-label="View Document History"
           >
-            <History className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
+            <History className="w-4 h-4 text-[var(--color-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
             <span>History</span>
           </button>
 
           {/* Pricing Quick Link */}
           <Link
             href="/pricing"
-            className="btn btn-sm rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] text-xs font-bold flex items-center gap-1.5 border border-[var(--color-brand)]/30 px-2.5 sm:px-3 transition-colors cursor-pointer"
+            className="btn-brand-primary !min-h-8 !h-8 !px-3 sm:!px-3.5 !text-[13px] !gap-1.5"
             aria-label="Pricing and credits"
           >
-            <Zap className="w-3.5 h-3.5 fill-current text-[var(--color-ink)]" aria-hidden="true" />
+            <Zap className="w-3.5 h-3.5" strokeWidth={2} aria-hidden="true" />
             <span className="hidden sm:inline">Pricing &amp; Credits</span>
-                      </Link>
+          </Link>
 
           {/* User Account Dropdown */}
           <div className="dropdown dropdown-end">
             <div
               tabIndex={0}
               role="button"
-              className="flex items-center gap-2 p-1 rounded-lg hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors border border-[var(--color-border)]"
+              className="flex items-center gap-1.5 h-11 sm:h-9 pl-1 pr-1 md:pr-2 rounded-full hover:bg-[var(--color-surface-subtle)] cursor-pointer transition-colors"
               aria-label="User profile menu"
               aria-haspopup="menu"
             >
@@ -191,96 +196,79 @@ export default function AdminTopNav({
                 src={session?.user?.image}
                 name={session?.user?.name}
                 size={28}
-                imageClassName="w-7 h-7 rounded-md object-cover ring-1 ring-[var(--color-brand)]"
-                fallbackClassName="w-7 h-7 rounded-md bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold flex items-center justify-center text-xs"
+                imageClassName="w-7 h-7 rounded-full object-cover ring-1 ring-[var(--color-border)]"
+                fallbackClassName="w-7 h-7 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-medium flex items-center justify-center text-xs"
               />
-              <span className="text-xs font-bold text-[var(--color-ink)] hidden md:inline max-w-[100px] truncate">
+              <span className="text-[13px] font-medium text-[var(--color-ink)] hidden md:inline max-w-[100px] truncate">
                 {session?.user?.name?.split(' ')[0] || 'Account'}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+              <ChevronDown className="hidden md:block w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
             </div>
 
             <ul
               tabIndex={0}
               onClick={() => (document.activeElement as HTMLElement | null)?.blur()}
-              className="dropdown-content z-50 menu p-2.5 shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg w-56 text-xs space-y-1 mt-2"
+              className="dropdown-content surface-overlay z-50 p-1.5 w-64 mt-2"
             >
-              <li className="p-2 border-b border-[var(--color-border)] pb-2.5 mb-1">
-                <p className="font-bold text-[var(--color-ink)] text-xs truncate">{session?.user?.name}</p>
-                <p className="text-[10px] text-[var(--color-text-muted)] font-mono truncate">{session?.user?.email}</p>
+              <li className="px-2.5 pt-2 pb-2.5 mb-1 border-b border-[var(--color-border-subtle)]">
+                <p className="font-medium text-[var(--color-ink)] text-sm truncate">{session?.user?.name}</p>
+                <p className="text-xs text-[var(--color-text-muted)] truncate">{session?.user?.email}</p>
               </li>
 
               <li>
-                <Link
-                  href="/workspace"
-                  className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
-                >
-                  <Sparkles className="w-4 h-4 text-[var(--color-brand-dark)]" />
+                <Link href="/workspace" className={menuItemClass}>
+                  <Sparkles className={menuIconClass} strokeWidth={1.75} aria-hidden="true" />
                   <span>OCR Studio & Convert</span>
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/dashboard"
-                  className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
-                >
-                  <BarChart3 className="w-4 h-4 text-[var(--color-ink)]" />
+                <Link href="/dashboard" className={menuItemClass}>
+                  <BarChart3 className={menuIconClass} strokeWidth={1.75} aria-hidden="true" />
                   <span>Dashboard</span>
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/documents"
-                  className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
-                >
-                  <FileText className="w-4 h-4 text-[var(--media-blue)]" />
+                <Link href="/documents" className={menuItemClass}>
+                  <FileText className={menuIconClass} strokeWidth={1.75} aria-hidden="true" />
                   <span>Converted Documents</span>
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/pricing"
-                  className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
-                >
-                  <CreditCard className="w-4 h-4 text-[var(--media-violet)]" />
+                <Link href="/pricing" className={menuItemClass}>
+                  <CreditCard className={menuIconClass} strokeWidth={1.75} aria-hidden="true" />
                   <span>Buy Credits ($10 - $100)</span>
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/invoices"
-                  className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg"
-                >
-                  <Receipt className="w-4 h-4 text-[var(--media-pink)]" />
+                <Link href="/invoices" className={menuItemClass}>
+                  <Receipt className={menuIconClass} strokeWidth={1.75} aria-hidden="true" />
                   <span>Invoices & Billing</span>
                 </Link>
               </li>
 
               <li>
-                <button
-                  onClick={() => setIsHistoryOpen(true)}
-                  className="py-2 flex items-center gap-2 font-medium hover:bg-[var(--color-surface-subtle)] rounded-lg w-full text-left cursor-pointer"
-                >
-                  <History className="w-4 h-4 text-[var(--color-ink)]" />
+                <button type="button" onClick={() => setIsHistoryOpen(true)} className={menuItemClass}>
+                  <History className={menuIconClass} strokeWidth={1.75} aria-hidden="true" />
                   <span>Document History</span>
                 </button>
               </li>
 
-              <li className="pt-1 border-t border-[var(--color-border)]">
+              <li className="mt-1 pt-1 border-t border-[var(--color-border-subtle)]">
                 <button
+                  type="button"
                   onClick={async () => {
                     try {
                       localStorage.removeItem('has_logged_in');
                     } catch {}
                     await signOut({ callbackUrl: '/' });
                   }}
-                  className="py-2 flex items-center gap-2 font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg w-full text-left cursor-pointer"
+                  className="flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] w-full text-left cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                   <span>Sign Out</span>
                 </button>
               </li>

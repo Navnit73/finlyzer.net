@@ -3,24 +3,21 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Cpu,
   CheckCircle2,
   AlertCircle,
   X,
   ChevronDown,
   ChevronUp,
-  Sparkles,
   FileSpreadsheet,
   ArrowRight,
-  Layers,
   Activity,
-  RotateCw,
+  Loader2,
 } from 'lucide-react';
-import { useActiveJobs, ActiveJobItem } from '@/context/ActiveJobsContext';
+import { useActiveJobs } from '@/context/ActiveJobsContext';
 
 export default function ActiveJobFloatingTracker() {
   const router = useRouter();
-  const { activeJobs, removeJob, isFloatingTrackerOpen, setIsFloatingTrackerOpen } = useActiveJobs();
+  const { activeJobs, removeJob, isFloatingTrackerOpen } = useActiveJobs();
   const [isMinimized, setIsMinimized] = useState(false);
 
   // If no jobs exist in storage, don't render anything
@@ -40,8 +37,22 @@ export default function ActiveJobFloatingTracker() {
     }
   };
 
+  const statusLabel = isCompleted
+    ? 'Extraction Complete'
+    : isFailed
+    ? 'Processing Error'
+    : 'Background OCR Worker';
+
+  const statusIcon = isCompleted ? (
+    <CheckCircle2 className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
+  ) : isFailed ? (
+    <AlertCircle className="w-4 h-4 text-[var(--color-danger)]" aria-hidden="true" />
+  ) : (
+    <Loader2 className="w-4 h-4 animate-spin text-[var(--color-brand-dark)]" aria-hidden="true" />
+  );
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-md w-[calc(100vw-2rem)] sm:w-96 select-none animate-in slide-in-from-bottom-5 duration-300">
+    <div className="fixed bottom-4 right-4 z-50 max-w-md w-[calc(100vw-2rem)] sm:w-96 select-none animate-slide-up">
       {isMinimized ? (
         /* Minimized Floating Pill */
         <div
@@ -55,95 +66,66 @@ export default function ActiveJobFloatingTracker() {
               setIsMinimized(false);
             }
           }}
-          className="flex items-center justify-between p-3 rounded-2xl bg-[var(--color-ink)] text-white border border-zinc-700 shadow-2xl cursor-pointer hover:border-[var(--color-brand)] transition-all group"
+          className="surface-overlay !rounded-full flex items-center justify-between gap-3 min-h-[52px] pl-4 pr-3 py-2 cursor-pointer hover:border-[var(--color-border-hover)] transition-colors group"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="w-7 h-7 rounded-xl bg-[var(--color-brand)] flex items-center justify-center text-[var(--color-on-brand)] shrink-0 shadow-xs">
-              {isCompleted ? (
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-on-brand)]" aria-hidden="true" />
-              ) : isFailed ? (
-                <AlertCircle className="w-4 h-4 text-[var(--color-on-brand)]" aria-hidden="true" />
-              ) : (
-                <Cpu className="w-4 h-4 animate-spin text-[var(--color-on-brand)]" aria-hidden="true" />
-              )}
-            </span>
+            <span className="shrink-0 flex">{statusIcon}</span>
             <div className="min-w-0">
-              <p className="text-xs font-bold truncate text-white">
+              <p className="text-[13px] font-medium truncate text-[var(--color-ink)]">
                 {activeJob.filename}
               </p>
-              <p className="text-[10px] text-zinc-400 truncate">
+              <p className="text-xs text-[var(--color-text-muted)] truncate tabular-nums">
                 {isCompleted
-                  ? '✅ Complete — Click to view'
+                  ? 'Complete — Click to view'
                   : isFailed
-                  ? '❌ Extraction failed'
+                  ? 'Extraction failed'
                   : `${activeJob.processedPages}/${activeJob.totalPages} pages • ${activeJob.processingProgress}%`}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0 ml-2">
-            <span className="text-[10px] font-bold text-[var(--color-brand)] font-mono">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs font-medium text-[var(--color-text-secondary)] tabular-nums">
               {activeJob.processingProgress}%
             </span>
-            <ChevronUp className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" aria-hidden="true" />
+            <ChevronUp className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-ink)] transition-colors" aria-hidden="true" />
           </div>
         </div>
       ) : (
         /* Expanded Floating Card */
-        <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-2xl overflow-hidden text-[var(--color-ink)] animate-in zoom-in-95 duration-200">
-          {/* Top Brand Strip */}
-          <div
-            className={`h-1 w-full ${
-              isCompleted
-                ? 'bg-[var(--color-brand)]'
-                : isFailed
-                ? 'bg-[var(--color-danger)]'
-                : 'bg-[var(--color-brand)]'
-            }`}
-          />
-
+        <div className="surface-overlay overflow-hidden text-[var(--color-ink)] animate-scale-up">
           {/* Header */}
-          <div className="p-3.5 border-b border-[var(--color-border)] bg-[var(--color-surface-subtle)] flex items-center justify-between">
+          <div className="pl-4 pr-2 py-2 border-b border-[var(--color-border-subtle)] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isCompleted
-                    ? 'bg-[var(--color-brand-dark)]'
-                    : isFailed
-                    ? 'bg-[var(--color-danger)]'
-                    : 'bg-[var(--color-brand-dark)] animate-ping'
-                }`}
-              />
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-ink)] truncate">
-                {isCompleted
-                  ? 'Extraction Complete'
-                  : isFailed
-                  ? 'Processing Error'
-                  : 'Background OCR Worker'}
+              <span className="shrink-0 flex">{statusIcon}</span>
+              <span className="text-[13px] font-semibold text-[var(--color-ink)] truncate">
+                {statusLabel}
               </span>
-              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] uppercase">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] tabular-nums shrink-0">
                 {activeJob.totalPages} Pages
               </span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center shrink-0">
               <button
+                type="button"
                 onClick={() => setIsMinimized(true)}
-                className="p-1 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)] transition cursor-pointer"
+                className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
                 title="Minimize Tracker"
                 aria-label="Minimize Tracker"
               >
-                <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+                <ChevronDown className="w-4 h-4" aria-hidden="true" />
               </button>
 
               {(isCompleted || isFailed) && (
                 <button
+                  type="button"
                   onClick={() => removeJob(activeJob.jobId)}
-                  className="p-1 rounded-lg text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                  className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition-colors cursor-pointer"
                   title="Dismiss"
                   aria-label="Dismiss job notification"
                 >
-                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -151,49 +133,51 @@ export default function ActiveJobFloatingTracker() {
 
           {/* Body */}
           <div className="p-4 space-y-3">
-            <div>
-              <p className="text-xs font-bold text-[var(--color-ink)] truncate">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[var(--color-ink)] truncate">
                 {activeJob.filename}
               </p>
-              <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5">
-                {activeJob.message ||
-                  (isProcessing ? 'Extracting financial statement pages...' : '')}
-              </p>
+              {(activeJob.message || isProcessing) && (
+                <p className="text-[13px] text-[var(--color-text-secondary)] mt-0.5">
+                  {activeJob.message ||
+                    (isProcessing ? 'Extracting financial statement pages...' : '')}
+                </p>
+              )}
             </div>
 
             {/* Progress Bar */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] font-bold">
-                <span className="text-[var(--color-text-muted)]">
-                  {isCompleted ? 'Finished 100%' : `Page ${activeJob.processedPages} of ${activeJob.totalPages}`}
-                </span>
-                <span className="text-[var(--color-ink)] font-extrabold">
-                  {activeJob.processingProgress}%
-                </span>
-              </div>
+            <div className="space-y-1.5">
               <div
                 role="progressbar"
                 aria-valuenow={activeJob.processingProgress}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label="Document processing progress"
-                className="w-full bg-[var(--color-surface-subtle)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5"
+                className="w-full bg-[var(--color-surface-muted)] h-1 rounded-full overflow-hidden"
               >
                 <div
-                  className="h-full rounded-full transition-all duration-300 bg-[var(--color-brand)]"
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    isFailed ? 'bg-[var(--color-danger)]' : isCompleted ? 'bg-[var(--color-success)]' : 'bg-[var(--color-brand)]'
+                  }`}
                   style={{ width: `${activeJob.processingProgress}%` }}
                 />
+              </div>
+              <div className="flex justify-between text-xs text-[var(--color-text-muted)] tabular-nums">
+                <span>
+                  {isCompleted ? 'Finished 100%' : `Page ${activeJob.processedPages} of ${activeJob.totalPages}`}
+                </span>
+                <span>{activeJob.processingProgress}%</span>
               </div>
             </div>
 
             {/* Stage info */}
             {isProcessing && (
-              <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-0.5">
-                <span className="flex items-center gap-1 font-mono uppercase">
-                  <Activity className="w-3 h-3 text-[var(--color-brand-dark)]" aria-hidden="true" />
+              <div className="flex items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
+                <span className="flex items-center gap-1 capitalize truncate">
+                  <Activity className="w-3 h-3 shrink-0" aria-hidden="true" />
                   {activeJob.currentStage.replace(/_/g, ' ')}
                 </span>
-                <span className="text-[var(--color-brand-dark)] font-bold">Auto-syncs on route change</span>
+                <span className="shrink-0">Auto-syncs on route change</span>
               </div>
             )}
 
@@ -201,32 +185,33 @@ export default function ActiveJobFloatingTracker() {
             {isCompleted && (
               <div className="flex items-center gap-2 pt-1">
                 <button
+                  type="button"
                   onClick={handleOpenDoc}
-                  className="btn-brand-primary flex-1 !min-h-[38px] !h-[38px] !px-3 text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+                  className="btn-brand-primary flex-1 !min-h-[40px] !px-4 !text-sm"
                 >
-                  <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Open Document</span>
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </button>
 
                 {docId && (
                   <a
                     href={`/api/export/download/${docId}?format=xlsx`}
-                    className="btn-brand-secondary !min-h-[38px] !h-[38px] !px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 border border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)]"
+                    className="btn-brand-secondary !min-h-[40px] !px-3.5 !text-sm"
                     title="Download Excel"
                     aria-label="Download Excel workbook"
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--color-success)]" aria-hidden="true" />
+                    <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
                   </a>
                 )}
               </div>
             )}
 
             {isFailed && (
-              <div className="text-right pt-1">
+              <div className="flex justify-end pt-1">
                 <button
+                  type="button"
                   onClick={() => removeJob(activeJob.jobId)}
-                  className="btn-brand-secondary !min-h-[34px] !h-[34px] px-3 text-xs font-bold rounded-xl border border-[var(--color-border)] cursor-pointer"
+                  className="btn-brand-secondary !min-h-[40px] !px-4 !text-sm"
                 >
                   Dismiss
                 </button>

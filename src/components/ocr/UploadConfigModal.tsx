@@ -70,7 +70,7 @@ function UploadConfigModalDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3.5 sm:p-6 bg-black/60 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/40 animate-fade-in overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isLoading) {
           onClose();
@@ -78,7 +78,7 @@ function UploadConfigModalDialog({
       }}
     >
       <div
-        className="relative w-full max-w-md bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-5 sm:p-7 space-y-5 animate-scale-up my-auto shadow-none"
+        className="relative w-full max-w-md surface-overlay p-6 sm:p-7 space-y-6 animate-scale-up my-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="upload-config-modal-title"
@@ -88,112 +88,100 @@ function UploadConfigModalDialog({
           onClick={onClose}
           type="button"
           disabled={isLoading}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-50"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer disabled:opacity-40"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" aria-hidden="true" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
 
         {/* Modal Header */}
-        <div>
-          <div className="flex flex-wrap items-center gap-2 pr-6 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--color-ink)]" aria-hidden="true" />
+        <div className="pr-12 space-y-1.5">
+          <h2 id="upload-config-modal-title" className="text-[21px] font-semibold tracking-tight text-[var(--color-ink)]">
+            Configure Processing Options
+          </h2>
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-[var(--color-text-muted)]">
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
               Document Setup
             </span>
             {isEncrypted && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
                 <Lock className="w-3 h-3" aria-hidden="true" /> Password Protected
               </span>
             )}
           </div>
-          <h2 id="upload-config-modal-title" className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
-            Configure Processing Options
-          </h2>
         </div>
 
         {/* Form Selection Fields */}
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Document Type Selection */}
           <div className="space-y-1.5">
             <label
               htmlFor="modal-doc-type"
-              className="flex items-center justify-between text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider"
+              className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--color-ink)]"
             >
-              <span className="flex items-center gap-1.5">
-                <FileType className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
-                Document Type
-              </span>
-             
+              <FileType className="w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
+              Document Type
             </label>
-            <div className="relative">
-              <select
-                id="modal-doc-type"
-                value={documentType}
-                disabled={isLoading}
-                onChange={(e) => onDocumentTypeChange(e.target.value as DocumentType)}
-                className="w-full py-2.5 px-3.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all cursor-pointer"
-              >
-                <option value="auto">Auto-Detect (Smart Classification)</option>
-                <option value="bank_statement">Bank Statement</option>
-                <option value="invoice">Invoice</option>
-                <option value="receipt">Receipt</option>
-                <option value="general">General Financial Document</option>
-              </select>
-            </div>
-
+            <select
+              id="modal-doc-type"
+              value={documentType}
+              disabled={isLoading}
+              onChange={(e) => onDocumentTypeChange(e.target.value as DocumentType)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <option value="auto">Auto-Detect (Smart Classification)</option>
+              <option value="bank_statement">Bank Statement</option>
+              <option value="invoice">Invoice</option>
+              <option value="receipt">Receipt</option>
+              <option value="general">General Financial Document</option>
+            </select>
           </div>
 
           {/* Language Selection */}
           <div className="space-y-1.5">
             <label
               htmlFor="modal-language"
-              className="flex items-center justify-between text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider"
+              className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--color-ink)]"
             >
-              <span className="flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
-                Language
-              </span>
-            
+              <Globe className="w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
+              Language
             </label>
-            <div className="relative">
-              <select
-                id="modal-language"
-                value={language}
-                disabled={isLoading}
-                onChange={(e) => onLanguageChange(e.target.value as SupportedLanguage)}
-                className="w-full py-2.5 px-3.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand)]/20 transition-all cursor-pointer"
-              >
-                <option value="en">English (EN)</option>
-                <option value="hi">Hindi (HI)</option>
-                <option value="es">Spanish (ES)</option>
-                <option value="fr">French (FR)</option>
-                <option value="de">German (DE)</option>
-                <option value="auto">Auto-Detect Language</option>
-              </select>
-            </div>
-
+            <select
+              id="modal-language"
+              value={language}
+              disabled={isLoading}
+              onChange={(e) => onLanguageChange(e.target.value as SupportedLanguage)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/20 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <option value="en">English (EN)</option>
+              <option value="hi">Hindi (HI)</option>
+              <option value="es">Spanish (ES)</option>
+              <option value="fr">French (FR)</option>
+              <option value="de">German (DE)</option>
+              <option value="auto">Auto-Detect Language</option>
+            </select>
           </div>
 
-          {/* Password Input (Clean Dark Green Outlined) */}
+          {/* Password Input */}
           {isEncrypted && (
-            <div className="space-y-2 pt-1">
+            <div className="space-y-1.5">
               <label
                 htmlFor="modal-password"
-                className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]"
+                className="flex items-center justify-between text-[13px] font-medium text-[var(--color-ink)]"
               >
-                <span className="flex items-center gap-1.5 text-[var(--color-success)] font-extrabold">
-                  <Lock className="w-3.5 h-3.5 text-[var(--color-success)] stroke-[2.5]" />
+                <span className="flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
                   PDF Password
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)] uppercase tracking-wider">
+                <span className="text-xs font-normal text-[var(--color-text-muted)]">
                   Required
                 </span>
               </label>
 
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--color-success)]">
-                  <KeyRound className="w-4 h-4 stroke-[2.2]" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--color-text-muted)]">
+                  <KeyRound className="w-4 h-4" aria-hidden="true" />
                 </div>
                 <input
                   id="modal-password"
@@ -204,25 +192,30 @@ function UploadConfigModalDialog({
                   required
                   autoFocus
                   disabled={isLoading}
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-[var(--color-surface)] border-2 border-[var(--color-success)] text-xs sm:text-sm font-semibold text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] placeholder:font-normal focus:outline-none focus:border-[var(--color-success-hover)] focus:ring-2 focus:ring-[var(--color-success)]/20 transition-all font-mono"
+                  aria-invalid={passwordError ? true : undefined}
+                  className={`w-full h-11 pl-10 pr-12 rounded-xl bg-[var(--color-surface)] border text-[15px] text-[var(--color-ink)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-4 transition-colors ${
+                    passwordError
+                      ? 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/15'
+                      : 'border-[var(--color-border)] focus:border-[var(--color-brand)] focus:ring-[var(--color-brand)]/20'
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
 
               {passwordError ? (
-                <p role="alert" className="text-[11px] text-[var(--color-danger)] font-medium flex items-center gap-1.5 mt-1 bg-[var(--color-danger-soft)] border border-[var(--color-danger-border)] p-2 rounded-lg">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                <p role="alert" className="text-[13px] text-[var(--color-danger)] flex items-start gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />
                   <span>{passwordError}</span>
                 </p>
               ) : (
-                <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+                <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
                   Password used by your bank to encrypt this statement (e.g. Date of Birth, PAN, Account No).
                 </p>
               )}
@@ -230,12 +223,12 @@ function UploadConfigModalDialog({
           )}
 
           {/* Action Footer */}
-          <div className="flex items-center justify-end gap-2.5 sm:gap-3 pt-3 sm:pt-4 border-t border-[var(--color-border)]">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 pt-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="btn-brand-secondary !min-h-[44px] !h-[44px] !py-0 !px-4 sm:!px-5 text-xs font-bold cursor-pointer"
+              className="btn-brand-secondary"
             >
               Cancel
             </button>
@@ -243,10 +236,10 @@ function UploadConfigModalDialog({
             <button
               type="submit"
               disabled={isLoading || (isEncrypted && !password.trim())}
-              className="btn-brand-primary !min-h-[44px] !h-[44px] !py-0 !px-5 sm:!px-6 text-xs font-bold flex items-center gap-2 cursor-pointer shadow-none hover:scale-[1.01] active:scale-[0.99] transition-transform disabled:opacity-50"
+              className="btn-brand-primary"
             >
               <span>{isLoading ? 'Processing...' : 'Start Extraction'}</span>
-              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </form>

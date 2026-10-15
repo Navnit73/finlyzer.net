@@ -4,19 +4,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import {
-  CreditCard,
   Receipt,
   Download,
-  ExternalLink,
-  CheckCircle2,
-  AlertCircle,
   RefreshCw,
   Lock,
   UserCheck,
   Zap,
   Printer,
   X,
-  ShieldCheck,
 } from 'lucide-react';
 import { OrderRecord } from '@/types/pricing';
 import AuthModal from '@/components/auth/AuthModal';
@@ -106,61 +101,63 @@ export default function InvoicesBillingPage() {
     }
   };
 
+  const pillBtn =
+    'inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full text-[13px] font-medium bg-[var(--color-surface-muted)] text-[var(--color-ink)] hover:bg-[var(--color-border)] transition-colors cursor-pointer whitespace-nowrap';
+
+  const summary = [
+    { label: 'Total Orders Placed', value: orders.length.toLocaleString() },
+    { label: 'Total Credits Purchased', value: `${totalCreditsBought.toLocaleString()} Pages` },
+    { label: 'Total Amount Billed', value: `${formatUSD(totalSpentUsd)} USD` },
+  ];
+
   return (
     <div className="w-full space-y-8 pb-16">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-[var(--color-surface-subtle)] text-[var(--color-ink)] border border-[var(--color-border)]">
-            <Receipt className="w-3.5 h-3.5" />
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-1.5 min-w-0">
+          <p className="inline-flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
+            <Receipt className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             <span>Billing Records & Invoices</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-ink)] tracking-tight">
-            Invoices & Credit Purchase History
-          </h1>
-          <p className="text-xs text-[var(--color-text-secondary)]">
+          </p>
+          <h1 className="type-title">Invoices & Credit Purchase History</h1>
+          <p className="text-[15px] text-[var(--color-text-secondary)]">
             Track all purchased page packages, download official PDF tax invoices, and verify transactions.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <button
+            type="button"
             onClick={() => fetchOrders()}
-            className="btn-brand-secondary !min-h-[36px] !h-[36px] !px-3 text-xs font-bold flex items-center gap-1.5 rounded-lg cursor-pointer"
+            className="btn-brand-secondary !min-h-9 !h-9 !px-4 !text-sm"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} strokeWidth={1.75} aria-hidden="true" />
             <span>Refresh</span>
           </button>
 
-          <Link
-            href="/pricing"
-            className="btn-brand-primary !min-h-[36px] !h-[36px] !px-4 text-xs font-bold flex items-center gap-1.5 rounded-lg shadow-xs"
-          >
-            <Zap className="w-3.5 h-3.5 fill-current" />
+          <Link href="/pricing" className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm">
+            <Zap className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             <span>Top-Up Credits</span>
           </Link>
         </div>
-      </div>
+      </header>
 
       {/* Guest Sign-In Notice */}
       {!isLoggedIn && status !== 'loading' && (
-        <div className="p-8 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-center space-y-4 max-w-xl mx-auto shadow-none my-8">
-          <div className="w-12 h-12 rounded-lg bg-[var(--color-brand)] text-[var(--color-on-brand)] flex items-center justify-center mx-auto shadow-xs">
-            <Lock className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-xl font-black text-[var(--color-ink)]">
+        <div className="py-16 sm:py-20 text-center max-w-md mx-auto space-y-4">
+          <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
+            <Lock className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+          </span>
+          <div className="space-y-1.5">
+            <h2 className="text-[17px] font-semibold text-[var(--color-ink)]">
               Sign In to View Billing History
             </h2>
-            <p className="text-xs text-[var(--color-text-secondary)]">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               Your previous order invoices and transaction IDs are linked to your account.
             </p>
           </div>
-          <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="btn-brand-dark !min-h-[40px] !h-[40px] !px-6 text-xs font-bold inline-flex items-center gap-2 cursor-pointer shadow-xs rounded-lg"
-          >
-            <UserCheck className="w-4 h-4" />
+          <button type="button" onClick={() => setIsAuthModalOpen(true)} className="btn-brand-primary">
+            <UserCheck className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             <span>Sign In with Google</span>
           </button>
         </div>
@@ -168,128 +165,119 @@ export default function InvoicesBillingPage() {
 
       {isLoggedIn && (
         <>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Total Orders Placed
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {orders.length}
-              </p>
-            </div>
-
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Total Credits Purchased
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {totalCreditsBought.toLocaleString()} Pages
-              </p>
-            </div>
-
-            <div className="p-5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                Total Amount Billed
-              </span>
-              <p className="text-2xl font-black text-[var(--color-ink)] font-mono">
-                {formatUSD(totalSpentUsd)} USD
-              </p>
-            </div>
-          </div>
+          {/* Summary */}
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-border)]">
+            {summary.map((item) => (
+              <div key={item.label} className="bg-[var(--color-surface)] p-5 sm:p-6 space-y-1">
+                <dt className="text-[13px] text-[var(--color-text-muted)]">{item.label}</dt>
+                <dd className="text-2xl font-semibold tracking-tight text-[var(--color-ink)] tabular-nums">
+                  {isLoading ? <span className="skeleton-line block h-7 w-28" aria-hidden="true" /> : item.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
           {/* Orders Table */}
           {isLoading ? (
-            <div className="p-16 text-center rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] space-y-3">
-              <span className="loading loading-spinner loading-md text-[var(--color-brand)]"></span>
-              <p className="text-xs text-[var(--color-text-secondary)]">Loading billing records...</p>
+            <div role="status" aria-label="Loading billing records" className="border-t border-[var(--color-border)]">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="py-4 border-b border-[var(--color-border-subtle)] flex items-center gap-6">
+                  <span className="skeleton-line block h-4 w-40" />
+                  <span className="skeleton-line block h-4 w-28" />
+                  <span className="skeleton-line block h-4 w-16 ml-auto" />
+                </div>
+              ))}
+              <span className="sr-only">Loading billing records...</span>
             </div>
           ) : orders.length === 0 ? (
-            <div className="p-16 text-center rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
-              <Receipt className="w-12 h-12 text-[var(--color-text-secondary)] mx-auto opacity-50" />
-              <p className="font-bold text-sm text-[var(--color-ink)]">No Billing Invoices Found</p>
-              <p className="text-xs text-[var(--color-text-secondary)] max-w-sm mx-auto">
+            <div className="py-16 text-center space-y-3 rounded-2xl bg-[var(--color-surface-subtle)]">
+              <span className="mx-auto flex w-10 h-10 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]">
+                <Receipt className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <p className="text-[17px] font-semibold text-[var(--color-ink)]">No Billing Invoices Found</p>
+              <p className="text-sm text-[var(--color-text-secondary)] max-w-sm mx-auto px-4">
                 You haven&apos;t purchased any credit packages yet. Top up your account starting from $10.
               </p>
-              <Link
-                href="/pricing"
-                className="btn-brand-primary !min-h-[36px] !h-[36px] !px-4 text-xs font-bold inline-flex items-center gap-1.5 mt-2 rounded-lg shadow-xs"
-              >
-                <Zap className="w-3.5 h-3.5 fill-current" />
-                <span>View Credit Packages</span>
-              </Link>
+              <div className="pt-1">
+                <Link href="/pricing" className="btn-brand-primary !min-h-9 !h-9 !px-4 !text-sm">
+                  <Zap className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  <span>View Credit Packages</span>
+                </Link>
+              </div>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-              <table className="table w-full text-xs" aria-label="Billing orders and invoices">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[860px] text-sm border-collapse" aria-label="Billing orders and invoices">
                 <thead>
-                  <tr className="bg-[var(--color-surface-subtle)] border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                    <th scope="col" className="font-bold py-3">Order / Invoice ID</th>
-                    <th scope="col" className="font-bold">Package Name</th>
-                    <th scope="col" className="font-bold">Credits Added</th>
-                    <th scope="col" className="font-bold">Amount (USD)</th>
-                    <th scope="col" className="font-bold">Gateway</th>
-                    <th scope="col" className="font-bold">Status</th>
-                    <th scope="col" className="font-bold">Date</th>
-                    <th scope="col" className="font-bold text-right">Receipt &amp; PDF</th>
+                  <tr className="border-b border-[var(--color-border)] text-[13px] text-[var(--color-text-muted)] text-left">
+                    <th scope="col" className="font-medium py-2.5 pr-4">Order / Invoice ID</th>
+                    <th scope="col" className="font-medium py-2.5 pr-4">Package Name</th>
+                    <th scope="col" className="font-medium py-2.5 pr-4 text-right">Credits Added</th>
+                    <th scope="col" className="font-medium py-2.5 pr-4 text-right">Amount (USD)</th>
+                    <th scope="col" className="font-medium py-2.5 pr-4">Gateway</th>
+                    <th scope="col" className="font-medium py-2.5 pr-4">Status</th>
+                    <th scope="col" className="font-medium py-2.5 pr-4">Date</th>
+                    <th scope="col" className="font-medium py-2.5 text-right">Receipt &amp; PDF</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((order) => (
                     <tr
                       key={order.order_id}
-                      className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)] transition-colors"
+                      className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors"
                     >
-                      <th scope="row" className="font-mono font-bold text-[var(--color-ink)] text-left font-normal">
+                      <th scope="row" className="py-3 pr-4 font-mono text-[13px] font-normal text-[var(--color-text-secondary)] text-left">
                         {order.order_id}
                       </th>
-                      <td className="font-semibold text-[var(--color-ink)]">
+                      <td className="py-3 pr-4 font-medium text-[var(--color-ink)]">
                         {order.plan_name}
                       </td>
-                      <td className="font-mono font-bold text-[var(--color-brand-dark)]">
+                      <td className="py-3 pr-4 text-right tabular-nums text-[var(--color-ink)]">
                         +{order.pages_credited.toLocaleString()} Pages
                       </td>
-                      <td className="font-bold text-[var(--color-ink)] font-mono">
+                      <td className="py-3 pr-4 text-right tabular-nums text-[var(--color-ink)]">
                         {formatUSD(order.amount_usd)} USD
                       </td>
-                      <td className="capitalize font-medium">
+                      <td className="py-3 pr-4 capitalize text-[var(--color-text-secondary)]">
                         {order.payment_gateway}
                       </td>
-                      <td>
-                        <span className={`badge badge-xs font-bold uppercase rounded-lg px-2 py-0.5 border-none ${
+                      <td className="py-3 pr-4">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
                           order.status === 'completed'
                             ? 'bg-[var(--color-success-soft)] text-[var(--color-success)]'
-                            : 'bg-[var(--color-brand-soft)] text-[var(--color-on-brand)]'
+                            : 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]'
                         }`}>
                           {order.status}
                         </span>
                       </td>
-                      <td className="text-[var(--color-text-secondary)] font-mono">
+                      <td className="py-3 pr-4 text-[var(--color-text-secondary)] tabular-nums">
                         {new Date(order.created_at).toLocaleDateString()}
                       </td>
-                      <td className="text-right">
+                      <td className="py-3 text-right">
                         {order.status !== 'completed' ? (
-                          <span className="text-[11px] text-[var(--color-text-muted)]">Unpaid</span>
+                          <span className="text-[13px] text-[var(--color-text-muted)]">Unpaid</span>
                         ) : (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={(e) => handleDownloadPdf(e, order.order_id)}
-                            className="btn btn-xs rounded-lg bg-[var(--color-brand-soft)] hover:bg-[var(--color-brand)] text-[var(--color-on-brand)] font-bold px-2.5 border border-[var(--color-brand)]/30 flex items-center gap-1 cursor-pointer"
-                            title="Download Official PDF Invoice"
-                            aria-label={`Download PDF invoice for order ${order.order_id}`}
-                          >
-                            <Download className="w-3 h-3" aria-hidden="true" />
-                            <span>PDF</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(e) => handleDownloadPdf(e, order.order_id)}
+                              className={pillBtn}
+                              title="Download Official PDF Invoice"
+                              aria-label={`Download PDF invoice for order ${order.order_id}`}
+                            >
+                              <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+                              <span>PDF</span>
+                            </button>
 
-                          <button
-                            onClick={() => setSelectedReceipt(order)}
-                            aria-label={`View receipt for order ${order.order_id}`}
-                            className="btn btn-xs rounded-lg bg-[var(--color-surface-subtle)] hover:bg-[var(--color-border)] text-[var(--color-ink)] font-bold px-2.5 border border-[var(--color-border)] cursor-pointer"
-                          >
-                            View
-                          </button>
-                        </div>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedReceipt(order)}
+                              aria-label={`View receipt for order ${order.order_id}`}
+                              className="link inline-flex items-center h-8 px-2 text-[13px] font-medium cursor-pointer"
+                            >
+                              View
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -308,90 +296,90 @@ export default function InvoicesBillingPage() {
           aria-modal="true"
           aria-labelledby="receipt-modal-title"
           onClick={() => setSelectedReceipt(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fade-in overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-6 bg-black/30 overflow-y-auto"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 animate-scale-up my-auto shadow-2xl"
+            className="relative w-full max-w-[480px] surface-overlay p-6 sm:p-8 space-y-6 sm:my-auto"
           >
             {/* Close */}
             <button
+              type="button"
               onClick={() => setSelectedReceipt(null)}
               aria-label="Close receipt dialog"
-              className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] cursor-pointer"
+              className="absolute top-3 right-3 w-11 h-11 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-full bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" aria-hidden="true" />
+              <X className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
             </button>
 
             {/* Receipt Header */}
-            <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] pb-4">
-              <div className="space-y-1">
-                <span className="badge badge-sm bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-black text-[10px] rounded-lg">
-                  Official Payment Receipt
-                </span>
-                <h2 id="receipt-modal-title" className="text-xl font-black text-[var(--color-ink)]">
+            <div className="flex items-start gap-3 pr-10">
+              <BrandLogo size="sm" showText={false} href={null} />
+              <div className="space-y-1 min-w-0">
+                <p className="text-[13px] text-[var(--color-text-muted)]">Official Payment Receipt</p>
+                <h2 id="receipt-modal-title" className="text-[22px] font-semibold tracking-tight leading-tight text-[var(--color-ink)]">
                   Payment Receipt
                 </h2>
-                <p className="text-xs text-[var(--color-text-secondary)] font-mono">
+                <p className="text-[13px] text-[var(--color-text-secondary)] font-mono break-all">
                   Order Reference: {selectedReceipt.order_id}
                 </p>
-              </div>
-              <div className="shrink-0 pr-6">
-                <BrandLogo size="sm" showText={false} href={null} />
               </div>
             </div>
 
             {/* Receipt Body */}
-            <div className="p-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3 text-xs">
-              <div className="flex justify-between border-b border-[var(--color-border)] pb-2">
-                <span className="text-[var(--color-text-secondary)]">Billed To:</span>
-                <span className="font-bold text-[var(--color-ink)] font-mono">{selectedReceipt.user_email}</span>
+            <dl className="rounded-xl bg-[var(--color-surface-subtle)] px-4 py-1 text-sm divide-y divide-[var(--color-border)]">
+              <div className="flex justify-between gap-4 py-2.5">
+                <dt className="text-[var(--color-text-secondary)] shrink-0">Billed To</dt>
+                <dd className="font-medium text-[var(--color-ink)] truncate">{selectedReceipt.user_email}</dd>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--color-text-secondary)]">Package Plan:</span>
-                <span className="font-bold text-[var(--color-ink)]">{selectedReceipt.plan_name}</span>
+              <div className="flex justify-between gap-4 py-2.5">
+                <dt className="text-[var(--color-text-secondary)]">Package Plan</dt>
+                <dd className="font-medium text-[var(--color-ink)] text-right">{selectedReceipt.plan_name}</dd>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--color-text-secondary)]">Credits Credited:</span>
-                <span className="font-bold text-[var(--color-brand-dark)] font-mono">+{selectedReceipt.pages_credited.toLocaleString()} Pages</span>
+              <div className="flex justify-between gap-4 py-2.5">
+                <dt className="text-[var(--color-text-secondary)]">Credits Credited</dt>
+                <dd className="font-medium text-[var(--color-ink)] tabular-nums">+{selectedReceipt.pages_credited.toLocaleString()} Pages</dd>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--color-text-secondary)]">Payment Gateway:</span>
-                <span className="font-bold text-[var(--color-ink)] capitalize">{selectedReceipt.payment_gateway}</span>
+              <div className="flex justify-between gap-4 py-2.5">
+                <dt className="text-[var(--color-text-secondary)]">Payment Gateway</dt>
+                <dd className="font-medium text-[var(--color-ink)] capitalize">{selectedReceipt.payment_gateway}</dd>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--color-text-secondary)]">Payment Status:</span>
-                <span className="font-bold uppercase text-[var(--color-success)]">{selectedReceipt.status}</span>
+              <div className="flex justify-between gap-4 py-2.5">
+                <dt className="text-[var(--color-text-secondary)]">Payment Status</dt>
+                <dd className="font-medium text-[var(--color-success)] capitalize">{selectedReceipt.status}</dd>
               </div>
-              <div className="flex justify-between border-t border-[var(--color-border)] pt-2 text-sm">
-                <span className="font-bold text-[var(--color-ink)]">Total Paid:</span>
-                <span className="font-black text-[var(--color-ink)] font-mono">{formatUSD(selectedReceipt.amount_usd)} USD</span>
+              <div className="flex justify-between gap-4 py-3">
+                <dt className="font-semibold text-[var(--color-ink)]">Total Paid</dt>
+                <dd className="font-semibold text-[var(--color-ink)] tabular-nums">{formatUSD(selectedReceipt.amount_usd)} USD</dd>
               </div>
-            </div>
+            </dl>
 
             {/* Actions */}
-            <div className="flex items-center justify-between gap-2.5 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2.5">
               <button
-                onClick={(e) => handleDownloadPdf(e, selectedReceipt.order_id)}
-                className="btn-brand-primary !min-h-[40px] !h-[40px] !px-4 text-xs font-bold flex items-center gap-2 rounded-lg cursor-pointer shadow-xs"
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="btn-brand-secondary w-full sm:w-auto"
               >
-                <Download className="w-4 h-4" />
-                <span>Download PDF Invoice</span>
+                Close
               </button>
 
               <button
+                type="button"
                 onClick={handlePrintReceipt}
-                className="btn-brand-dark !min-h-[40px] !h-[40px] !px-4 text-xs font-bold flex items-center gap-2 rounded-lg cursor-pointer"
+                className="btn-brand-secondary w-full sm:w-auto"
               >
-                <Printer className="w-4 h-4" />
+                <Printer className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                 <span>Print</span>
               </button>
 
               <button
-                onClick={() => setSelectedReceipt(null)}
-                className="btn-brand-secondary !min-h-[40px] !h-[40px] !px-3 text-xs font-bold rounded-lg cursor-pointer"
+                type="button"
+                onClick={(e) => handleDownloadPdf(e, selectedReceipt.order_id)}
+                className="btn-brand-primary w-full sm:flex-1"
               >
-                Close
+                <Download className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                <span>Download PDF Invoice</span>
               </button>
             </div>
           </div>

@@ -31,6 +31,7 @@ import {
   Receipt,
   Copy,
   Check,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface ExtractionViewerProps {
@@ -55,8 +56,11 @@ export default function ExtractionViewer({
   const receiptData = extraction as ReceiptData;
 
   const currency = bankData.currency || invoiceData.currency || receiptData.currency || 'USD';
-  const transactions = bankData.transactions || [];
-  const items: InvoiceItem[] = invoiceData.items || receiptData.items || [];
+  const transactions = useMemo(() => bankData.transactions || [], [bankData.transactions]);
+  const items: InvoiceItem[] = useMemo(
+    () => invoiceData.items || receiptData.items || [],
+    [invoiceData.items, receiptData.items]
+  );
   const pageCount = data.metadata?.pages || data.pages?.length || 1;
   const isGuest = data.is_guest ?? false;
 
@@ -127,144 +131,142 @@ export default function ExtractionViewer({
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6 animate-fade-in">
-      {/* 1. Top Summary Banner — Flat Solid Theme */}
-      <div className="card bg-[var(--color-ink)] text-white border border-[var(--color-ink-soft)] rounded-lg overflow-hidden shadow-none">
-        <div className="card-body p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
-          {/* Header row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-[var(--color-ink-soft)]">
-            <div className="space-y-2.5">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <span className="badge bg-[var(--color-brand)] text-[var(--color-on-brand)] font-extrabold text-[11px] sm:text-xs px-2.5 sm:px-3 py-1 border-none tracking-wider uppercase">
-                  {docType.replace('_', ' ')}
-                </span>
-                <span className="text-[11px] sm:text-xs text-[var(--color-text-muted)] flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-                  {data.metadata?.processing_time_ms ? `${data.metadata.processing_time_ms}ms` : '1,150ms'}
-                </span>
-                <span className="text-[11px] sm:text-xs text-[var(--color-text-muted)] flex items-center gap-1">
-                  <Cpu className="w-3.5 h-3.5 text-[var(--media-blue)]" />
-                  AI Financial Model
-                </span>
-                <span className="badge badge-sm bg-[var(--color-ink-soft)] text-white border border-[#444444] font-semibold text-[10px] sm:text-xs">
-                  {data.metadata?.pages || 1} Page{data.metadata?.pages !== 1 ? 's' : ''}
-                </span>
-              </div>
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+      {/* 1. Summary header */}
+      <section aria-label="Extraction summary" className="space-y-5 sm:space-y-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-2 min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-[var(--color-text-muted)]">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] text-xs font-medium capitalize">
+                {docType.replace('_', ' ')}
+              </span>
+              <span className="inline-flex items-center gap-1 tabular-nums">
+                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                {data.metadata?.processing_time_ms ? `${data.metadata.processing_time_ms}ms` : '1,150ms'}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Cpu className="w-3.5 h-3.5" aria-hidden="true" />
+                AI Financial Model
+              </span>
+              <span className="tabular-nums">
+                {data.metadata?.pages || 1} Page{data.metadata?.pages !== 1 ? 's' : ''}
+              </span>
+            </div>
 
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight break-words">
-                {bankData.bank_name || invoiceData.vendor_name || receiptData.merchant_name || data.filename || 'Financial Extraction'}
-              </h2>
+            <h2 className="type-title break-words">
+              {bankData.bank_name || invoiceData.vendor_name || receiptData.merchant_name || data.filename || 'Financial Extraction'}
+            </h2>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-[var(--color-text-muted)] pt-0.5">
+            {(bankData.account_holder || bankData.account_number_masked || bankData.statement_period) && (
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1.5 sm:gap-x-5 text-sm text-[var(--color-text-secondary)]">
                 {bankData.account_holder && (
-                  <span className="flex items-center gap-1.5 text-white">
-                    <User className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-                    <span className="truncate max-w-[220px]">{bankData.account_holder}</span>
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <User className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
+                    <span className="truncate max-w-[260px]">{bankData.account_holder}</span>
                   </span>
                 )}
                 {bankData.account_number_masked && (
-                  <span className="flex items-center gap-1.5 font-mono">
-                    <CreditCard className="w-3.5 h-3.5 text-[var(--media-blue)]" />
+                  <span className="flex items-center gap-1.5 tabular-nums">
+                    <CreditCard className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
                     <span>{bankData.account_number_masked}</span>
                   </span>
                 )}
                 {bankData.statement_period && (
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[var(--media-violet)]" />
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Calendar className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
                     <span className="truncate">{bankData.statement_period}</span>
                   </span>
                 )}
               </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex items-center gap-2 self-stretch sm:self-start md:self-auto">
-              {onNewScan && (
-                <button
-                  onClick={onNewScan}
-                  className="btn btn-sm rounded-full bg-[var(--color-ink-soft)] hover:bg-[#3d3d3d] text-white border border-[#444444] text-xs font-semibold w-full sm:w-auto cursor-pointer transition-colors shadow-none"
-                >
-                  Scan Another File
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Key Metrics Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-            {docType === 'bank_statement' ? (
-              <>
-                <FinancialMetricCard
-                  title="Closing Balance"
-                  value={closingBalance}
-                  subtitle="Reconciled Statement Total"
-                  icon={Wallet}
-                  variant="brand"
-                  currency={currency}
-                />
-                <FinancialMetricCard
-                  title="Total Inflow / Credits"
-                  value={totalInflow}
-                  subtitle="Deposits &amp; Income"
-                  icon={TrendingUp}
-                  variant="blue"
-                  currency={currency}
-                />
-                <FinancialMetricCard
-                  title="Total Outflow / Debits"
-                  value={totalOutflow}
-                  subtitle="Expenses &amp; Withdrawals"
-                  icon={TrendingDown}
-                  variant="pink"
-                  currency={currency}
-                />
-                <FinancialMetricCard
-                  title="Net Cashflow"
-                  value={netSavings}
-                  subtitle={`${transactions.length} Total Transactions`}
-                  icon={Layers}
-                  variant="violet"
-                  currency={currency}
-                />
-              </>
-            ) : (
-              <>
-                <FinancialMetricCard
-                  title="Total Amount"
-                  value={invoiceData.total_amount || receiptData.total_amount || 0}
-                  subtitle="Tax &amp; Fees Included"
-                  icon={Wallet}
-                  variant="brand"
-                  currency={currency}
-                />
-                <FinancialMetricCard
-                  title="Subtotal"
-                  value={invoiceData.subtotal || receiptData.subtotal || 0}
-                  subtitle="Base Line Items"
-                  icon={TrendingUp}
-                  variant="blue"
-                  currency={currency}
-                />
-                <FinancialMetricCard
-                  title="Tax &amp; VAT"
-                  value={invoiceData.tax_amount || receiptData.tax || 0}
-                  subtitle="Deductions"
-                  icon={TrendingDown}
-                  variant="pink"
-                  currency={currency}
-                />
-                <FinancialMetricCard
-                  title="Line Items Count"
-                  value={items.length || 1}
-                  subtitle="Parsed Products/Services"
-                  icon={Receipt}
-                  variant="violet"
-                />
-              </>
             )}
           </div>
+
+          {/* Quick Actions */}
+          {onNewScan && (
+            <button
+              type="button"
+              onClick={onNewScan}
+              className="btn-brand-secondary w-full sm:w-auto shrink-0"
+            >
+              Scan Another File
+            </button>
+          )}
         </div>
-      </div>
+
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {docType === 'bank_statement' ? (
+            <>
+              <FinancialMetricCard
+                title="Closing Balance"
+                value={closingBalance}
+                subtitle="Reconciled Statement Total"
+                icon={Wallet}
+                variant="brand"
+                currency={currency}
+              />
+              <FinancialMetricCard
+                title="Total Inflow / Credits"
+                value={totalInflow}
+                subtitle="Deposits &amp; Income"
+                icon={TrendingUp}
+                variant="blue"
+                currency={currency}
+              />
+              <FinancialMetricCard
+                title="Total Outflow / Debits"
+                value={totalOutflow}
+                subtitle="Expenses &amp; Withdrawals"
+                icon={TrendingDown}
+                variant="pink"
+                currency={currency}
+              />
+              <FinancialMetricCard
+                title="Net Cashflow"
+                value={netSavings}
+                subtitle={`${transactions.length} Total Transactions`}
+                icon={Layers}
+                variant="violet"
+                currency={currency}
+              />
+            </>
+          ) : (
+            <>
+              <FinancialMetricCard
+                title="Total Amount"
+                value={invoiceData.total_amount || receiptData.total_amount || 0}
+                subtitle="Tax &amp; Fees Included"
+                icon={Wallet}
+                variant="brand"
+                currency={currency}
+              />
+              <FinancialMetricCard
+                title="Subtotal"
+                value={invoiceData.subtotal || receiptData.subtotal || 0}
+                subtitle="Base Line Items"
+                icon={TrendingUp}
+                variant="blue"
+                currency={currency}
+              />
+              <FinancialMetricCard
+                title="Tax &amp; VAT"
+                value={invoiceData.tax_amount || receiptData.tax || 0}
+                subtitle="Deductions"
+                icon={TrendingDown}
+                variant="pink"
+                currency={currency}
+              />
+              <FinancialMetricCard
+                title="Line Items Count"
+                value={items.length || 1}
+                subtitle="Parsed Products/Services"
+                icon={Receipt}
+                variant="violet"
+              />
+            </>
+          )}
+        </div>
+      </section>
 
       {/* 2. Export Action Bar */}
       <ExportActionBar
@@ -278,73 +280,74 @@ export default function ExtractionViewer({
       />
 
       {/* 3. Interactive Detail Tabs */}
-      <div className="space-y-4 sm:space-y-6 bg-transparent sm:bg-[var(--color-surface)] sm:rounded-lg sm:border sm:border-[var(--color-border)] p-0 sm:p-6 md:p-8 sm:shadow-xs">
-        {/* Navigation Tabs (Horizontally Scrollable Segmented Bar on Mobile) */}
-        <div role="tablist" aria-label="Extraction view options" className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-[var(--color-border)]">
-          <button
-            role="tab"
-            id="tab-structured"
-            aria-selected={activeTab === 'structured'}
-            aria-controls="tabpanel-structured"
-            onClick={() => setActiveTab('structured')}
-            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+      <section aria-label="Extraction details" className="space-y-5">
+        {/* Segmented control (horizontally scrollable on mobile) */}
+        <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
+          <div role="tablist" aria-label="Extraction view options" className="inline-flex items-center gap-1 p-1 rounded-full bg-[var(--color-surface-subtle)]">
+            <button
+              role="tab"
+              id="tab-structured"
+              aria-selected={activeTab === 'structured'}
+              aria-controls="tabpanel-structured"
+              onClick={() => setActiveTab('structured')}
+              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'structured'
-                ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
-          >
-            <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
-            <span>Structured Data ({docType === 'bank_statement' ? `${transactions.length} Rows` : `${items.length} Items`})</span>
-          </button>
+            >
+              <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
+              <span>Structured Data ({docType === 'bank_statement' ? `${transactions.length} Rows` : `${items.length} Items`})</span>
+            </button>
 
-          <button
-            role="tab"
-            id="tab-ai_summary"
-            aria-selected={activeTab === 'ai_summary'}
-            aria-controls="tabpanel-ai_summary"
-            onClick={() => setActiveTab('ai_summary')}
-            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            <button
+              role="tab"
+              id="tab-ai_summary"
+              aria-selected={activeTab === 'ai_summary'}
+              aria-controls="tabpanel-ai_summary"
+              onClick={() => setActiveTab('ai_summary')}
+              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'ai_summary'
-                ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
-          >
-            <Sparkles className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
-            <span>AI Insights &amp; Audit</span>
-          </button>
+            >
+              <Sparkles className="w-4 h-4" aria-hidden="true" />
+              <span>AI Insights &amp; Audit</span>
+            </button>
 
-          <button
-            role="tab"
-            id="tab-raw_text"
-            aria-selected={activeTab === 'raw_text'}
-            aria-controls="tabpanel-raw_text"
-            onClick={() => setActiveTab('raw_text')}
-            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            <button
+              role="tab"
+              id="tab-raw_text"
+              aria-selected={activeTab === 'raw_text'}
+              aria-controls="tabpanel-raw_text"
+              onClick={() => setActiveTab('raw_text')}
+              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'raw_text'
-                ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
-          >
-            <FileCode className="w-4 h-4" aria-hidden="true" />
-            <span>OCR Raw Text</span>
-          </button>
+            >
+              <FileCode className="w-4 h-4" aria-hidden="true" />
+              <span>OCR Raw Text</span>
+            </button>
 
-          <button
-            role="tab"
-            id="tab-json"
-            aria-selected={activeTab === 'json'}
-            aria-controls="tabpanel-json"
-            onClick={() => setActiveTab('json')}
-            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 shrink-0 transition-colors cursor-pointer ${
+            <button
+              role="tab"
+              id="tab-json"
+              aria-selected={activeTab === 'json'}
+              aria-controls="tabpanel-json"
+              onClick={() => setActiveTab('json')}
+              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
               activeTab === 'json'
-                ? 'bg-[var(--color-ink)] text-white shadow-xs'
-                : 'bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
             }`}
-          >
-            <span>{`{ JSON Payload }`}</span>
-          </button>
+            >
+              <span>{`{ JSON Payload }`}</span>
+            </button>
+          </div>
         </div>
-
 
         {/* Tab Content 1: Structured Transactions / Invoice Items */}
         {activeTab === 'structured' && (
@@ -354,27 +357,27 @@ export default function ExtractionViewer({
             ) : (
               /* Invoice / Receipt Line Items Table */
               <div className="space-y-4">
-                <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
-                  <table className="table w-full text-xs sm:text-sm" aria-label="Invoice items">
-                    <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] text-[11px] uppercase font-bold">
-                      <tr>
-                        <th scope="col" className="py-3.5 pl-5">Description</th>
-                        <th scope="col" className="py-3.5 text-center">Quantity</th>
-                        <th scope="col" className="py-3.5 text-right">Unit Price</th>
-                        <th scope="col" className="py-3.5 text-right pr-5">Total Amount</th>
+                <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)]">
+                  <table className="w-full text-sm" aria-label="Invoice items">
+                    <thead className="bg-[var(--color-surface-subtle)] text-[var(--color-text-muted)] text-[13px]">
+                      <tr className="border-b border-[var(--color-border)]">
+                        <th scope="col" className="py-3 pl-5 pr-3 text-left font-medium">Description</th>
+                        <th scope="col" className="py-3 px-3 text-center font-medium">Quantity</th>
+                        <th scope="col" className="py-3 px-3 text-right font-medium">Unit Price</th>
+                        <th scope="col" className="py-3 pl-3 pr-5 text-right font-medium">Total Amount</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--color-border)]">
+                    <tbody className="divide-y divide-[var(--color-border-subtle)]">
                       {paginatedItems.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-[var(--color-surface-subtle)]">
-                          <td className="font-semibold text-[var(--color-ink)] pl-5">
+                        <tr key={idx} className="hover:bg-[var(--color-surface-subtle)] transition-colors">
+                          <td className="py-3 pl-5 pr-3 text-[var(--color-ink)]">
                             {item.description}
                           </td>
-                          <td className="text-center font-mono">{item.quantity || 1}</td>
-                          <td className="text-right font-mono">
+                          <td className="py-3 px-3 text-center tabular-nums text-[var(--color-text-secondary)]">{item.quantity || 1}</td>
+                          <td className="py-3 px-3 text-right tabular-nums text-[var(--color-text-secondary)]">
                             {item.unit_price ? `$${item.unit_price.toFixed(2)}` : '—'}
                           </td>
-                          <td className="text-right font-mono font-bold text-[var(--color-ink)] pr-5">
+                          <td className="py-3 pl-3 pr-5 text-right tabular-nums font-medium text-[var(--color-ink)]">
                             {item.amount ? `$${item.amount.toFixed(2)}` : '—'}
                           </td>
                         </tr>
@@ -385,28 +388,30 @@ export default function ExtractionViewer({
 
                 {/* Line Items Pagination Controls (if > 25 items) */}
                 {totalItemPages > 1 && (
-                  <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] px-2 pt-1">
+                  <div className="flex items-center justify-between gap-3 text-[13px] text-[var(--color-text-muted)] tabular-nums">
                     <span>
                       Showing {(itemsPage - 1) * itemsPageSize + 1} to{' '}
                       {Math.min(itemsPage * itemsPageSize, items.length)} of {items.length} items
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
+                        type="button"
                         onClick={() => setItemsPage((p) => Math.max(1, p - 1))}
                         disabled={itemsPage === 1}
                         aria-label="Previous page of items"
-                        className="px-2.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                        className="min-h-[36px] px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-subtle)] text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       >
                         Prev
                       </button>
-                      <span className="px-1.5 font-bold text-[var(--color-ink)]">
+                      <span className="px-1.5 text-[var(--color-ink)]">
                         {itemsPage} / {totalItemPages}
                       </span>
                       <button
+                        type="button"
                         onClick={() => setItemsPage((p) => Math.min(totalItemPages, p + 1))}
                         disabled={itemsPage === totalItemPages}
                         aria-label="Next page of items"
-                        className="px-2.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                        className="min-h-[36px] px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-subtle)] text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       >
                         Next
                       </button>
@@ -415,27 +420,27 @@ export default function ExtractionViewer({
                 )}
 
                 {/* Subtotal / Tax Summary footer */}
-                <div className="flex justify-end pt-2">
-                  <div className="w-72 bg-[var(--color-surface-subtle)] p-4 rounded-lg border border-[var(--color-border)] space-y-2 text-xs">
-                    <div className="flex justify-between text-[var(--color-text-secondary)]">
-                      <span>Subtotal</span>
-                      <span className="font-bold text-[var(--color-ink)] font-mono">
+                <div className="flex justify-end">
+                  <dl className="w-full sm:w-72 text-sm">
+                    <div className="flex justify-between py-2 text-[var(--color-text-secondary)]">
+                      <dt>Subtotal</dt>
+                      <dd className="text-[var(--color-ink)] tabular-nums">
                         ${(invoiceData.subtotal || receiptData.subtotal || 0).toFixed(2)}
-                      </span>
+                      </dd>
                     </div>
-                    <div className="flex justify-between text-[var(--color-text-secondary)]">
-                      <span>Tax / VAT</span>
-                      <span className="font-bold text-[var(--color-ink)] font-mono">
+                    <div className="flex justify-between py-2 text-[var(--color-text-secondary)]">
+                      <dt>Tax / VAT</dt>
+                      <dd className="text-[var(--color-ink)] tabular-nums">
                         ${(invoiceData.tax_amount || receiptData.tax || 0).toFixed(2)}
-                      </span>
+                      </dd>
                     </div>
-                    <div className="flex justify-between pt-2 border-t border-[var(--color-border)] text-sm font-black text-[var(--color-ink)]">
-                      <span>Grand Total</span>
-                      <span className="text-[var(--color-ink)] font-mono font-black">
+                    <div className="flex justify-between pt-2.5 mt-1 border-t border-[var(--color-border)] font-semibold text-[var(--color-ink)]">
+                      <dt>Grand Total</dt>
+                      <dd className="tabular-nums">
                         ${(invoiceData.total_amount || receiptData.total_amount || 0).toFixed(2)}
-                      </span>
+                      </dd>
                     </div>
-                  </div>
+                  </dl>
                 </div>
               </div>
             )}
@@ -447,11 +452,11 @@ export default function ExtractionViewer({
           <div role="tabpanel" id="tabpanel-ai_summary" aria-labelledby="tab-ai_summary" className="space-y-6">
             {transactions.length > 0 && (
               balanceCheck.status === 'verified' ? (
-                <div className="alert bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 rounded-lg p-4 flex items-start gap-3 text-[var(--color-on-brand)]">
-                  <Sparkles className="w-5 h-5 text-[var(--color-brand-dark)] shrink-0 mt-0.5" aria-hidden="true" />
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-sm">Running balance verified</p>
-                    <p className="leading-relaxed">
+                <div role="status" className="rounded-2xl p-4 flex items-start gap-3 bg-[var(--color-success-soft)]">
+                  <CheckCircle2 className="w-5 h-5 text-[var(--color-success)] shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-[15px] text-[var(--color-ink)]">Running balance verified</p>
+                    <p className="text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
                       {balanceCheck.checkedRows > 0
                         ? `All ${balanceCheck.checkedRows} rows with a printed balance match the recomputed running balance`
                         : 'The recomputed balance'}
@@ -460,11 +465,11 @@ export default function ExtractionViewer({
                   </div>
                 </div>
               ) : balanceCheck.status === 'mismatch' ? (
-                <div className="alert bg-[var(--color-warning-soft)] border border-[var(--color-warning-border)] rounded-lg p-4 flex items-start gap-3 text-[var(--color-ink)]">
+                <div role="status" className="rounded-2xl p-4 flex items-start gap-3 bg-[var(--color-warning-soft)]">
                   <AlertTriangle className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" aria-hidden="true" />
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-sm">Check these rows before exporting</p>
-                    <p className="leading-relaxed">
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-[15px] text-[var(--color-ink)]">Check these rows before exporting</p>
+                    <p className="text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
                       {balanceCheck.mismatchRows.length > 0 &&
                         `${balanceCheck.mismatchRows.length} row${balanceCheck.mismatchRows.length === 1 ? '' : 's'} don't match the printed running balance (row ${balanceCheck.mismatchRows
                           .slice(0, 5)
@@ -476,11 +481,11 @@ export default function ExtractionViewer({
                   </div>
                 </div>
               ) : (
-                <div className="alert bg-[var(--color-surface-subtle)] border border-[var(--color-border)] rounded-lg p-4 flex items-start gap-3 text-[var(--color-ink)]">
-                  <Info className="w-5 h-5 text-[var(--color-text-secondary)] shrink-0 mt-0.5" aria-hidden="true" />
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-sm">Balance check not available</p>
-                    <p className="leading-relaxed text-[var(--color-text-secondary)]">
+                <div role="status" className="rounded-2xl p-4 flex items-start gap-3 bg-[var(--color-surface-subtle)]">
+                  <Info className="w-5 h-5 text-[var(--color-text-muted)] shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-[15px] text-[var(--color-ink)]">Balance check not available</p>
+                    <p className="text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
                       This statement has no printed running or closing balance to verify against. Compare the totals with your statement.
                     </p>
                   </div>
@@ -488,64 +493,64 @@ export default function ExtractionViewer({
               )
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)] flex items-center gap-2">
-                  <Building className="w-4 h-4 text-[var(--color-brand-dark)]" aria-hidden="true" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="space-y-2">
+                <h4 className="text-[15px] font-semibold text-[var(--color-ink)] flex items-center gap-2">
+                  <Building className="w-4 h-4 text-[var(--color-text-muted)]" aria-hidden="true" />
                   Entity Verification
                 </h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]">Issuer Organization</span>
-                    <span className="font-bold text-[var(--color-ink)]">
+                <dl className="text-sm border-t border-[var(--color-border)]">
+                  <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
+                    <dt className="text-[var(--color-text-secondary)]">Issuer Organization</dt>
+                    <dd className="text-[var(--color-ink)] text-right">
                       {bankData.bank_name || invoiceData.vendor_name || receiptData.merchant_name || 'Verified Financial Institute'}
-                    </span>
+                    </dd>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]">Currency Baseline</span>
-                    <span className="font-bold font-mono text-[var(--color-ink)]">{currency}</span>
+                  <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
+                    <dt className="text-[var(--color-text-secondary)]">Currency Baseline</dt>
+                    <dd className="text-[var(--color-ink)] tabular-nums">{currency}</dd>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]">AI Model Stage</span>
-                    <span className="font-bold text-[var(--color-ink)]">AI Financial Engine</span>
+                  <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
+                    <dt className="text-[var(--color-text-secondary)]">AI Model Stage</dt>
+                    <dd className="text-[var(--color-ink)]">AI Financial Engine</dd>
                   </div>
-                </div>
+                </dl>
               </div>
 
-              <div className="p-5 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)] flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[var(--media-violet)]" />
+              <div className="space-y-2">
+                <h4 className="text-[15px] font-semibold text-[var(--color-ink)] flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[var(--color-text-muted)]" aria-hidden="true" />
                   Stage Timings
                 </h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]">OCR Text Extraction</span>
-                    <span className="font-mono font-bold text-[var(--color-ink)]">
+                <dl className="text-sm border-t border-[var(--color-border)]">
+                  <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
+                    <dt className="text-[var(--color-text-secondary)]">OCR Text Extraction</dt>
+                    <dd className="tabular-nums text-[var(--color-ink)]">
                       {data.metadata?.stage_timings_ms?.ocr_extraction || 12}ms
-                    </span>
+                    </dd>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]"> AI Cleaning</span>
-                    <span className="font-mono font-bold text-[var(--color-ink)]">
+                  <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
+                    <dt className="text-[var(--color-text-secondary)]">AI Cleaning</dt>
+                    <dd className="tabular-nums text-[var(--color-ink)]">
                       {data.metadata?.stage_timings_ms?.ai_cleaning || 480}ms
-                    </span>
+                    </dd>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-secondary)]">Structured Entity Parser</span>
-                    <span className="font-mono font-bold text-[var(--color-ink)]">
+                  <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
+                    <dt className="text-[var(--color-text-secondary)]">Structured Entity Parser</dt>
+                    <dd className="tabular-nums text-[var(--color-ink)]">
                       {data.metadata?.stage_timings_ms?.structured_extraction || 655}ms
-                    </span>
+                    </dd>
                   </div>
-                </div>
+                </dl>
               </div>
             </div>
 
             {data.cleaned_text && (
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">
+                <h4 className="text-[13px] font-medium text-[var(--color-text-muted)]">
                   Cleaned Statement Narrative
-                </span>
-                <pre className="p-4 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-ink)] font-mono whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
+                </h4>
+                <pre className="p-4 rounded-2xl bg-[var(--color-surface-subtle)] text-[13px] text-[var(--color-ink)] font-mono whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
                   {data.cleaned_text}
                 </pre>
               </div>
@@ -555,15 +560,15 @@ export default function ExtractionViewer({
 
         {/* Tab Content 3: Raw OCR Text (Chunked/Paginated for 100+ pages) */}
         {activeTab === 'raw_text' && (
-          <div role="tabpanel" id="tabpanel-raw_text" aria-labelledby="tab-raw_text" className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-text-secondary)]">
+          <div role="tabpanel" id="tabpanel-raw_text" aria-labelledby="tab-raw_text" className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-[var(--color-text-muted)]">
               <span>Raw Optical Character Recognition Output ({data.metadata?.ocr_engine || 'PyMuPDF Engine'})</span>
-              <div className="flex items-center gap-2">
-                <span className="badge badge-sm bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-[var(--color-ink)] font-mono">
+              <div className="flex items-center gap-2 tabular-nums">
+                <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-surface-subtle)] text-xs font-medium text-[var(--color-text-secondary)]">
                   {data.raw_text?.length || 0} chars
                 </span>
                 {rawTextChunks.length > 1 && (
-                  <span className="badge badge-sm bg-[var(--color-brand-soft)] text-[var(--color-on-brand)] font-bold font-mono">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-xs font-medium text-[var(--color-brand-dark)]">
                     Page {rawTextPage} of {rawTextChunks.length}
                   </span>
                 )}
@@ -571,24 +576,26 @@ export default function ExtractionViewer({
             </div>
 
             {rawTextChunks.length > 1 && (
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--color-surface-subtle)] border border-[var(--color-border)] text-xs">
-                <span className="font-bold text-[var(--color-ink)]">
+              <div className="flex items-center justify-between gap-3 text-[13px]">
+                <span className="text-[var(--color-text-secondary)] tabular-nums">
                   Displaying Section {rawTextPage} of {rawTextChunks.length}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
                     onClick={() => setRawTextPage((p) => Math.max(1, p - 1))}
                     disabled={rawTextPage === 1}
                     aria-label="Previous raw text section"
-                    className="px-2.5 py-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                    className="min-h-[36px] px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-subtle)] text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
                     Previous
                   </button>
                   <button
+                    type="button"
                     onClick={() => setRawTextPage((p) => Math.min(rawTextChunks.length, p + 1))}
                     disabled={rawTextPage === rawTextChunks.length}
                     aria-label="Next raw text section"
-                    className="px-2.5 py-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] disabled:opacity-40 font-semibold cursor-pointer"
+                    className="min-h-[36px] px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-subtle)] text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
                     Next
                   </button>
@@ -596,7 +603,7 @@ export default function ExtractionViewer({
               </div>
             )}
 
-            <pre className="p-5 rounded-lg bg-[var(--color-ink)] text-white text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed border border-[var(--color-ink-soft)]">
+            <pre className="p-5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-[13px] font-mono overflow-x-auto max-h-96 whitespace-pre-wrap leading-relaxed">
               {rawTextChunks.length > 0 ? rawTextChunks[rawTextPage - 1] : (data.raw_text || 'No raw text stream provided.')}
             </pre>
           </div>
@@ -605,24 +612,25 @@ export default function ExtractionViewer({
         {/* Tab Content 4: JSON Payload (Lazy Loaded) */}
         {activeTab === 'json' && (
           <div role="tabpanel" id="tabpanel-json" aria-labelledby="tab-json" className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[var(--color-text-secondary)]">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[13px] text-[var(--color-text-muted)]">
                 API Standard Response Object (`ExtractionResponse`)
               </span>
               <button
+                type="button"
                 onClick={copyJson}
-                className="btn btn-xs rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[36px] px-3.5 rounded-full text-[13px] font-medium bg-[var(--color-surface-subtle)] text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer inline-flex items-center gap-1.5 shrink-0"
               >
                 {copiedJson ? <Check className="w-3.5 h-3.5 text-[var(--color-success)]" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
                 <span>{copiedJson ? 'Copied' : 'Copy JSON'}</span>
               </button>
             </div>
-            <pre className="p-5 rounded-lg bg-[var(--color-dark-surface)] text-[var(--color-brand)] text-xs font-mono overflow-x-auto max-h-96 whitespace-pre border border-[var(--color-ink-soft)]">
+            <pre className="p-5 rounded-2xl bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-[13px] font-mono overflow-x-auto max-h-96 whitespace-pre">
               {formattedJson}
             </pre>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

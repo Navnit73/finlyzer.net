@@ -1,20 +1,29 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  X,
-  Code,
-  FileSpreadsheet,
-  RotateCw,
-  Copy,
-  Check,
-  Layers,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Cpu,
-} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, FileSpreadsheet, RotateCw, Copy, Check } from 'lucide-react';
 import { OCRJob } from '@/types/ocr';
+
+const STATUS_BADGE: Record<OCRJob['status'], string> = {
+  completed: 'bg-[var(--color-success-soft)] text-[var(--color-success)]',
+  processing: 'bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)]',
+  queued: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
+  failed: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]',
+  cancelled: 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]',
+};
+
+const FOCUS_RING =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]';
+
+const TOOL_BUTTON = `inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-subtle)] cursor-pointer ${FOCUS_RING}`;
+
+const TABS = [
+  { id: 'extraction', label: 'Extraction data (JSON)' },
+  { id: 'metadata', label: 'Job metadata & timings' },
+  { id: 'raw', label: 'Raw extracted text' },
+] as const;
+
+type InspectTab = (typeof TABS)[number]['id'];
 
 interface AdminJobInspectModalProps {
   job: OCRJob | null;
@@ -30,10 +39,17 @@ export default function AdminJobInspectModal({
   onRetry,
 }: AdminJobInspectModalProps) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'extraction' | 'metadata' | 'raw'>('extraction');
+  const [activeTab, setActiveTab] = useState<InspectTab>('extraction');
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  // Move focus into the dialog when it opens
+  useEffect(() => {
+    if (isOpen && job) closeButtonRef.current?.focus();
+  }, [isOpen, job]);
 
   // Close on Escape key
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -60,8 +76,29 @@ export default function AdminJobInspectModal({
 
   const isCompleted = job.status === 'completed';
   const isFailed = job.status === 'failed';
-  const isProcessing = job.status === 'processing';
   const docId = job.document_id || job.result?.id;
+
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const next = (index + (e.key === 'ArrowRight' ? 1 : -1) + TABS.length) % TABS.length;
+    setActiveTab(TABS[next].id);
+    tabRefs.current[next]?.focus();
+  };
+
+  const details: Array<{ label: string; value: React.ReactNode; mono?: boolean }> = [
+    { label: 'Document ID', value: job.document_id || '—', mono: true },
+    { label: 'File', value: job.metadata?.filename || 'statement.pdf' },
+    { label: 'Pages', value: job.total_pages || job.result?.metadata?.pages || 1 },
+    { label: 'Progress', value: `${job.progress ?? 0}%` },
+    { label: 'Stage', value: job.current_stage ? job.current_stage.replace(/_/g, ' ') : '—' },
+    { label: 'Retries', value: job.retry_count ?? 0 },
+    { label: 'Created', value: new Date(job.created_at).toLocaleString() },
+    { label: 'Completed', value: job.completed_at ? new Date(job.completed_at).toLocaleTimeString() : '—' },
+  ];
+
+  const codeClass =
+    'rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-4 font-mono text-[12px] leading-relaxed text-[var(--color-ink)] overflow-x-auto';
 
   return (
     <div
@@ -70,164 +107,157 @@ export default function AdminJobInspectModal({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 sm:p-6 animate-fade-in"
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="job-inspect-modal-title"
-        className="relative w-full max-w-4xl max-h-[90vh] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="surface-overlay relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden animate-scale-up"
       >
-        {/* Modal Top Bar */}
-        <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] border border-[var(--color-brand)]/40 flex items-center justify-center text-[var(--color-ink)]">
-              <Code className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] px-5 py-4 sm:px-6">
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 id="job-inspect-modal-title" className="text-[17px] font-semibold text-[var(--color-ink)]">
+                Job inspector:{' '}
+                <span className="font-mono text-[15px] font-normal text-[var(--color-text-secondary)] break-all">{job.job_id}</span>
+              </h2>
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-[12px] font-medium capitalize ${
+                  STATUS_BADGE[job.status] ?? STATUS_BADGE.cancelled
+                }`}
+              >
+                {job.status}
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 id="job-inspect-modal-title" className="text-base font-black text-[var(--color-ink)]">
-                  Job Inspector: {job.job_id}
-                </h2>
-                <span
-                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                    isCompleted
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : isFailed
-                      ? 'bg-red-100 text-red-800'
-                      : isProcessing
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-zinc-100 text-zinc-800'
-                  }`}
-                >
-                  {job.status}
-                </span>
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)]">
-                Document ID: {job.document_id || '—'} &bull; File: {job.metadata?.filename || 'statement.pdf'}
-              </p>
-            </div>
+            {job.error && <p className="text-[13px] text-[var(--color-danger)] break-words">{job.error}</p>}
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopy}
-              className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-3 cursor-pointer shadow-none"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
-              <span>{copied ? 'Copied' : 'Copy JSON'}</span>
+          <div className="flex shrink-0 items-center gap-2">
+            <button type="button" onClick={handleCopy} className={TOOL_BUTTON}>
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-[var(--color-success)]" aria-hidden="true" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              <span aria-live="polite">{copied ? 'Copied' : 'Copy JSON'}</span>
             </button>
 
             <button
+              ref={closeButtonRef}
+              type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-subtle)] transition cursor-pointer"
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)] cursor-pointer ${FOCUS_RING}`}
               aria-label="Close dialog"
             >
-              <X className="w-5 h-5" aria-hidden="true" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
 
-        {/* Tab Switcher*/}
-        <div role="tablist" aria-label="Job Data Views" className="px-6 pt-3 border-b border-[var(--color-border)] flex items-center gap-4 text-xs font-bold">
-          <button
-            role="tab"
-            aria-selected={activeTab === 'extraction'}
-            onClick={() => setActiveTab('extraction')}
-            className={`pb-2.5 transition-colors cursor-pointer border-b-2 ${
-              activeTab === 'extraction'
-                ? 'border-[var(--color-brand)] text-[var(--color-ink)]'
-                : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
+        <div className="flex-1 overflow-y-auto">
+          {/* Summary */}
+          <dl className="grid grid-cols-1 gap-x-8 border-b border-[var(--color-border)] px-5 py-2 sm:grid-cols-2 sm:px-6">
+            {details.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-baseline justify-between gap-4 border-b border-[var(--color-border-subtle)] py-2.5 last:border-b-0 sm:[&:nth-last-child(2)]:border-b-0"
+              >
+                <dt className="shrink-0 text-[13px] text-[var(--color-text-muted)]">{item.label}</dt>
+                <dd
+                  className={`min-w-0 truncate text-right text-[13px] tabular-nums text-[var(--color-ink)] ${
+                    item.mono ? 'font-mono text-[12px] text-[var(--color-text-secondary)]' : ''
+                  }`}
+                  title={typeof item.value === 'string' ? item.value : undefined}
+                >
+                  {item.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          {/* Tabs */}
+          <div
+            role="tablist"
+            aria-label="Job Data Views"
+            className="flex items-center gap-5 overflow-x-auto border-b border-[var(--color-border)] px-5 pt-3 sm:px-6"
           >
-            Extraction Data (JSON)
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeTab === 'metadata'}
-            onClick={() => setActiveTab('metadata')}
-            className={`pb-2.5 transition-colors cursor-pointer border-b-2 ${
-              activeTab === 'metadata'
-                ? 'border-[var(--color-brand)] text-[var(--color-ink)]'
-                : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-          >
-            Job Metadata &amp; Timings
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeTab === 'raw'}
-            onClick={() => setActiveTab('raw')}
-            className={`pb-2.5 transition-colors cursor-pointer border-b-2 ${
-              activeTab === 'raw'
-                ? 'border-[var(--color-brand)] text-[var(--color-ink)]'
-                : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-          >
-            Raw Extracted Text
-          </button>
-        </div>
-
-        {/* Modal Body / Code Viewer */}
-        <div role="tabpanel" aria-label={`${activeTab} view`} className="p-6 flex-1 overflow-y-auto bg-[var(--color-surface-subtle)]">
-          {activeTab === 'extraction' && (
-            <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto leading-relaxed border border-zinc-800">
-              {job.result?.extraction
-                ? JSON.stringify(job.result.extraction, null, 2)
-                : '// No structured extraction generated yet (Status: ' + job.status + ')'}
-            </pre>
-          )}
-
-          {activeTab === 'metadata' && (
-            <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto leading-relaxed border border-zinc-800">
-              {JSON.stringify(job, null, 2)}
-            </pre>
-          )}
-
-          {activeTab === 'raw' && (
-            <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-100 font-mono text-xs overflow-x-auto leading-relaxed border border-zinc-800 whitespace-pre-wrap">
-              {job.result?.raw_text || '// No raw text captured'}
-            </pre>
-          )}
-        </div>
-
-        {/* Modal Footer Actions */}
-        <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-surface)] flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-            <span>Created: {new Date(job.created_at).toLocaleString()}</span>
-            {job.completed_at && (
-              <span>&bull; Completed: {new Date(job.completed_at).toLocaleTimeString()}</span>
-            )}
+            {TABS.map((tab, index) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  ref={(el) => {
+                    tabRefs.current[index] = el;
+                  }}
+                  type="button"
+                  role="tab"
+                  id={`job-inspect-tab-${tab.id}`}
+                  aria-selected={isActive}
+                  aria-controls="job-inspect-tabpanel"
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setActiveTab(tab.id)}
+                  onKeyDown={(e) => handleTabKeyDown(e, index)}
+                  className={`-mb-px whitespace-nowrap border-b-2 pb-2.5 text-[13px] transition-colors cursor-pointer ${FOCUS_RING} ${
+                    isActive
+                      ? 'border-[var(--color-brand)] font-medium text-[var(--color-ink)]'
+                      : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-2">
-            {isFailed && (
-              <button
-                onClick={() => onRetry(job.job_id)}
-                className="btn btn-sm rounded-lg bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-[var(--color-on-brand)] text-xs font-bold flex items-center gap-1.5 px-4 cursor-pointer"
-              >
-                <RotateCw className="w-3.5 h-3.5" />
-                <span>Retry Job</span>
-              </button>
+          {/* Tab panel */}
+          <div
+            role="tabpanel"
+            id="job-inspect-tabpanel"
+            aria-labelledby={`job-inspect-tab-${activeTab}`}
+            aria-label={`${activeTab} view`}
+            className="p-5 sm:p-6"
+          >
+            {activeTab === 'extraction' && (
+              <pre className={codeClass}>
+                {job.result?.extraction
+                  ? JSON.stringify(job.result.extraction, null, 2)
+                  : '// No structured extraction generated yet (Status: ' + job.status + ')'}
+              </pre>
             )}
 
-            {isCompleted && docId && (
-              <a
-                href={`/api/export/download/${docId}?format=xlsx`}
-                className="btn btn-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] text-[var(--color-ink)] text-xs font-bold flex items-center gap-1.5 px-4 cursor-pointer"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Export Excel</span>
-              </a>
-            )}
+            {activeTab === 'metadata' && <pre className={codeClass}>{JSON.stringify(job, null, 2)}</pre>}
 
+            {activeTab === 'raw' && (
+              <pre className={`${codeClass} whitespace-pre-wrap`}>{job.result?.raw_text || '// No raw text captured'}</pre>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[var(--color-border)] px-5 py-3 sm:px-6">
+          {isFailed && (
             <button
-              onClick={onClose}
-              className="btn btn-sm rounded-lg border border-[var(--color-border)] px-4 text-xs font-bold cursor-pointer"
+              type="button"
+              onClick={() => onRetry(job.job_id)}
+              className={`inline-flex h-8 items-center gap-1.5 rounded-md bg-[var(--color-brand)] px-3.5 text-[13px] font-medium text-[var(--color-on-brand)] transition-colors hover:bg-[var(--color-brand-hover)] cursor-pointer ${FOCUS_RING}`}
             >
-              Close
+              <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Retry job</span>
             </button>
-          </div>
+          )}
+
+          {isCompleted && docId && (
+            <a href={`/api/export/download/${docId}?format=xlsx`} className={TOOL_BUTTON}>
+              <FileSpreadsheet className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Export Excel</span>
+            </a>
+          )}
+
+          <button type="button" onClick={onClose} className={TOOL_BUTTON}>
+            Close
+          </button>
         </div>
       </div>
     </div>

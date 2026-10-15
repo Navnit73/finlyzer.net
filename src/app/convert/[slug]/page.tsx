@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import BreadcrumbStrip from '@/components/layout/BreadcrumbStrip';
 import {
   getAllLandingPages,
   getLandingPageBySlug,
@@ -15,8 +15,9 @@ import {
   pageMetadata,
   serializeJsonLd,
 } from '@/lib/seo-config';
-import { ChevronRight, UploadCloud, Cpu, Download } from 'lucide-react';
+import { UploadCloud, Cpu, Download } from 'lucide-react';
 import ConverterHero from '@/components/converter/ConverterHero';
+import { FREE_PAGE_LIMIT } from '@/types/pricing';
 import MobileStickyCta from '@/components/converter/MobileStickyCta';
 import {
   MetricsStrip,
@@ -30,6 +31,8 @@ import {
   ComparisonSection,
   FaqSection,
   FinalCtaSection,
+  SectionBand,
+  type BandTone,
   type LedgerRow,
   type Step,
   type FileOutputPreview,
@@ -215,24 +218,130 @@ export default async function SEOConverterPage({ params }: PageProps) {
     ...(faqs.length > 0 ? [getFaqJsonLd(faqs)] : []),
   ]);
 
+  // Content bands in page order. White and parchment alternate automatically (skipping
+  // sections this page doesn't have); the feature grid is always the dark band.
+  const bands: { key: string; tone?: 'dark'; node: React.ReactNode }[] = [
+    {
+      key: 'how',
+      node: (
+        <HowItWorksSection
+          title={`How to Convert ${statementPlural} to ${page.outputFormat}`}
+          steps={steps.map((step, i) => ({ ...step, icon: stepIcons[i % stepIcons.length] }))}
+        />
+      ),
+    },
+    ...(page.sampleData.length > 0
+      ? [{
+          key: 'before-after',
+          node: (
+            <BeforeAfterSection
+              title={page.category === 'formats' ? `From PDF Statement to ${page.outputFormat}` : `Before & After: Your ${page.statementLabel} Data`}
+              subtitle={`Messy ${page.statementLabel} text becomes clean, verified ${page.outputFormat} output.`}
+              rawLines={page.sampleData.map((row) => `${row.date} ${row.desc} ${row.amount.replace(/[$₹£,+]/g, '')} ${row.balance.replace(/[$₹£,]/g, '')}`)}
+              rows={toLedgerRows(page)}
+              fileOutput={toFileOutput(page)}
+            />
+          ),
+        }]
+      : []),
+    ...(page.features.length > 0
+      ? [{
+          key: 'features',
+          tone: 'dark' as const,
+          node: (
+            <FeatureGridSection
+              title={page.category === 'formats' ? `Why Use the ${page.outputFormat} Export` : `Built for ${statementPlural}`}
+              subtitle="Understands real statement layouts, not just generic PDF tables."
+              features={page.features}
+              bare
+            />
+          ),
+        }]
+      : []),
+    { key: 'formats', node: <ExportFormatsSection title={exportFormatsTitle(page)} excludeSlug={page.slug} /> },
+    ...(page.contentHtml || page.category.endsWith('-banks')
+      ? [{
+          key: 'editorial',
+          node: (
+            <>
+              {page.contentHtml && <EditorialSection html={page.contentHtml} />}
+              {page.category.endsWith('-banks') && (
+                <p className={`max-w-3xl mx-auto type-caption ${page.contentHtml ? 'mt-10 pt-6 border-t border-[var(--color-border)]' : ''}`}>
+                  Finlyzers is an independent tool and is not affiliated with or endorsed by {page.bankName}. Statement
+                  layouts described here can change; always check the converted figures against your statement.
+                </p>
+              )}
+            </>
+          ),
+        }]
+      : []),
+    { key: 'security', node: <SecuritySection title={`Is It Safe to Upload My ${page.statementLabel}?`} bare /> },
+    ...(relatedPages.length > 0
+      ? [{
+          key: 'related',
+          node: (
+            <ConverterLinksSection
+              title="Related Converters"
+              links={relatedPages.map((rel) => ({ name: rel.title, slug: rel.slug, badge: rel.badgeText }))}
+            />
+          ),
+        }]
+      : []),
+    { key: 'comparison', node: <ComparisonSection /> },
+    ...(faqs.length > 0
+      ? [{
+          key: 'faq',
+          node: (
+            <FaqSection
+              title={`${page.title} FAQ`}
+              subtitle={`Common questions about converting ${statementPlural}.`}
+              faqs={faqs}
+            />
+          ),
+        }]
+      : []),
+    {
+      key: 'final-cta',
+      node: (
+        <FinalCtaSection
+          title={`Ready to Convert Your ${page.statementLabel}?`}
+          subtitle={
+            page.acceptsSpreadsheets
+              ? 'Upload a CSV or Excel file and download a QuickBooks-ready QBO file.'
+              : `Upload a PDF and download clean transactions in seconds. Statements up to ${FREE_PAGE_LIMIT} pages are free.`
+          }
+        />
+      ),
+    },
+  ];
+
+  let lightIndex = 0;
+  const bandTones: BandTone[] = bands.map((band) => {
+    if (band.tone === 'dark') {
+      lightIndex = 0; // the band after a dark band starts white again
+      return 'dark';
+    }
+    return lightIndex++ % 2 === 0 ? 'parchment' : 'white';
+  });
+
   return (
-    <div className="w-full">
+    <div className="w-full -mb-6 sm:-mb-10">
       {/* Inject Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
 
-      <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] min-w-0">
-        <Link href="/" className="hover:text-[var(--color-ink)] transition-colors shrink-0">Home</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-        <Link href="/convert" className="hover:text-[var(--color-ink)] transition-colors shrink-0">Converters</Link>
-        <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-        <span className="text-[var(--color-ink)] font-semibold truncate" aria-current="page">{page.title}</span>
-      </nav>
+      <BreadcrumbStrip
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Converters', href: '/convert' },
+          { label: page.title },
+        ]}
+      />
 
       <ConverterHero
-        badge={page.acceptsSpreadsheets ? page.badgeText : `${page.badgeText} · Free up to 10 pages`}
+        badge={page.acceptsSpreadsheets ? page.badgeText : `${page.badgeText} · Free up to ${FREE_PAGE_LIMIT} pages`}
         title={page.title}
         description={page.intro}
         benefits={page.acceptsSpreadsheets ? SPREADSHEET_BENEFITS : undefined}
@@ -241,71 +350,15 @@ export default async function SEOConverterPage({ params }: PageProps) {
         acceptSpreadsheets={page.acceptsSpreadsheets}
       />
 
-      <div className="w-full space-y-16 sm:space-y-24 pt-8 sm:pt-12 pb-8 sm:pb-16">
+      <div className="pt-10 sm:pt-16 pb-[var(--section-y)]">
         <MetricsStrip />
-
-        <HowItWorksSection
-          title={`How to Convert ${statementPlural} to ${page.outputFormat}`}
-          steps={steps.map((step, i) => ({ ...step, icon: stepIcons[i % stepIcons.length] }))}
-        />
-
-        {page.sampleData.length > 0 && (
-          <BeforeAfterSection
-            title={page.category === 'formats' ? `From PDF Statement to ${page.outputFormat}` : `Before & After: Your ${page.statementLabel} Data`}
-            subtitle={`Messy ${page.statementLabel} text becomes clean, verified ${page.outputFormat} output.`}
-            rawLines={page.sampleData.map((row) => `${row.date} ${row.desc} ${row.amount.replace(/[$₹£,+]/g, '')} ${row.balance.replace(/[$₹£,]/g, '')}`)}
-            rows={toLedgerRows(page)}
-            fileOutput={toFileOutput(page)}
-          />
-        )}
-
-        {page.features.length > 0 && (
-          <FeatureGridSection
-            title={page.category === 'formats' ? `Why Use the ${page.outputFormat} Export` : `Built for ${statementPlural}`}
-            subtitle="Understands real statement layouts, not just generic PDF tables."
-            features={page.features}
-          />
-        )}
-
-        <ExportFormatsSection title={exportFormatsTitle(page)} excludeSlug={page.slug} />
-
-        {page.contentHtml && <EditorialSection html={page.contentHtml} />}
-
-        {page.category.endsWith('-banks') && (
-          <p className="max-w-3xl mx-auto -mt-8 sm:-mt-16 text-sm text-[var(--color-text-muted)]">
-            Finlyzers is an independent tool and is not affiliated with or endorsed by {page.bankName}. Statement
-            layouts described here can change; always check the converted figures against your statement.
-          </p>
-        )}
-
-        <SecuritySection title={`Is It Safe to Upload My ${page.statementLabel}?`} />
-
-        {relatedPages.length > 0 && (
-          <ConverterLinksSection
-            title="Related Converters"
-            links={relatedPages.map((rel) => ({ name: rel.title, slug: rel.slug, badge: rel.badgeText }))}
-          />
-        )}
-
-        <ComparisonSection />
-
-        {faqs.length > 0 && (
-          <FaqSection
-            title={`${page.title} FAQ`}
-            subtitle={`Common questions about converting ${statementPlural}.`}
-            faqs={faqs}
-          />
-        )}
-
-        <FinalCtaSection
-          title={`Ready to Convert Your ${page.statementLabel}?`}
-          subtitle={
-            page.acceptsSpreadsheets
-              ? 'Upload a CSV or Excel file and download a QuickBooks-ready QBO file.'
-              : 'Upload a PDF and download clean transactions in seconds. Statements up to 10 pages are free.'
-          }
-        />
       </div>
+
+      {bands.map((band, i) => (
+        <SectionBand key={band.key} tone={bandTones[i]}>
+          {band.node}
+        </SectionBand>
+      ))}
 
       <MobileStickyCta />
     </div>
