@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="w-full bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] border-t border-[var(--color-border)] py-12 mt-auto">
       <div className="site-container space-y-10">
         {/* Top Multi-Column Link Directory for SEO & Crawlers */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Col 1: Brand Info */}
           <div className="space-y-3">
             <BrandLogo size="sm" textClassName="!text-lg" />
@@ -153,7 +153,31 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Col 5: Resources & Directory */}
+          {/* Col 5: Bank Reconciliation */}
+          <div className="space-y-3">
+            <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
+              Reconciliation
+            </p>
+            <ul className="space-y-2 text-xs">
+              {[
+                ['bank-reconciliation-tool', 'Bank reconciliation tool'],
+                ['bank-statement-vs-ledger', 'Bank statement vs ledger'],
+                ['bank-statement-matching-tool', 'Transaction matching'],
+                ['bank-reconciliation-calculator', 'Reconciliation calculator'],
+              ].map(([slug, label]) => (
+                <li key={slug}>
+                  <Link
+                    href={`/reconcile/${slug}`}
+                    className="hover:text-[var(--color-ink)] hover:underline transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 6: Resources & Directory */}
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-wider text-[var(--color-ink)]">
               Product &amp; Directory

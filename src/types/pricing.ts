@@ -22,6 +22,8 @@ export interface OrderRecord {
   status: 'created' | 'pending' | 'completed' | 'failed';
   payment_gateway: 'razorpay';
   document_id?: string;
+  /** Set on guest unlock orders for a bank reconciliation instead of a converted document. */
+  reconciliation_id?: string;
   guest_session_id?: string;
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
@@ -41,6 +43,9 @@ export interface OrderRecord {
 
 // Free tier: documents up to FREE_PAGE_LIMIT pages convert and download at no cost.
 export const FREE_PAGE_LIMIT = 10;
+
+// Guests can go up to GUEST_MAX_PAGES with a one-time Document Pass; anything longer needs an account.
+export const GUEST_MAX_PAGES = 30;
 
 // 'single_10' is retired (merged into the $10 Document Pass) but stays in the id unions above
 // so historical orders still type-check and render.

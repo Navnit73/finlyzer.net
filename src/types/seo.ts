@@ -74,3 +74,39 @@ export interface SEOGuidePage {
   faqs: SEOFAQ[];
   contentHtml: string;
 }
+
+/** One illustrative bank-vs-ledger pair for the sample comparison table on reconciliation pages. */
+export interface SEOReconSampleRow {
+  date: string;
+  bankDesc: string;
+  bankAmount: string;
+  ledgerDesc: string;
+  ledgerAmount: string;
+  result: string;
+}
+
+/** Bank reconciliation landing page under /reconcile, rendered from src/content/reconciliation. */
+export interface SEOReconciliationPage {
+  slug: string;
+  /** Visible H1. */
+  title: string;
+  /** Short name for breadcrumbs, footer and link cards. */
+  shortTitle: string;
+  metaTitle: string;
+  metaDescription: string;
+  intro: string;
+  badgeText: string;
+  /** Primary + secondary search terms this page owns (keyword map; not emitted as a meta tag). */
+  keywords: string[];
+  /** Slugs of other reconciliation pages to cross-link, in display order. */
+  related: string[];
+  benefits: string[];
+  features: SEOFeature[];
+  steps: SEOStep[];
+  sampleRows: SEOReconSampleRow[];
+  faqs: SEOFAQ[];
+  /** Renders the interactive bank reconciliation statement calculator under the hero. */
+  showCalculator: boolean;
+  dateModified: string;
+  contentHtml: string;
+}

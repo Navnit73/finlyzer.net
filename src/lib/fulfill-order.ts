@@ -1,12 +1,13 @@
 import { claimOrderCompletion, updateOrderStatus, setOrderPayerDetails, OrderRecord } from '@/lib/models/Order';
 import { addPurchasedPages, getUserQuota } from '@/lib/models/User';
 import { unlockGuestDocument } from '@/lib/models/Document';
+import { unlockReconciliation } from '@/lib/models/Reconciliation';
 import { fetchPayerDetails } from '@/lib/razorpay';
 import { sendCreditPurchaseEmail } from '@/lib/email';
 
 /**
- * Marks a paid order completed and delivers what was bought (page credits or a guest document
- * unlock). Safe to call from both the browser verify endpoint and the Razorpay webhook: only the
+ * Marks a paid order completed and delivers what was bought (page credits, or a guest document
+ * or reconciliation unlock). Safe to call from both the browser verify endpoint and the Razorpay webhook: only the
  * first caller to flip the order to 'completed' fulfils it, later callers get `fulfilled: false`.
  */
 export async function completeAndFulfillOrder(
@@ -20,6 +21,9 @@ export async function completeAndFulfillOrder(
   try {
     if (order.document_id) {
       await unlockGuestDocument(order.document_id, order.order_id);
+    }
+    if (order.reconciliation_id) {
+      await unlockReconciliation(order.reconciliation_id, order.order_id);
     }
     if (order.user_email && order.user_email !== 'guest' && order.pages_credited > 0) {
       const tier = order.plan_id === 'pack_100' ? 'enterprise' : order.plan_id === 'pack_50' ? 'pro' : undefined;

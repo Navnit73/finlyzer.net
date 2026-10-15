@@ -7,12 +7,12 @@ import { Sparkles, X, CheckCircle2, ShieldCheck, CreditCard } from 'lucide-react
 import { PRICING_PLANS } from '@/types/pricing';
 import { useIsMounted } from '@/lib/useIsMounted';
 import BrandLogo from '../BrandLogo';
-import { APP_HOME, APP_WORKSPACE, isPublicOnlyRoute } from '@/lib/routes';
+import { APP_HOME, APP_RECONCILIATIONS, APP_WORKSPACE, isPublicOnlyRoute } from '@/lib/routes';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  reason?: 'page_limit' | 'batch_upload' | 'save_history' | 'dashboard' | 'pricing' | 'general';
+  reason?: 'page_limit' | 'reconciliation' | 'batch_upload' | 'save_history' | 'dashboard' | 'pricing' | 'general';
   pageCount?: number;
   planId?: string;
   redirectUrl?: string;
@@ -79,6 +79,8 @@ export default function AuthModal({
           destination = planId ? `/pricing?plan=${planId}&checkout=true` : '/pricing';
         } else if (reason === 'page_limit' || reason === 'batch_upload' || reason === 'save_history') {
           destination = APP_WORKSPACE;
+        } else if (reason === 'reconciliation') {
+          destination = APP_RECONCILIATIONS;
         } else if (reason === 'dashboard' || isPublicOnlyRoute(window.location.pathname)) {
           destination = APP_HOME;
         } else {
@@ -95,6 +97,7 @@ export default function AuthModal({
 
   const titles = {
     page_limit: pageCount ? `Sign in to convert this ${pageCount}-page statement` : 'Sign in to convert longer statements',
+    reconciliation: pageCount ? `Sign in to reconcile these ${pageCount} pages` : 'Sign in to reconcile longer documents',
     batch_upload: 'Sign in to convert files in bulk',
     save_history: 'Sign in to save your conversions',
     dashboard: 'Sign in to your dashboard',
@@ -104,6 +107,7 @@ export default function AuthModal({
 
   const descriptions = {
     page_limit: 'Guest conversions support statements up to 30 pages. Sign in with Google to process statements up to 200 pages.',
+    reconciliation: 'Guests can reconcile up to 30 pages in total. Sign in with Google to reconcile longer statements and ledgers using your page credits.',
     batch_upload: 'Upload up to 50 statements or a .zip archive at once and merge their cash flows into one workbook.',
     save_history: 'Keep every converted statement, invoice, and receipt in your private vault, available on any device.',
     dashboard: 'View your credit balance, converted statements, and invoices in one place.',
@@ -115,6 +119,7 @@ export default function AuthModal({
 
   const benefits: Record<NonNullable<AuthModalProps['reason']>, string[]> = {
     page_limit: ['10 free pages included with every account', 'Statements up to 200 pages', 'Results saved to your private vault'],
+    reconciliation: ['10 free pages included with every account', 'Each file up to 200 pages', 'Reports don’t expire like guest runs'],
     batch_upload: ['Up to 50 files per batch', 'Merged cash flow across statements', 'Results saved to your private vault'],
     save_history: ['Unlimited conversion history', 'Re-download any format at any time', 'Delete your data whenever you want'],
     dashboard: ['Live credit balance', 'Converted statements history', 'Downloadable PDF invoices'],

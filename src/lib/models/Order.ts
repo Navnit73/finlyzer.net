@@ -18,7 +18,7 @@ export async function createOrder(
   userEmail: string,
   planId: PricingPlan['id'],
   gateway: OrderRecord['payment_gateway'] = 'razorpay',
-  extra: Pick<OrderRecord, 'document_id'> = {}
+  extra: Pick<OrderRecord, 'document_id' | 'reconciliation_id'> = {}
 ): Promise<OrderRecord> {
   const normalizedEmail = userEmail.toLowerCase().trim();
   const plan =
@@ -40,6 +40,7 @@ export async function createOrder(
     status: 'created',
     payment_gateway: gateway,
     ...(extra.document_id ? { document_id: extra.document_id } : {}),
+    ...(extra.reconciliation_id ? { reconciliation_id: extra.reconciliation_id } : {}),
     created_at: now,
     updated_at: now,
   };

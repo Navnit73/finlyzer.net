@@ -9,12 +9,15 @@ export const APP_HOME = '/dashboard';
 /** Signed-in conversion workspace (replaces the public homepage uploader for logged-in users). */
 export const APP_WORKSPACE = '/workspace';
 
+/** Signed-in bank reconciliation page: upload plus the list of past reconciliations. */
+export const APP_RECONCILIATIONS = '/reconciliations';
+
 /** Marketing / SEO pages. Guests only — signed-in users are redirected into the app. */
-const PUBLIC_ONLY_PREFIXES = ['/convert'];
+const PUBLIC_ONLY_PREFIXES = ['/convert', '/reconcile'];
 const PUBLIC_ONLY_EXACT = ['/'];
 
 /** Private app pages. Signed-in users only — guests are sent to sign in. */
-const APP_PREFIXES = ['/dashboard', '/workspace', '/documents', '/invoices', '/superadmin', '/admin'];
+const APP_PREFIXES = ['/dashboard', '/workspace', '/reconciliations', '/documents', '/invoices', '/superadmin', '/admin'];
 
 /** Admin-only app pages. */
 const ADMIN_PREFIXES = ['/superadmin', '/admin'];
@@ -25,6 +28,11 @@ function matchesPrefix(pathname: string, prefixes: string[]): boolean {
 
 export function isPublicOnlyRoute(pathname: string): boolean {
   return PUBLIC_ONLY_EXACT.includes(pathname) || matchesPrefix(pathname, PUBLIC_ONLY_PREFIXES);
+}
+
+/** Where a signed-in user who opens a guest-only page is sent instead. */
+export function appRedirectFor(pathname: string): string {
+  return pathname === '/reconcile' || pathname.startsWith('/reconcile/') ? APP_RECONCILIATIONS : APP_HOME;
 }
 
 export function isAppRoute(pathname: string): boolean {

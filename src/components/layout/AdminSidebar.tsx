@@ -18,6 +18,7 @@ import {
   Layers,
   ShieldCheck,
   ChevronRight,
+  GitCompareArrows,
   ChevronLeft,
   X,
 } from 'lucide-react';
@@ -89,6 +90,13 @@ export default function AdminSidebar({
           icon: Sparkles,
           active: pathname === '/workspace',
           badge: 'AI',
+        },
+        {
+          name: 'Bank Reconciliation',
+          shortName: 'Reconcile',
+          href: '/reconciliations',
+          icon: GitCompareArrows,
+          active: pathname === '/reconciliations' || pathname.startsWith('/reconciliation/'),
         },
         {
           name: 'Document Vault',

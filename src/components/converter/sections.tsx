@@ -100,6 +100,12 @@ const comparisonRows = [
   ['Export formats', 'XLSX, CSV, QBO, OFX, QIF, PDF', 'Excel only', 'Basic CSV'],
 ];
 
+const defaultCtaFacts = [
+  { icon: UploadCloud, label: 'PDF, scans & photos' },
+  { icon: Download, label: 'Excel, CSV, QBO, OFX, QIF' },
+  { icon: ShieldCheck, label: `Auto-deleted in ${GUEST_RETENTION_HOURS}h` },
+];
+
 const linkUnderline =
   'font-semibold text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-brand)] decoration-2';
 
@@ -126,14 +132,14 @@ export function SectionHeading({
   );
 }
 
-export function MetricsStrip() {
+export function MetricsStrip({ items = metrics }: { items?: string[][] } = {}) {
   return (
     <section aria-label="Finlyzers at a glance" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] px-4 py-6 sm:py-8">
       <p className="text-center text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
         Built for accountants, bookkeepers, small businesses &amp; analysts
       </p>
       <dl className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-y-6 gap-x-4">
-        {metrics.map(([value, label]) => (
+        {items.map(([value, label]) => (
           <div key={label} className="text-center">
             <dt className="sr-only">{label}</dt>
             <dd className="text-2xl sm:text-4xl font-extrabold text-[var(--color-ink)] tabular-nums">{value}</dd>
@@ -149,10 +155,12 @@ export function HowItWorksSection({
   title = 'How the Bank Statement Converter Works',
   subtitle = 'Three steps, about a minute. Works with digital PDFs, scanned statements and phone photos.',
   steps = defaultSteps,
+  ctaLabel = 'Upload Your Statement',
 }: {
   title?: string;
   subtitle?: string;
   steps?: Step[];
+  ctaLabel?: string;
 }) {
   return (
     <section className="space-y-8 sm:space-y-10">
@@ -172,7 +180,7 @@ export function HowItWorksSection({
         ))}
       </ol>
       <div className="flex justify-center">
-        <UploadCtaButton label="Upload Your Statement" />
+        <UploadCtaButton label={ctaLabel} />
       </div>
     </section>
   );
@@ -326,7 +334,19 @@ export function ExportFormatsSection({
   );
 }
 
-export function SecuritySection({ title = 'Your Bank Statements Stay Private' }: { title?: string }) {
+export interface SecurityPoint {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+}
+
+export function SecuritySection({
+  title = 'Your Bank Statements Stay Private',
+  points = securityPoints,
+}: {
+  title?: string;
+  points?: SecurityPoint[];
+}) {
   return (
     <section className="intro-panel grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8 items-start">
       <div className="space-y-3">
@@ -337,7 +357,7 @@ export function SecuritySection({ title = 'Your Bank Statements Stay Private' }:
         </p>
       </div>
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {securityPoints.map((p) => (
+        {points.map((p) => (
           <li key={p.title} className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] space-y-2">
             <p.icon className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
             <h3 className="text-base font-bold text-[var(--color-ink)]">{p.title}</h3>
@@ -349,13 +369,23 @@ export function SecuritySection({ title = 'Your Bank Statements Stay Private' }:
   );
 }
 
-export function ConverterLinksSection({ title, links }: { title: string; links: ConverterLink[] }) {
+export function ConverterLinksSection({
+  title,
+  links,
+  basePath = '/convert',
+  allLink = { href: '/convert', label: 'View all converters' },
+}: {
+  title: string;
+  links: ConverterLink[];
+  basePath?: string;
+  allLink?: { href: string; label: string };
+}) {
   return (
     <section className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-ink)] tracking-tight max-w-2xl">{title}</h2>
-        <Link href="/convert" className={`inline-flex items-center gap-1.5 text-base min-h-[44px] ${linkUnderline}`}>
-          View all converters
+        <Link href={allLink.href} className={`inline-flex items-center gap-1.5 text-base min-h-[44px] ${linkUnderline}`}>
+          {allLink.label}
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
@@ -363,7 +393,7 @@ export function ConverterLinksSection({ title, links }: { title: string; links: 
         {links.map((b) => (
           <Link
             key={b.slug}
-            href={`/convert/${b.slug}`}
+            href={`${basePath}/${b.slug}`}
             className="group p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-colors flex sm:flex-col items-center sm:items-start justify-between gap-3"
           >
             <div className="space-y-2">
@@ -460,11 +490,15 @@ export function FinalCtaSection({
   title = 'Stop Retyping Bank Statements',
   subtitle = 'Convert your first statement free. No signup needed for statements up to 10 pages.',
   href,
+  ctaLabel = 'Convert a Statement Free',
+  facts = defaultCtaFacts,
 }: {
   title?: string;
   subtitle?: string;
   /** Link target instead of opening the on-page upload picker (for pages without a hero uploader). */
   href?: string;
+  ctaLabel?: string;
+  facts?: { icon: LucideIcon; label: string }[];
 }) {
   const ctaClass = 'btn-brand-primary w-full sm:w-auto !min-h-[60px] !px-10';
   return (
@@ -475,16 +509,16 @@ export function FinalCtaSection({
       <p className="text-base sm:text-lg text-[var(--color-text-muted)] max-w-xl mx-auto">{subtitle}</p>
       {href ? (
         <Link href={href} className={ctaClass}>
-          <span>Convert a Statement Free</span>
+          <span>{ctaLabel}</span>
           <ArrowRight className="w-5 h-5" />
         </Link>
       ) : (
-        <UploadCtaButton className={ctaClass} />
+        <UploadCtaButton label={ctaLabel} className={ctaClass} />
       )}
       <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-[var(--color-text-muted)]">
-        <span className="inline-flex items-center gap-1.5"><UploadCloud className="w-4 h-4" aria-hidden="true" /> PDF, scans &amp; photos</span>
-        <span className="inline-flex items-center gap-1.5"><Download className="w-4 h-4" aria-hidden="true" /> Excel, CSV, QBO, OFX, QIF</span>
-        <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" aria-hidden="true" /> Auto-deleted in 24h</span>
+        {facts.map(({ icon: Icon, label }) => (
+          <span key={label} className="inline-flex items-center gap-1.5"><Icon className="w-4 h-4" aria-hidden="true" /> {label}</span>
+        ))}
       </p>
     </section>
   );

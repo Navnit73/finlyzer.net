@@ -93,6 +93,15 @@ export async function ensureDatabaseIndexes(db: Db): Promise<void> {
       ordersCol.createIndex({ razorpay_payment_id: 1 }, { sparse: true, background: true }),
     ]);
 
+    // 4. Site Reconciliation Records Indexes (not the reconciliation service's own `reconciliations`)
+    const reconciliationsCol = db.collection('site_reconciliations');
+    await Promise.allSettled([
+      reconciliationsCol.createIndex({ reconciliation_id: 1 }, { unique: true, background: true }),
+      reconciliationsCol.createIndex({ user_email: 1, created_at: -1 }, { background: true }),
+      // TTL: guest runs carry `expires_at`, matching the reconciliation service's own guest expiry.
+      reconciliationsCol.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0, background: true }),
+    ]);
+
     if (process.env.NODE_ENV !== 'production') {
       console.log('⚡ [MongoDB] Production compound indexes verified.');
     }

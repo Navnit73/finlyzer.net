@@ -20,6 +20,7 @@ import {
   Receipt,
   User,
   Zap,
+  GitCompareArrows,
 } from 'lucide-react';
 import UserMenu from './auth/UserMenu';
 import HistoryDrawer from './ocr/HistoryDrawer';
@@ -104,6 +105,14 @@ export default function Header() {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand-dark)]" aria-hidden="true" />
                   <span>All Bank Converters</span>
+                </Link>
+                <Link
+                  href="/reconcile/bank-reconciliation-tool"
+                  aria-current={pathname.startsWith('/reconcile') ? 'page' : undefined}
+                  className="hover:text-[var(--color-ink)] transition-colors flex items-center gap-1.5"
+                >
+                  <GitCompareArrows className="w-3.5 h-3.5 text-[var(--media-blue-text)]" aria-hidden="true" />
+                  <span>Bank Reconciliation</span>
                 </Link>
                 <Link
                   href="/pricing"
@@ -242,6 +251,23 @@ export default function Header() {
                         <div>
                           <span>All Bank Converters Hub</span>
                           <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">By bank &amp; export format</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />
+                    </Link>
+
+                    <Link
+                      href="/reconcile/bank-reconciliation-tool"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-[var(--color-surface-muted)] text-[var(--color-ink)] font-bold text-sm transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--media-blue-soft)] text-[var(--media-blue-text)] flex items-center justify-center">
+                          <GitCompareArrows className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span>Bank Reconciliation</span>
+                          <p className="text-[11px] font-normal text-[var(--color-text-secondary)]">Match your statement to your ledger</p>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)]" />

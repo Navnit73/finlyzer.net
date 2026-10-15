@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
         destination: 'https://finlyzers.com/:path*',
         permanent: true,
       },
+      // /reconcile has no hub page; send it to the main reconciliation tool.
+      {
+        source: '/reconcile',
+        destination: '/reconcile/bank-reconciliation-tool',
+        permanent: false,
+      },
       // Bank converter slugs renamed to the "<bank>-...-statement-to-excel" pattern (Oct 2026).
       {
         source: '/convert/wells-fargo-pdf-to-excel',

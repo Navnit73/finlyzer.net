@@ -8,7 +8,13 @@ import { openUploadPicker } from './UploadCtaButton';
  * out of view, so the primary action is always one tap away. It hides again
  * over the final CTA and footer so it never covers them.
  */
-export default function MobileStickyCta() {
+export default function MobileStickyCta({
+  label = 'Convert a Statement Free',
+  note = 'Free up to 10 pages · No signup',
+}: {
+  label?: string;
+  note?: string;
+} = {}) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -44,9 +50,9 @@ export default function MobileStickyCta() {
         onClick={openUploadPicker}
         className="btn-brand-primary w-full !min-h-[52px]"
       >
-        Convert a Statement Free
+        {label}
       </button>
-      <p className="mt-1.5 text-center text-xs text-[var(--color-text-muted)]">Free up to 10 pages · No signup</p>
+      <p className="mt-1.5 text-center text-xs text-[var(--color-text-muted)]">{note}</p>
     </div>
   );
 }

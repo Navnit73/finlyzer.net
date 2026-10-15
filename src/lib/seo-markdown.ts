@@ -1,9 +1,19 @@
 import fs from 'fs';
 import path from 'path';
-import { SEOConverterPage, SEOFeature, SEOFAQ, SEOGuidePage, SEOSampleRow, SEOStep } from '@/types/seo';
+import {
+  SEOConverterPage,
+  SEOFeature,
+  SEOFAQ,
+  SEOGuidePage,
+  SEOReconSampleRow,
+  SEOReconciliationPage,
+  SEOSampleRow,
+  SEOStep,
+} from '@/types/seo';
 
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/converters');
 const GUIDES_DIR = path.join(process.cwd(), 'src/content/guides');
+const RECONCILIATION_DIR = path.join(process.cwd(), 'src/content/reconciliation');
 
 /**
  * Parses simple YAML-like frontmatter without bulky dependencies
@@ -272,4 +282,50 @@ export function getAllGuides(): SEOGuidePage[] {
 
 export function getGuideBySlug(slug: string): SEOGuidePage | null {
   return getAllGuides().find((g) => g.slug === slug) || null;
+}
+
+/**
+ * Returns all bank reconciliation landing pages parsed from src/content/reconciliation
+ */
+export function getAllReconciliationPages(): SEOReconciliationPage[] {
+  try {
+    if (!fs.existsSync(RECONCILIATION_DIR)) {
+      return [];
+    }
+
+    return fs
+      .readdirSync(RECONCILIATION_DIR)
+      .filter((f) => f.endsWith('.md'))
+      .sort()
+      .map((file) => {
+        const { data, content } = parseFrontmatter(fs.readFileSync(path.join(RECONCILIATION_DIR, file), 'utf8'));
+        const title = (data.title as string) || 'Bank Reconciliation Tool';
+        return {
+          slug: (data.slug as string) || file.replace(/\.md$/, ''),
+          title,
+          shortTitle: (data.shortTitle as string) || title,
+          metaTitle: (data.metaTitle as string) || `${title} | Finlyzers`,
+          metaDescription: (data.metaDescription as string) || '',
+          intro: (data.intro as string) || (data.metaDescription as string) || '',
+          badgeText: (data.badgeText as string) || 'Bank reconciliation',
+          keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
+          related: Array.isArray(data.related) ? (data.related as string[]) : [],
+          benefits: Array.isArray(data.benefits) ? (data.benefits as string[]) : [],
+          features: Array.isArray(data.features) ? (data.features as SEOFeature[]) : [],
+          steps: Array.isArray(data.steps) ? (data.steps as SEOStep[]) : [],
+          sampleRows: Array.isArray(data.sampleRows) ? (data.sampleRows as SEOReconSampleRow[]) : [],
+          faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
+          showCalculator: data.showCalculator === true,
+          dateModified: String(data.dateModified || ''),
+          contentHtml: renderMarkdown(content),
+        };
+      });
+  } catch (err) {
+    console.error('Error loading reconciliation pages:', err);
+    return [];
+  }
+}
+
+export function getReconciliationPageBySlug(slug: string): SEOReconciliationPage | null {
+  return getAllReconciliationPages().find((p) => p.slug === slug) || null;
 }
