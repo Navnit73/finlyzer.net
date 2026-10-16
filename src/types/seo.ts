@@ -135,3 +135,23 @@ export interface SEOAnalyzerPage {
   dateModified: string;
   contentHtml: string;
 }
+
+/** Free calculator page under /calculators, rendered from src/content/calculators. */
+export interface SEOCalculatorPage {
+  slug: string;
+  /** Visible H1. */
+  title: string;
+  /** Short name for breadcrumbs, footer and link cards. */
+  shortTitle: string;
+  metaTitle: string;
+  metaDescription: string;
+  intro: string;
+  badgeText: string;
+  /** Primary + secondary search terms this page owns (keyword map; not emitted as a meta tag). */
+  keywords: string[];
+  benefits: string[];
+  faqs: SEOFAQ[];
+  datePublished: string;
+  dateModified: string;
+  contentHtml: string;
+}

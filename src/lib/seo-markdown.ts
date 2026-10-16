@@ -4,6 +4,7 @@ import { FREE_PAGE_LIMIT, GUEST_MAX_PAGES } from '@/types/pricing';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 import {
   SEOAnalyzerPage,
+  SEOCalculatorPage,
   SEOConverterPage,
   SEOFeature,
   SEOReconFeature,
@@ -19,6 +20,7 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/converters');
 const GUIDES_DIR = path.join(process.cwd(), 'src/content/guides');
 const RECONCILIATION_DIR = path.join(process.cwd(), 'src/content/reconciliation');
 const ANALYZERS_DIR = path.join(process.cwd(), 'src/content/analyzers');
+const CALCULATORS_DIR = path.join(process.cwd(), 'src/content/calculators');
 
 /**
  * Parses simple YAML-like frontmatter without bulky dependencies
@@ -411,4 +413,46 @@ export function getAllAnalyzerPages(): SEOAnalyzerPage[] {
 
 export function getAnalyzerPageBySlug(slug: string): SEOAnalyzerPage | null {
   return getAllAnalyzerPages().find((p) => p.slug === slug) || null;
+}
+
+/**
+ * Returns all calculator landing pages parsed from src/content/calculators
+ */
+export function getAllCalculatorPages(): SEOCalculatorPage[] {
+  try {
+    if (!fs.existsSync(CALCULATORS_DIR)) {
+      return [];
+    }
+
+    return fs
+      .readdirSync(CALCULATORS_DIR)
+      .filter((f) => f.endsWith('.md'))
+      .sort()
+      .map((file) => {
+        const { data, content } = parseFrontmatter(fs.readFileSync(path.join(CALCULATORS_DIR, file), 'utf8'));
+        const title = (data.title as string) || 'Calculator';
+        return {
+          slug: (data.slug as string) || file.replace(/\.md$/, ''),
+          title,
+          shortTitle: (data.shortTitle as string) || title,
+          metaTitle: (data.metaTitle as string) || `${title} | Finlyzers`,
+          metaDescription: (data.metaDescription as string) || '',
+          intro: (data.intro as string) || (data.metaDescription as string) || '',
+          badgeText: (data.badgeText as string) || 'Free calculator',
+          keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
+          benefits: Array.isArray(data.benefits) ? (data.benefits as string[]) : [],
+          faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
+          datePublished: String(data.datePublished || ''),
+          dateModified: String(data.dateModified || data.datePublished || ''),
+          contentHtml: renderMarkdown(content),
+        };
+      });
+  } catch (err) {
+    console.error('Error loading calculator pages:', err);
+    return [];
+  }
+}
+
+export function getCalculatorPageBySlug(slug: string): SEOCalculatorPage | null {
+  return getAllCalculatorPages().find((p) => p.slug === slug) || null;
 }
