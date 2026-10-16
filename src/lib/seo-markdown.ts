@@ -135,12 +135,40 @@ export function renderMarkdown(md: string): string {
     if (list) html.push(`<${list.tag}>${list.items.map((i) => `<li>${renderInline(i)}</li>`).join('')}</${list.tag}>`);
     list = null;
   };
+  let table: string[] = [];
+  const flushTable = () => {
+    if (!table.length) return;
+    const cells = (row: string) => row.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+    const isDivider = (row: string) => /^\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?$/.test(row);
+    if (table.length >= 2 && isDivider(table[1])) {
+      const align = cells(table[1]).map((c) => (c.endsWith(':') ? (c.startsWith(':') ? 'center' : 'right') : ''));
+      const cell = (tag: 'th' | 'td', text: string, i: number) =>
+        `<${tag}${align[i] ? ` style="text-align:${align[i]}"` : ''}>${renderInline(text)}</${tag}>`;
+      const head = `<tr>${cells(table[0]).map((c, i) => cell('th', c, i)).join('')}</tr>`;
+      const body = table
+        .slice(2)
+        .map((row) => `<tr>${cells(row).map((c, i) => cell('td', c, i)).join('')}</tr>`)
+        .join('');
+      html.push(`<div class="md-table"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`);
+    } else {
+      paragraph.push(...table);
+    }
+    table = [];
+  };
 
   for (const rawLine of md.split(/\r?\n/)) {
     const line = rawLine.trim();
     const heading = line.match(/^(#{1,4})\s+(.*)$/);
     const ordered = line.match(/^\d+\.\s+(.*)$/);
     const unordered = line.match(/^[-*]\s+(.*)$/);
+
+    if (line.startsWith('|')) {
+      flushParagraph();
+      flushList();
+      table.push(line);
+      continue;
+    }
+    flushTable();
 
     if (!line) {
       flushParagraph();
@@ -161,6 +189,7 @@ export function renderMarkdown(md: string): string {
       paragraph.push(line);
     }
   }
+  flushTable();
   flushParagraph();
   flushList();
   return html.join('\n');

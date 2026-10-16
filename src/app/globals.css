@@ -723,6 +723,16 @@ kbd,
 .legal-prose th, .legal-prose td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
 .legal-prose th { color: var(--color-ink); font-weight: 600; background: var(--color-surface-subtle); }
 
+/* Markdown tables rendered by renderMarkdown() in SEO content */
+.md-table { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--color-border); border-radius: 14px; }
+.md-table table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 15px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.md-table th, .md-table td { text-align: left; padding: 12px 16px; vertical-align: top; color: var(--color-text-secondary); }
+.md-table th { color: var(--color-ink); font-weight: 600; background: var(--color-surface-subtle); border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+.md-table tbody tr + tr td { border-top: 1px solid var(--color-border); }
+.md-table td[style*="right"] { white-space: nowrap; }
+.md-table tbody tr:last-child:has(strong) td { background: var(--color-surface-subtle); }
+.md-table strong { color: var(--color-ink); font-weight: 600; }
+
 /* Horizontal scrollers (tabs, chip rows) without a visible scrollbar */
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
