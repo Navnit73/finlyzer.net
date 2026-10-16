@@ -115,3 +115,23 @@ export interface SEOReconciliationPage {
   dateModified: string;
   contentHtml: string;
 }
+
+/** Analyzer landing page under /analyzer, rendered from src/content/analyzers. */
+export interface SEOAnalyzerPage {
+  slug: string;
+  /** Visible H1. */
+  title: string;
+  /** Short name for breadcrumbs, footer and link cards. */
+  shortTitle: string;
+  metaTitle: string;
+  metaDescription: string;
+  intro: string;
+  badgeText: string;
+  /** Primary + secondary search terms this page owns (keyword map; not emitted as a meta tag). */
+  keywords: string[];
+  highlights: SEOStep[];
+  steps: SEOStep[];
+  faqs: SEOFAQ[];
+  dateModified: string;
+  contentHtml: string;
+}

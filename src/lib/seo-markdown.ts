@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import { FREE_PAGE_LIMIT, GUEST_MAX_PAGES } from '@/types/pricing';
+import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 import {
+  SEOAnalyzerPage,
   SEOConverterPage,
   SEOFeature,
   SEOReconFeature,
@@ -15,6 +18,7 @@ import {
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/converters');
 const GUIDES_DIR = path.join(process.cwd(), 'src/content/guides');
 const RECONCILIATION_DIR = path.join(process.cwd(), 'src/content/reconciliation');
+const ANALYZERS_DIR = path.join(process.cwd(), 'src/content/analyzers');
 
 /**
  * Parses simple YAML-like frontmatter without bulky dependencies
@@ -358,4 +362,53 @@ export function getAllReconciliationPages(): SEOReconciliationPage[] {
 
 export function getReconciliationPageBySlug(slug: string): SEOReconciliationPage | null {
   return getAllReconciliationPages().find((p) => p.slug === slug) || null;
+}
+
+/** `{{FREE_PAGE_LIMIT}}`-style placeholders in analyzer content, so limit and retention copy follows the code. */
+const CONTENT_CONSTANTS: Record<string, number> = { FREE_PAGE_LIMIT, GUEST_MAX_PAGES, GUEST_RETENTION_HOURS };
+
+function fillConstants(raw: string): string {
+  return raw.replace(/\{\{([A-Z_]+)\}\}/g, (match, key: string) => (key in CONTENT_CONSTANTS ? String(CONTENT_CONSTANTS[key]) : match));
+}
+
+/**
+ * Returns all analyzer landing pages parsed from src/content/analyzers
+ */
+export function getAllAnalyzerPages(): SEOAnalyzerPage[] {
+  try {
+    if (!fs.existsSync(ANALYZERS_DIR)) {
+      return [];
+    }
+
+    return fs
+      .readdirSync(ANALYZERS_DIR)
+      .filter((f) => f.endsWith('.md'))
+      .sort()
+      .map((file) => {
+        const { data, content } = parseFrontmatter(fillConstants(fs.readFileSync(path.join(ANALYZERS_DIR, file), 'utf8')));
+        const title = (data.title as string) || 'Analyzer';
+        return {
+          slug: (data.slug as string) || file.replace(/\.md$/, ''),
+          title,
+          shortTitle: (data.shortTitle as string) || title,
+          metaTitle: (data.metaTitle as string) || `${title} | Finlyzers`,
+          metaDescription: (data.metaDescription as string) || '',
+          intro: (data.intro as string) || (data.metaDescription as string) || '',
+          badgeText: (data.badgeText as string) || 'Analyzer',
+          keywords: Array.isArray(data.keywords) ? (data.keywords as string[]) : [],
+          highlights: Array.isArray(data.highlights) ? (data.highlights as SEOStep[]) : [],
+          steps: Array.isArray(data.steps) ? (data.steps as SEOStep[]) : [],
+          faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
+          dateModified: String(data.dateModified || ''),
+          contentHtml: renderMarkdown(content),
+        };
+      });
+  } catch (err) {
+    console.error('Error loading analyzer pages:', err);
+    return [];
+  }
+}
+
+export function getAnalyzerPageBySlug(slug: string): SEOAnalyzerPage | null {
+  return getAllAnalyzerPages().find((p) => p.slug === slug) || null;
 }

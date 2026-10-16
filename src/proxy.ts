@@ -14,6 +14,14 @@ import { APP_HOME, appRedirectFor, isAdminRoute, isAppRoute, isPublicOnlyRoute }
  */
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // Analyzer slugs are lowercase; /analyzer/Bank-statement-analyzer → one canonical URL.
+  if (pathname.startsWith('/analyzer/') && pathname !== pathname.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
+
   const token = await getToken({ req: request, secret: AUTH_SECRET });
 
   if (token) {
@@ -41,6 +49,7 @@ export const config = {
     '/',
     '/convert/:path*',
     '/reconcile/:path*',
+    '/analyzer/:path*',
     '/reconciliations/:path*',
     '/dashboard/:path*',
     '/workspace/:path*',

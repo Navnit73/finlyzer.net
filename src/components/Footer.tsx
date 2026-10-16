@@ -46,6 +46,10 @@ const COLUMNS: { heading: string; links: FooterLink[] }[] = [
     ].map(([slug, label]) => ({ href: `/reconcile/${slug}`, label })),
   },
   {
+    heading: "Analyzers",
+    links: [{ href: "/analyzer/bank-statement-analyzer", label: "Bank statement analyzer" }],
+  },
+  {
     heading: "Product & Directory",
     links: [
       { href: "/pricing", label: "Pricing & Page Credits" },

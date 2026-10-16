@@ -15,11 +15,14 @@ import AsyncJobProgressModal from './AsyncJobProgressModal';
 interface OcrUploaderProps {
   onExtractionComplete: (data: ExtractionResponse) => void;
   onOpenBatchModal: () => void;
+  /** Pre-selected document type in the config popup (e.g. 'bank_statement' for analyzers). */
+  defaultDocumentType?: DocumentType;
 }
 
 export default function OcrUploader({
   onExtractionComplete,
   onOpenBatchModal,
+  defaultDocumentType = 'auto',
 }: OcrUploaderProps) {
   const { data: session } = useSession();
   const {
@@ -35,7 +38,7 @@ export default function OcrUploader({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [estimatedPages, setEstimatedPages] = useState<number>(1);
   const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
-  const [documentType, setDocumentType] = useState<DocumentType>('auto');
+  const [documentType, setDocumentType] = useState<DocumentType>(defaultDocumentType);
   const [language, setLanguage] = useState<SupportedLanguage>('en');
 
   // Modal States

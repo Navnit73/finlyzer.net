@@ -111,6 +111,19 @@
   --color-media-orange-border: #f8d9b0;
   --color-media-deep-purple: #1d1d1f;
 
+  /* Chart palette — spending categories in the analyzer reports (data marks only) */
+  --color-chart-1: #34a853;
+  --color-chart-2: #ef8d4d;
+  --color-chart-3: #a470f2;
+  --color-chart-4: #7b5cf0;
+  --color-chart-5: #f2b94b;
+  --color-chart-6: #4f8ef7;
+  --color-chart-7: #3fb8b0;
+  --color-chart-8: #6b7a99;
+  --color-chart-9: #e8648f;
+  --color-chart-10: #8fa0b8;
+  --color-chart-other: #b8bfcb;
+
   /* Typography — SF Pro on Apple platforms, Inter elsewhere */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;

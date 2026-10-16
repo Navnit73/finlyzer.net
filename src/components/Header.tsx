@@ -70,6 +70,7 @@ export default function Header() {
   const guestLinks = [
     { href: '/convert', label: 'All Bank Converters', active: pathname.startsWith('/convert') },
     { href: '/reconcile/bank-reconciliation-tool', label: 'Bank Reconciliation', active: pathname.startsWith('/reconcile') },
+    { href: '/analyzer/bank-statement-analyzer', label: 'Statement Analyzer', active: pathname.startsWith('/analyzer') },
     { href: '/pricing', label: 'Pricing', active: pathname === '/pricing' },
   ];
 
@@ -95,6 +96,7 @@ export default function Header() {
     { href: '/', label: 'Home' },
     { href: '/convert', label: 'All Bank Converters Hub', hint: 'By bank & export format' },
     { href: '/reconcile/bank-reconciliation-tool', label: 'Bank Reconciliation', hint: 'Match your statement to your ledger' },
+    { href: '/analyzer/bank-statement-analyzer', label: 'Statement Analyzer', hint: 'See where your money went' },
     { href: '/pricing', label: 'Pricing & Credit Plans', hint: 'Free tier & Pay-as-you-go' },
   ];
 
