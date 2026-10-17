@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Menu, X, ShieldCheck, ChevronRight, User } from 'lucide-react';
 import UserMenu from './auth/UserMenu';
-import HistoryDrawer from './ocr/HistoryDrawer';
 import AuthModal from './auth/AuthModal';
 import BrandLogo from './BrandLogo';
 import { sanitizeNextPath } from '@/lib/routes';
@@ -23,17 +21,15 @@ function LoginPromptReader({ onPrompt }: { onPrompt: (next: string | null) => vo
   return null;
 }
 
+/**
+ * The single public-site header. AppShell renders it on every public page (and on shared pages
+ * for guests); signed-in users get AdminShell instead, so this never switches its links by auth.
+ */
 export default function Header() {
-  const router = useRouter();
   const pathname = usePathname();
-  const { data: session, status } = useSession();
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [loginRedirect, setLoginRedirect] = useState<string | undefined>(undefined);
-
-  const isLoggedIn = status === 'authenticated' && !!session?.user;
-  const isAdmin = !!session?.user?.isAdmin;
 
   const handleLoginPrompt = React.useCallback((next: string | null) => {
     setLoginRedirect(next ?? undefined);
@@ -75,15 +71,6 @@ export default function Header() {
     { href: '/pricing', label: 'Pricing', active: pathname === '/pricing' },
   ];
 
-  const appLinks = [
-    { href: '/dashboard', label: 'Dashboard', active: pathname === '/dashboard' },
-    { href: '/workspace', label: 'OCR Studio', active: pathname === '/workspace' },
-    { href: '/documents', label: 'Document Vault', active: pathname === '/documents' },
-    { href: '/invoices', label: 'Invoices', active: pathname === '/invoices' },
-    { href: '/pricing', label: 'Pricing & Credits', active: pathname === '/pricing' },
-    ...(isAdmin ? [{ href: '/superadmin', label: 'SuperAdmin', active: pathname.startsWith('/superadmin') }] : []),
-  ];
-
   const desktopLinkClass = (active: boolean) =>
     `inline-flex items-center h-11 px-1 text-sm transition-colors ${
       active ? 'text-[var(--color-ink)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
@@ -102,15 +89,6 @@ export default function Header() {
     { href: '/pricing', label: 'Pricing & Credit Plans', hint: 'Free tier & Pay-as-you-go' },
   ];
 
-  const mobileAppLinks = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/workspace', label: 'OCR Studio' },
-    { href: '/documents', label: 'Document Vault' },
-    { href: '/invoices', label: 'Invoices' },
-    { href: '/pricing', label: 'Pricing & Credits' },
-    ...(isAdmin ? [{ href: '/superadmin', label: 'SuperAdmin Operations' }] : []),
-  ];
-
   return (
     <>
       {/* Global frosted header. The blur lives on an inner layer so the fixed mobile
@@ -126,7 +104,7 @@ export default function Header() {
 
               {/* Center navigation links (desktop) */}
               <div className="hidden md:flex items-center gap-7 lg:gap-9">
-                {(isLoggedIn ? appLinks : guestLinks).map((link) => (
+                {guestLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -140,12 +118,7 @@ export default function Header() {
 
               {/* Account Actions, User Menu & Mobile Hamburger Button */}
               <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-                {!isLoggedIn && status !== 'loading' && pathname === '/' && (
-                  <a href="#upload" className="hidden md:inline-flex btn-brand-secondary !min-h-9 !h-9 !px-4 !text-sm">
-                    Start Reconciliation
-                  </a>
-                )}
-                <UserMenu onOpenHistory={isLoggedIn ? () => setIsHistoryOpen(true) : undefined} />
+                <UserMenu />
 
                 {/* Hamburger Button (Mobile Only) */}
                 <button
@@ -173,104 +146,74 @@ export default function Header() {
             className="md:hidden fixed inset-x-0 top-[var(--nav-height)] bottom-0 z-50 bg-[var(--color-surface)] overflow-y-auto overscroll-contain animate-fade-in"
           >
             <div className="site-container pt-4 pb-10">
-              {!isLoggedIn ? (
-                /* Guest Mobile Navigation */
-                <div className="space-y-10">
-                  <ul>
-                    {mobileGuestLinks.map((link) => (
-                      <li key={link.href}>
-                        <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={mobileRowClass}>
-                          <span className="min-w-0">
-                            <span className="block text-[19px] font-semibold tracking-[-0.015em]">{link.label}</span>
-                            {link.hint && (
-                              <span className="block mt-0.5 text-[13px] text-[var(--color-text-muted)]">{link.hint}</span>
-                            )}
-                          </span>
-                          <ChevronRight className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-hidden="true" />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+              <div className="space-y-10">
+                <ul>
+                  {mobileGuestLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={mobileRowClass}>
+                        <span className="min-w-0">
+                          <span className="block text-[19px] font-semibold tracking-[-0.015em]">{link.label}</span>
+                          {link.hint && (
+                            <span className="block mt-0.5 text-[13px] text-[var(--color-text-muted)]">{link.hint}</span>
+                          )}
+                        </span>
+                        <ChevronRight className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
 
-                  {/* Popular bank converters */}
-                  <div>
-                    <p className="text-[13px] text-[var(--color-text-muted)]">Popular Converters</p>
-                    <ul className="mt-2 grid grid-cols-2 gap-x-6">
-                      {[
-                        { name: 'Chase to Excel', slug: 'chase-bank-statement-to-excel' },
-                        { name: 'Bank of America', slug: 'bank-of-america-statement-to-excel' },
-                        { name: 'Wells Fargo to Excel', slug: 'wells-fargo-bank-statement-to-excel' },
-                        { name: 'Barclays Statement', slug: 'barclays-bank-statement-to-excel' },
-                        { name: 'Indian Banks (HDFC/SBI)', slug: 'indian-bank-statement-to-excel' },
-                        { name: 'Scanned PDF OCR', slug: 'scanned-pdf-ocr-to-excel' },
-                      ].map((bank) => (
-                        <li key={bank.slug}>
-                          <Link
-                            href={`/convert/${bank.slug}`}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex items-center min-h-[44px] py-2 border-b border-[var(--color-border)] text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
-                          >
-                            <span className="truncate">{bank.name}</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Free tier note + sign in */}
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <ShieldCheck className="w-5 h-5 mt-0.5 text-[var(--color-success)] shrink-0" aria-hidden="true" />
-                      <div>
-                        <p className="text-[15px] font-semibold text-[var(--color-ink)]">100% Free For 1–10 Pages</p>
-                        <p className="text-[13px] text-[var(--color-text-secondary)]">No credit card or registration required.</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        setIsAuthModalOpen(true);
-                      }}
-                      className="btn-brand-primary w-full !min-h-[50px] !text-[17px] cursor-pointer"
-                    >
-                      <User className="w-4 h-4" aria-hidden="true" />
-                      <span>Sign In with Google</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Authenticated Mobile Navigation */
+                {/* Popular bank converters */}
                 <div>
-                  <p className="text-[13px] text-[var(--color-text-muted)]">Your Workspace</p>
-                  <ul className="mt-1">
-                    {mobileAppLinks.map((link) => (
-                      <li key={link.href}>
-                        <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={mobileRowClass}>
-                          <span className="text-[19px] font-semibold tracking-[-0.015em]">{link.label}</span>
-                          <ChevronRight className="w-4 h-4 shrink-0 text-[var(--color-text-muted)]" aria-hidden="true" />
+                  <p className="text-[13px] text-[var(--color-text-muted)]">Popular Converters</p>
+                  <ul className="mt-2 grid grid-cols-2 gap-x-6">
+                    {[
+                      { name: 'Chase to Excel', slug: 'chase-bank-statement-to-excel' },
+                      { name: 'Bank of America', slug: 'bank-of-america-statement-to-excel' },
+                      { name: 'Wells Fargo to Excel', slug: 'wells-fargo-bank-statement-to-excel' },
+                      { name: 'Barclays Statement', slug: 'barclays-bank-statement-to-excel' },
+                      { name: 'Indian Banks (HDFC/SBI)', slug: 'indian-bank-statement-to-excel' },
+                      { name: 'Scanned PDF OCR', slug: 'scanned-pdf-ocr-to-excel' },
+                    ].map((bank) => (
+                      <li key={bank.slug}>
+                        <Link
+                          href={`/convert/${bank.slug}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center min-h-[44px] py-2 border-b border-[var(--color-border)] text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors"
+                        >
+                          <span className="truncate">{bank.name}</span>
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
-              )}
+
+                {/* Free tier note + sign in */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 mt-0.5 text-[var(--color-success)] shrink-0" aria-hidden="true" />
+                    <div>
+                      <p className="text-[15px] font-semibold text-[var(--color-ink)]">100% Free For 1–10 Pages</p>
+                      <p className="text-[13px] text-[var(--color-text-secondary)]">No credit card or registration required.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="btn-brand-primary w-full !min-h-[50px] !text-[17px] cursor-pointer"
+                  >
+                    <User className="w-4 h-4" aria-hidden="true" />
+                    <span>Sign In with Google</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
       </header>
-
-      {/* Global History Drawer (Only for Authenticated Users) */}
-      {isLoggedIn && (
-        <HistoryDrawer
-          isOpen={isHistoryOpen}
-          onClose={() => setIsHistoryOpen(false)}
-          onSelectDocument={(id) => {
-            setIsHistoryOpen(false);
-            router.push(`/document/${id}`);
-          }}
-        />
-      )}
 
       <Suspense fallback={null}>
         <LoginPromptReader onPrompt={handleLoginPrompt} />
