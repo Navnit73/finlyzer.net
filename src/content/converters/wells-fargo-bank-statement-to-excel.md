@@ -10,6 +10,7 @@ statementLabel: "Wells Fargo Bank Statement"
 outputFormat: "Excel"
 country: "United States"
 badgeText: "Wells Fargo statements"
+dateModified: "2026-10-23"
 keywords:
   - "wells fargo bank statement to excel"
   - "wells fargo statement to csv"
@@ -96,4 +97,4 @@ Because the balance appears once per day, the converter totals each day's deposi
 
 Reconciling business checking in QuickBooks or Xero, preparing a year of transactions for tax filing, and supplying statement history for loan or lease applications.
 
-Moving the data into accounting software? Download [QBO for QuickBooks](/convert/bank-statement-to-qbo) or [CSV](/convert/bank-statement-to-csv) from the same upload. Have a paper statement from a branch? Use the [scanned statement converter](/convert/scanned-pdf-ocr-to-excel). Other US banks are covered in the [Chase](/convert/chase-bank-statement-to-excel) and [Bank of America](/convert/bank-of-america-statement-to-excel) guides.
+Moving the data into accounting software? Download [QBO for QuickBooks](/convert/bank-statement-to-qbo) or [CSV](/convert/bank-statement-to-csv) from the same upload. Have a paper statement from a branch? Use the [scanned statement converter](/convert/scanned-pdf-ocr-to-excel). Other US banks are covered in the [Chase](/convert/chase-bank-statement-to-excel), [Bank of America](/convert/bank-of-america-statement-to-excel), [PNC](/convert/pnc-bank-statement-to-excel) and [TD Bank](/convert/td-bank-statement-to-excel) guides.

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { getAllReconciliationPages, getReconciliationPageBySlug } from '@/lib/seo-markdown';
 
-// Per-page share image for /reconcile/[slug] (overrides the root opengraph-image.png).
+// Per-page share image for /reconcile/[slug] (overrides the root opengraph-image.jpg).
 // Satori can't read CSS variables, so these mirror the tokens in src/app/globals.css.
 const TOKENS = {
   ink: '#1d1d1f', // --color-ink

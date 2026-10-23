@@ -28,7 +28,7 @@ export const metadata = pageMetadata({
 });
 
 // Site-wide entities live on the homepage; other pages reference them by @id.
-// Only verifiable facts: no ratings, reviews, addresses or social profiles.
+// Only verifiable facts: no ratings, reviews or addresses; sameAs lists only profiles we control.
 const jsonLd = serializeJsonLd([
   {
     '@type': 'Organization',
@@ -39,6 +39,7 @@ const jsonLd = serializeJsonLd([
     logo: absoluteUrl('/logo.png'),
     email: 'navnitrai5389@gmail.com',
     telephone: '+91-7355087072',
+    sameAs: ['https://www.producthunt.com/products/finlyzers'],
   },
   {
     '@type': 'WebSite',

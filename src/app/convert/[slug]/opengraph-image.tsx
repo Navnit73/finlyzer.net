@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { getLandingPageBySlug } from '@/lib/seo-markdown';
 
-// Per-converter share image (overrides the root opengraph-image.png for /convert/[slug]).
+// Per-converter share image (overrides the root opengraph-image.jpg for /convert/[slug]).
 // Satori can't read CSS variables, so these mirror the tokens in src/app/globals.css.
 const TOKENS = {
   ink: '#1d1d1f', // --color-ink

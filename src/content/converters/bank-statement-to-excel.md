@@ -9,6 +9,7 @@ bankName: "Bank"
 outputFormat: "Excel"
 country: "Global"
 badgeText: "Excel (.xlsx)"
+dateModified: "2026-10-15"
 keywords:
   - "bank statement to excel converter"
   - "convert bank statements to excel"

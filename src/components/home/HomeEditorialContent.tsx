@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { FileText, FileSpreadsheet, Users } from 'lucide-react';
+import { FileText, FileSpreadsheet, Scale, Users } from 'lucide-react';
 import {
   MetricsStrip,
   HowItWorksSection,
@@ -26,10 +26,14 @@ import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 export const featuredBankConverters = [
   { name: 'Chase bank statements', slug: 'chase-bank-statement-to-excel', badge: 'United States' },
   { name: 'Bank of America statements', slug: 'bank-of-america-statement-to-excel', badge: 'United States' },
-  { name: 'Wells Fargo statements', slug: 'wells-fargo-bank-statement-to-excel', badge: 'United States' },
+  { name: 'Citibank statements', slug: 'citibank-statement-to-excel', badge: 'United States' },
+  { name: 'Capital One statements', slug: 'capital-one-statement-to-excel', badge: 'United States' },
   { name: 'Barclays statements', slug: 'barclays-bank-statement-to-excel', badge: 'United Kingdom' },
-  { name: 'HDFC Bank statements', slug: 'hdfc-bank-statement-to-excel', badge: 'India' },
-  { name: 'SBI, ICICI, Axis & Kotak statements', slug: 'indian-bank-statement-to-excel', badge: 'India' },
+  { name: 'HSBC statements', slug: 'hsbc-bank-statement-to-excel', badge: 'United Kingdom' },
+  { name: 'CommBank statements', slug: 'commbank-statement-to-excel', badge: 'Australia' },
+  { name: 'Westpac statements', slug: 'westpac-bank-statement-to-excel', badge: 'Australia' },
+  { name: 'AIB statements', slug: 'aib-bank-statement-to-excel', badge: 'Ireland' },
+  { name: 'Revolut statements', slug: 'revolut-statement-to-excel', badge: 'Europe' },
   { name: 'Credit card statements', slug: 'credit-card-statement-to-excel', badge: 'Any card issuer' },
   { name: 'Scanned statements & photos', slug: 'scanned-pdf-ocr-to-excel', badge: 'OCR' },
 ];
@@ -49,7 +53,7 @@ export const faqs = [
   },
   {
     q: 'Which banks are supported?',
-    a: 'The converter adapts to most bank statement layouts rather than relying on a fixed template per bank, so statements from banks in the US, UK, Canada, Australia, India and elsewhere can be converted. Some banks, such as Chase, Bank of America, Wells Fargo, Barclays and HDFC Bank, also have their own guides.',
+    a: 'The converter adapts to most bank statement layouts rather than relying on a fixed template per bank, so statements from banks in the US, UK, Ireland, Australia, Canada, India and elsewhere can be converted, provided the statement is in English. Many banks, such as Chase, Citibank, Barclays, HSBC, CommBank, AIB and Revolut, also have their own guides.',
   },
   {
     q: 'How accurate is the conversion, and how do I check it?',
@@ -130,6 +134,21 @@ function HomeIntroSection() {
             extraction and verification work on the{' '}
             <Link href="/editorial-policy" className={linkClass}>methodology page</Link>, and how uploads are handled on
             the <Link href="/security" className={linkClass}>security page</Link>.
+          </p>
+        </div>
+
+        <div className={rowClass}>
+          <span className={iconClass}>
+            <Scale className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+          </span>
+          <p className={paragraphClass}>
+            The same extraction powers tools beyond conversion. The{' '}
+            <Link href="/reconcile/bank-reconciliation-tool" className={linkClass}>bank reconciliation tool</Link> matches a
+            statement against your ledger and lists what is missing on either side, the{' '}
+            <Link href="/analyzer/bank-statement-analyzer" className={linkClass}>bank statement analyzer</Link> breaks
+            spending down by category and finds recurring subscriptions, and the{' '}
+            <Link href="/calculators/cash-flow-calculator" className={linkClass}>cash flow calculator</Link> works out net
+            and operating cash flow.
           </p>
         </div>
       </div>

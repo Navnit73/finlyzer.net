@@ -1,5 +1,5 @@
 ---
-slug: "pdf-to-excel-converter"
+slug: "financial-pdf-to-excel"
 title: "Financial PDF to Excel Converter"
 metaTitle: "Financial PDF to Excel: Invoices & Receipts | Finlyzers"
 metaDescription: "Extract tables from invoices, receipts, vendor and brokerage statements and other financial PDFs into Excel or CSV. Digital and scanned files supported."
@@ -10,6 +10,7 @@ statementLabel: "Financial PDF"
 outputFormat: "Excel"
 country: "Global"
 badgeText: "Invoices, receipts & reports"
+dateModified: "2026-10-07"
 keywords:
   - "financial pdf to excel"
   - "invoice pdf to excel"

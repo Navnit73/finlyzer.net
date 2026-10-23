@@ -11,6 +11,8 @@ const CATEGORIES: { id: SEOConverterPage['category']; label: string; heading: st
   { id: 'formats', label: 'By format', heading: 'Convert by Export Format' },
   { id: 'us-banks', label: 'US banks', heading: 'United States Banks' },
   { id: 'uk-banks', label: 'UK banks', heading: 'United Kingdom Banks' },
+  { id: 'eu-banks', label: 'EU banks', heading: 'Ireland & European Banks' },
+  { id: 'au-banks', label: 'Australian banks', heading: 'Australian Banks' },
   { id: 'india-banks', label: 'Indian banks', heading: 'Indian Banks' },
   { id: 'tools', label: 'Cards & scans', heading: 'Credit Cards, Scans & Other Documents' },
 ];

@@ -14,7 +14,9 @@ import {
 } from 'lucide-react';
 import { PRICING_PLANS, PricingPlan, FREE_PAGE_LIMIT } from '@/types/pricing';
 import CheckoutModal from '@/components/dashboard/CheckoutModal';
-import AuthModal from '@/components/auth/AuthModal';
+import Link from 'next/link';
+import { PRICING_FAQS } from './faqs';
+import AuthModal from '@/components/auth/LazyAuthModal';
 
 // Reads ?plan= in its own Suspense boundary so the rest of the page can be server-rendered.
 function PlanQueryReader({ onPlan }: { onPlan: (planId: string | null) => void }) {
@@ -136,24 +138,7 @@ export default function PricingPage() {
     setIsCheckoutOpen(true);
   };
 
-  const faqs = [
-    {
-      q: 'Is it really free for small statements?',
-      a: `Yes. Any statement up to ${FREE_PAGE_LIMIT} pages converts and downloads for free in every format, with no card required.`,
-    },
-    {
-      q: 'What does the $10 Document Pass cover?',
-      a: 'One statement between 11 and 30 pages: full conversion plus download in all 6 export formats. Pay once, no subscription.',
-    },
-    {
-      q: 'Do purchased page credits expire?',
-      a: 'No. Purchased page credits are permanent and never expire.',
-    },
-    {
-      q: 'What happens if a document fails to parse?',
-      a: 'If a document fails validation or OCR extraction, no page credits are deducted from your balance.',
-    },
-  ];
+  const faqs = PRICING_FAQS;
 
   // `freePagesRemaining` is the total remaining balance (free + purchased − used).
   const totalBalance = quota.freePagesRemaining ?? 0;
@@ -374,6 +359,14 @@ export default function PricingPage() {
           ))}
         </div>
       </section>
+
+      <p className="max-w-2xl mx-auto text-center text-[15px] text-[var(--color-text-secondary)] leading-relaxed">
+        Page credits work across every tool: the{' '}
+        <Link href="/" className="link">bank statement converter</Link> (Excel, CSV, QBO, OFX and QIF), the{' '}
+        <Link href="/reconcile/bank-reconciliation-tool" className="link">bank reconciliation tool</Link> and the{' '}
+        <Link href="/analyzer/bank-statement-analyzer" className="link">bank statement analyzer</Link>. Browse{' '}
+        <Link href="/convert" className="link">converters by bank and format</Link>.
+      </p>
 
       <p className="flex items-center justify-center gap-1.5 text-[13px] text-[var(--color-text-muted)] text-center">
         <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />

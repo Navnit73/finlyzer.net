@@ -19,7 +19,7 @@ import { DocumentListResponse, StoredDocument, ExportFormat } from '@/types/ocr'
 import { getBrowserHistory, removeFromBrowserHistory, BrowserHistoryItem } from '@/lib/browser-history';
 import { useIsMounted } from '@/lib/useIsMounted';
 import { useActiveJobs } from '@/context/ActiveJobsContext';
-import AuthModal from '../auth/AuthModal';
+import AuthModal from '../auth/LazyAuthModal';
 import { formatUSD } from '@/lib/format';
 
 interface HistoryDrawerProps {

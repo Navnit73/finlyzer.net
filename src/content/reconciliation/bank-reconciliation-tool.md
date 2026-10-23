@@ -1,12 +1,12 @@
 ---
 slug: "bank-reconciliation-tool"
-title: "Monthly Bank Reconciliation: Online Tool and Step-by-Step Guide"
+title: "Bank Reconciliation Tool: Do Your Monthly Bank Reconciliation Online"
 shortTitle: "Monthly Bank Reconciliation Tool"
 metaTitle: "Monthly Bank Reconciliation Tool & Guide | Finlyzers"
 metaDescription: "Do your monthly bank reconciliation online. Upload a statement and ledger, see matched and missing items, and follow our guide. Free up to 10 pages."
 intro: "Upload your bank statement and your ledger or cash book. Finlyzers matches every transaction by amount, direction and date, then shows what agrees, what is missing on either side and whether the balances tie out. Finish your monthly bank reconciliation in minutes, not hours."
 badgeText: "Monthly bank reconciliation"
-dateModified: "2026-10-16"
+dateModified: "2026-10-23"
 keywords:
   - "monthly bank reconciliation"
   - "bank reconciliation tool"

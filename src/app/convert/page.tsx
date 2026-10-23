@@ -19,7 +19,7 @@ import { FinalCtaSection, SectionBand } from "@/components/converter/sections";
 
 const title = "Bank Statement Converters by Bank & Format | Finlyzers";
 const description =
-  "Find the right converter: Excel, CSV, QBO, OFX and QIF formats, plus guides for Chase, Bank of America, Wells Fargo, Barclays, HDFC and other banks.";
+  "Find the right converter: Excel, CSV, QBO, OFX and QIF formats, plus guides for US, UK, Irish and Australian banks such as Chase, Citi, HSBC and CommBank.";
 
 export const metadata: Metadata = pageMetadata({ title, description, path: "/convert" });
 

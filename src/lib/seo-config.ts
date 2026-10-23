@@ -15,13 +15,13 @@ export function absoluteUrl(path: string = '/'): string {
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-/** Default share card (same artwork as src/app/opengraph-image.png). PNG for the widest crawler support. */
+/** Default share card (same artwork as src/app/opengraph-image.jpg). 1200x675 JPEG, about 100 KB, so every platform shows it. */
 const DEFAULT_SHARE_IMAGE = {
-  url: '/og_image.png',
-  width: 1672,
-  height: 941,
+  url: '/og_image.jpg',
+  width: 1200,
+  height: 675,
   alt: 'Finlyzers bank statement converter: PDF to Excel, CSV and QuickBooks',
-  type: 'image/png',
+  type: 'image/jpeg',
 };
 
 /*
@@ -44,7 +44,7 @@ interface PageMetadataInput {
 
 /**
  * Canonical, Open Graph and Twitter tags for an indexable page, built from one title/description
- * pair so they can't drift apart. A page's own openGraph object stops the root opengraph-image.png
+ * pair so they can't drift apart. A page's own openGraph object stops the root opengraph-image.jpg
  * from being inherited, so the default card is set explicitly; segments with their own
  * opengraph-image / twitter-image file (e.g. /convert/[slug]) must pass defaultShareImage: false,
  * because config images take precedence over the segment's generated image.

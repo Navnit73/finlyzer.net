@@ -10,6 +10,7 @@ statementLabel: "Scanned Statement"
 outputFormat: "Excel"
 country: "Global"
 badgeText: "OCR for scans & photos"
+dateModified: "2026-10-08"
 keywords:
   - "scan bank statements into excel"
   - "scan bank statement to excel"
@@ -22,7 +23,7 @@ related:
   - "bank-statement-to-excel"
   - "indian-bank-statement-to-excel"
   - "hdfc-bank-statement-to-excel"
-  - "pdf-to-excel-converter"
+  - "financial-pdf-to-excel"
 features:
   - title: "Reads Image-Only Pages"
     description: "Scanned PDFs and photos have no selectable text. OCR turns each page into text before the table is rebuilt."

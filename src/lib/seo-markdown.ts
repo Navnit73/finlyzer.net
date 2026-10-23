@@ -240,6 +240,7 @@ export function getAllLandingPages(): SEOConverterPage[] {
         steps: Array.isArray(data.steps) ? (data.steps as SEOStep[]) : [],
         faqs: Array.isArray(data.faqs) ? (data.faqs as SEOFAQ[]) : [],
         acceptsSpreadsheets: data.acceptsSpreadsheets === true,
+        dateModified: String(data.dateModified || ''),
         rawContent: content,
         contentHtml: renderMarkdown(content),
       });

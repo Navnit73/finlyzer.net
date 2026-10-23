@@ -10,6 +10,7 @@ statementLabel: "HDFC Bank Statement"
 outputFormat: "Excel"
 country: "India"
 badgeText: "India · HDFC Bank statements"
+dateModified: "2026-10-07"
 keywords:
   - "hdfc bank statement to excel"
   - "hdfc statement pdf to excel"

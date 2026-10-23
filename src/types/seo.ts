@@ -26,7 +26,7 @@ export interface SEOConverterPage {
   title: string;
   metaTitle: string;
   metaDescription: string;
-  category: 'formats' | 'us-banks' | 'uk-banks' | 'india-banks' | 'tools';
+  category: 'formats' | 'us-banks' | 'uk-banks' | 'eu-banks' | 'au-banks' | 'india-banks' | 'tools';
   bankName: string;
   /** Singular noun used in headings, e.g. "Chase Bank Statement" or "Financial PDF". */
   statementLabel: string;
@@ -47,6 +47,8 @@ export interface SEOConverterPage {
   faqs: SEOFAQ[];
   /** The upload hero also takes CSV / Excel files (spreadsheet-to-QBO converters). */
   acceptsSpreadsheets: boolean;
+  /** YYYY-MM-DD of the last material content change; shown on the page and in WebPage JSON-LD. */
+  dateModified: string;
   contentHtml?: string;
   rawContent: string;
 }

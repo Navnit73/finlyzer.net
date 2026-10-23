@@ -22,7 +22,7 @@ import { useOCRJob } from '@/hooks/useOCRJob';
 import { useActiveJobs } from '@/context/ActiveJobsContext';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
-import AuthModal from '../auth/AuthModal';
+import AuthModal from '../auth/LazyAuthModal';
 
 export default function AsyncDocumentProcessor() {
   const router = useRouter();

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { BatchResponse } from '@/types/ocr';
 import FinancialMetricCard from './FinancialMetricCard';
-import AuthModal from '../auth/AuthModal';
+import AuthModal from '../auth/LazyAuthModal';
 import { useIsMounted } from '@/lib/useIsMounted';
 
 interface BatchProcessingModalProps {

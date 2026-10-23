@@ -10,6 +10,7 @@ statementLabel: "Barclays Bank Statement"
 outputFormat: "Excel"
 country: "United Kingdom"
 badgeText: "UK · Barclays statements"
+dateModified: "2026-10-23"
 keywords:
   - "barclays bank statement to excel"
   - "barclays statement to csv"
@@ -100,4 +101,4 @@ Keeping these codes in the description column makes it easy to filter by payment
 - **Accounting imports:** download [OFX](/convert/bank-statement-to-ofx) or [CSV](/convert/bank-statement-to-csv) for Xero, FreeAgent, QuickBooks or Sage.
 - **Common uses:** Self Assessment records, landlord income and expenses, mortgage applications and month-end reconciliation for limited companies.
 
-Converting a Barclaycard or other card statement? Use the [credit card converter](/convert/credit-card-statement-to-excel). For paper statements, try the [scanned statement converter](/convert/scanned-pdf-ocr-to-excel). Statements from other UK banks such as Lloyds, HSBC, NatWest or Santander work with the general [bank statement converter](/).
+Converting a Barclaycard or other card statement? Use the [credit card converter](/convert/credit-card-statement-to-excel). For paper statements, try the [scanned statement converter](/convert/scanned-pdf-ocr-to-excel). Banking elsewhere in the UK? See the guides for [HSBC](/convert/hsbc-bank-statement-to-excel), [Lloyds](/convert/lloyds-bank-statement-to-excel), [NatWest](/convert/natwest-bank-statement-to-excel) and [Santander](/convert/santander-bank-statement-to-excel).

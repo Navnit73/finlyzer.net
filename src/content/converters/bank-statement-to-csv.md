@@ -9,6 +9,7 @@ bankName: "Bank"
 outputFormat: "CSV"
 country: "Global"
 badgeText: "CSV (.csv)"
+dateModified: "2026-10-15"
 keywords:
   - "convert bank statement to csv"
   - "convert pdf bank statement to csv"

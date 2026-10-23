@@ -11,29 +11,29 @@
   <!-- Core pages -->
   <url>
     <loc>https://finlyzers.com/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/pricing</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
 
   <!-- Converters: formats -->
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-excel</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-15</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-csv</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-15</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-qbo</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-15</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-ofx</loc>
@@ -46,12 +46,12 @@
 
   <!-- Converters: tools -->
   <url>
-    <loc>https://finlyzers.com/convert/pdf-to-excel-converter</loc>
-    <lastmod>2026-10-07</lastmod>
+    <loc>https://finlyzers.com/convert/financial-pdf-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/scanned-pdf-ocr-to-excel</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/credit-card-statement-to-excel</loc>
@@ -62,23 +62,93 @@
     <lastmod>2026-10-08</lastmod>
   </url>
 
-  <!-- Converters: banks -->
+  <!-- Converters: US & UK banks -->
   <url>
     <loc>https://finlyzers.com/convert/chase-bank-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-of-america-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/wells-fargo-bank-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/citibank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/capital-one-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/us-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/pnc-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/td-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/barclays-bank-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
+  <url>
+    <loc>https://finlyzers.com/convert/hsbc-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/lloyds-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/natwest-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/santander-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+
+  <!-- Converters: Ireland & Europe -->
+  <url>
+    <loc>https://finlyzers.com/convert/aib-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/bank-of-ireland-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/revolut-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+
+  <!-- Converters: Australia -->
+  <url>
+    <loc>https://finlyzers.com/convert/commbank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/westpac-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/anz-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/convert/nab-bank-statement-to-excel</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+
+  <!-- Converters: India -->
   <url>
     <loc>https://finlyzers.com/convert/hdfc-bank-statement-to-excel</loc>
     <lastmod>2026-10-07</lastmod>
@@ -103,19 +173,19 @@
   <!-- Bank reconciliation -->
   <url>
     <loc>https://finlyzers.com/reconcile/bank-reconciliation-tool</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/reconcile/bank-statement-vs-ledger</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/reconcile/bank-statement-matching-tool</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/reconcile/bank-reconciliation-calculator</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
   </url>
 
   <!-- Guides -->

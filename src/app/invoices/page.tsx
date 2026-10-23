@@ -17,7 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { OrderRecord } from '@/types/pricing';
-import AuthModal from '@/components/auth/AuthModal';
+import AuthModal from '@/components/auth/LazyAuthModal';
 import { formatUSD } from '@/lib/format';
 import BrandLogo from '@/components/BrandLogo';
 

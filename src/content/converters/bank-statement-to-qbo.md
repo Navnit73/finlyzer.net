@@ -9,6 +9,7 @@ bankName: "Bank"
 outputFormat: "QuickBooks QBO"
 country: "Global"
 badgeText: "QuickBooks (.qbo)"
+dateModified: "2026-10-15"
 keywords:
   - "convert bank statements to quickbooks"
   - "pdf to qbo"

@@ -22,7 +22,7 @@ import {
   ArrowRight,
   X,
 } from 'lucide-react';
-import AuthModal from '@/components/auth/AuthModal';
+import AuthModal from '@/components/auth/LazyAuthModal';
 import { StoredDocument, ExportFormat } from '@/types/ocr';
 import { useActiveJobs } from '@/context/ActiveJobsContext';
 

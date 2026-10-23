@@ -9,6 +9,7 @@ bankName: "Bank"
 outputFormat: "Quicken QIF"
 country: "Global"
 badgeText: "Quicken (.qif)"
+dateModified: "2026-10-08"
 keywords:
   - "bank statement to qif"
   - "pdf to qif"

@@ -18,7 +18,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { DocumentType, SupportedLanguage } from '@/types/ocr';
-import AuthModal from '@/components/auth/AuthModal';
+import AuthModal from '@/components/auth/LazyAuthModal';
 import PdfPasswordModal from '@/components/ocr/PdfPasswordModal';
 import { FREE_PAGE_LIMIT, GUEST_MAX_PAGES, PRICING_PLANS } from '@/types/pricing';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';

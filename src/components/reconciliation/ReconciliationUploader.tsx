@@ -19,7 +19,7 @@ import {
   UploadCloud,
   X,
 } from 'lucide-react';
-import AuthModal from '@/components/auth/AuthModal';
+import AuthModal from '@/components/auth/LazyAuthModal';
 import PdfPasswordModal from '@/components/ocr/PdfPasswordModal';
 import { UPLOAD_INPUT_ID } from '@/components/converter/ConverterHero';
 import { inspectPdfFile } from '@/lib/pdf-helper';

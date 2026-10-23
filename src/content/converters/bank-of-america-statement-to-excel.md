@@ -10,6 +10,7 @@ statementLabel: "Bank of America Statement"
 outputFormat: "Excel"
 country: "United States"
 badgeText: "Bank of America statements"
+dateModified: "2026-10-23"
 keywords:
   - "bank of america statement to excel"
   - "bank of america statement to csv"
@@ -95,4 +96,4 @@ Because most transactions do not have a balance printed next to them, the most r
 
 Bookkeepers reconciling client accounts, small businesses preparing for tax season, landlords tracking rental income, and anyone moving older history into QuickBooks, Xero, Excel or Google Sheets.
 
-Need a different format? The same upload can be downloaded as [CSV](/convert/bank-statement-to-csv), [QBO for QuickBooks](/convert/bank-statement-to-qbo) or [OFX](/convert/bank-statement-to-ofx). Statements from other US banks are covered in the [Chase](/convert/chase-bank-statement-to-excel) and [Wells Fargo](/convert/wells-fargo-bank-statement-to-excel) guides, and any other bank works with the general [bank statement converter](/).
+Need a different format? The same upload can be downloaded as [CSV](/convert/bank-statement-to-csv), [QBO for QuickBooks](/convert/bank-statement-to-qbo) or [OFX](/convert/bank-statement-to-ofx). Statements from other US banks are covered in the [Chase](/convert/chase-bank-statement-to-excel), [Wells Fargo](/convert/wells-fargo-bank-statement-to-excel) and [Citibank](/convert/citibank-statement-to-excel) guides, and any other bank works with the general [bank statement converter](/).

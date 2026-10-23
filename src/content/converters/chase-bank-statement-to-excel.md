@@ -10,6 +10,7 @@ statementLabel: "Chase Bank Statement"
 outputFormat: "Excel"
 country: "United States"
 badgeText: "Chase statements"
+dateModified: "2026-10-23"
 keywords:
   - "chase bank statement to excel"
   - "chase statement to csv"
@@ -99,4 +100,4 @@ Chase statements are designed to be read, not exported. Depending on the account
 
 ## Other Formats and Accounts
 
-The same upload can be downloaded as [QBO for QuickBooks](/convert/bank-statement-to-qbo), [OFX for Xero](/convert/bank-statement-to-ofx) or [CSV](/convert/bank-statement-to-csv). Chase credit card statements work best with the [credit card converter](/convert/credit-card-statement-to-excel). For statements from other banks, start with the general [bank statement converter](/).
+The same upload can be downloaded as [QBO for QuickBooks](/convert/bank-statement-to-qbo), [OFX for Xero](/convert/bank-statement-to-ofx) or [CSV](/convert/bank-statement-to-csv). Chase credit card statements work best with the [credit card converter](/convert/credit-card-statement-to-excel). Other US banks have their own guides too, including [Citibank](/convert/citibank-statement-to-excel), [Capital One](/convert/capital-one-statement-to-excel) and [U.S. Bank](/convert/us-bank-statement-to-excel); for any other bank, start with the general [bank statement converter](/).

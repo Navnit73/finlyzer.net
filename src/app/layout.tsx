@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 // Site-wide defaults. Every indexable page overrides title, description, canonical and social
-// tags via pageMetadata() in src/lib/seo-config.ts; share images come from opengraph-image.png.
+// tags via pageMetadata() in src/lib/seo-config.ts; share images come from opengraph-image.jpg.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -26,6 +26,8 @@ export const metadata: Metadata = {
   authors: [{ name: "Finlyzers", url: SITE_URL }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
+  // Google Search Console HTML-tag verification. Set GOOGLE_SITE_VERIFICATION (the tag's content value) at build time.
+  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
   formatDetection: {
     email: false,
     address: false,

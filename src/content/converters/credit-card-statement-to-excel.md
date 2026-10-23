@@ -10,6 +10,7 @@ statementLabel: "Credit Card Statement"
 outputFormat: "Excel"
 country: "Global"
 badgeText: "Amex, Chase, Citi & more"
+dateModified: "2026-10-08"
 keywords:
   - "convert credit card statement to excel"
   - "convert credit card statement pdf to excel"

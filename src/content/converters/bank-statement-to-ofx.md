@@ -9,6 +9,7 @@ bankName: "Bank"
 outputFormat: "OFX"
 country: "Global"
 badgeText: "OFX (.ofx)"
+dateModified: "2026-10-07"
 keywords:
   - "bank statement to ofx"
   - "pdf to ofx converter"

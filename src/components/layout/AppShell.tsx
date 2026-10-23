@@ -2,13 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useSession } from 'next-auth/react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import AdminShell from './AdminShell';
 import { ActiveJobsProvider } from '@/context/ActiveJobsContext';
 import ActiveJobFloatingTracker from '@/components/ocr/ActiveJobFloatingTracker';
 import { isAppRoute, isPublicOnlyRoute } from '@/lib/routes';
+
+// The signed-in shell (sidebar, top nav) is its own chunk, so public pages don't ship it.
+const AdminShell = dynamic(() => import('./AdminShell'));
 
 interface AppShellProps {
   children: React.ReactNode;

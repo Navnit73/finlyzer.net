@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Lock, AlertCircle, UploadCloud, ArrowRight } from 'lucide-react';
 import { ExtractionResponse, DocumentType, SupportedLanguage } from '@/types/ocr';
 import { inspectPdfFile } from '@/lib/pdf-helper';
-import AuthModal from '../auth/AuthModal';
+import AuthModal from '../auth/LazyAuthModal';
 import UploadConfigModal from './UploadConfigModal';
 import { saveToBrowserHistory } from '@/lib/browser-history';
 

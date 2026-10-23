@@ -42,6 +42,23 @@ const nextConfig: NextConfig = {
         destination: '/convert/bank-of-america-statement-to-excel',
         permanent: true,
       },
+      // Slug renamed to match the page's intent (financial PDFs, not a generic PDF converter).
+      {
+        source: '/convert/pdf-to-excel-converter',
+        destination: '/convert/financial-pdf-to-excel',
+        permanent: true,
+      },
+      // /about is the one About & Contact page; the aliases redirect instead of duplicating it.
+      {
+        source: '/about-us',
+        destination: '/about',
+        permanent: true,
+      },
+      {
+        source: '/contact',
+        destination: '/about#contact-details',
+        permanent: true,
+      },
     ];
   },
 };

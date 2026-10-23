@@ -10,6 +10,7 @@ statementLabel: "CSV or Excel File"
 outputFormat: "QuickBooks QBO"
 country: "Global"
 badgeText: "CSV, XLSX & XLS to .qbo"
+dateModified: "2026-10-08"
 acceptsSpreadsheets: true
 keywords:
   - "csv to qbo converter"

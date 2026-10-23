@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, History, ChevronDown, User, CreditCard, ShieldAlert } from 'lucide-react';
 import UserAvatar from '@/components/auth/UserAvatar';
-import AuthModal from './AuthModal';
+import AuthModal from './LazyAuthModal';
 
 interface UserMenuProps {
   onOpenHistory?: () => void;

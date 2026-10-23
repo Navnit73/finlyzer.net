@@ -72,6 +72,13 @@ function getSteps(page: SEOPageData): Omit<Step, 'icon'>[] {
   ];
 }
 
+function formatDate(iso: string): string {
+  const date = new Date(`${iso}T00:00:00Z`);
+  return Number.isNaN(date.getTime())
+    ? iso
+    : date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+}
+
 function parseAmount(amount: string): number {
   return Number(amount.replace(/[^0-9.-]/g, ''));
 }
@@ -209,7 +216,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
   // WebPage + BreadcrumbList, plus FAQPage for the FAQs rendered below. The product entity
   // (WebApplication) lives once on the homepage and is referenced here by @id.
   const jsonLd = serializeJsonLd([
-    { ...getWebPageJsonLd({ path, name: page.title, description: page.metaDescription }), about: { '@id': WEBAPP_ID } },
+    { ...getWebPageJsonLd({ path, name: page.title, description: page.metaDescription, dateModified: page.dateModified || undefined }), about: { '@id': WEBAPP_ID } },
     getBreadcrumbJsonLd([
       { name: 'Home', path: '/' },
       { name: 'Converters', path: '/convert' },
@@ -237,7 +244,7 @@ export default async function SEOConverterPage({ params }: PageProps) {
             <BeforeAfterSection
               title={page.category === 'formats' ? `From PDF Statement to ${page.outputFormat}` : `Before & After: Your ${page.statementLabel} Data`}
               subtitle={`Messy ${page.statementLabel} text becomes clean, verified ${page.outputFormat} output.`}
-              rawLines={page.sampleData.map((row) => `${row.date} ${row.desc} ${row.amount.replace(/[$₹£,+]/g, '')} ${row.balance.replace(/[$₹£,]/g, '')}`)}
+              rawLines={page.sampleData.map((row) => `${row.date} ${row.desc} ${row.amount.replace(/[^0-9.-]/g, '')} ${row.balance.replace(/[^0-9.-]/g, '')}`)}
               rows={toLedgerRows(page)}
               fileOutput={toFileOutput(page)}
             />
@@ -259,16 +266,23 @@ export default async function SEOConverterPage({ params }: PageProps) {
         }]
       : []),
     { key: 'formats', node: <ExportFormatsSection title={exportFormatsTitle(page)} excludeSlug={page.slug} /> },
-    ...(page.contentHtml || page.category.endsWith('-banks')
+    ...(page.contentHtml || page.category.endsWith('-banks') || page.dateModified
       ? [{
           key: 'editorial',
           node: (
             <>
               {page.contentHtml && <EditorialSection html={page.contentHtml} />}
-              {page.category.endsWith('-banks') && (
+              {(page.category.endsWith('-banks') || page.dateModified) && (
                 <p className={`max-w-3xl mx-auto type-caption ${page.contentHtml ? 'mt-10 pt-6 border-t border-[var(--color-border)]' : ''}`}>
-                  Finlyzers is an independent tool and is not affiliated with or endorsed by {page.bankName}. Statement
-                  layouts described here can change; always check the converted figures against your statement.
+                  {page.dateModified && (
+                    <>Updated <time dateTime={page.dateModified}>{formatDate(page.dateModified)}</time>. </>
+                  )}
+                  {page.category.endsWith('-banks') && (
+                    <>
+                      Finlyzers is an independent tool and is not affiliated with or endorsed by {page.bankName}. Statement
+                      layouts described here can change; always check the converted figures against your statement.
+                    </>
+                  )}
                 </p>
               )}
             </>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Menu, X, ShieldCheck, ChevronRight, User } from 'lucide-react';
 import UserMenu from './auth/UserMenu';
-import AuthModal from './auth/AuthModal';
+import AuthModal from './auth/LazyAuthModal';
 import BrandLogo from './BrandLogo';
 import { sanitizeNextPath } from '@/lib/routes';
 
@@ -172,8 +172,8 @@ export default function Header() {
                       { name: 'Bank of America', slug: 'bank-of-america-statement-to-excel' },
                       { name: 'Wells Fargo to Excel', slug: 'wells-fargo-bank-statement-to-excel' },
                       { name: 'Barclays Statement', slug: 'barclays-bank-statement-to-excel' },
-                      { name: 'Indian Banks (HDFC/SBI)', slug: 'indian-bank-statement-to-excel' },
-                      { name: 'Scanned PDF OCR', slug: 'scanned-pdf-ocr-to-excel' },
+                      { name: 'HSBC Statement', slug: 'hsbc-bank-statement-to-excel' },
+                      { name: 'CommBank Statement', slug: 'commbank-statement-to-excel' },
                     ].map((bank) => (
                       <li key={bank.slug}>
                         <Link

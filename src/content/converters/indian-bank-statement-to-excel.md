@@ -10,6 +10,7 @@ statementLabel: "Indian Bank Statement"
 outputFormat: "Excel"
 country: "India"
 badgeText: "India · SBI, ICICI, Axis, Kotak"
+dateModified: "2026-10-07"
 keywords:
   - "indian bank statement to excel"
   - "sbi bank statement to excel"

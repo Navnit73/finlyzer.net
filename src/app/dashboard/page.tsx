@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { StoredDocument, ExportFormat } from '@/types/ocr';
 import { OrderRecord } from '@/types/pricing';
-import AuthModal from '@/components/auth/AuthModal';
+import AuthModal from '@/components/auth/LazyAuthModal';
 import { formatUSD } from '@/lib/format';
 
 interface UserStatsState {
