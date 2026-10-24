@@ -715,6 +715,21 @@ kbd,
   50% { opacity: 0.55; }
 }
 
+/* Moving dots along a connector line (German e-invoice flow diagram) */
+.flow-dash {
+  stroke-dasharray: 2 9;
+  stroke-linecap: round;
+  animation: flow-dash 1.4s linear infinite;
+}
+
+@keyframes flow-dash {
+  to { stroke-dashoffset: -11; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-dash { animation: none; }
+}
+
 /* ==========================================================================
    LONG-FORM PROSE (trust & legal pages — see src/components/legal/LegalPage.tsx)
    ========================================================================== */

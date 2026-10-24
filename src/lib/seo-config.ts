@@ -32,7 +32,7 @@ const GERMAN_SHARE_IMAGE = {
   url: '/de/opengraph-image',
   width: 1200,
   height: 630,
-  alt: 'Finlyzers auf Deutsch: Finanzen für Selbstständige, verständlich erklärt',
+  alt: 'Finlyzers: PDF-Rechnungen in ZUGFeRD und XRechnung umwandeln',
   type: 'image/png',
 };
 

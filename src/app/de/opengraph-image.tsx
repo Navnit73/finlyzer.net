@@ -12,7 +12,7 @@ const TOKENS = {
   brandDark: '#0066cc', // --color-brand-dark
 };
 
-export const alt = 'Finlyzers auf Deutsch: Finanzen für Selbstständige, verständlich erklärt';
+export const alt = 'Finlyzers: PDF-Rechnungen in ZUGFeRD und XRechnung umwandeln';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -49,10 +49,10 @@ export default function Image() {
               fontWeight: 500,
             }}
           >
-            Auf Deutsch
+            E-Rechnung nach EN 16931
           </div>
           <div style={{ fontSize: 72, fontWeight: 600, lineHeight: 1.05, color: TOKENS.ink, letterSpacing: -2.5 }}>
-            Finanzen für Selbstständige, verständlich erklärt
+            PDF in ZUGFeRD &amp; XRechnung umwandeln
           </div>
         </div>
 

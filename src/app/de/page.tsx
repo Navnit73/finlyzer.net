@@ -1,18 +1,29 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  ArrowRight, CheckCircle2, FileCheck2, Hammer, Landmark, ShieldCheck, UserRound, type LucideIcon,
-} from 'lucide-react';
+import { ArrowRight, CheckCircle2, FileCheck2, ShieldCheck } from 'lucide-react';
 import { SectionBand, SectionHeading, FaqSection } from '@/components/converter/sections';
+import {
+  BentoTile,
+  BridgeVisual,
+  DeadlineTimeline,
+  FewInvoicesVisual,
+  FormatChoiceVisual,
+  KeepWorkflowVisual,
+  LeitwegVisual,
+} from '@/components/de/einvoice/Bento';
 import {
   DownloadVisual,
   FieldMappingList,
   FormVisual,
-  HeroIllustration,
+  FlowDiagram,
   InvoicePaper,
+  InvoiceSummaryCard,
+  TONE_CLASSES,
+  type Tone,
   UploadVisual,
   ValidationReport,
   XmlPanel,
+  XrechnungTile,
   XrechnungFormatVisual,
   ZugferdFormatVisual,
 } from '@/components/de/einvoice/Illustrations';
@@ -43,47 +54,31 @@ export const metadata: Metadata = {
 // The e-invoice converter has no page yet, so CTAs scroll to the steps. Point this at the tool once it exists.
 const CONVERTER_HREF = '#so-funktionierts';
 
-const heroFacts = ['EN 16931', 'ZUGFeRD 2.x / Factur-X', 'XRechnung', 'PDF/A-3'];
-
-const deadlines = [
-  { date: '1. Januar 2025', title: 'Empfang', body: 'Alle Unternehmen müssen E-Rechnungen empfangen und verarbeiten können.', done: true },
-  { date: '1. Januar 2027', title: 'Versand ab 800.000 € Umsatz', body: 'Unternehmen mit mehr als 800.000 € Vorjahresumsatz müssen E-Rechnungen versenden.', done: false },
-  { date: '1. Januar 2028', title: 'Versand für alle', body: 'Die Pflicht zum Versand gilt für alle Unternehmen im B2B-Bereich.', done: false },
+// Product facts only, no usage statistics (see the no-unverifiable-claims rule).
+const heroFacts: { value: string; label: string; tone: Tone }[] = [
+  { value: '2 Formate', label: 'ZUGFeRD & XRechnung', tone: 'blue' },
+  { value: 'EN 16931', label: 'Europäische Norm', tone: 'green' },
+  { value: 'PDF/A-3', label: 'Archivfähiges PDF', tone: 'orange' },
 ];
 
 const steps = [
   {
     visual: UploadVisual,
+    tone: 'blue' as Tone,
     title: 'Standard-PDF hochladen',
     body: 'Ziehen Sie Ihre fertige Rechnung als PDF in den gesicherten Upload-Bereich. Unser ZUGFeRD Generator liest das Dokument ein und bereitet die Konvertierung vor.',
   },
   {
     visual: FormVisual,
+    tone: 'orange' as Tone,
     title: 'Rechnungsdaten ergänzen',
     body: 'Pflichtangaben wie Rechnungsnummer, Nettobetrag, Steuer oder die Leitweg-ID für XRechnung werden strukturiert erfasst. Fehlendes ergänzen Sie in einer übersichtlichen Eingabemaske.',
   },
   {
     visual: DownloadVisual,
+    tone: 'green' as Tone,
     title: 'Validierte E-Rechnung herunterladen',
     body: 'Klicken Sie auf „Generieren“: Das Tool bettet die XML-Datei ein. Laden Sie Ihr ZUGFeRD PDF/A-3 oder Ihre reine XRechnung-XML herunter und versenden Sie sie an Ihren Kunden.',
-  },
-];
-
-const audiences: { icon: LucideIcon; title: string; body: string }[] = [
-  {
-    icon: UserRound,
-    title: 'Freiberufler & Kleinunternehmer',
-    body: 'Sie schreiben nur wenige Rechnungen im Monat? Ein teures Abo einer großen Buchhaltungssoftware lohnt sich nicht. Bei uns können Sie bedarfsgenau PDF in ZUGFeRD umwandeln – kostenlos in der Testversion – oder günstige Pakete für geringe Volumen nutzen.',
-  },
-  {
-    icon: Landmark,
-    title: 'Auftragnehmer der öffentlichen Hand (B2G)',
-    body: 'Wenn Sie für Bund, Länder oder Kommunen arbeiten, reichen Sie eine XRechnung über Portale wie die ZRE ein. Mit Finlyzers wandeln Sie Ihre PDF in XRechnung um und stellen sicher, dass Pflichtfelder wie die Leitweg-ID korrekt formatiert sind.',
-  },
-  {
-    icon: Hammer,
-    title: 'Handwerksbetriebe und Agenturen',
-    body: 'Bleiben Sie bei Ihrem bewährten Rechnungsprogramm. Wir sind die Brücke zwischen Ihrem gewohnten PDF-Format und den neuen gesetzlichen Anforderungen an ZUGFeRD.',
   },
 ];
 
@@ -91,6 +86,7 @@ const formats = [
   {
     name: 'ZUGFeRD',
     tag: 'Empfohlen für B2B',
+    tone: 'blue' as Tone,
     visual: ZugferdFormatVisual,
     body: 'Eine PDF/A-3-Rechnung, die aussieht wie gewohnt, mit eingebetteter XML. Ihr Kunde liest das PDF, seine Software liest die Daten.',
     points: ['Für Menschen und Maschinen lesbar', 'Ideal zwischen Unternehmen', 'Kompatibel mit Factur-X'],
@@ -98,6 +94,7 @@ const formats = [
   {
     name: 'XRechnung',
     tag: 'Standard für Behörden',
+    tone: 'green' as Tone,
     visual: XrechnungFormatVisual,
     body: 'Eine reine XML-Datei ohne sichtbare Ansicht, gemacht für die automatische Verarbeitung in öffentlichen Rechnungseingangsportalen.',
     points: ['Reine Strukturdaten', 'Für Bund, Länder und Kommunen', 'Leitweg-ID als Pflichtfeld'],
@@ -169,130 +166,144 @@ export default function GermanHomePage() {
         aria-labelledby="hero-title"
         className="-mt-6 sm:-mt-10 pt-12 sm:pt-20 pb-14 sm:pb-20 bg-[var(--color-surface-subtle)] shadow-[0_0_0_100vmax_var(--color-surface-subtle)] [clip-path:inset(0_-100vmax)]"
       >
-        <div className="text-center">
-          <span className="feature-badge">E-Rechnung für KMU, Freiberufler &amp; B2G</span>
-          <h1 id="hero-title" className="type-hero !text-[clamp(2.25rem,6.5vw,4rem)] mt-5 max-w-4xl mx-auto text-balance">
-            PDF in ZUGFeRD &amp; XRechnung umwandeln
-          </h1>
-          <p className="type-lead mt-5 max-w-2xl mx-auto text-balance">
-            Ihr Rechnungsprogramm exportiert nur Standard-PDFs? Laden Sie Ihre Rechnung hoch und erhalten Sie eine ZUGFeRD-Datei
-            oder XRechnung nach EN 16931 – ohne neue Buchhaltungssoftware.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href={CONVERTER_HREF} className={ctaClass}>
-              <span>ZUGFeRD Generator kostenlos testen</span>
-              <ArrowRight className="w-5 h-5" aria-hidden="true" />
-            </Link>
-            <Link href="#so-funktionierts" className="btn-brand-secondary w-full sm:w-auto !min-h-[50px] !px-8 !text-[17px]">
-              So funktioniert&apos;s
-            </Link>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-12 lg:gap-16 items-center">
+          <div>
+            <span className="feature-badge">E-Rechnung für KMU, Freiberufler &amp; B2G</span>
+            <h1 id="hero-title" className="type-hero !text-[clamp(2.5rem,6vw,4.5rem)] mt-5 text-balance">
+              PDF in <span className="text-[var(--color-brand-dark)]">ZUGFeRD</span> &amp;{' '}
+              <span className="text-[var(--color-success)]">XRechnung</span> umwandeln
+            </h1>
+            <p className="type-lead mt-6 max-w-xl">
+              Ihr Rechnungsprogramm exportiert nur Standard-PDFs? Laden Sie Ihre Rechnung hoch und erhalten Sie eine ZUGFeRD-Datei
+              oder XRechnung nach EN 16931 – ohne neue Buchhaltungssoftware.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3">
+              <Link href={CONVERTER_HREF} className={ctaClass}>
+                <span>ZUGFeRD Generator kostenlos testen</span>
+                <ArrowRight className="w-5 h-5" aria-hidden="true" />
+              </Link>
+              <Link href="#so-funktionierts" className="btn-brand-ghost w-full sm:w-auto !min-h-[50px] !px-8 !text-[17px]">
+                So funktioniert&apos;s
+              </Link>
+            </div>
+            <dl className="mt-10 sm:mt-12 grid grid-cols-3 max-w-xl divide-x divide-[var(--color-border)]">
+              {heroFacts.map(({ value, label, tone }) => (
+                <div key={label} className="px-3 first:pl-0 sm:px-6">
+                  <dt className="sr-only">{label}</dt>
+                  <dd className={`text-[19px] sm:text-[30px] whitespace-nowrap font-semibold tracking-[-0.02em] ${TONE_CLASSES[tone].fg}`}>{value}</dd>
+                  <dd className="mt-1 text-[13px] sm:text-[14px] text-[var(--color-text-secondary)] leading-snug">{label}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-          <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] text-[var(--color-text-secondary)]">
-            {heroFacts.map((f) => (
-              <li key={f} className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" /> {f}
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        <div className="mt-12 sm:mt-16">
-          <HeroIllustration />
+          <div className="space-y-4 w-full max-w-md mx-auto lg:max-w-none">
+            <InvoiceSummaryCard />
+            <XrechnungTile />
+          </div>
         </div>
       </section>
 
-      {/* Why now + deadlines */}
+      {/* Flow: sources → Finlyzers → files */}
       <SectionBand>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h2 className="type-display">Warum Sie jetzt ein Tool zum Erstellen von ZUGFeRD &amp; XRechnung brauchen</h2>
-              <p className="type-body">
-                Seit 2025 müssen Unternehmen in Deutschland strukturierte elektronische Rechnungen nach der europäischen Norm EN 16931
-                empfangen können. Einfache PDF-Dateien ohne strukturierte XML-Daten gelten nicht als elektronische Rechnung.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="type-headline">Vermeiden Sie teure Software-Upgrades</h3>
-              <p className="type-body">
-                Anstatt tausende Euro in komplexe ERP-Systeme (wie DATEV oder SAP) zu investieren, schreiben Sie Ihre Rechnung weiter in
-                Word, Excel oder Ihrem Rechnungsprogramm und lassen Finlyzers die PDF-Rechnung in ZUGFeRD konvertieren.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="type-headline">ZUGFeRD &amp; XRechnung – alles an einem Ort</h3>
-              <p className="type-body">
-                Ob B2B oder öffentliche Verwaltung (B2G): Sie wählen flexibel, ob Sie eine ZUGFeRD-Datei erstellen oder die PDF in eine
-                XRechnung umwandeln.
-              </p>
-            </div>
-          </div>
-
-          <div className="card-surface p-6 sm:p-8">
-            <p className="text-[15px] font-semibold text-[var(--color-ink)]">Fristen der E-Rechnungspflicht im B2B-Bereich</p>
-            <ol className="mt-6 relative">
-              {deadlines.map((d, i) => (
-                <li key={d.date} className="relative pl-9 pb-7 last:pb-0">
-                  {i < deadlines.length - 1 && (
-                    <span className="absolute left-[9px] top-6 bottom-0 w-px bg-[var(--color-border)]" aria-hidden="true" />
-                  )}
-                  <span
-                    className={`absolute left-0 top-0.5 w-5 h-5 rounded-full flex items-center justify-center ${
-                      d.done
-                        ? 'bg-[var(--color-success)]'
-                        : 'bg-[var(--color-surface)] border-2 border-[var(--color-brand)]'
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {d.done && <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-on-brand)]" />}
-                  </span>
-                  <p className="text-[13px] font-medium text-[var(--color-brand-dark)]">{d.date}</p>
-                  <p className="mt-0.5 text-[17px] font-semibold text-[var(--color-ink)]">{d.title}</p>
-                  <p className="mt-1 text-[15px] text-[var(--color-text-secondary)] leading-relaxed">{d.body}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
+        <section className="space-y-10 sm:space-y-14">
+          <SectionHeading
+            title="Ihre Rechnung rein, E-Rechnung raus"
+            subtitle="Schreiben Sie Rechnungen weiter wie gewohnt. Finlyzers liest die Pflichtangaben aus Ihrer PDF und erzeugt daraus die strukturierte E-Rechnung."
+          />
+          <FlowDiagram />
+        </section>
       </SectionBand>
 
-      {/* Anatomy: what the tool produces */}
+      {/* Why now: bento */}
       <SectionBand tone="parchment">
+        <section className="space-y-10 sm:space-y-14">
+          <SectionHeading
+            title="Warum Sie jetzt ein Tool zum Erstellen von ZUGFeRD & XRechnung brauchen"
+            subtitle="Einfache PDF-Dateien ohne strukturierte XML-Daten gelten nicht als elektronische Rechnung nach EN 16931."
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5">
+            <BentoTile
+              className="lg:col-span-2"
+              visual={<DeadlineTimeline />}
+              title="Die E-Rechnungspflicht kommt in Stufen"
+              body="Seit 2025 müssen Unternehmen in Deutschland strukturierte elektronische Rechnungen nach der europäischen Norm EN 16931 empfangen können. Der Versand wird ab 2027 schrittweise Pflicht."
+            />
+            <BentoTile
+              dark
+              visual={<KeepWorkflowVisual />}
+              title="Vermeiden Sie teure Software-Upgrades"
+              body="Statt in komplexe ERP-Systeme wie DATEV oder SAP zu investieren, schreiben Sie Rechnungen weiter in Word, Excel oder Ihrem Rechnungsprogramm."
+            />
+            <BentoTile
+              horizontal
+              className="lg:col-span-3"
+              visual={<FormatChoiceVisual />}
+              title="ZUGFeRD & XRechnung – alles an einem Ort"
+              body="Ob B2B oder öffentliche Verwaltung (B2G): Sie wählen flexibel, ob Sie eine ZUGFeRD-Datei erstellen oder die PDF in eine XRechnung umwandeln."
+            />
+          </div>
+        </section>
+      </SectionBand>
+
+      {/* Anatomy: bento */}
+      <SectionBand>
         <section className="space-y-10 sm:space-y-14">
           <SectionHeading
             title="Aus Ihrer PDF wird eine maschinenlesbare Rechnung"
             subtitle="Jede Pflichtangabe Ihrer Rechnung wird einem Feld der Norm EN 16931 zugeordnet und als strukturierte XML gespeichert. So sieht das für eine Beispielrechnung aus."
           />
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,0.75fr)_minmax(0,1.3fr)] gap-6 items-start">
-            <div className="space-y-2">
-              <p className="text-[13px] font-medium text-[var(--color-text-muted)]">1. Ihre PDF-Rechnung</p>
-              <InvoicePaper markers />
-            </div>
-            <div className="space-y-2">
-              <p className="text-[13px] font-medium text-[var(--color-text-muted)]">2. Zuordnung zur Norm</p>
-              <FieldMappingList />
-            </div>
-            <div className="space-y-2 min-w-0">
-              <p className="text-[13px] font-medium text-[var(--color-text-muted)]">3. Erzeugte XML (Auszug)</p>
-              <XmlPanel />
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
+            <BentoTile
+              className="lg:col-span-5"
+              step={{ n: 1, tone: 'blue' }}
+              visual={<InvoicePaper markers className="w-full max-w-sm" />}
+              title="Ihre PDF-Rechnung"
+              body="Sie schreiben die Rechnung wie gewohnt. Die markierten Pflichtangaben werden erkannt."
+            />
+            <BentoTile
+              className="lg:col-span-7"
+              step={{ n: 2, tone: 'orange' }}
+              visual={<FieldMappingList className="w-full self-stretch grid grid-cols-1 sm:grid-cols-2 auto-rows-fr gap-3" />}
+              title="Zuordnung zur Norm EN 16931"
+              body="Jede Angabe bekommt ihr festes Feld (Business Term, BT) im europäischen Datenmodell – unabhängig davon, wie Ihre PDF aussieht."
+            />
+            <BentoTile
+              dark
+              horizontal
+              className="lg:col-span-12"
+              step={{ n: 3, tone: 'green' }}
+              visual={<XmlPanel className="w-full" />}
+              title="Erzeugte XML"
+              body={
+                <>
+                  Daraus entsteht die strukturierte XML-Datei im CII-Format. Bei ZUGFeRD steckt sie als{' '}
+                  <code className="font-mono text-[0.9em] text-[var(--color-ink)]">factur-x.xml</code> im PDF/A-3, bei XRechnung ist sie
+                  die Rechnung selbst.
+                </>
+              }
+            />
           </div>
         </section>
       </SectionBand>
 
       {/* How it works */}
-      <SectionBand>
+      <SectionBand tone="parchment">
         <section id="so-funktionierts" className="scroll-mt-24 space-y-10 sm:space-y-14">
           <SectionHeading
             title="In 3 einfachen Schritten zur E-Rechnung"
             subtitle="Sie brauchen keine technischen Vorkenntnisse. Der gesamte Prozess dauert weniger als 60 Sekunden."
           />
-          <ol className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {steps.map((s, i) => (
-              <li key={s.title} className="card-surface p-5 sm:p-6 flex flex-col">
+              <li key={s.title} className={`card-surface p-5 sm:p-6 flex flex-col ${i === 2 ? 'sm:col-span-2 lg:col-span-1' : ''}`}>
                 <s.visual />
-                <span className="mt-6 text-[13px] font-medium text-[var(--color-brand-dark)] tabular-nums">Schritt {i + 1}</span>
-                <h3 className="type-headline mt-1">{s.title}</h3>
+                <span
+                  className={`mt-6 self-start inline-flex items-center rounded-full border px-2.5 py-0.5 text-[12px] font-medium tabular-nums ${TONE_CLASSES[s.tone].soft} ${TONE_CLASSES[s.tone].border} ${TONE_CLASSES[s.tone].fg}`}
+                >
+                  Schritt {i + 1}
+                </span>
+                <h3 className="type-headline mt-2">{s.title}</h3>
                 <p className="mt-2 text-base text-[var(--color-text-secondary)] leading-relaxed">{s.body}</p>
               </li>
             ))}
@@ -307,7 +318,7 @@ export default function GermanHomePage() {
       </SectionBand>
 
       {/* ZUGFeRD vs XRechnung */}
-      <SectionBand tone="parchment">
+      <SectionBand>
         <section className="space-y-10 sm:space-y-14">
           <SectionHeading
             title="Unterschied XRechnung und ZUGFeRD: Was benötigen Sie?"
@@ -316,18 +327,18 @@ export default function GermanHomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {formats.map((f) => (
               <div key={f.name} className="card-surface p-6 sm:p-8">
-                <div className="rounded-xl bg-[var(--color-surface-subtle)]">
+                <div className={`rounded-xl border ${TONE_CLASSES[f.tone].soft} ${TONE_CLASSES[f.tone].border}`}>
                   <f.visual />
                 </div>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <h3 className="type-title">{f.name}</h3>
-                  <span className="feature-badge">{f.tag}</span>
+                  <span className={`inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ${TONE_CLASSES[f.tone].soft} ${TONE_CLASSES[f.tone].fg}`}>{f.tag}</span>
                 </div>
                 <p className="mt-3 type-body">{f.body}</p>
                 <ul className="mt-5 space-y-2">
                   {f.points.map((p) => (
                     <li key={p} className="flex items-center gap-2 text-[15px] text-[var(--color-ink)]">
-                      <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] shrink-0" aria-hidden="true" /> {p}
+                      <CheckCircle2 className={`w-4 h-4 shrink-0 ${TONE_CLASSES[f.tone].fg}`} aria-hidden="true" /> {p}
                     </li>
                   ))}
                 </ul>
@@ -341,8 +352,8 @@ export default function GermanHomePage() {
               <thead>
                 <tr className="border-b border-[var(--color-border)]">
                   <th scope="col" className="py-4 px-5 sm:px-6 text-[13px] font-medium text-[var(--color-text-muted)]">Kriterium</th>
-                  <th scope="col" className="py-4 px-5 sm:px-6 font-semibold text-[var(--color-ink)]">ZUGFeRD (2.x)</th>
-                  <th scope="col" className="py-4 px-5 sm:px-6 font-semibold text-[var(--color-ink)]">XRechnung</th>
+                  <th scope="col" className="py-4 px-5 sm:px-6 font-semibold text-[var(--color-brand-dark)]">ZUGFeRD (2.x)</th>
+                  <th scope="col" className="py-4 px-5 sm:px-6 font-semibold text-[var(--color-success)]">XRechnung</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-subtle)]">
@@ -364,29 +375,39 @@ export default function GermanHomePage() {
         </section>
       </SectionBand>
 
-      {/* Audiences */}
-      <SectionBand>
+      {/* Audiences: bento */}
+      <SectionBand tone="parchment">
         <section className="space-y-10 sm:space-y-14">
           <SectionHeading
             title="Für wen ist unser E-Rechnung Konverter geeignet?"
             subtitle="Für Unternehmen, die eine unkomplizierte, schnelle Lösung suchen, ohne tief in die IT-Infrastruktur einzugreifen."
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-            {audiences.map((a) => (
-              <div key={a.title}>
-                <span className="w-12 h-12 rounded-2xl bg-[var(--color-brand-soft)] flex items-center justify-center">
-                  <a.icon className="w-6 h-6 text-[var(--color-brand-dark)]" aria-hidden="true" />
-                </span>
-                <h3 className="type-headline mt-5">{a.title}</h3>
-                <p className="mt-2 text-base text-[var(--color-text-secondary)] leading-relaxed">{a.body}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+            <BentoTile
+              className="md:col-span-2"
+              visual={<FewInvoicesVisual />}
+              title="Freiberufler & Kleinunternehmer"
+              body="Sie schreiben nur wenige Rechnungen im Monat? Ein teures Abo einer großen Buchhaltungssoftware lohnt sich nicht. Bei uns wandeln Sie bedarfsgenau PDF in ZUGFeRD um – kostenlos in der Testversion oder mit günstigen Paketen für geringe Volumen."
+            />
+            <BentoTile
+              dark
+              className="lg:row-span-2"
+              visual={<LeitwegVisual />}
+              title="Auftragnehmer der öffentlichen Hand (B2G)"
+              body="Wenn Sie für Bund, Länder oder Kommunen arbeiten, reichen Sie eine XRechnung über Portale wie die ZRE ein. Finlyzers stellt sicher, dass Pflichtfelder wie die Leitweg-ID korrekt formatiert sind."
+            />
+            <BentoTile
+              className="lg:col-span-2"
+              visual={<BridgeVisual />}
+              title="Handwerksbetriebe und Agenturen"
+              body="Bleiben Sie bei Ihrem bewährten Rechnungsprogramm. Wir sind die Brücke zwischen Ihrem gewohnten PDF-Format und den neuen gesetzlichen Anforderungen an ZUGFeRD."
+            />
           </div>
         </section>
       </SectionBand>
 
       {/* Validation */}
-      <SectionBand tone="parchment">
+      <SectionBand>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="space-y-8">
             <div className="space-y-4">
@@ -409,8 +430,8 @@ export default function GermanHomePage() {
               </div>
             </div>
             <div className="flex gap-4">
-              <span className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+              <span className="w-10 h-10 rounded-xl bg-[var(--color-success-soft)] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[var(--color-success)]" aria-hidden="true" />
               </span>
               <div>
                 <h3 className="type-headline">Integrierte ZUGFeRD-Validierung</h3>
@@ -426,7 +447,7 @@ export default function GermanHomePage() {
       </SectionBand>
 
       {/* FAQ */}
-      <SectionBand>
+      <SectionBand tone="parchment">
         <FaqSection
           title="Häufig gestellte Fragen zu ZUGFeRD-Rechnungen"
           subtitle="Die wichtigsten Fragen rund um Rechnungsstellung und Konvertierung."
@@ -448,6 +469,13 @@ export default function GermanHomePage() {
               <ArrowRight className="w-5 h-5" aria-hidden="true" />
             </Link>
           </div>
+          <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[var(--color-text-secondary)]">
+            {['ZUGFeRD PDF/A-3', 'XRechnung XML', 'EN 16931 geprüft'].map((f) => (
+              <li key={f} className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" /> {f}
+              </li>
+            ))}
+          </ul>
         </section>
       </SectionBand>
     </div>
