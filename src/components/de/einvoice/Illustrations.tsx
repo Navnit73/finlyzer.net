@@ -188,15 +188,15 @@ export const TONE_CLASSES: Record<Tone, { soft: string; border: string; fg: stri
 function AmountRing() {
   const ring = 'fill-none [stroke-width:11]';
   return (
-    <div className="relative w-36 h-36 sm:w-44 sm:h-44 mx-auto">
+    <div className="relative w-28 h-28 sm:w-32 sm:h-32 mx-auto shrink-0">
       <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90" aria-hidden="true">
         <circle cx="50" cy="50" r="40" className={`${ring} stroke-[var(--color-surface-subtle)]`} />
         <circle cx="50" cy="50" r="40" pathLength={100} className={`${ring} stroke-[var(--color-brand)]`} strokeDasharray="82 18" />
         <circle cx="50" cy="50" r="40" pathLength={100} className={`${ring} stroke-[var(--color-success)]`} strokeDasharray="14 86" strokeDashoffset={-84} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[21px] sm:text-[24px] font-semibold tracking-[-0.02em] text-[var(--color-ink)] tabular-nums">1.190 €</span>
-        <span className="text-[12px] text-[var(--color-text-muted)]">Gesamtbetrag</span>
+        <span className="text-[18px] sm:text-[19px] font-semibold tracking-[-0.02em] text-[var(--color-ink)] tabular-nums">1.190 €</span>
+        <span className="text-[11px] text-[var(--color-text-muted)]">Gesamtbetrag</span>
       </div>
     </div>
   );
@@ -210,7 +210,7 @@ export function InvoiceSummaryCard() {
     { dot: 'bg-[var(--color-media-orange)]', label: 'Leitweg-ID', value: 'erkannt', valueClass: 'text-[var(--color-success)]' },
   ];
   return (
-    <div className="card-surface p-5 sm:p-7">
+    <div className="card-surface p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <span className="w-10 h-10 rounded-xl bg-[var(--color-brand-soft)] flex items-center justify-center shrink-0">
@@ -225,23 +225,24 @@ export function InvoiceSummaryCard() {
           ZUGFeRD <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
         </span>
       </div>
-      <div className="mt-6">
+      {/* Ring beside the amounts from sm up, stacked on phones. */}
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
         <AmountRing />
-      </div>
-      <ul className="mt-6 space-y-2.5">
+        <ul className="flex-1 space-y-2">
         {rows.map((r) => (
-          <li key={r.label} className="flex items-center justify-between gap-3 text-[14px]">
-            <span className="inline-flex items-center gap-2 text-[var(--color-text-secondary)]">
-              <span className={`w-2.5 h-2.5 rounded-full ${r.dot}`} aria-hidden="true" /> {r.label}
-            </span>
-            <span className={`inline-flex items-center gap-1 font-medium tabular-nums ${r.valueClass}`}>
-              {r.value === 'erkannt' && <CheckCircle2 className="w-4 h-4" aria-hidden="true" />}
-              {r.value}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-5 flex items-center gap-2 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-3.5 py-2.5 text-[13px] font-medium text-[var(--color-success)]">
+            <li key={r.label} className="flex items-center justify-between gap-3 text-[14px]">
+              <span className="inline-flex items-center gap-2 text-[var(--color-text-secondary)]">
+                <span className={`w-2.5 h-2.5 rounded-full ${r.dot}`} aria-hidden="true" /> {r.label}
+              </span>
+              <span className={`inline-flex items-center gap-1 font-medium tabular-nums ${r.valueClass}`}>
+                {r.value === 'erkannt' && <CheckCircle2 className="w-4 h-4" aria-hidden="true" />}
+                {r.value}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="mt-4 flex items-center gap-2 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-3.5 py-2 text-[13px] font-medium text-[var(--color-success)]">
         <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" /> EN 16931 geprüft · bereit zum Download
       </p>
     </div>
@@ -251,18 +252,18 @@ export function InvoiceSummaryCard() {
 /** Dark hero tile for the public-sector (B2G) use case. */
 export function XrechnungTile() {
   return (
-    <div className="surface-dark rounded-2xl p-5 sm:p-7 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:gap-5">
+    <div className="surface-dark rounded-2xl p-5 sm:p-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:gap-5">
       <div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-success)] text-[var(--color-on-brand)] px-3 py-1 text-[12px] font-medium">
           <Landmark className="w-3.5 h-3.5" aria-hidden="true" /> Für Behörden
         </span>
-        <p className="mt-4 text-[18px] sm:text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-[var(--color-ink)]">
+        <p className="mt-3 text-[17px] sm:text-[19px] font-semibold leading-[1.2] tracking-[-0.015em] text-[var(--color-ink)]">
           XRechnung mit Leitweg-ID, direkt aus Ihrer PDF
         </p>
       </div>
-      <div className="relative w-24 h-28 sm:w-28 sm:h-32 shrink-0" aria-hidden="true">
-        <div className="absolute right-0 top-0 w-20 h-24 sm:w-24 sm:h-28 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]" />
-        <div className="absolute left-0 bottom-0 w-20 h-24 sm:w-24 sm:h-28 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-2.5 sm:p-3 font-mono text-[8px] sm:text-[9px] leading-[1.6]">
+      <div className="relative w-24 h-28 shrink-0" aria-hidden="true">
+        <div className="absolute right-0 top-0 w-20 h-24 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]" />
+        <div className="absolute left-0 bottom-0 w-20 h-24 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-2.5 font-mono text-[8px] leading-[1.6]">
           <div className="text-[var(--color-brand-dark)]">&lt;Invoice&gt;</div>
           <div className="pl-1.5 text-[var(--color-media-orange)]">04011000…</div>
           <div className="text-[var(--color-brand-dark)]">&lt;/Invoice&gt;</div>

@@ -46,8 +46,8 @@ const description =
 // Indexable: robots comes from the layout ("index, follow").
 export const metadata: Metadata = pageMetadata({ title, description, path: GERMAN_ROOT, locale: 'de' });
 
-// The e-invoice converter has no page yet, so CTAs scroll to the steps. Point this at the tool once it exists.
-const CONVERTER_HREF = '#so-funktionierts';
+// The converter tool (src/app/de/konverter/e-rechnung).
+const CONVERTER_HREF = '/de/konverter/e-rechnung';
 
 // Product facts only, no usage statistics (see the no-unverifiable-claims rule).
 const heroFacts: { value: string; label: string; tone: Tone }[] = [
@@ -159,20 +159,20 @@ export default function GermanHomePage() {
       {/* Hero */}
       <section
         aria-labelledby="hero-title"
-        className="-mt-6 sm:-mt-10 pt-12 sm:pt-20 pb-14 sm:pb-20 bg-[var(--color-surface-subtle)] shadow-[0_0_0_100vmax_var(--color-surface-subtle)] [clip-path:inset(0_-100vmax)]"
+        className="-mt-6 sm:-mt-10 pt-10 sm:pt-14 pb-10 sm:pb-14 bg-[var(--color-surface-subtle)] shadow-[0_0_0_100vmax_var(--color-surface-subtle)] [clip-path:inset(0_-100vmax)]"
       >
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-12 lg:gap-16 items-center">
           <div>
             <span className="feature-badge">Ohne neue Software · für KMU, Freiberufler &amp; B2G</span>
-            <h1 id="hero-title" className="type-hero !text-[clamp(2.5rem,6vw,4.5rem)] mt-5 text-balance">
+            <h1 id="hero-title" className="type-hero !text-[clamp(2rem,4vw,3.25rem)] mt-4 text-balance">
               PDF in <span className="text-[var(--color-brand-dark)]">ZUGFeRD</span> &amp;{' '}
               <span className="text-[var(--color-success)]">XRechnung</span> umwandeln
             </h1>
-            <p className="type-lead mt-6 max-w-xl">
+            <p className="type-lead !text-[17px] mt-4 max-w-xl">
               Ihr Rechnungsprogramm exportiert nur Standard-PDFs? Statt teurer Software-Upgrades konvertieren Sie Ihre bestehende
               PDF-Rechnung in ZUGFeRD oder erstellen eine XRechnung aus PDF – nach EN 16931. PDF in ZUGFeRD umwandeln: kostenlos testen.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3">
+            <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap gap-3">
               <Link href={CONVERTER_HREF} className={ctaClass}>
                 <span>ZUGFeRD Generator kostenlos testen</span>
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
@@ -181,11 +181,11 @@ export default function GermanHomePage() {
                 So funktioniert&apos;s
               </Link>
             </div>
-            <dl className="mt-10 sm:mt-12 grid grid-cols-3 max-w-xl divide-x divide-[var(--color-border)]">
+            <dl className="mt-8 grid grid-cols-3 max-w-xl divide-x divide-[var(--color-border)]">
               {heroFacts.map(({ value, label, tone }) => (
                 <div key={label} className="px-3 first:pl-0 sm:px-6">
                   <dt className="sr-only">{label}</dt>
-                  <dd className={`text-[19px] sm:text-[30px] whitespace-nowrap font-semibold tracking-[-0.02em] ${TONE_CLASSES[tone].fg}`}>{value}</dd>
+                  <dd className={`text-[19px] sm:text-[24px] whitespace-nowrap font-semibold tracking-[-0.02em] ${TONE_CLASSES[tone].fg}`}>{value}</dd>
                   <dd className="mt-1 text-[13px] sm:text-[14px] text-[var(--color-text-secondary)] leading-snug">{label}</dd>
                 </div>
               ))}
