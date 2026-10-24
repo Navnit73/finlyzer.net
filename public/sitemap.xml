@@ -5,6 +5,7 @@
   When you rename a page: replace its <loc> here and add a permanent redirect in next.config.ts.
   When you change a page materially: bump its <lastmod> (YYYY-MM-DD).
   Never list private/app pages (dashboard, documents, invoices, workspace, admin, superadmin, document/*).
+  German pages (/de/*) are not listed here: they are listed in /de/sitemap.xml (src/app/de/sitemap.ts).
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 

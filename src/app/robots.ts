@@ -12,6 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin', '/superadmin', '/dashboard', '/workspace', '/invoices', '/document', '/analysis', '/user'],
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    // public/sitemap.xml lists the English site; the German section generates its own (src/app/de/sitemap.ts).
+    sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/de/sitemap.xml`],
   };
 }

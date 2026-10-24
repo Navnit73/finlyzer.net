@@ -7,6 +7,8 @@ interface BrandLogoProps {
   showText?: boolean;
   tag?: string;
   href?: string | null;
+  /** Accessible name of the logo link. */
+  linkLabel?: string;
   className?: string;
   imageClassName?: string;
   textClassName?: string;
@@ -26,6 +28,7 @@ export default function BrandLogo({
   showText = true,
   tag,
   href = '/',
+  linkLabel = 'Finlyzers Home',
   className = '',
   imageClassName = '',
   textClassName = '',
@@ -70,7 +73,7 @@ export default function BrandLogo({
         href={href}
         onClick={onClick}
         className="inline-flex items-center min-h-[44px] rounded-md hover:opacity-80 transition-opacity"
-        aria-label="Finlyzers Home"
+        aria-label={linkLabel}
       >
         {content}
       </Link>

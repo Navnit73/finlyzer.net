@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  experimental: {
+    // The English site (src/app/(site)) and /de (src/app/de) are separate root layouts, so
+    // unmatched URLs need src/app/global-not-found.tsx.
+    globalNotFound: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -15,6 +20,24 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  // Generated share images inside the (site) route group get a hash suffix from Next.js
+  // (e.g. /convert/x/opengraph-image-qllqjw/card). These rewrites keep the URLs they had before the
+  // English routes moved into (site), so cached social previews still load. The suffix is a hash
+  // of the segment path: if one of these folders moves, rebuild and update its suffix here.
+  async rewrites() {
+    const suffixes: [string, string][] = [
+      ['/convert/:slug', 'qllqjw'],
+      ['/calculators/:slug', 'n9lodk'],
+      ['/reconcile/:slug', '138j9a'],
+      ['/analyzer/:slug', 'z3gdt'],
+    ];
+    return suffixes.flatMap(([base, hash]) =>
+      ['opengraph-image', 'twitter-image'].flatMap((image) => [
+        { source: `${base}/${image}`, destination: `${base}/${image}-${hash}` },
+        { source: `${base}/${image}/:id`, destination: `${base}/${image}-${hash}/:id` },
+      ]),
+    );
   },
   async redirects() {
     return [
