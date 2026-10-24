@@ -1,8 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
+import { GERMAN_ROOT, type Locale } from '@/lib/i18n';
 import { getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from '@/lib/seo-config';
-import { TRUST_PAGES, POLICIES_LAST_UPDATED } from '@/lib/trust-pages';
+import { DE_POLICIES_LAST_UPDATED, DE_TRUST_PAGES, TRUST_PAGES, POLICIES_LAST_UPDATED } from '@/lib/trust-pages';
 
 export interface LegalSection {
   id: string;
@@ -19,27 +20,53 @@ interface LegalPageProps {
   sections: LegalSection[];
   /** Extra JSON-LD nodes (e.g. FAQPage) merged into the page graph. */
   jsonLd?: Record<string, unknown>[];
+  /** German pages (/de) get German labels, the German home link and the German trust pages. */
+  locale?: Locale;
 }
 
-const updatedLabel = new Date(`${POLICIES_LAST_UPDATED}T00:00:00Z`).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  timeZone: 'UTC',
-});
+const LOCALE_CONFIG = {
+  en: {
+    home: '/',
+    homeLabel: 'Home',
+    updatedLabel: 'Last updated',
+    tocLabel: 'On this page',
+    relatedLabel: 'Related',
+    dateLocale: 'en-US',
+    lastUpdated: POLICIES_LAST_UPDATED,
+    pages: TRUST_PAGES,
+  },
+  de: {
+    home: GERMAN_ROOT,
+    homeLabel: 'Startseite',
+    updatedLabel: 'Zuletzt aktualisiert',
+    tocLabel: 'Auf dieser Seite',
+    relatedLabel: 'Weitere Seiten',
+    dateLocale: 'de-DE',
+    lastUpdated: DE_POLICIES_LAST_UPDATED,
+    pages: DE_TRUST_PAGES,
+  },
+};
 
 /** Shared layout for trust & legal pages: breadcrumb, title, table of contents, sections, related links. */
-export default function LegalPage({ path, title, description, intro, sections, jsonLd = [] }: LegalPageProps) {
+export default function LegalPage({ path, title, description, intro, sections, jsonLd = [], locale = 'en' }: LegalPageProps) {
+  const t = LOCALE_CONFIG[locale];
+  const updatedLabel = new Date(`${t.lastUpdated}T00:00:00Z`).toLocaleDateString(t.dateLocale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+
   const graph = serializeJsonLd([
-    getWebPageJsonLd({ path, name: title, description, dateModified: POLICIES_LAST_UPDATED }),
+    getWebPageJsonLd({ path, name: title, description, dateModified: t.lastUpdated, locale }),
     getBreadcrumbJsonLd([
-      { name: 'Home', path: '/' },
+      { name: t.homeLabel, path: t.home },
       { name: title, path },
     ]),
     ...jsonLd,
   ]);
 
-  const related = TRUST_PAGES.filter((p) => p.path !== path);
+  const related = t.pages.filter((p) => p.path !== path);
 
   return (
     <article className="max-w-6xl mx-auto w-full pb-16 sm:pb-24">
@@ -48,7 +75,7 @@ export default function LegalPage({ path, title, description, intro, sections, j
       <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,720px)] lg:justify-center gap-x-16">
         <div className="lg:col-start-2 min-w-0">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)] mb-8 sm:mb-10">
-            <Link href="/" className="hover:text-[var(--color-ink)] transition-colors">Home</Link>
+            <Link href={t.home} className="hover:text-[var(--color-ink)] transition-colors">{t.homeLabel}</Link>
             <ChevronRight className="w-3 h-3" aria-hidden="true" />
             <span className="text-[var(--color-text-secondary)]">{title}</span>
           </nav>
@@ -57,15 +84,15 @@ export default function LegalPage({ path, title, description, intro, sections, j
             <h1 className="type-display text-balance">{title}</h1>
             <div className="type-lead [&_strong]:font-semibold [&_strong]:text-[var(--color-ink)] [&_a]:text-[var(--color-brand-dark)]">{intro}</div>
             <p className="type-caption">
-              Last updated: <time dateTime={POLICIES_LAST_UPDATED}>{updatedLabel}</time>
+              {t.updatedLabel}: <time dateTime={t.lastUpdated}>{updatedLabel}</time>
             </p>
           </header>
         </div>
 
         {/* Table of contents */}
         <aside className="hidden lg:block lg:col-start-1 lg:row-start-2">
-          <nav aria-label="On this page" className="sticky top-24 border-l border-[var(--color-border)]">
-            <p className="pl-4 mb-2 text-[13px] font-semibold text-[var(--color-ink)]">On this page</p>
+          <nav aria-label={t.tocLabel} className="sticky top-24 border-l border-[var(--color-border)]">
+            <p className="pl-4 mb-2 text-[13px] font-semibold text-[var(--color-ink)]">{t.tocLabel}</p>
             {sections.map((s) => (
               <a
                 key={s.id}
@@ -87,7 +114,7 @@ export default function LegalPage({ path, title, description, intro, sections, j
           ))}
 
           <footer className="pt-10 border-t border-[var(--color-border)] space-y-4">
-            <h2 className="text-[17px] font-semibold text-[var(--color-ink)]">Related</h2>
+            <h2 className="text-[17px] font-semibold text-[var(--color-ink)]">{t.relatedLabel}</h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
               {related.map((p) => (
                 <li key={p.path} className="border-b border-[var(--color-border-subtle)]">

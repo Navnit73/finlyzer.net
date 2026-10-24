@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   authors: [{ name: SITE_NAME, url: `${SITE_URL}${GERMAN_ROOT}` }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
+  // Same Google Search Console HTML-tag verification as the English layout.
+  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
   formatDetection: { email: false, address: false, telephone: false },
   robots: {
     index: true,

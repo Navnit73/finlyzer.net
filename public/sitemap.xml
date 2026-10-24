@@ -3,7 +3,6 @@
   Static sitemap, served at /sitemap.xml. Maintained by hand.
   When you add a public page: add a <url> block below with its full https://finlyzers.com URL.
   When you rename a page: replace its <loc> here and add a permanent redirect in next.config.ts.
-  When you change a page materially: bump its <lastmod> (YYYY-MM-DD).
   Never list private/app pages (dashboard, documents, invoices, workspace, admin, superadmin, document/*).
   German pages (/de/*) are not listed here: they are listed in /de/sitemap.xml (src/app/de/sitemap.ts).
 -->
@@ -12,216 +11,168 @@
   <!-- Core pages -->
   <url>
     <loc>https://finlyzers.com/</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/pricing</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
 
   <!-- Converters: formats -->
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-excel</loc>
-    <lastmod>2026-10-15</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-csv</loc>
-    <lastmod>2026-10-15</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-qbo</loc>
-    <lastmod>2026-10-15</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-ofx</loc>
-    <lastmod>2026-10-07</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-statement-to-qif</loc>
-    <lastmod>2026-10-08</lastmod>
   </url>
 
   <!-- Converters: tools -->
   <url>
     <loc>https://finlyzers.com/convert/financial-pdf-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/scanned-pdf-ocr-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/credit-card-statement-to-excel</loc>
-    <lastmod>2026-10-08</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/csv-to-qbo</loc>
-    <lastmod>2026-10-08</lastmod>
   </url>
 
   <!-- Converters: US & UK banks -->
   <url>
     <loc>https://finlyzers.com/convert/chase-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-of-america-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/wells-fargo-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/citibank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/capital-one-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/us-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/pnc-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/td-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/barclays-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/hsbc-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/lloyds-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/natwest-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/santander-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
 
   <!-- Converters: Ireland & Europe -->
   <url>
     <loc>https://finlyzers.com/convert/aib-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/bank-of-ireland-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/revolut-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
 
   <!-- Converters: Australia -->
   <url>
     <loc>https://finlyzers.com/convert/commbank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/westpac-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/anz-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/nab-bank-statement-to-excel</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
 
   <!-- Converters: India -->
   <url>
     <loc>https://finlyzers.com/convert/hdfc-bank-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/convert/indian-bank-statement-to-excel</loc>
-    <lastmod>2026-10-07</lastmod>
   </url>
 
   <!-- Analyzers -->
   <url>
     <loc>https://finlyzers.com/analyzer/bank-statement-analyzer</loc>
-    <lastmod>2026-10-16</lastmod>
   </url>
 
   <!-- Calculators -->
   <url>
     <loc>https://finlyzers.com/calculators/cash-flow-calculator</loc>
-    <lastmod>2026-10-16</lastmod>
   </url>
 
   <!-- Bank reconciliation -->
   <url>
     <loc>https://finlyzers.com/reconcile/bank-reconciliation-tool</loc>
-    <lastmod>2026-10-23</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/reconcile/bank-statement-vs-ledger</loc>
-    <lastmod>2026-10-16</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/reconcile/bank-statement-matching-tool</loc>
-    <lastmod>2026-10-16</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/reconcile/bank-reconciliation-calculator</loc>
-    <lastmod>2026-10-16</lastmod>
   </url>
 
   <!-- Guides -->
   <url>
     <loc>https://finlyzers.com/guides/import-excel-into-quickbooks</loc>
-    <lastmod>2026-10-08</lastmod>
   </url>
 
   <!-- Trust &amp; legal -->
   <url>
     <loc>https://finlyzers.com/about</loc>
-    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/faq</loc>
-    <lastmod>2026-10-07</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/security</loc>
-    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/privacy-policy</loc>
-    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/terms</loc>
-    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/disclaimer</loc>
-    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://finlyzers.com/editorial-policy</loc>
-    <lastmod>2026-10-09</lastmod>
   </url>
 </urlset>

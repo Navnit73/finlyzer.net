@@ -17,3 +17,16 @@ export const TRUST_PAGES: TrustPage[] = [
 
 /** Date the policy text was last revised. Bump whenever a policy page changes materially. */
 export const POLICIES_LAST_UPDATED = '2026-10-09';
+
+/** Trust & legal pages of the German section (/de). Shared by DeFooter, the German sitemap and "Weitere Seiten". */
+export const DE_TRUST_PAGES: TrustPage[] = [
+  { path: '/de/ueber-uns', title: 'Über uns', shortTitle: 'Über uns' },
+  { path: '/de/kontakt', title: 'Kontakt', shortTitle: 'Kontakt' },
+  { path: '/de/faq', title: 'Häufige Fragen', shortTitle: 'FAQ' },
+  { path: '/de/impressum', title: 'Impressum', shortTitle: 'Impressum' },
+  { path: '/de/datenschutz', title: 'Datenschutzerklärung', shortTitle: 'Datenschutz' },
+  { path: '/de/nutzungsbedingungen', title: 'Nutzungsbedingungen', shortTitle: 'Nutzungsbedingungen' },
+];
+
+/** Date the German legal texts were last revised. Bump whenever one of them changes materially. */
+export const DE_POLICIES_LAST_UPDATED = '2026-10-24';

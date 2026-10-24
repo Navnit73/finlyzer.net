@@ -14,6 +14,12 @@ export const DEFAULT_LOCALE: Locale = 'en';
 
 export const GERMAN_ROOT = '/de';
 
+/**
+ * Request header the proxy sets on /de requests, so src/app/global-not-found.tsx (which can't see
+ * the URL) can render the German 404 for unmatched /de URLs.
+ */
+export const LOCALE_HEADER = 'x-finlyzers-locale';
+
 /** Open Graph locale per site. */
 export const OG_LOCALE: Record<Locale, string> = { en: 'en_US', de: 'de_DE' };
 

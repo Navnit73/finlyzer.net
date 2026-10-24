@@ -4,6 +4,7 @@ import { getToken } from 'next-auth/jwt';
 import { AUTH_SECRET } from '@/lib/auth-secret';
 import { isAdminEmail } from '@/lib/admin';
 import { APP_HOME, appRedirectFor, isAdminRoute, isAppRoute, isPublicOnlyRoute } from '@/lib/routes';
+import { GERMAN_ROOT, LOCALE_HEADER } from '@/lib/i18n';
 
 /**
  * Keeps the signed-in app and the public marketing site isolated:
@@ -14,6 +15,13 @@ import { APP_HOME, appRedirectFor, isAdminRoute, isAppRoute, isPublicOnlyRoute }
  */
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // /de has no auth rules; just tag the request so unmatched /de URLs get the German 404.
+  if (pathname === GERMAN_ROOT || pathname.startsWith(`${GERMAN_ROOT}/`)) {
+    const headers = new Headers(request.headers);
+    headers.set(LOCALE_HEADER, 'de');
+    return NextResponse.next({ request: { headers } });
+  }
 
   // Analyzer slugs are lowercase; /analyzer/Bank-statement-analyzer → one canonical URL.
   if (pathname.startsWith('/analyzer/') && pathname !== pathname.toLowerCase()) {
@@ -57,5 +65,6 @@ export const config = {
     '/invoices/:path*',
     '/superadmin/:path*',
     '/admin/:path*',
+    '/de/:path*',
   ],
 };
