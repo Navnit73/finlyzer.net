@@ -61,7 +61,7 @@ const steps = [
     visual: UploadVisual,
     tone: 'blue' as Tone,
     title: 'Standard-PDF hochladen',
-    body: 'Ziehen Sie Ihre fertige Rechnung als PDF in den gesicherten Upload-Bereich. Unser ZUGFeRD Generator liest das Dokument ein und bereitet die Konvertierung vor.',
+    body: 'Ziehen Sie Ihre fertige Rechnung als PDF in den gesicherten Upload-Bereich. Unser ZUGFeRD Generator liest das Dokument ein, um Ihre PDF-Rechnung in ZUGFeRD zu konvertieren oder eine XRechnung aus der PDF zu erstellen.',
   },
   {
     visual: FormVisual,
@@ -101,7 +101,7 @@ const comparisonRows = [
   ['Lesbarkeit für Menschen', 'Ja, sieht aus wie eine ganz normale PDF-Rechnung.', 'Nein, reine Strukturdaten.'],
   ['Strukturierte Daten', 'Ja (XML-Datei ist unsichtbar in der PDF eingebettet).', 'Ja (ausschließlich XML).'],
   ['Empfohlener Einsatzort', 'B2B (zwischen Unternehmen), da beide Seiten profitieren.', 'B2G (Behörden, Bund, Länder, Kommunen).'],
-  ['Erstellung mit Finlyzers', 'PDF in ZUGFeRD-Format umwandeln', 'PDF in XML umwandeln (XRechnung)'],
+  ['Erstellung mit Finlyzers', 'PDF in ZUGFeRD umwandeln (PDF/A-3 mit XML)', 'XRechnung aus PDF erstellen (reine XML)'],
 ];
 
 const faqs = [
@@ -118,12 +118,12 @@ const faqs = [
     a: 'Absolut. Neben ZUGFeRD bieten wir die Möglichkeit, eine reine XRechnung aus PDF erstellen zu lassen. Das ist besonders wichtig, wenn Sie Rechnungen an staatliche Einrichtungen senden müssen: Dort wird in der Regel eine XRechnung als XML-Datei erwartet, nicht eine PDF.',
   },
   {
-    q: 'Gibt es ein ZUGFeRD Beispiel PDF zum Download?',
-    a: 'Ja. Damit Sie sehen können, wie das Endresultat aussieht, stellen wir Ihnen gerne ein ZUGFeRD Beispiel-PDF sowie ein XML-Rechnungsbeispiel zur Verfügung. Besuchen Sie dazu unsere Ressourcen-Seite für ZUGFeRD-2.x-Beispieldateien.',
+    q: 'Wie sieht ein ZUGFeRD Beispiel bzw. ein XML-Rechnung Beispiel aus?',
+    a: 'Ein vollständiges ZUGFeRD Beispiel finden Sie oben auf dieser Seite im Abschnitt „Aus Ihrer PDF wird eine maschinenlesbare Rechnung“: Dort sehen Sie eine Beispielrechnung als PDF, die Zuordnung jeder Pflichtangabe zur Norm EN 16931 und die daraus erzeugte XML im CII-Format. Bei ZUGFeRD ist diese XML als factur-x.xml in die PDF/A-3 eingebettet, bei XRechnung ist die XML-Datei die Rechnung selbst.',
   },
   {
-    q: 'Was ist der Unterschied zwischen ZUGFeRD 1.0 und 2.0?',
-    a: 'ZUGFeRD 1.0 basierte noch auf älteren Standards. ZUGFeRD 2.0 bis zur aktuellen Version 2.3 sind vollständig kompatibel mit der europäischen Norm EN 16931 und der französischen Factur-X. Unser System erzeugt immer die aktuelle Version.',
+    q: 'Was ist der Unterschied zwischen ZUGFeRD 1.0, 2.0 und den aktuellen 2.x-Versionen?',
+    a: 'ZUGFeRD 1.0 (2014) entstand vor der europäischen Norm EN 16931 und nutzt ein eigenes, älteres XML-Schema. Ab ZUGFeRD 2.0 ist das Format an die EN 16931 angepasst und technisch identisch mit dem französischen Factur-X. Die Folgeversionen 2.1, 2.2 und die aktuelle 2.3 ergänzen unter anderem ein XRechnung-Profil und präzisieren die Regeln. Für neue E-Rechnungen sollten Sie deshalb immer eine ZUGFeRD-2.x-Version verwenden.',
   },
   {
     q: 'Bieten Sie eine ZUGFeRD API für Entwickler an?',
@@ -163,14 +163,14 @@ export default function GermanHomePage() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-12 lg:gap-16 items-center">
           <div>
-            <span className="feature-badge">E-Rechnung für KMU, Freiberufler &amp; B2G</span>
+            <span className="feature-badge">Ohne neue Software · für KMU, Freiberufler &amp; B2G</span>
             <h1 id="hero-title" className="type-hero !text-[clamp(2.5rem,6vw,4.5rem)] mt-5 text-balance">
               PDF in <span className="text-[var(--color-brand-dark)]">ZUGFeRD</span> &amp;{' '}
               <span className="text-[var(--color-success)]">XRechnung</span> umwandeln
             </h1>
             <p className="type-lead mt-6 max-w-xl">
-              Ihr Rechnungsprogramm exportiert nur Standard-PDFs? Laden Sie Ihre Rechnung hoch und erhalten Sie eine ZUGFeRD-Datei
-              oder XRechnung nach EN 16931 – ohne neue Buchhaltungssoftware.
+              Ihr Rechnungsprogramm exportiert nur Standard-PDFs? Statt teurer Software-Upgrades konvertieren Sie Ihre bestehende
+              PDF-Rechnung in ZUGFeRD oder erstellen eine XRechnung aus PDF – nach EN 16931. PDF in ZUGFeRD umwandeln: kostenlos testen.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3">
               <Link href={CONVERTER_HREF} className={ctaClass}>
@@ -246,7 +246,7 @@ export default function GermanHomePage() {
         <section className="space-y-10 sm:space-y-14">
           <SectionHeading
             title="Aus Ihrer PDF wird eine maschinenlesbare Rechnung"
-            subtitle="Jede Pflichtangabe Ihrer Rechnung wird einem Feld der Norm EN 16931 zugeordnet und als strukturierte XML gespeichert. So sieht das für eine Beispielrechnung aus."
+            subtitle="Jede Pflichtangabe Ihrer Rechnung wird einem Feld der Norm EN 16931 zugeordnet und als strukturierte XML gespeichert. Ein ZUGFeRD Beispiel mit XML-Rechnung Schritt für Schritt:"
           />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
             <BentoTile
@@ -317,7 +317,7 @@ export default function GermanHomePage() {
         <section className="space-y-10 sm:space-y-14">
           <SectionHeading
             title="Unterschied XRechnung und ZUGFeRD: Was benötigen Sie?"
-            subtitle="Beide Formate basieren auf der europäischen Norm EN 16931, unterscheiden sich jedoch in ihrer Darstellung."
+            subtitle="Beide Formate basieren auf der europäischen Norm EN 16931. Der Unterschied zwischen XRechnung und ZUGFeRD liegt in der Darstellung: PDF mit eingebetteter XML oder reine XML-Datei."
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {formats.map((f) => (
@@ -343,7 +343,7 @@ export default function GermanHomePage() {
 
           <div className="card-surface overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <caption className="sr-only">Vergleich von ZUGFeRD und XRechnung</caption>
+              <caption className="sr-only">Unterschied XRechnung und ZUGFeRD im Vergleich</caption>
               <thead>
                 <tr className="border-b border-[var(--color-border)]">
                   <th scope="col" className="py-4 px-5 sm:px-6 text-[13px] font-medium text-[var(--color-text-muted)]">Kriterium</th>
@@ -363,7 +363,7 @@ export default function GermanHomePage() {
             </table>
           </div>
           <p className="type-body max-w-3xl mx-auto text-center">
-            Zusammenfassend: Für Rechnungen an andere Unternehmen empfehlen wir ZUGFeRD, da Ihr Kunde die Rechnung wie gewohnt lesen
+            Zusammenfassend zum Unterschied zwischen ZUGFeRD und XRechnung: Für Rechnungen an andere Unternehmen empfehlen wir ZUGFeRD, da Ihr Kunde die Rechnung wie gewohnt lesen
             kann, während die Buchhaltungssoftware die XML-Daten ausliest. Für Behörden ist die XRechnung der Standard. Unser Tool
             beherrscht beides.
           </p>
@@ -431,7 +431,7 @@ export default function GermanHomePage() {
               <div>
                 <h3 className="type-headline">Integrierte ZUGFeRD-Validierung</h3>
                 <p className="mt-2 type-body">
-                  Vor dem Download prüfen wir, ob alle gesetzlichen Pflichtangaben vorhanden und mathematisch korrekt summiert sind.
+                  Vor dem Download prüft die ZUGFeRD-Validierung, ob alle gesetzlichen Pflichtangaben vorhanden und mathematisch korrekt summiert sind.
                   So wird Ihre ZUGFeRD-Datei von modernen ERP-Systemen problemlos verarbeitet.
                 </p>
               </div>
