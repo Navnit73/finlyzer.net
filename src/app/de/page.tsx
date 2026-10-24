@@ -43,13 +43,8 @@ const title = 'PDF in ZUGFeRD & XRechnung umwandeln | Finlyzers Konverter';
 const description =
   'Wandeln Sie Ihre Standard-PDF-Rechnungen in Sekunden in rechtskonforme ZUGFeRD und XRechnung Dateien um. Keine neue Software nötig. Jetzt kostenlos testen!';
 
-// noindex while this is a placeholder with no German tools or guides: an indexed page this thin
-// risks being judged a soft 404. Remove `robots` and add the page back to src/app/de/sitemap.ts
-// once real content ships. `follow` keeps the footer's legal and contact pages crawlable.
-export const metadata: Metadata = {
-  ...pageMetadata({ title, description, path: GERMAN_ROOT, locale: 'de' }),
-  robots: { index: false, follow: true },
-};
+// Indexable: robots comes from the layout ("index, follow").
+export const metadata: Metadata = pageMetadata({ title, description, path: GERMAN_ROOT, locale: 'de' });
 
 // The e-invoice converter has no page yet, so CTAs scroll to the steps. Point this at the tool once it exists.
 const CONVERTER_HREF = '#so-funktionierts';
@@ -453,6 +448,13 @@ export default function GermanHomePage() {
           subtitle="Die wichtigsten Fragen rund um Rechnungsstellung und Konvertierung."
           faqs={faqs}
         />
+        <p className="mt-8 text-center text-base text-[var(--color-text-secondary)]">
+          Weitere Antworten finden Sie in unseren{' '}
+          <Link href="/de/faq" className="link">
+            häufigen Fragen zu Finlyzers
+          </Link>
+          .
+        </p>
       </SectionBand>
 
       {/* Final CTA */}
