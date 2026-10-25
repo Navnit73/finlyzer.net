@@ -151,8 +151,10 @@ export function newLine(partial: Partial<LineForm> = {}): LineForm {
   return { id: `line-${lineCounter}`, description: '', quantity: '1', unit: 'Stk', netPrice: '', vatRate: '19', ...partial };
 }
 
+/** Local calendar date (YYYY-MM-DD); toISOString() would give yesterday before 01:00/02:00 in Germany. */
 export function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export function emptyInvoiceForm(): InvoiceForm {

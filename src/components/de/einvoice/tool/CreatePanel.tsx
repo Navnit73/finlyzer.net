@@ -1003,6 +1003,8 @@ function ResultView({ result, onClose, onVerifyArchive }: { result: CreateResult
   const { t } = useLang();
   const isPdf = result.format === 'zugferd';
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // The browser's PDF viewer is heavy; only load it once the preview is opened.
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!isPdf) return;
@@ -1057,7 +1059,7 @@ function ResultView({ result, onClose, onVerifyArchive }: { result: CreateResult
       )}
 
       {previewUrl && (
-        <details className="group rounded-2xl border border-[var(--color-border)]">
+        <details onToggle={(e) => setPreviewOpen(e.currentTarget.open)} className="group rounded-2xl border border-[var(--color-border)]">
           <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-4 sm:px-5 py-3.5 [&::-webkit-details-marker]:hidden">
             <span>
               <span className="block text-[15px] font-medium text-[var(--color-ink)]">{t('PDF-Vorschau', 'PDF preview')}</span>
@@ -1070,7 +1072,9 @@ function ResultView({ result, onClose, onVerifyArchive }: { result: CreateResult
             </span>
             <ChevronDown className="w-4 h-4 text-[var(--color-text-secondary)] transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
-          <iframe src={previewUrl} title={t('Vorschau der ZUGFeRD-PDF', 'ZUGFeRD PDF preview')} className="w-full h-[640px] border-t border-[var(--color-border)] rounded-b-2xl" />
+          {previewOpen && (
+            <iframe src={previewUrl} title={t('Vorschau der ZUGFeRD-PDF', 'ZUGFeRD PDF preview')} className="w-full h-[640px] border-t border-[var(--color-border)] rounded-b-2xl" />
+          )}
         </details>
       )}
 

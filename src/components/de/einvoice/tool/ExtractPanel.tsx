@@ -20,7 +20,10 @@ import { useLang } from './i18n';
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Obj) : {});
 const text = (v: unknown) => (v === null || v === undefined || v === '' ? '–' : String(v));
-const money = (v: unknown) => (typeof v === 'number' ? formatEuro(v) : text(v));
+// Decimals may arrive as JSON strings ("119.00"), as Pydantic serialises Decimal.
+const asNumber = (v: unknown) => (typeof v === 'number' ? v : typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim()) ? Number(v) : NaN);
+const money = (v: unknown) => (Number.isFinite(asNumber(v)) ? formatEuro(asNumber(v)) : text(v));
+const decimal = (v: unknown) => (Number.isFinite(asNumber(v)) ? asNumber(v).toLocaleString('de-DE', { maximumFractionDigits: 4 }) : text(v));
 const date = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(`${v}T00:00:00`).toLocaleDateString('de-DE') : text(v));
 
 const XMP_LABELS: Record<string, [string, string]> = {
@@ -148,8 +151,8 @@ export default function ExtractPanel({
                   {t('Rechnung', 'Invoice')} {text(invoice.invoice_number)}
                 </h3>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {[data.source_type.toUpperCase(), data.syntax, data.profile, data.version, data.embedded_filename].filter(Boolean).map((chip) => (
-                    <span key={chip} className="rounded-full bg-[var(--color-surface-muted)] px-2.5 py-1 text-[12px] text-[var(--color-ink)]">
+                  {[data.source_type.toUpperCase(), data.syntax, data.profile, data.version, data.embedded_filename].filter(Boolean).map((chip, i) => (
+                    <span key={`${i}-${chip}`}className="rounded-full bg-[var(--color-surface-muted)] px-2.5 py-1 text-[12px] text-[var(--color-ink)]">
                       {chip}
                     </span>
                   ))}
@@ -226,10 +229,10 @@ export default function ExtractPanel({
                             <td className="px-3 py-2 text-[var(--color-text-muted)]">{text(l.position ?? i + 1)}</td>
                             <td className="px-3 py-2 text-[var(--color-ink)] min-w-[160px]">{text(l.description)}</td>
                             <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">
-                              {text(l.quantity)} {text(l.unit)}
+                              {decimal(l.quantity)} {text(l.unit)}
                             </td>
                             <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{money(l.net_price)}</td>
-                            <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{text(l.vat_rate)} %</td>
+                            <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{decimal(l.vat_rate)} %</td>
                             <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap font-medium">{money(l.line_net_amount)}</td>
                           </tr>
                         ))}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Fingerprint, Loader2, XCircle } from 'lucide-react';
 import type { ArchiveVerification } from '@/lib/einvoice';
 import { ArchiveFiles, EinvoiceRequestError, ErrorNotice, Field, SectionHeader, floatingInputClass, formatDateTime, requestEinvoice } from './shared';
@@ -22,10 +22,13 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<EinvoiceRequestError | null>(null);
   const [record, setRecord] = useState<ArchiveVerification | null>(null);
+  // Checks requested from another tab can overlap a running one; only the latest may set the result.
+  const latest = useRef(0);
 
   async function verify(archiveId: string) {
     const trimmed = archiveId.trim();
     if (!trimmed) return;
+    const run = ++latest.current;
     setBusy(true);
     setError(null);
     setRecord(null);
@@ -34,11 +37,13 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
         400: t('Das ist keine gültige Archiv-ID. Sie beginnt mit „ea_“.', 'This is not a valid archive ID. It starts with “ea_”.'),
         404: t('Zu dieser Archiv-ID gibt es keinen Datensatz.', 'There is no record for this archive ID.'),
       });
-      setRecord(await res.json());
+      const data: ArchiveVerification = await res.json();
+      if (run === latest.current) setRecord(data);
     } catch (err) {
-      setError(err instanceof EinvoiceRequestError ? err : new EinvoiceRequestError(t('Die Prüfung ist fehlgeschlagen.', 'The check failed.'), 0));
+      if (run === latest.current)
+        setError(err instanceof EinvoiceRequestError ? err : new EinvoiceRequestError(t('Die Prüfung ist fehlgeschlagen.', 'The check failed.'), 0));
     } finally {
-      setBusy(false);
+      if (run === latest.current) setBusy(false);
     }
   }
 
@@ -46,6 +51,7 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
     if (!request) return;
     setId(request.id);
     verify(request.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only for a new request, not when verify/t change
   }, [request]);
 
   return (

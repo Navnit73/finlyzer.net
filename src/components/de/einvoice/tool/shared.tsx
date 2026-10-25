@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   AlertTriangle,
@@ -391,7 +391,10 @@ export function FileDrop({
         e.preventDefault();
         setDragging(true);
       }}
-      onDragLeave={() => setDragging(false)}
+      // dragleave also fires when moving onto a child element; only reset when leaving the drop zone.
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+      }}
       onDrop={(e) => {
         e.preventDefault();
         setDragging(false);
@@ -559,31 +562,39 @@ export function CopyButton({ text, label }: { text: string; label?: string }) {
 
 export function XmlViewer({ xml, filename, title }: { xml: string; filename: string; title?: string }) {
   const { t } = useLang();
-  const lines = xml.split('\n').length;
+  // XML can be several MB: count once, and only put it in the DOM while the panel is open.
+  const lines = useMemo(() => xml.split('\n').length, [xml]);
+  const size = useMemo(() => new Blob([xml]).size, [xml]);
+  const [open, setOpen] = useState(false);
   return (
-    <details className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <details
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+    >
       <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-4 sm:px-5 py-3.5 [&::-webkit-details-marker]:hidden">
         <span className="min-w-0">
           <span className="block text-[15px] font-medium text-[var(--color-ink)]">{title ?? t('XML-Daten', 'XML data')}</span>
           <span className="block text-[12px] text-[var(--color-text-muted)]">
-            {lines} {t('Zeilen', 'lines')} · {formatBytes(new Blob([xml]).size)} · {t('maschinenlesbarer Teil der E-Rechnung', 'machine-readable part of the e-invoice')}
+            {lines} {t('Zeilen', 'lines')} · {formatBytes(size)} · {t('maschinenlesbarer Teil der E-Rechnung', 'machine-readable part of the e-invoice')}
           </span>
         </span>
         <ChevronDown className="w-4 h-4 text-[var(--color-text-secondary)] transition-transform group-open:rotate-180 shrink-0" aria-hidden="true" />
       </summary>
-      <div className="border-t border-[var(--color-border)]">
-        <div className="flex flex-wrap justify-end gap-1 px-3 py-2">
-          <CopyButton text={xml} />
-          <button
-            type="button"
-            onClick={() => downloadBlob(new Blob([xml], { type: 'application/xml' }), filename)}
-            className="inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-full text-[13px] font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" aria-hidden="true" /> {t('XML herunterladen', 'Download XML')}
-          </button>
+      {open && (
+        <div className="border-t border-[var(--color-border)]">
+          <div className="flex flex-wrap justify-end gap-1 px-3 py-2">
+            <CopyButton text={xml} />
+            <button
+              type="button"
+              onClick={() => downloadBlob(new Blob([xml], { type: 'application/xml' }), filename)}
+              className="inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-full text-[13px] font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" aria-hidden="true" /> {t('XML herunterladen', 'Download XML')}
+            </button>
+          </div>
+          <pre className="max-h-[420px] overflow-auto px-4 sm:px-5 pb-4 font-mono text-[12px] leading-[1.6] text-[var(--color-ink)] whitespace-pre">{xml}</pre>
         </div>
-        <pre className="max-h-[420px] overflow-auto px-4 sm:px-5 pb-4 font-mono text-[12px] leading-[1.6] text-[var(--color-ink)] whitespace-pre">{xml}</pre>
-      </div>
+      )}
     </details>
   );
 }

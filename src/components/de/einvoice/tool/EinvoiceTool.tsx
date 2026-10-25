@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { FilePlus2, FileSearch, Fingerprint, ShieldCheck } from 'lucide-react';
-import { emptyInvoiceForm, invoiceToForm, type EinvoiceFormat, type ExtractResponse, type FormMode, type InvoiceForm } from '@/lib/einvoice';
+import { emptyInvoiceForm, invoiceToForm, today, type EinvoiceFormat, type ExtractResponse, type FormMode, type InvoiceForm } from '@/lib/einvoice';
 import CreatePanel, { type ImportNotice } from './CreatePanel';
 import ExtractPanel from './ExtractPanel';
 import ValidatePanel from './ValidatePanel';
@@ -52,7 +52,8 @@ export default function EinvoiceTool({ intro }: { intro?: React.ReactNode }) {
 function Tool({ intro }: { intro?: React.ReactNode }) {
   const { t } = useLang();
   const [tab, setTab] = useState<Tab>('erstellen');
-  const [form, setForm] = useState<InvoiceForm>(emptyInvoiceForm);
+  // The page is prerendered, so dates computed during render would be the build date; they are filled in after mount.
+  const [form, setForm] = useState<InvoiceForm>(() => ({ ...emptyInvoiceForm(), issueDate: '', deliveryDate: '' }));
   const [format, setFormat] = useState<EinvoiceFormat>('zugferd');
   const [mode, setMode] = useState<FormMode>('simple');
   const [importNotice, setImportNotice] = useState<ImportNotice | null>(null);
@@ -60,10 +61,20 @@ function Tool({ intro }: { intro?: React.ReactNode }) {
   const topRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
 
-  // Deep links such as /de/konverter/e-rechnung#pruefen open that tab.
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (isTab(hash)) setTab(hash);
+    const d = today();
+    setForm((f) => (f.issueDate || f.deliveryDate ? f : { ...f, issueDate: d, deliveryDate: d }));
+  }, []);
+
+  // Deep links such as /de/konverter/e-rechnung#pruefen open that tab, also when only the hash changes.
+  useEffect(() => {
+    const fromHash = () => {
+      const hash = window.location.hash.slice(1);
+      if (isTab(hash)) setTab(hash);
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash);
+    return () => window.removeEventListener('hashchange', fromHash);
   }, []);
 
   const select = (next: Tab, scroll = false) => {
