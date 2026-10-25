@@ -25,6 +25,7 @@ import {
   type ValidationIssue,
   type ValidationReport,
 } from '@/lib/einvoice';
+import { useLang, type T } from './i18n';
 
 /* ---------------- Requests ---------------- */
 
@@ -40,16 +41,25 @@ export class EinvoiceRequestError extends Error {
   }
 }
 
-const STATUS_MESSAGES: Record<number, string> = {
-  401: 'Der E-Rechnungsdienst hat die Anfrage abgelehnt. Bitte versuchen Sie es später erneut.',
-  404: 'Nicht gefunden.',
-  413: `Die Datei ist zu groß. Erlaubt sind höchstens ${EINVOICE_MAX_UPLOAD_MB} MB pro Datei.`,
-  415: 'Dieser Dateityp passt nicht. Erlaubt sind PDF- bzw. XML-Dateien, deren Inhalt zur Dateiendung passt.',
-  422: 'Die Angaben enthalten Fehler. Bitte prüfen Sie die Hinweise unten.',
-  429: 'Zu viele Anfragen in kurzer Zeit. Bitte warten Sie einen Moment und versuchen Sie es erneut.',
-  502: 'Der E-Rechnungsdienst ist gerade nicht erreichbar. Bitte versuchen Sie es in einigen Minuten erneut.',
-  503: 'Das revisionssichere Archiv ist gerade nicht verfügbar. Aus Sicherheitsgründen wurde nichts erstellt.',
-};
+const statusMessages = (t: T): Record<number, string> => ({
+  401: t('Der E-Rechnungsdienst hat die Anfrage abgelehnt. Bitte versuchen Sie es später erneut.', 'The e-invoice service rejected the request. Please try again later.'),
+  404: t('Nicht gefunden.', 'Not found.'),
+  413: t(`Die Datei ist zu groß. Erlaubt sind höchstens ${EINVOICE_MAX_UPLOAD_MB} MB pro Datei.`, `The file is too large. The maximum is ${EINVOICE_MAX_UPLOAD_MB} MB per file.`),
+  415: t(
+    'Dieser Dateityp passt nicht. Erlaubt sind PDF- bzw. XML-Dateien, deren Inhalt zur Dateiendung passt.',
+    'This file type is not supported. Allowed are PDF or XML files whose content matches the file extension.'
+  ),
+  422: t('Die Angaben enthalten Fehler. Bitte prüfen Sie die Hinweise unten.', 'The data contains errors. Please check the notes below.'),
+  429: t('Zu viele Anfragen in kurzer Zeit. Bitte warten Sie einen Moment und versuchen Sie es erneut.', 'Too many requests in a short time. Please wait a moment and try again.'),
+  502: t(
+    'Der E-Rechnungsdienst ist gerade nicht erreichbar. Bitte versuchen Sie es in einigen Minuten erneut.',
+    'The e-invoice service is currently unavailable. Please try again in a few minutes.'
+  ),
+  503: t(
+    'Das revisionssichere Archiv ist gerade nicht verfügbar. Aus Sicherheitsgründen wurde nichts erstellt.',
+    'The audit-proof archive is currently unavailable. For safety reasons, nothing was created.'
+  ),
+});
 
 function formatLoc(loc: unknown): string | null {
   if (!Array.isArray(loc)) return null;
@@ -60,18 +70,19 @@ function formatLoc(loc: unknown): string | null {
 
 /**
  * Calls one of our /api/einvoice/* proxy routes. Non-2xx responses become an EinvoiceRequestError
- * with a German message plus the backend's field-level issues (both of its 422 formats).
+ * with a message in the current UI language plus the backend's field-level issues (both of its 422 formats).
  */
 export async function requestEinvoice(
   url: string,
   init: RequestInit,
+  t: T,
   messages: Partial<Record<number, string>> = {}
 ): Promise<Response> {
   let res: Response;
   try {
     res = await fetch(url, init);
   } catch {
-    throw new EinvoiceRequestError('Keine Verbindung. Bitte prüfen Sie Ihre Internetverbindung.', 0);
+    throw new EinvoiceRequestError(t('Keine Verbindung. Bitte prüfen Sie Ihre Internetverbindung.', 'No connection. Please check your internet connection.'), 0);
   }
   if (res.ok) return res;
 
@@ -95,12 +106,12 @@ export async function requestEinvoice(
     issues = (body.details as { loc?: unknown; msg?: string }[]).map((d) => ({
       rule_id: 'SCHEMA',
       field: formatLoc(d.loc),
-      message: (d.msg || 'Ungültiger Wert').replace(/^Value error, /, ''),
+      message: (d.msg || t('Ungültiger Wert', 'Invalid value')).replace(/^Value error, /, ''),
       severity: 'error',
       source: 'input',
     }));
   }
-  const message = messages[res.status] ?? STATUS_MESSAGES[res.status] ?? `Unerwarteter Fehler (HTTP ${res.status}).`;
+  const message = messages[res.status] ?? statusMessages(t)[res.status] ?? t(`Unerwarteter Fehler (HTTP ${res.status}).`, `Unexpected error (HTTP ${res.status}).`);
   throw new EinvoiceRequestError(message, res.status, detail, issues, report);
 }
 
@@ -173,6 +184,7 @@ export function SectionHeader({
   description?: React.ReactNode;
   aside?: React.ReactNode;
 }) {
+  const { t } = useLang();
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex items-start gap-3 min-w-0">
@@ -183,7 +195,7 @@ export function SectionHeader({
             }`}
           >
             {done ? <Check className="w-4 h-4" strokeWidth={3} aria-hidden="true" /> : step}
-            {done && <span className="sr-only">Schritt {step}, vollständig</span>}
+            {done && <span className="sr-only">{t(`Schritt ${step}, vollständig`, `Step ${step}, complete`)}</span>}
           </span>
         )}
         <div className="min-w-0">
@@ -252,6 +264,7 @@ export function Field({
 }
 
 export function ErrorNotice({ error, onDismiss }: { error: EinvoiceRequestError; onDismiss?: () => void }) {
+  const { t } = useLang();
   return (
     <div role="alert" className="rounded-2xl border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] p-4 sm:p-5">
       <div className="flex items-start gap-3">
@@ -267,7 +280,7 @@ export function ErrorNotice({ error, onDismiss }: { error: EinvoiceRequestError;
             type="button"
             onClick={onDismiss}
             className="w-9 h-9 -mt-1.5 -mr-1.5 inline-flex items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]"
-            aria-label="Hinweis schließen"
+            aria-label={t('Hinweis schließen', 'Dismiss')}
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -306,6 +319,7 @@ export function FileDrop({
   onError: (message: string) => void;
   disabled?: boolean;
 }) {
+  const { t } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -313,11 +327,17 @@ export function FileDrop({
     if (!f) return;
     const ext = f.name.includes('.') ? f.name.slice(f.name.lastIndexOf('.')).toLowerCase() : '';
     if (!extensions.includes(ext)) {
-      onError(`„${f.name}“ hat kein unterstütztes Format. Erlaubt: ${extensions.map((e) => e.slice(1).toUpperCase()).join(', ')}.`);
+      const allowed = extensions.map((e) => e.slice(1).toUpperCase()).join(', ');
+      onError(t(`„${f.name}“ hat kein unterstütztes Format. Erlaubt: ${allowed}.`, `“${f.name}” is not a supported format. Allowed: ${allowed}.`));
       return;
     }
     if (f.size > EINVOICE_MAX_UPLOAD_BYTES) {
-      onError(`„${f.name}“ ist ${formatBytes(f.size)} groß. Erlaubt sind höchstens ${EINVOICE_MAX_UPLOAD_MB} MB.`);
+      onError(
+        t(
+          `„${f.name}“ ist ${formatBytes(f.size)} groß. Erlaubt sind höchstens ${EINVOICE_MAX_UPLOAD_MB} MB.`,
+          `“${f.name}” is ${formatBytes(f.size)}. The maximum is ${EINVOICE_MAX_UPLOAD_MB} MB.`
+        )
+      );
       return;
     }
     onFile(f);
@@ -356,7 +376,7 @@ export function FileDrop({
           onClick={() => onFile(null)}
           disabled={disabled}
           className="w-11 h-11 -mr-1.5 inline-flex items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)] transition-colors disabled:opacity-40"
-          aria-label={`${file.name} entfernen`}
+          aria-label={t(`${file.name} entfernen`, `Remove ${file.name}`)}
         >
           <X className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -390,8 +410,8 @@ export function FileDrop({
       <span className="mt-2 text-[16px] font-semibold text-[var(--color-ink)]">{title}</span>
       <span className="text-[13px] text-[var(--color-text-secondary)] max-w-md">{hint}</span>
       <span className="mt-2 inline-flex items-center min-h-[36px] px-4 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[14px] font-medium text-[var(--color-brand-dark)]">
-        <span className="sm:hidden">Datei auswählen</span>
-        <span className="hidden sm:inline">Hierher ziehen oder Datei auswählen</span>
+        <span className="sm:hidden">{t('Datei auswählen', 'Choose file')}</span>
+        <span className="hidden sm:inline">{t('Hierher ziehen oder Datei auswählen', 'Drag here or choose a file')}</span>
       </span>
     </label>
   );
@@ -400,6 +420,7 @@ export function FileDrop({
 /* ---------------- Validation report ---------------- */
 
 export function IssueList({ issues, tone }: { issues: ValidationIssue[]; tone: 'danger' | 'warning' }) {
+  const { t } = useLang();
   const Icon = tone === 'danger' ? XCircle : AlertTriangle;
   const color = tone === 'danger' ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]';
   return (
@@ -411,15 +432,15 @@ export function IssueList({ issues, tone }: { issues: ValidationIssue[]; tone: '
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-md bg-[var(--color-surface-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--color-ink)]">{issue.rule_id}</span>
               {issue.source && (
-                <span className="text-[11px] text-[var(--color-text-muted)]">{ISSUE_SOURCE_LABELS[issue.source] ?? issue.source}</span>
+                <span className="text-[11px] text-[var(--color-text-muted)]">{ISSUE_SOURCE_LABELS[issue.source] ? t(ISSUE_SOURCE_LABELS[issue.source].label, ISSUE_SOURCE_LABELS[issue.source].labelEn) : issue.source}</span>
               )}
-              {typeof issue.line === 'number' && <span className="text-[11px] text-[var(--color-text-muted)]">· Zeile {issue.line}</span>}
+              {typeof issue.line === 'number' && <span className="text-[11px] text-[var(--color-text-muted)]">· {t('Zeile', 'Line')} {issue.line}</span>}
             </div>
             <p className="mt-1 text-[14px] leading-snug text-[var(--color-ink)] break-words">{issue.message}</p>
             {issue.field && <p className="mt-1 font-mono text-[11px] text-[var(--color-text-muted)] break-all">{issue.field}</p>}
             {(issue.expected || issue.actual) && (
               <p className="mt-1 text-[12px] text-[var(--color-text-secondary)] tabular-nums">
-                Erwartet <span className="font-medium text-[var(--color-ink)]">{issue.expected ?? '–'}</span> · erhalten{' '}
+                {t('Erwartet', 'Expected')} <span className="font-medium text-[var(--color-ink)]">{issue.expected ?? '–'}</span> · {t('erhalten', 'got')}{' '}
                 <span className="font-medium text-[var(--color-ink)]">{issue.actual ?? '–'}</span>
               </p>
             )}
@@ -430,13 +451,14 @@ export function IssueList({ issues, tone }: { issues: ValidationIssue[]; tone: '
   );
 }
 
-const CHECK_STATE: Record<string, { icon: typeof Check; className: string; label: string }> = {
-  passed: { icon: CheckCircle2, className: 'text-[var(--color-success)]', label: 'Bestanden' },
-  failed: { icon: XCircle, className: 'text-[var(--color-danger)]', label: 'Fehlgeschlagen' },
-  skipped: { icon: MinusCircle, className: 'text-[var(--color-text-muted)]', label: 'Übersprungen' },
+const CHECK_STATE: Record<string, { icon: typeof Check; className: string; label: string; labelEn: string }> = {
+  passed: { icon: CheckCircle2, className: 'text-[var(--color-success)]', label: 'Bestanden', labelEn: 'Passed' },
+  failed: { icon: XCircle, className: 'text-[var(--color-danger)]', label: 'Fehlgeschlagen', labelEn: 'Failed' },
+  skipped: { icon: MinusCircle, className: 'text-[var(--color-text-muted)]', label: 'Übersprungen', labelEn: 'Skipped' },
 };
 
 export function ReportView({ report, title }: { report: ValidationReport; title?: string }) {
+  const { t } = useLang();
   const valid = report.valid;
   const meta = [report.profile, report.version, report.syntax].filter(Boolean).join(' · ');
   return (
@@ -453,13 +475,20 @@ export function ReportView({ report, title }: { report: ValidationReport; title?
         )}
         <div className="min-w-0">
           <p className="text-[19px] font-semibold tracking-[-0.015em] text-[var(--color-ink)]">
-            {title ?? (valid ? 'Gültige E-Rechnung' : 'E-Rechnung ist nicht gültig')}
+            {title ?? (valid ? t('Gültige E-Rechnung', 'Valid e-invoice') : t('E-Rechnung ist nicht gültig', 'E-invoice is not valid'))}
           </p>
           <p className="mt-0.5 text-[14px] text-[var(--color-text-secondary)]">
             {valid
-              ? 'Alle Pflichtprüfungen nach EN 16931 wurden bestanden.'
-              : `${report.errors.length} Fehler gefunden. Die Details stehen unten.`}
-            {report.warnings.length > 0 && ` ${report.warnings.length} Hinweis${report.warnings.length === 1 ? '' : 'e'}.`}
+              ? t('Alle Pflichtprüfungen nach EN 16931 wurden bestanden.', 'All mandatory EN 16931 checks passed.')
+              : t(
+                  `${report.errors.length} Fehler gefunden. Die Details stehen unten.`,
+                  `${report.errors.length} error${report.errors.length === 1 ? '' : 's'} found. See the details below.`
+                )}
+            {report.warnings.length > 0 &&
+              t(
+                ` ${report.warnings.length} Hinweis${report.warnings.length === 1 ? '' : 'e'}.`,
+                ` ${report.warnings.length} warning${report.warnings.length === 1 ? '' : 's'}.`
+              )}
           </p>
           {meta && <p className="mt-1.5 text-[13px] text-[var(--color-text-muted)] break-words">{meta}</p>}
         </div>
@@ -467,19 +496,19 @@ export function ReportView({ report, title }: { report: ValidationReport; title?
 
       {Object.keys(report.checks).length > 0 && (
         <div>
-          <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">Prüfschritte</p>
+          <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">{t('Prüfschritte', 'Checks')}</p>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {Object.entries(report.checks).map(([key, state]) => {
               const s = CHECK_STATE[state] ?? CHECK_STATE.skipped;
-              const info = CHECK_LABELS[key] ?? { label: key, hint: '' };
+              const info = CHECK_LABELS[key] ?? { label: key, hint: '', labelEn: key, hintEn: '' };
               return (
                 <li key={key} className="flex items-start gap-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 py-3">
                   <s.icon className={`w-[18px] h-[18px] mt-px shrink-0 ${s.className}`} aria-hidden="true" />
                   <div className="min-w-0">
                     <p className="text-[14px] font-medium text-[var(--color-ink)]">
-                      {info.label} <span className={`text-[12px] font-normal ${s.className}`}>· {s.label}</span>
+                      {t(info.label, info.labelEn)} <span className={`text-[12px] font-normal ${s.className}`}>· {t(s.label, s.labelEn)}</span>
                     </p>
-                    {info.hint && <p className="text-[12px] leading-snug text-[var(--color-text-muted)]">{info.hint}</p>}
+                    {info.hint && <p className="text-[12px] leading-snug text-[var(--color-text-muted)]">{t(info.hint, info.hintEn)}</p>}
                   </div>
                 </li>
               );
@@ -490,24 +519,25 @@ export function ReportView({ report, title }: { report: ValidationReport; title?
 
       {report.errors.length > 0 && (
         <div>
-          <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">Fehler ({report.errors.length})</p>
+          <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">{t('Fehler', 'Errors')} ({report.errors.length})</p>
           <IssueList issues={report.errors} tone="danger" />
         </div>
       )}
       {report.warnings.length > 0 && (
         <div>
-          <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">Hinweise ({report.warnings.length})</p>
+          <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">{t('Hinweise', 'Warnings')} ({report.warnings.length})</p>
           <IssueList issues={report.warnings} tone="warning" />
         </div>
       )}
-      {report.validated_at && <p className="text-[12px] text-[var(--color-text-muted)]">Geprüft am {formatDateTime(report.validated_at)}</p>}
+      {report.validated_at && <p className="text-[12px] text-[var(--color-text-muted)]">{t('Geprüft am', 'Validated on')} {formatDateTime(report.validated_at)}</p>}
     </div>
   );
 }
 
 /* ---------------- XML viewer ---------------- */
 
-export function CopyButton({ text, label = 'Kopieren' }: { text: string; label?: string }) {
+export function CopyButton({ text, label }: { text: string; label?: string }) {
+  const { t } = useLang();
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -522,20 +552,21 @@ export function CopyButton({ text, label = 'Kopieren' }: { text: string; label?:
       className="inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-full text-[13px] font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors"
     >
       {copied ? <Check className="w-3.5 h-3.5" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
-      {copied ? 'Kopiert' : label}
+      {copied ? t('Kopiert', 'Copied') : (label ?? t('Kopieren', 'Copy'))}
     </button>
   );
 }
 
-export function XmlViewer({ xml, filename, title = 'XML-Daten' }: { xml: string; filename: string; title?: string }) {
+export function XmlViewer({ xml, filename, title }: { xml: string; filename: string; title?: string }) {
+  const { t } = useLang();
   const lines = xml.split('\n').length;
   return (
     <details className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-4 sm:px-5 py-3.5 [&::-webkit-details-marker]:hidden">
         <span className="min-w-0">
-          <span className="block text-[15px] font-medium text-[var(--color-ink)]">{title}</span>
+          <span className="block text-[15px] font-medium text-[var(--color-ink)]">{title ?? t('XML-Daten', 'XML data')}</span>
           <span className="block text-[12px] text-[var(--color-text-muted)]">
-            {lines} Zeilen · {formatBytes(new Blob([xml]).size)} · maschinenlesbarer Teil der E-Rechnung
+            {lines} {t('Zeilen', 'lines')} · {formatBytes(new Blob([xml]).size)} · {t('maschinenlesbarer Teil der E-Rechnung', 'machine-readable part of the e-invoice')}
           </span>
         </span>
         <ChevronDown className="w-4 h-4 text-[var(--color-text-secondary)] transition-transform group-open:rotate-180 shrink-0" aria-hidden="true" />
@@ -548,7 +579,7 @@ export function XmlViewer({ xml, filename, title = 'XML-Daten' }: { xml: string;
             onClick={() => downloadBlob(new Blob([xml], { type: 'application/xml' }), filename)}
             className="inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-full text-[13px] font-medium text-[var(--color-brand-dark)] hover:bg-[var(--color-brand-soft)] transition-colors"
           >
-            <Download className="w-3.5 h-3.5" aria-hidden="true" /> XML herunterladen
+            <Download className="w-3.5 h-3.5" aria-hidden="true" /> {t('XML herunterladen', 'Download XML')}
           </button>
         </div>
         <pre className="max-h-[420px] overflow-auto px-4 sm:px-5 pb-4 font-mono text-[12px] leading-[1.6] text-[var(--color-ink)] whitespace-pre">{xml}</pre>
@@ -559,21 +590,22 @@ export function XmlViewer({ xml, filename, title = 'XML-Daten' }: { xml: string;
 
 /* ---------------- Archive ---------------- */
 
-export const ARCHIVE_ROLE_LABELS: Record<string, string> = {
-  input_json: 'Eingabedaten (JSON)',
-  original_pdf: 'Original-PDF',
-  uploaded_document: 'Hochgeladenes Dokument',
-  generated_pdf: 'Erzeugtes ZUGFeRD-PDF',
-  generated_xml: 'Erzeugte XRechnung (XML)',
+export const ARCHIVE_ROLE_LABELS: Record<string, { label: string; labelEn: string }> = {
+  input_json: { label: 'Eingabedaten (JSON)', labelEn: 'Input data (JSON)' },
+  original_pdf: { label: 'Original-PDF', labelEn: 'Original PDF' },
+  uploaded_document: { label: 'Hochgeladenes Dokument', labelEn: 'Uploaded document' },
+  generated_pdf: { label: 'Erzeugtes ZUGFeRD-PDF', labelEn: 'Generated ZUGFeRD PDF' },
+  generated_xml: { label: 'Erzeugte XRechnung (XML)', labelEn: 'Generated XRechnung (XML)' },
 };
 
 export function ArchiveFiles({ files }: { files: ArchiveInfo['files'] }) {
+  const { t } = useLang();
   return (
     <ul className="divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)]">
       {files.map((f) => (
         <li key={f.filename} className="px-3.5 py-2.5">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-            <p className="text-[13px] font-medium text-[var(--color-ink)]">{ARCHIVE_ROLE_LABELS[f.role] ?? f.role}</p>
+            <p className="text-[13px] font-medium text-[var(--color-ink)]">{ARCHIVE_ROLE_LABELS[f.role] ? t(ARCHIVE_ROLE_LABELS[f.role].label, ARCHIVE_ROLE_LABELS[f.role].labelEn) : f.role}</p>
             <p className="text-[12px] text-[var(--color-text-muted)] tabular-nums">{formatBytes(f.size)}</p>
           </div>
           <p className="font-mono text-[11px] text-[var(--color-text-muted)] break-all" title={f.sha256}>
@@ -595,6 +627,7 @@ export function ArchiveCard({
   archiveId?: string | null;
   onVerify: (id: string) => void;
 }) {
+  const { t } = useLang();
   const id = archive?.archive_id ?? archiveId;
   if (!id) return null;
   return (
@@ -603,17 +636,18 @@ export function ArchiveCard({
         <div className="flex items-start gap-3 min-w-0">
           <Fingerprint className="w-5 h-5 mt-0.5 text-[var(--color-ink)] shrink-0" aria-hidden="true" />
           <div className="min-w-0">
-            <p className="text-[15px] font-medium text-[var(--color-ink)]">Revisionssicher archiviert (GoBD)</p>
+            <p className="text-[15px] font-medium text-[var(--color-ink)]">{t('Revisionssicher archiviert (GoBD)', 'Archived audit-proof (GoBD)')}</p>
             <p className="text-[13px] text-[var(--color-text-secondary)]">
-              Unveränderte Kopie mit SHA-256-Prüfsummen{archive ? `, am ${formatDateTime(archive.archived_at)}` : ''}.
+              {t('Unveränderte Kopie mit SHA-256-Prüfsummen', 'Unaltered copy with SHA-256 checksums')}
+              {archive ? t(`, am ${formatDateTime(archive.archived_at)}`, `, on ${formatDateTime(archive.archived_at)}`) : ''}.
             </p>
             <p className="mt-1 font-mono text-[12px] text-[var(--color-ink)] break-all">{id}</p>
           </div>
         </div>
         <div className="flex gap-1">
-          <CopyButton text={id} label="ID kopieren" />
+          <CopyButton text={id} label={t('ID kopieren', 'Copy ID')} />
           <button type="button" onClick={() => onVerify(id)} className="btn-brand-ghost !min-h-[36px] !px-4 !text-[13px]">
-            Integrität prüfen
+            {t('Integrität prüfen', 'Verify integrity')}
           </button>
         </div>
       </div>

@@ -8,12 +8,9 @@ const title = 'E-Rechnung erstellen, auslesen und prüfen | Finlyzers';
 const description =
   'PDF-Rechnungen in ZUGFeRD oder XRechnung umwandeln, Daten aus E-Rechnungen auslesen und gegen EN 16931 prüfen.';
 
-// The tool itself; /de owns the "PDF in ZUGFeRD umwandeln" search intent, so this page stays out of
-// the index and the sitemap to avoid competing with it.
-export const metadata: Metadata = {
-  ...pageMetadata({ title, description, path, locale: 'de' }),
-  robots: { index: false, follow: true },
-};
+// The tool itself. Indexable (robots from the layout) for the "E-Rechnung erstellen / auslesen / prüfen"
+// intent; /de keeps "PDF in ZUGFeRD umwandeln", so keep this title off that phrase.
+export const metadata: Metadata = pageMetadata({ title, description, path, locale: 'de' });
 
 const highlights = ['ZUGFeRD PDF/A-3', 'XRechnung XML', 'EN 16931 geprüft', 'Revisionssicher archiviert'];
 

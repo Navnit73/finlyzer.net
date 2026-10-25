@@ -4,18 +4,20 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Fingerprint, Loader2, XCircle } from 'lucide-react';
 import type { ArchiveVerification } from '@/lib/einvoice';
 import { ArchiveFiles, EinvoiceRequestError, ErrorNotice, Field, SectionHeader, floatingInputClass, formatDateTime, requestEinvoice } from './shared';
+import { useLang } from './i18n';
 
-const OPERATION_LABELS: Record<string, string> = {
-  'create-zugferd': 'ZUGFeRD erstellt',
-  'create-xrechnung': 'XRechnung erstellt',
-  'convert-zugferd': 'PDF in ZUGFeRD umgewandelt',
-  'convert-xrechnung': 'In XRechnung umgewandelt',
-  extract: 'E-Rechnung ausgelesen',
-  validate: 'E-Rechnung geprüft',
+const OPERATION_LABELS: Record<string, [string, string]> = {
+  'create-zugferd': ['ZUGFeRD erstellt', 'ZUGFeRD created'],
+  'create-xrechnung': ['XRechnung erstellt', 'XRechnung created'],
+  'convert-zugferd': ['PDF in ZUGFeRD umgewandelt', 'PDF converted to ZUGFeRD'],
+  'convert-xrechnung': ['In XRechnung umgewandelt', 'Converted to XRechnung'],
+  extract: ['E-Rechnung ausgelesen', 'E-invoice extracted'],
+  validate: ['E-Rechnung geprüft', 'E-invoice validated'],
 };
 
 /** `request` is set by other tabs ("Integrität prüfen"); a new nonce re-runs the check for the same ID. */
 export default function ArchivePanel({ request }: { request: { id: string; nonce: number } | null }) {
+  const { t } = useLang();
   const [id, setId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<EinvoiceRequestError | null>(null);
@@ -28,13 +30,13 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
     setError(null);
     setRecord(null);
     try {
-      const res = await requestEinvoice(`/api/einvoice/archive/${encodeURIComponent(trimmed)}`, { method: 'GET' }, {
-        400: 'Das ist keine gültige Archiv-ID. Sie beginnt mit „ea_“.',
-        404: 'Zu dieser Archiv-ID gibt es keinen Datensatz.',
+      const res = await requestEinvoice(`/api/einvoice/archive/${encodeURIComponent(trimmed)}`, { method: 'GET' }, t, {
+        400: t('Das ist keine gültige Archiv-ID. Sie beginnt mit „ea_“.', 'This is not a valid archive ID. It starts with “ea_”.'),
+        404: t('Zu dieser Archiv-ID gibt es keinen Datensatz.', 'There is no record for this archive ID.'),
       });
       setRecord(await res.json());
     } catch (err) {
-      setError(err instanceof EinvoiceRequestError ? err : new EinvoiceRequestError('Die Prüfung ist fehlgeschlagen.', 0));
+      setError(err instanceof EinvoiceRequestError ? err : new EinvoiceRequestError(t('Die Prüfung ist fehlgeschlagen.', 'The check failed.'), 0));
     } finally {
       setBusy(false);
     }
@@ -50,8 +52,11 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
       <div className="space-y-6 min-w-0">
         <SectionHeader
-          title="Archiv-Integrität prüfen"
-          description="Jede erstellte, umgewandelte oder ausgelesene E-Rechnung wird unverändert mit SHA-256-Prüfsummen archiviert. Geben Sie die Archiv-ID ein, um nachzuweisen, dass weder Dateien noch Protokoll verändert wurden."
+          title={t('Archiv-Integrität prüfen', 'Verify archive integrity')}
+          description={t(
+            'Jede erstellte, umgewandelte oder ausgelesene E-Rechnung wird unverändert mit SHA-256-Prüfsummen archiviert. Geben Sie die Archiv-ID ein, um nachzuweisen, dass weder Dateien noch Protokoll verändert wurden.',
+            'Every created, converted or extracted e-invoice is archived unaltered with SHA-256 checksums. Enter the archive ID to prove that neither the files nor the log have been changed.'
+          )}
         />
         <form
           onSubmit={(e) => {
@@ -60,12 +65,14 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
           }}
           className="flex flex-col sm:flex-row sm:items-start gap-2"
         >
-          <Field htmlFor="einv-archive-id" label="Archiv-ID" className="flex-1" hint="Steht im Ergebnis jeder Erstellung oder Auslesung">
+          <Field htmlFor="einv-archive-id" label={t('Archiv-ID', 'Archive ID')}
+            className="flex-1"
+            hint={t('Steht im Ergebnis jeder Erstellung oder Auslesung', 'Shown in the result of every creation or extraction')}>
             <input
               id="einv-archive-id"
               value={id}
               onChange={(e) => setId(e.target.value)}
-              placeholder="z. B. ea_20261024T155024Z_a7df191907c84c8c"
+              placeholder={`${t('z. B.', 'e.g.')} ea_20261024T155024Z_a7df191907c84c8c`}
               className={`${floatingInputClass} font-mono !text-[14px]`}
               autoComplete="off"
               spellCheck={false}
@@ -73,7 +80,7 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
           </Field>
           <button type="submit" disabled={!id.trim() || busy} className="btn-brand-primary !min-h-[56px] !px-6 shrink-0">
             {busy ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Fingerprint className="w-4 h-4" aria-hidden="true" />}
-            Prüfen
+            {t('Prüfen', 'Verify')}
           </button>
         </form>
 
@@ -92,20 +99,26 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
                 <XCircle className="w-7 h-7 shrink-0 text-[var(--color-danger)]" aria-hidden="true" />
               )}
               <div className="min-w-0">
-                <p className="text-[19px] font-semibold tracking-[-0.015em] text-[var(--color-ink)]">{record.intact ? 'Unverändert' : 'Veränderung erkannt'}</p>
+                <p className="text-[19px] font-semibold tracking-[-0.015em] text-[var(--color-ink)]">{record.intact ? t('Unverändert', 'Unaltered') : t('Veränderung erkannt', 'Change detected')}</p>
                 <p className="text-[14px] text-[var(--color-text-secondary)]">
                   {record.intact
-                    ? 'Alle Dateien, das Manifest und die Protokollkette stimmen mit den gespeicherten Prüfsummen überein.'
-                    : 'Mindestens eine Prüfsumme oder die Protokollkette stimmt nicht mehr. Details unten.'}
+                    ? t(
+                        'Alle Dateien, das Manifest und die Protokollkette stimmen mit den gespeicherten Prüfsummen überein.',
+                        'All files, the manifest and the log chain match the stored checksums.'
+                      )
+                    : t(
+                        'Mindestens eine Prüfsumme oder die Protokollkette stimmt nicht mehr. Details unten.',
+                        'At least one checksum or the log chain no longer matches. Details below.'
+                      )}
                 </p>
               </div>
             </div>
 
             <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                ['Vorgang', OPERATION_LABELS[record.operation] ?? record.operation],
-                ['Rechnungsnummer', record.invoice_number || '–'],
-                ['Archiviert am', formatDateTime(record.archived_at)],
+                [t('Vorgang', 'Operation'), OPERATION_LABELS[record.operation] ? t(...OPERATION_LABELS[record.operation]) : record.operation],
+                [t('Rechnungsnummer', 'Invoice number'), record.invoice_number || '–'],
+                [t('Archiviert am', 'Archived on'), formatDateTime(record.archived_at)],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-xl border border-[var(--color-border)] px-3.5 py-2.5">
                   <dt className="text-[12px] text-[var(--color-text-muted)]">{k}</dt>
@@ -114,7 +127,7 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
               ))}
             </dl>
             <div>
-              <p className="text-[12px] text-[var(--color-text-muted)]">Hash des Protokolleintrags</p>
+              <p className="text-[12px] text-[var(--color-text-muted)]">{t('Hash des Protokolleintrags', 'Log entry hash')}</p>
               <p className="font-mono text-[12px] text-[var(--color-ink)] break-all">{record.entry_hash}</p>
             </div>
             {record.files.length > 0 && <ArchiveFiles files={record.files} />}
@@ -135,13 +148,20 @@ export default function ArchivePanel({ request }: { request: { id: string; nonce
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-success)] text-[var(--color-on-brand)] px-3 py-1 text-[12px] font-medium">
           <Fingerprint className="w-3.5 h-3.5" aria-hidden="true" /> GoBD · § 147 AO
         </span>
-        <p className="text-[15px] font-semibold text-[var(--color-ink)]">Warum ein Archiv?</p>
+        <p className="text-[15px] font-semibold text-[var(--color-ink)]">{t('Warum ein Archiv?', 'Why an archive?')}</p>
         <p>
-          Rechnungen müssen in Deutschland 8 Jahre unveränderbar aufbewahrt werden (§ 147 AO, GoBD). Jede Datei wird beim Speichern mit einer SHA-256-Prüfsumme
-          versehen, und jeder Eintrag ist mit dem vorherigen verkettet.
+          {t(
+            'Rechnungen müssen in Deutschland 8 Jahre unveränderbar aufbewahrt werden (§ 147 AO, GoBD). Jede Datei wird beim Speichern mit einer SHA-256-Prüfsumme versehen, und jeder Eintrag ist mit dem vorherigen verkettet.',
+            'In Germany, invoices must be kept unaltered for 8 years (§ 147 AO, GoBD). Every file gets a SHA-256 checksum when stored, and every entry is chained to the previous one.'
+          )}
         </p>
-        <p>Die Prüfung rechnet alle Prüfsummen neu und geht die gesamte Protokollkette durch. Gelöschte, geänderte oder eingefügte Einträge fallen auf.</p>
-        <p>Die Archiv-ID finden Sie im Ergebnis jeder Erstellung oder Auslesung.</p>
+        <p>
+          {t(
+            'Die Prüfung rechnet alle Prüfsummen neu und geht die gesamte Protokollkette durch. Gelöschte, geänderte oder eingefügte Einträge fallen auf.',
+            'The check recalculates all checksums and walks the entire log chain. Deleted, changed or inserted entries are detected.'
+          )}
+        </p>
+        <p>{t('Die Archiv-ID finden Sie im Ergebnis jeder Erstellung oder Auslesung.', 'You find the archive ID in the result of every creation or extraction.')}</p>
       </aside>
     </div>
   );

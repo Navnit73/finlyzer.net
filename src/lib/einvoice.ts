@@ -127,22 +127,22 @@ export interface InvoiceForm {
   };
 }
 
-/** Unit aliases the backend maps to UN/ECE Rec 20 codes. */
-export const UNITS: { value: string; label: string; code: string }[] = [
-  { value: 'Stk', label: 'Stück', code: 'C62' },
-  { value: 'Std', label: 'Stunden', code: 'HUR' },
-  { value: 'Tag', label: 'Tage', code: 'DAY' },
-  { value: 'kg', label: 'Kilogramm', code: 'KGM' },
-  { value: 'pauschal', label: 'Pauschal', code: 'LS' },
+/** Unit aliases the backend maps to UN/ECE Rec 20 codes. `labelEn` is for the tool's English UI. */
+export const UNITS: { value: string; label: string; labelEn: string; code: string }[] = [
+  { value: 'Stk', label: 'Stück', labelEn: 'Pieces', code: 'C62' },
+  { value: 'Std', label: 'Stunden', labelEn: 'Hours', code: 'HUR' },
+  { value: 'Tag', label: 'Tage', labelEn: 'Days', code: 'DAY' },
+  { value: 'kg', label: 'Kilogramm', labelEn: 'Kilograms', code: 'KGM' },
+  { value: 'pauschal', label: 'Pauschal', labelEn: 'Lump sum', code: 'LS' },
 ];
 
 /** Standard-rated categories only; 0 % lines need an exemption reason the form doesn't collect. */
 export const VAT_RATES = ['19', '7'];
 
-export const TYPE_CODES: { value: string; label: string }[] = [
-  { value: '380', label: 'Rechnung' },
-  { value: '381', label: 'Gutschrift' },
-  { value: '384', label: 'Korrigierte Rechnung' },
+export const TYPE_CODES: { value: string; label: string; labelEn: string }[] = [
+  { value: '380', label: 'Rechnung', labelEn: 'Invoice' },
+  { value: '381', label: 'Gutschrift', labelEn: 'Credit note' },
+  { value: '384', label: 'Korrigierte Rechnung', labelEn: 'Corrected invoice' },
 ];
 
 let lineCounter = 0;
@@ -506,19 +506,44 @@ export function base64ToBlob(base64: string, type: string): Blob {
   return new Blob([bytes], { type });
 }
 
-export const CHECK_LABELS: Record<string, { label: string; hint: string }> = {
-  xml: { label: 'XML-Struktur', hint: 'Wohlgeformtheit, keine DTD oder Entities (Schutz vor XXE)' },
-  xsd: { label: 'XSD-Schema', hint: 'Schema des erkannten Profils (Factur-X bzw. UBL 2.1)' },
-  business_rules: { label: 'Geschäftsregeln', hint: 'EN 16931 inkl. Nachrechnung aller Beträge, BR-DE für XRechnung' },
-  kosit: { label: 'KoSIT-Prüfung', hint: 'Offizielle Schematron-Prüfung (XRechnung, EN 16931 CII)' },
-  pdf: { label: 'PDF/A-3 & Anhang', hint: 'Eingebettete XML, PDF/A-3 in XMP, Profil passt zur XML' },
+export const CHECK_LABELS: Record<string, { label: string; hint: string; labelEn: string; hintEn: string }> = {
+  xml: {
+    label: 'XML-Struktur',
+    hint: 'Wohlgeformtheit, keine DTD oder Entities (Schutz vor XXE)',
+    labelEn: 'XML structure',
+    hintEn: 'Well-formed, no DTD or entities (XXE protection)',
+  },
+  xsd: {
+    label: 'XSD-Schema',
+    hint: 'Schema des erkannten Profils (Factur-X bzw. UBL 2.1)',
+    labelEn: 'XSD schema',
+    hintEn: 'Schema of the detected profile (Factur-X or UBL 2.1)',
+  },
+  business_rules: {
+    label: 'Geschäftsregeln',
+    hint: 'EN 16931 inkl. Nachrechnung aller Beträge, BR-DE für XRechnung',
+    labelEn: 'Business rules',
+    hintEn: 'EN 16931 incl. recalculation of all amounts, BR-DE for XRechnung',
+  },
+  kosit: {
+    label: 'KoSIT-Prüfung',
+    hint: 'Offizielle Schematron-Prüfung (XRechnung, EN 16931 CII)',
+    labelEn: 'KoSIT check',
+    hintEn: 'Official Schematron validation (XRechnung, EN 16931 CII)',
+  },
+  pdf: {
+    label: 'PDF/A-3 & Anhang',
+    hint: 'Eingebettete XML, PDF/A-3 in XMP, Profil passt zur XML',
+    labelEn: 'PDF/A-3 & attachment',
+    hintEn: 'Embedded XML, PDF/A-3 in XMP, profile matches the XML',
+  },
 };
 
-export const ISSUE_SOURCE_LABELS: Record<string, string> = {
-  input: 'Eingabe',
-  xsd: 'XSD',
-  'business-rules': 'Geschäftsregel',
-  kosit: 'KoSIT',
-  pdf: 'PDF',
-  xml: 'XML',
+export const ISSUE_SOURCE_LABELS: Record<string, { label: string; labelEn: string }> = {
+  input: { label: 'Eingabe', labelEn: 'Input' },
+  xsd: { label: 'XSD', labelEn: 'XSD' },
+  'business-rules': { label: 'Geschäftsregel', labelEn: 'Business rule' },
+  kosit: { label: 'KoSIT', labelEn: 'KoSIT' },
+  pdf: { label: 'PDF', labelEn: 'PDF' },
+  xml: { label: 'XML', labelEn: 'XML' },
 };

@@ -8,5 +8,5 @@ import { DE_TRUST_PAGES } from '@/lib/trust-pages';
  * the English sitemap. List new /de pages here as they ship.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [GERMAN_ROOT, ...DE_TRUST_PAGES.map((p) => p.path)].map((path) => ({ url: absoluteUrl(path) }));
+  return [GERMAN_ROOT, '/de/konverter/e-rechnung', ...DE_TRUST_PAGES.map((p) => p.path)].map((path) => ({ url: absoluteUrl(path) }));
 }

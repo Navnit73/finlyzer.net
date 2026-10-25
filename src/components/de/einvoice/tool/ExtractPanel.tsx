@@ -15,6 +15,7 @@ import {
   downloadBlob,
   requestEinvoice,
 } from './shared';
+import { useLang } from './i18n';
 
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Obj) : {});
@@ -22,21 +23,22 @@ const text = (v: unknown) => (v === null || v === undefined || v === '' ? '–' 
 const money = (v: unknown) => (typeof v === 'number' ? formatEuro(v) : text(v));
 const date = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(`${v}T00:00:00`).toLocaleDateString('de-DE') : text(v));
 
-const XMP_LABELS: Record<string, string> = {
-  pdfa_part: 'PDF/A-Teil',
-  pdfa_conformance: 'PDF/A-Konformität',
-  document_type: 'Dokumenttyp',
-  document_file_name: 'XML-Anhang',
-  version: 'Factur-X-Version',
-  conformance_level: 'Profil (XMP)',
-  namespace: 'Namensraum',
+const XMP_LABELS: Record<string, [string, string]> = {
+  pdfa_part: ['PDF/A-Teil', 'PDF/A part'],
+  pdfa_conformance: ['PDF/A-Konformität', 'PDF/A conformance'],
+  document_type: ['Dokumenttyp', 'Document type'],
+  document_file_name: ['XML-Anhang', 'XML attachment'],
+  version: ['Factur-X-Version', 'Factur-X version'],
+  conformance_level: ['Profil (XMP)', 'Profile (XMP)'],
+  namespace: ['Namensraum', 'Namespace'],
 };
 
+/** [title DE, title EN, body DE, body EN] */
 const OUTPUTS = [
-  ['Rechnungsdaten', 'Parteien, Positionen und Summen übersichtlich aufbereitet'],
-  ['Profil und Version', 'z. B. EN 16931, XRechnung 3.0 oder Factur-X'],
-  ['XML und JSON', 'Rohe XML ansehen, kopieren oder als JSON exportieren'],
-  ['Ins Formular übernehmen', 'Daten mit einem Klick in „Erstellen“ weiterverwenden'],
+  ['Rechnungsdaten', 'Invoice data', 'Parteien, Positionen und Summen übersichtlich aufbereitet', 'Parties, line items and totals clearly laid out'],
+  ['Profil und Version', 'Profile and version', 'z. B. EN 16931, XRechnung 3.0 oder Factur-X', 'e.g. EN 16931, XRechnung 3.0 or Factur-X'],
+  ['XML und JSON', 'XML and JSON', 'Rohe XML ansehen, kopieren oder als JSON exportieren', 'View and copy the raw XML or export it as JSON'],
+  ['Ins Formular übernehmen', 'Use in the form', 'Daten mit einem Klick in „Erstellen“ weiterverwenden', 'Reuse the data in “Create” with one click'],
 ];
 
 export default function ExtractPanel({
@@ -46,6 +48,7 @@ export default function ExtractPanel({
   onUseInForm: (data: ExtractResponse) => void;
   onVerifyArchive: (id: string) => void;
 }) {
+  const { t } = useLang();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<EinvoiceRequestError | null>(null);
@@ -59,12 +62,15 @@ export default function ExtractPanel({
     try {
       const body = new FormData();
       body.append('file', file, file.name);
-      const res = await requestEinvoice('/api/einvoice/extract', { method: 'POST', body }, {
-        422: 'In dieser Datei wurde keine E-Rechnung gefunden. Ist es eine ZUGFeRD-PDF oder eine XRechnung-/CII-XML?',
+      const res = await requestEinvoice('/api/einvoice/extract', { method: 'POST', body }, t, {
+        422: t(
+          'In dieser Datei wurde keine E-Rechnung gefunden. Ist es eine ZUGFeRD-PDF oder eine XRechnung-/CII-XML?',
+          'No e-invoice was found in this file. Is it a ZUGFeRD PDF or an XRechnung/CII XML?'
+        ),
       });
       setData(await res.json());
     } catch (err) {
-      setError(err instanceof EinvoiceRequestError ? err : new EinvoiceRequestError('Die Datei konnte nicht ausgelesen werden.', 0));
+      setError(err instanceof EinvoiceRequestError ? err : new EinvoiceRequestError(t('Die Datei konnte nicht ausgelesen werden.', 'The file could not be read.'), 0));
     } finally {
       setBusy(false);
     }
@@ -85,14 +91,17 @@ export default function ExtractPanel({
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
         <section className="space-y-5 min-w-0">
           <SectionHeader
-            title="E-Rechnung auslesen"
-            description={`Laden Sie eine ZUGFeRD-/Factur-X-PDF oder eine XRechnung-, CII- oder UBL-XML hoch. Wir lesen die strukturierten Rechnungsdaten, erkennen Profil und Version und zeigen die rohe XML. Max. ${EINVOICE_MAX_UPLOAD_MB} MB.`}
+            title={t('E-Rechnung auslesen', 'Extract e-invoice')}
+            description={t(
+              `Laden Sie eine ZUGFeRD-/Factur-X-PDF oder eine XRechnung-, CII- oder UBL-XML hoch. Wir lesen die strukturierten Rechnungsdaten, erkennen Profil und Version und zeigen die rohe XML. Max. ${EINVOICE_MAX_UPLOAD_MB} MB.`,
+              `Upload a ZUGFeRD/Factur-X PDF or an XRechnung, CII or UBL XML. We read the structured invoice data, detect profile and version and show the raw XML. Max. ${EINVOICE_MAX_UPLOAD_MB} MB.`
+            )}
           />
           <FileDrop
             id="einv-extract-file"
             accept=".pdf,.xml,application/pdf,application/xml,text/xml"
             extensions={['.pdf', '.xml']}
-            title="E-Rechnung hochladen"
+            title={t('E-Rechnung hochladen', 'Upload e-invoice')}
             hint="ZUGFeRD 2.x / Factur-X (PDF), XRechnung 1.x–3.x, CII- oder UBL-XML"
             file={file}
             onFile={(f) => {
@@ -105,21 +114,21 @@ export default function ExtractPanel({
           />
           <button type="button" onClick={run} disabled={!file || busy} className="btn-brand-primary w-full sm:w-auto !min-h-[48px] !px-7">
             {busy ? <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> : <FileSearch className="w-5 h-5" aria-hidden="true" />}
-            {busy ? 'Wird ausgelesen …' : 'Daten auslesen'}
+            {busy ? t('Wird ausgelesen …', 'Extracting …') : t('Daten auslesen', 'Extract data')}
           </button>
         </section>
 
         <aside className="surface-dark rounded-2xl p-5 sm:p-6">
-          <p className="text-[15px] font-semibold text-[var(--color-ink)]">Das erhalten Sie</p>
+          <p className="text-[15px] font-semibold text-[var(--color-ink)]">{t('Das erhalten Sie', 'What you get')}</p>
           <ul className="mt-4 space-y-3">
-            {OUTPUTS.map(([t, b]) => (
-              <li key={t} className="flex gap-3">
+            {OUTPUTS.map(([titleDe, titleEn, bodyDe, bodyEn]) => (
+              <li key={titleDe} className="flex gap-3">
                 <span className="mt-px">
                   <CheckDot />
                 </span>
                 <div>
-                  <p className="text-[14px] font-medium text-[var(--color-ink)]">{t}</p>
-                  <p className="text-[13px] leading-snug text-[var(--color-text-secondary)]">{b}</p>
+                  <p className="text-[14px] font-medium text-[var(--color-ink)]">{t(titleDe, titleEn)}</p>
+                  <p className="text-[13px] leading-snug text-[var(--color-text-secondary)]">{t(bodyDe, bodyEn)}</p>
                 </div>
               </li>
             ))}
@@ -130,12 +139,14 @@ export default function ExtractPanel({
       {error && <ErrorNotice error={error} onDismiss={() => setError(null)} />}
 
       {data && (
-        <section aria-label="Ausgelesene Rechnungsdaten" className="space-y-6">
+        <section aria-label={t('Ausgelesene Rechnungsdaten', 'Extracted invoice data')} className="space-y-6">
           <div className="rounded-2xl border border-[var(--color-border)] p-4 sm:p-6 space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-[13px] text-[var(--color-text-muted)] break-all">{data.filename}</p>
-                <h3 className="text-[21px] font-semibold tracking-[-0.02em] text-[var(--color-ink)]">Rechnung {text(invoice.invoice_number)}</h3>
+                <h3 className="text-[21px] font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
+                  {t('Rechnung', 'Invoice')} {text(invoice.invoice_number)}
+                </h3>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {[data.source_type.toUpperCase(), data.syntax, data.profile, data.version, data.embedded_filename].filter(Boolean).map((chip) => (
                     <span key={chip} className="rounded-full bg-[var(--color-surface-muted)] px-2.5 py-1 text-[12px] text-[var(--color-ink)]">
@@ -147,7 +158,7 @@ export default function ExtractPanel({
               <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                 {data.invoice && (
                   <button type="button" onClick={() => onUseInForm(data)} className="btn-brand-primary flex-1 sm:flex-none !min-h-[44px]">
-                    In Formular übernehmen <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                    {t('In Formular übernehmen', 'Use in form')} <ArrowRight className="w-4 h-4" aria-hidden="true" />
                   </button>
                 )}
                 {data.invoice && (
@@ -168,10 +179,10 @@ export default function ExtractPanel({
               <>
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 border-t border-[var(--color-border)] pt-5">
                   {[
-                    ['Rechnungsdatum', date(invoice.issue_date)],
-                    ['Leistungsdatum', date(invoice.delivery_date)],
-                    ['Belegart', text(invoice.type_code)],
-                    ['Währung', text(invoice.currency)],
+                    [t('Rechnungsdatum', 'Invoice date'), date(invoice.issue_date)],
+                    [t('Leistungsdatum', 'Delivery date'), date(invoice.delivery_date)],
+                    [t('Belegart', 'Document type'), text(invoice.type_code)],
+                    [t('Währung', 'Currency'), text(invoice.currency)],
                   ].map(([k, v]) => (
                     <div key={k}>
                       <dt className="text-[12px] text-[var(--color-text-muted)]">{k}</dt>
@@ -181,14 +192,16 @@ export default function ExtractPanel({
                 </dl>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    ['Rechnungssteller', seller],
-                    ['Rechnungsempfänger', buyer],
+                    [t('Rechnungssteller', 'Seller'), seller],
+                    [t('Rechnungsempfänger', 'Buyer'), buyer],
                   ].map(([label, p]) => (
                     <div key={label as string} className="rounded-xl bg-[var(--color-surface-subtle)] p-4">
                       <p className="text-[12px] text-[var(--color-text-muted)]">{label as string}</p>
                       <p className="mt-0.5 text-[15px] font-medium text-[var(--color-ink)]">{text((p as Obj).name)}</p>
                       <p className="text-[13px] text-[var(--color-text-secondary)]">{party(p as Obj) || '–'}</p>
-                      {Boolean((p as Obj).vat_id) && <p className="text-[13px] text-[var(--color-text-secondary)]">USt-IdNr. {text((p as Obj).vat_id)}</p>}
+                      {Boolean((p as Obj).vat_id) && <p className="text-[13px] text-[var(--color-text-secondary)]">
+                          {t('USt-IdNr.', 'VAT ID')} {text((p as Obj).vat_id)}
+                        </p>}
                       {Boolean((p as Obj).buyer_reference) && <p className="text-[13px] text-[var(--color-text-secondary)]">Leitweg-ID {text((p as Obj).buyer_reference)}</p>}
                     </div>
                   ))}
@@ -199,12 +212,12 @@ export default function ExtractPanel({
                     <table className="w-full text-[14px]">
                       <thead className="bg-[var(--color-surface-subtle)] text-[12px] text-[var(--color-text-muted)]">
                         <tr>
-                          <th className="text-left font-medium px-3 py-2">Pos.</th>
-                          <th className="text-left font-medium px-3 py-2">Bezeichnung</th>
-                          <th className="text-right font-medium px-3 py-2">Menge</th>
-                          <th className="text-right font-medium px-3 py-2">Netto/Einh.</th>
-                          <th className="text-right font-medium px-3 py-2">USt.</th>
-                          <th className="text-right font-medium px-3 py-2">Betrag</th>
+                          <th className="text-left font-medium px-3 py-2">{t('Pos.', 'No.')}</th>
+                          <th className="text-left font-medium px-3 py-2">{t('Bezeichnung', 'Description')}</th>
+                          <th className="text-right font-medium px-3 py-2">{t('Menge', 'Qty')}</th>
+                          <th className="text-right font-medium px-3 py-2">{t('Netto/Einh.', 'Net/unit')}</th>
+                          <th className="text-right font-medium px-3 py-2">{t('USt.', 'VAT')}</th>
+                          <th className="text-right font-medium px-3 py-2">{t('Betrag', 'Amount')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[var(--color-border)]">
@@ -227,10 +240,10 @@ export default function ExtractPanel({
 
                 <dl className="ml-auto max-w-xs space-y-1.5 text-[14px]">
                   {[
-                    ['Nettobetrag', totals.net_total],
-                    ['Umsatzsteuer', totals.vat_total],
-                    ['Gesamtbetrag', totals.gross_total],
-                    ['Zahlbetrag', totals.payable_amount],
+                    [t('Nettobetrag', 'Net amount'), totals.net_total],
+                    [t('Umsatzsteuer', 'VAT'), totals.vat_total],
+                    [t('Gesamtbetrag', 'Total'), totals.gross_total],
+                    [t('Zahlbetrag', 'Amount due'), totals.payable_amount],
                   ].map(([k, v], i) => (
                     <div key={k as string} className={`flex justify-between gap-4 ${i === 2 ? 'border-t border-[var(--color-border)] pt-2 font-semibold text-[var(--color-ink)]' : 'text-[var(--color-text-secondary)]'}`}>
                       <dt>{k as string}</dt>
@@ -244,11 +257,11 @@ export default function ExtractPanel({
 
           {data.xmp && Object.keys(data.xmp).length > 0 && (
             <div>
-              <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">PDF-Metadaten (XMP)</p>
+              <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">{t('PDF-Metadaten (XMP)', 'PDF metadata (XMP)')}</p>
               <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {Object.entries(data.xmp).map(([k, v]) => (
                   <div key={k} className="rounded-xl border border-[var(--color-border)] px-3 py-2">
-                    <dt className="text-[12px] text-[var(--color-text-muted)]">{XMP_LABELS[k] ?? k}</dt>
+                    <dt className="text-[12px] text-[var(--color-text-muted)]">{XMP_LABELS[k] ? t(...XMP_LABELS[k]) : k}</dt>
                     <dd className="text-[14px] text-[var(--color-ink)] break-words">{text(v)}</dd>
                   </div>
                 ))}
@@ -258,12 +271,14 @@ export default function ExtractPanel({
 
           {data.warnings.length > 0 && (
             <div>
-              <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">Befunde beim Auslesen ({data.warnings.length})</p>
+              <p className="text-[13px] font-medium text-[var(--color-text-muted)] mb-2">
+                {t('Befunde beim Auslesen', 'Extraction findings')} ({data.warnings.length})
+              </p>
               <IssueList issues={data.warnings} tone="warning" />
             </div>
           )}
 
-          <XmlViewer xml={data.raw_xml} filename={`${String(invoice.invoice_number || 'rechnung')}.xml`} title="Rohe XML" />
+          <XmlViewer xml={data.raw_xml} filename={`${String(invoice.invoice_number || 'rechnung')}.xml`} title={t('Rohe XML', 'Raw XML')} />
 
           <ArchiveCard archive={data.archive} onVerify={onVerifyArchive} />
         </section>
