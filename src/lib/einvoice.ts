@@ -15,6 +15,10 @@ export type EinvoiceFormat = 'zugferd' | 'xrechnung';
 /** Simple = flat form via /convert; full = EInvoiceData via /create-zugferd or /create-xrechnung. */
 export type FormMode = 'simple' | 'full';
 
+/** Design of the PDF the backend renders when no PDF is uploaded (backend `template` query parameter). */
+export type PdfTemplate = 'classic' | 'modern' | 'minimal';
+export const PDF_TEMPLATES: readonly PdfTemplate[] = ['classic', 'modern', 'minimal'];
+
 export interface ValidationIssue {
   rule_id: string;
   field?: string | null;

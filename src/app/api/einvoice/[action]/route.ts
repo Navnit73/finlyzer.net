@@ -3,6 +3,7 @@ import { errorResponse } from '@/lib/api-utils';
 import {
   EINVOICE_ACTIONS,
   EINVOICE_MAX_REQUEST_BYTES,
+  EINVOICE_TEMPLATES,
   EinvoiceUnavailableError,
   callEinvoice,
   passThrough,
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/einvoice/{create-zugferd|create-xrechnung|extract|validate|convert}
- * Forwards the body unchanged to the backend with our API key; the backend does all file-type, size
+ * Forwards the body (and the allowed `output` / `template` query values) unchanged to the backend with our API key; the backend does all file-type, size
  * and invoice validation, so its status codes and error bodies are passed straight back.
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ action: string }> }) {
@@ -27,8 +28,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ act
   const contentType = req.headers.get('content-type');
   if (!contentType) return errorResponse('Missing Content-Type', 400, 'BAD_REQUEST');
 
-  const output = req.nextUrl.searchParams.get('output');
-  const query = output && outputs.includes(output) ? `?output=${output}` : '';
+  const search = req.nextUrl.searchParams;
+  const forward = new URLSearchParams();
+  const output = search.get('output');
+  if (output && outputs.includes(output)) forward.set('output', output);
+  const template = search.get('template');
+  if (template && EINVOICE_TEMPLATES[action]?.includes(template)) forward.set('template', template);
+  const query = forward.toString() ? `?${forward}` : '';
 
   try {
     const body = await req.arrayBuffer();

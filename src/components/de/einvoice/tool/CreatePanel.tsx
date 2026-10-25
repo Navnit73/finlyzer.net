@@ -38,6 +38,7 @@ import {
   type FormMode,
   type InvoiceForm,
   type LineForm,
+  type PdfTemplate,
   type ValidationIssue,
   type ValidationReport,
 } from '@/lib/einvoice';
@@ -67,6 +68,8 @@ interface CreateResult {
   blob: Blob;
   xml: string | null;
   report: ValidationReport | null;
+  /** Design the backend rendered; null for XRechnung or when the user's own PDF was used. */
+  template: PdfTemplate | null;
   /** From the X-Validation-* headers of /convert, used when the follow-up /validate call fails. */
   headerSummary?: { valid: boolean; warnings: number; profile: string };
   archive: ArchiveInfo | null;
@@ -114,6 +117,12 @@ const FORMAT_TONES: Record<EinvoiceFormat, { selected: string; icon: string; dot
   },
 };
 
+const PDF_DESIGNS: { id: PdfTemplate; title: [string, string]; body: [string, string] }[] = [
+  { id: 'classic', title: ['Klassisch', 'Classic'], body: ['Briefbogen nach DIN 5008, zeitlos und seriös', 'DIN 5008 letterhead, timeless and formal'] },
+  { id: 'modern', title: ['Modern', 'Modern'], body: ['Farbiger Kopfbereich und klare Tabellen', 'Coloured header and clear tables'] },
+  { id: 'minimal', title: ['Minimal', 'Minimal'], body: ['Viel Weißraum und feine Linien', 'Lots of white space and fine lines'] },
+];
+
 const MODES: { id: FormMode; title: [string, string]; body: [string, string] }[] = [
   { id: 'simple', title: ['Schnell', 'Quick'], body: ['Nur die Pflichtangaben', 'Required fields only'] },
   {
@@ -146,6 +155,7 @@ export default function CreatePanel({
 }) {
   const { t } = useLang();
   const [pdf, setPdf] = useState<File | null>(null);
+  const [pdfTemplate, setPdfTemplate] = useState<PdfTemplate>('classic');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<EinvoiceRequestError | null>(null);
   const [result, setResult] = useState<CreateResult | null>(null);
@@ -164,6 +174,8 @@ export default function CreatePanel({
 
   const xr = format === 'xrechnung';
   const full = mode === 'full';
+  // The design only applies when the backend renders the PDF itself.
+  const renderedTemplate = !xr && !pdf ? pdfTemplate : null;
   const totals = useMemo(() => computeTotals(form.lines), [form.lines]);
 
   // Field-level messages from a 422 (create/convert) or from the report attached to it.
@@ -215,7 +227,8 @@ export default function CreatePanel({
     const body = new FormData();
     body.append('invoice_data', JSON.stringify(buildFlatPayload(form, format)));
     if (!xr && pdf) body.append('file', pdf, pdf.name);
-    const res = await requestEinvoice('/api/einvoice/convert', { method: 'POST', body }, t);
+    const query = renderedTemplate ? `?template=${renderedTemplate}` : '';
+    const res = await requestEinvoice(`/api/einvoice/convert${query}`, { method: 'POST', body }, t);
     const filename = filenameFrom(res, xr ? 'xrechnung.xml' : 'zugferd.pdf');
     const blob = await res.blob();
     const headerSummary = {
@@ -237,6 +250,7 @@ export default function CreatePanel({
       blob,
       xml: xr ? await blob.text() : null,
       report,
+      template: renderedTemplate,
       headerSummary,
       archive: null,
       archiveId: res.headers.get('x-archive-id'),
@@ -259,6 +273,7 @@ export default function CreatePanel({
         blob: new Blob([data.xml], { type: 'application/xml' }),
         xml: data.xml,
         report: data.validation,
+        template: null,
         archive: data.archive ?? null,
         archiveId: data.archive?.archive_id ?? null,
       };
@@ -266,7 +281,8 @@ export default function CreatePanel({
     const body = new FormData();
     body.append('invoice_data', JSON.stringify(payload));
     if (pdf) body.append('file', pdf, pdf.name);
-    const res = await requestEinvoice('/api/einvoice/create-zugferd?output=json', { method: 'POST', body }, t);
+    const query = renderedTemplate ? `&template=${renderedTemplate}` : '';
+    const res = await requestEinvoice(`/api/einvoice/create-zugferd?output=json${query}`, { method: 'POST', body }, t);
     const data: { filename: string; pdf_base64: string; xml: string; validation: ValidationReport; archive?: ArchiveInfo } = await res.json();
     return {
       format,
@@ -274,6 +290,7 @@ export default function CreatePanel({
       blob: base64ToBlob(data.pdf_base64, 'application/pdf'),
       xml: data.xml,
       report: data.validation,
+      template: renderedTemplate,
       archive: data.archive ?? null,
       archiveId: data.archive?.archive_id ?? null,
     };
@@ -540,13 +557,54 @@ export default function CreatePanel({
             <section className={sectionClass}>
               <SectionHeader
                 step={nextStep()}
-                done={pdf !== null}
-                title={t('Ihre Rechnung als PDF (optional)', 'Your invoice as PDF (optional)')}
+                done
+                title={t('Design der Rechnungs-PDF', 'Invoice PDF design')}
                 description={t(
-                  'Wir betten die XML-Daten in Ihre bestehende PDF ein und machen sie PDF/A-3-konform. Ohne Upload erzeugen wir eine saubere Rechnungs-PDF aus Ihren Angaben.',
-                  'We embed the XML data into your existing PDF and make it PDF/A-3 compliant. Without an upload, we generate a clean invoice PDF from your details.'
+                  'Wählen Sie ein Design für die PDF, die wir aus Ihren Angaben erzeugen. Oder laden Sie Ihre eigene Rechnungs-PDF hoch: Wir betten die XML-Daten ein und machen sie PDF/A-3-konform.',
+                  'Choose a design for the PDF we generate from your details. Or upload your own invoice PDF: we embed the XML data and make it PDF/A-3 compliant.'
                 )}
               />
+              <div role="radiogroup" aria-label={t('PDF-Design', 'PDF design')} className={`grid grid-cols-3 gap-2.5 sm:gap-4 ${pdf ? 'opacity-50' : ''}`}>
+                {PDF_DESIGNS.map((d) => {
+                  const active = !pdf && pdfTemplate === d.id;
+                  return (
+                    <button
+                      key={d.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      disabled={busy || pdf !== null}
+                      onClick={() => setPdfTemplate(d.id)}
+                      className={`group flex flex-col justify-start text-left rounded-2xl border p-2 sm:p-3 bg-[var(--color-surface)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] disabled:cursor-not-allowed ${
+                        active ? 'border-[var(--color-brand)] ring-1 ring-[var(--color-brand)]' : 'border-[var(--color-border)] enabled:hover:border-[var(--color-border-hover)]'
+                      }`}
+                    >
+                      <span className="block overflow-hidden rounded-lg border border-[var(--color-border)]">
+                        <DesignThumb design={d.id} />
+                      </span>
+                      <span className="mt-2.5 flex items-center justify-between gap-2">
+                        <span className="text-[14px] sm:text-[15px] font-semibold text-[var(--color-ink)]">{t(...d.title)}</span>
+                        <span
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            active ? 'border-[var(--color-brand)] bg-[var(--color-brand)]' : 'border-[var(--color-border-hover)]'
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {active && <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--color-on-brand)]" />}
+                        </span>
+                      </span>
+                      <span className="hidden sm:block mt-0.5 text-[13px] leading-snug text-[var(--color-text-muted)]">{t(...d.body)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-3 text-[13px] text-[var(--color-text-muted)]">
+                <span className="h-px flex-1 bg-[var(--color-border)]" />
+                {pdf
+                  ? t('Ihre eigene PDF wird verwendet. Entfernen Sie sie, um ein Design zu wählen.', 'Your own PDF is used. Remove it to choose a design.')
+                  : t('oder eigene PDF verwenden (optional)', 'or use your own PDF (optional)')}
+                <span className="h-px flex-1 bg-[var(--color-border)]" />
+              </div>
               <FileDrop
                 id="einv-pdf"
                 accept=".pdf,application/pdf"
@@ -999,6 +1057,104 @@ function LineRow({
   );
 }
 
+/** Miniature of each backend PDF design (A4 proportions). Colours mirror the PDF, not the site theme. */
+function DesignThumb({ design }: { design: PdfTemplate }) {
+  const ink = '#1f2937';
+  const muted = '#cbd5e1';
+  const accent = design === 'modern' ? '#1e40af' : ink;
+  const bar = (x: number, y: number, w: number, fill = muted, h = 2) => <rect x={x} y={y} width={w} height={h} rx={h / 2} fill={fill} />;
+  return (
+    <svg viewBox="0 0 120 170" className="block w-full h-auto" aria-hidden="true">
+      <rect width="120" height="170" fill="#ffffff" />
+      {design === 'modern' && (
+        <>
+          <rect width="120" height="26" fill={accent} />
+          {bar(10, 9, 34, '#ffffff', 4)}
+          {bar(10, 16, 26, '#bfdbfe')}
+          {bar(80, 9, 30, '#ffffff', 4)}
+          {bar(88, 16, 22, '#bfdbfe')}
+          {bar(10, 34, 14, accent, 1.5)}
+          <rect x="64" y="33" width="46" height="22" rx="2" fill="#eff6ff" />
+        </>
+      )}
+      {design === 'classic' && (
+        <>
+          {bar(10, 12, 36, ink, 4)}
+          {bar(86, 10, 24)}
+          {bar(92, 14, 18)}
+          <rect x="10" y="20" width="100" height="0.8" fill={ink} />
+          {bar(10, 29, 30, muted, 1)}
+          {bar(10, 54, 40, ink, 4)}
+        </>
+      )}
+      {design === 'minimal' && (
+        <>
+          {bar(10, 10, 38, ink, 5)}
+          {bar(10, 18, 14)}
+          {bar(88, 10, 22, ink)}
+          {bar(92, 14, 18)}
+          {bar(10, 34, 14, '#a1a1aa', 1.5)}
+          {bar(64, 34, 18, '#a1a1aa', 1.5)}
+        </>
+      )}
+      {/* Recipient and invoice details */}
+      {[0, 1, 2].map((i) => (
+        <g key={i}>
+          {bar(10, 38 + i * 4.5, i === 0 ? 30 : 24)}
+          {bar(68, 37 + i * 5.5, 14)}
+          {bar(design === 'minimal' ? 88 : 94, 37 + i * 5.5, 12, '#94a3b8')}
+        </g>
+      ))}
+      {/* Line items */}
+      {design === 'modern' && <rect x="10" y="66" width="100" height="7" fill={accent} />}
+      {design === 'classic' && <rect x="10" y="66" width="100" height="7" fill="#f3f4f6" stroke={ink} strokeWidth="0.5" />}
+      {design === 'minimal' && <rect x="10" y="72.5" width="100" height="0.5" fill={ink} />}
+      {bar(13, 68.5, 22, design === 'modern' ? '#ffffff' : '#94a3b8')}
+      {bar(92, 68.5, 15, design === 'modern' ? '#ffffff' : '#94a3b8')}
+      {[0, 1, 2, 3].map((i) => (
+        <g key={i}>
+          {design === 'modern' && i % 2 === 1 && <rect x="10" y={74 + i * 8} width="100" height="8" fill="#f1f5f9" />}
+          {design !== 'modern' && <rect x="10" y={82 + i * 8} width="100" height="0.4" fill="#e5e7eb" />}
+          {bar(13, 77 + i * 8, 34, '#64748b')}
+          {bar(96, 77 + i * 8, 11, ink)}
+        </g>
+      ))}
+      {/* Totals */}
+      {[0, 1].map((i) => (
+        <g key={i}>
+          {bar(66, 112 + i * 5, 18)}
+          {bar(98, 112 + i * 5, 12)}
+        </g>
+      ))}
+      {design === 'modern' && <rect x="62" y="122" width="48" height="9" rx="1.5" fill={accent} />}
+      {design === 'classic' && <rect x="62" y="122" width="48" height="9" fill="#f3f4f6" stroke={ink} strokeWidth="0.6" />}
+      {design === 'minimal' && <rect x="62" y="122" width="48" height="0.6" fill={ink} />}
+      {bar(65, 125.5, 16, design === 'modern' ? '#ffffff' : ink)}
+      {design === 'minimal' ? bar(90, 125, 20, ink, 3) : bar(94, 125.5, 13, design === 'modern' ? '#ffffff' : ink)}
+      {/* Payment box and footer */}
+      {design !== 'minimal' && (
+        <rect
+          x="10"
+          y="137"
+          width="100"
+          height="14"
+          rx={design === 'modern' ? 2 : 0}
+          fill={design === 'modern' ? '#eff6ff' : '#f9fafb'}
+          stroke={design === 'classic' ? '#e5e7eb' : 'none'}
+          strokeWidth="0.5"
+        />
+      )}
+      {bar(14, 141, 30, '#94a3b8')}
+      {bar(62, 141, 34, ink)}
+      {bar(14, 145.5, 24)}
+      <rect x="10" y="158" width="100" height="0.5" fill={design === 'modern' ? accent : design === 'classic' ? ink : '#e5e7eb'} />
+      {[10, 36, 62, 88].map((x) => (
+        <React.Fragment key={x}>{bar(x, 161, 18, muted, 1.5)}</React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
 function ResultView({ result, onClose, onVerifyArchive }: { result: CreateResult; onClose: () => void; onVerifyArchive: (id: string) => void }) {
   const { t } = useLang();
   const isPdf = result.format === 'zugferd';
@@ -1032,6 +1188,7 @@ function ResultView({ result, onClose, onVerifyArchive }: { result: CreateResult
             </h3>
             <p className="text-[14px] text-[var(--color-text-secondary)] break-all">
               {result.filename} · {formatBytes(result.blob.size)}
+              {result.template && ` · ${t('Design', 'Design')} ${t(...PDF_DESIGNS.find((d) => d.id === result.template)!.title)}`}
             </p>
           </div>
         </div>

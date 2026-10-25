@@ -1,4 +1,4 @@
-import { EINVOICE_MAX_UPLOAD_BYTES } from '@/lib/einvoice';
+import { EINVOICE_MAX_UPLOAD_BYTES, PDF_TEMPLATES } from '@/lib/einvoice';
 
 /**
  * Server-side client for the backend's German e-invoicing API (ZUGFeRD / XRechnung). It lives at
@@ -17,6 +17,12 @@ export const EINVOICE_ACTIONS: Record<string, readonly string[]> = {
   extract: [],
   validate: [],
   convert: [],
+};
+
+/** Endpoints that render a visual PDF, with the `template` values each accepts. */
+export const EINVOICE_TEMPLATES: Record<string, readonly string[]> = {
+  'create-zugferd': PDF_TEMPLATES,
+  convert: PDF_TEMPLATES,
 };
 
 /** Same cap as the backend's pre-parse check: a PDF plus a JSON file part plus multipart overhead. */
