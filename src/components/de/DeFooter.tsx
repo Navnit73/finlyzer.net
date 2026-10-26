@@ -16,17 +16,45 @@ export default function DeFooter() {
             </p>
           </div>
 
-          <nav aria-label="Rechtliches und Kontakt">
-            <ul className="grid grid-cols-2 gap-x-10 gap-y-1">
-              {DE_TRUST_PAGES.map((p) => (
-                <li key={p.path}>
-                  <Link href={p.path} className="inline-flex items-center min-h-[44px] hover:text-[var(--color-ink)] transition-colors">
-                    {p.shortTitle}
+          <div className="flex flex-col sm:flex-row gap-8 sm:gap-14">
+            <nav aria-label="Tools und Ratgeber">
+              <span className="block font-semibold text-[var(--color-ink)] mb-3 text-[13px]">
+                Tools &amp; Ratgeber
+              </span>
+              <ul className="space-y-2 text-[14px]">
+                <li>
+                  <Link href="/de/konverter/e-rechnung" className="hover:text-[var(--color-ink)] transition-colors">
+                    E-Rechnung Konverter
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </nav>
+                <li>
+                  <Link href="/de/ratgeber" className="hover:text-[var(--color-ink)] transition-colors">
+                    Ratgeber Übersicht
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/de/ratgeber/zugferd-rechnung" className="hover:text-[var(--color-ink)] transition-colors">
+                    ZUGFeRD-Rechnung Leitfaden
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            <nav aria-label="Rechtliches und Kontakt">
+              <span className="block font-semibold text-[var(--color-ink)] mb-3 text-[13px]">
+                Rechtliches &amp; Kontakt
+              </span>
+              <ul className="grid grid-cols-2 gap-x-8 gap-y-2 text-[14px]">
+                {DE_TRUST_PAGES.map((p) => (
+                  <li key={p.path}>
+                    <Link href={p.path} className="hover:text-[var(--color-ink)] transition-colors">
+                      {p.shortTitle}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </div>
 
         <div className="mt-12 sm:mt-14 pt-6 hairline-t flex flex-col md:flex-row md:items-center justify-between gap-4 text-[12px] text-[var(--color-text-muted)]">

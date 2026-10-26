@@ -2,11 +2,23 @@ import type { MetadataRoute } from 'next';
 import { GERMAN_ROOT } from '@/lib/i18n';
 import { absoluteUrl } from '@/lib/seo-config';
 import { DE_TRUST_PAGES } from '@/lib/trust-pages';
+import { getAllRatgeberSlugs } from '@/lib/ratgeber-markdown';
 
 /**
- * /de/sitemap.xml (the English sitemap, public/sitemap.xml, is maintained by hand). No lastmod, as in
- * the English sitemap. List new /de pages here as they ship.
+ * /de/sitemap.xml (the English sitemap, public/sitemap.xml, is maintained by hand).
+ * Lists all German routes dynamically, including all Ratgeber articles from src/content/ratgeber/*.md.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [GERMAN_ROOT, '/de/konverter/e-rechnung', ...DE_TRUST_PAGES.map((p) => p.path)].map((path) => ({ url: absoluteUrl(path) }));
+  const ratgeberSlugs = getAllRatgeberSlugs();
+  const ratgeberPaths = ratgeberSlugs.map((slug) => `/de/ratgeber/${slug}`);
+
+  const allPaths = [
+    GERMAN_ROOT,
+    '/de/konverter/e-rechnung',
+    '/de/ratgeber',
+    ...ratgeberPaths,
+    ...DE_TRUST_PAGES.map((p) => p.path),
+  ];
+
+  return allPaths.map((path) => ({ url: absoluteUrl(path) }));
 }
