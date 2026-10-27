@@ -3,7 +3,7 @@ import BrandLogo from '@/components/BrandLogo';
 import { GERMAN_ROOT } from '@/lib/i18n';
 import { DE_TRUST_PAGES } from '@/lib/trust-pages';
 
-/** Footer of the German section. Links only to German pages (see src/lib/i18n.ts). */
+/** Footer of the German section. Links back to the main English homepage for cross-site authority transfer. */
 export default function DeFooter() {
   return (
     <footer className="w-full section-parchment hairline-t mt-auto text-[13px] leading-[1.5] text-[var(--color-text-secondary)]">
@@ -14,6 +14,9 @@ export default function DeFooter() {
             <p className="text-[14px] leading-relaxed">
               Verständliche Informationen zu Steuern, Finanzen und Buchhaltung für Selbstständige und kleine Unternehmen.
             </p>
+            <Link href="/" className="inline-block hover:text-[var(--color-ink)] transition-colors">
+              Finlyzers auf Englisch &rarr;
+            </Link>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-8 sm:gap-14">

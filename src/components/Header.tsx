@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Menu, X, ShieldCheck, ChevronRight, User } from 'lucide-react';
+import { Menu, X, ShieldCheck, ChevronRight, User, Globe } from 'lucide-react';
 import UserMenu from './auth/UserMenu';
 import AuthModal from './auth/LazyAuthModal';
 import BrandLogo from './BrandLogo';
@@ -72,7 +72,7 @@ export default function Header() {
   ];
 
   const desktopLinkClass = (active: boolean) =>
-    `inline-flex items-center h-11 px-1 text-sm transition-colors ${
+    `inline-flex items-center h-11 px-1 text-sm whitespace-nowrap transition-colors ${
       active ? 'text-[var(--color-ink)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
     }`;
 
@@ -87,6 +87,7 @@ export default function Header() {
     { href: '/analyzer/bank-statement-analyzer', label: 'Statement Analyzer', hint: 'See where your money went' },
     { href: '/calculators/cash-flow-calculator', label: 'Cash Flow Calculator', hint: 'Net, operating & free cash flow' },
     { href: '/pricing', label: 'Pricing & Credit Plans', hint: 'Free tier & Pay-as-you-go' },
+    { href: '/de', label: 'Deutsch', hint: 'German site' },
   ];
 
   return (
@@ -118,6 +119,14 @@ export default function Header() {
 
               {/* Account Actions, User Menu & Mobile Hamburger Button */}
               <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+                <Link
+                  href="/de"
+                  className="hidden xl:inline-flex items-center gap-1 h-9 px-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors shrink-0"
+                  aria-label="Deutsche Version"
+                >
+                  <Globe className="w-4 h-4" aria-hidden="true" />
+                  <span>DE</span>
+                </Link>
                 <UserMenu />
 
                 {/* Hamburger Button (Mobile Only) */}

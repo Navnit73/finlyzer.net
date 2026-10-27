@@ -88,6 +88,7 @@ const COLUMNS: { heading: string; links: FooterLink[] }[] = [
       { href: "/about", label: "About Us & Contact" },
       { href: "/faq", label: "FAQ" },
       { href: "/editorial-policy", label: "Methodology & Accuracy" },
+      { href: "/de", label: "Deutsch (German Site)" },
     ],
   },
 ];

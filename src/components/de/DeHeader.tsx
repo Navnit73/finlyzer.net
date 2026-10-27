@@ -4,8 +4,8 @@ import BrandLogo from '@/components/BrandLogo';
 import { GERMAN_ROOT } from '@/lib/i18n';
 
 /**
- * Header of the German section. Rendered only by src/app/de/layout.tsx. /de is a standalone site:
- * no sign-in, app or English links.
+ * Header of the German section. Rendered only by src/app/de/layout.tsx. /de is a standalone site
+ * with its own nav; it links back to the main English homepage for cross-site authority transfer.
  */
 export default function DeHeader() {
   return (
@@ -26,6 +26,12 @@ export default function DeHeader() {
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors py-2"
               >
                 Ratgeber
+              </Link>
+              <Link
+                href="/"
+                className="text-[var(--color-text-secondary)] hover:text-[var(--color-ink)] transition-colors py-2"
+              >
+                English
               </Link>
             </div>
           </nav>
