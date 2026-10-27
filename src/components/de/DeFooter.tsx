@@ -40,6 +40,11 @@ export default function DeFooter() {
                     ZUGFeRD-Rechnung Leitfaden
                   </Link>
                 </li>
+                <li>
+                  <Link href="/de/ratgeber/unterschied-xrechnung-zugferd" className="hover:text-[var(--color-ink)] transition-colors">
+                    XRechnung vs. ZUGFeRD
+                  </Link>
+                </li>
               </ul>
             </nav>
 

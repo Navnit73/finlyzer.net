@@ -23,7 +23,8 @@ keywords:
   - "e-rechnung"
   - "en 16931"
   - "elektronische rechnung 2026"
-related: []
+related:
+  - "unterschied-xrechnung-zugferd"
 faqs:
   - question: "Ist eine ZUGFeRD-Rechnung eine E-Rechnung im Sinne des Gesetzes?"
     answer: "Ja, eine nach den Vorgaben der europäischen Norm EN 16931 erstellte elektronische Rechnung im ZUGFeRD-Format gilt ab dem Profil BASIC (sowie EN 16931 und EXTENDED) als vollwertige E-Rechnung gemäß § 14 UStG. Reine PDF-Dateien ohne eingebettetes XML gelten hingegen seit dem 1. Januar 2025 nur noch als sonstige Rechnungen."

@@ -602,6 +602,38 @@ export function ZugferdFormatVisual() {
   );
 }
 
+/** Compact PDF → XML conversion flow for narrow spaces (sidebar/CTA cards): two tiles joined by a moving dashed line and travelling particles. */
+export function MiniConvertFlow() {
+  return (
+    <div
+      role="img"
+      aria-label="Eine PDF-Rechnung wird in eine ZUGFeRD-XML umgewandelt."
+      className="flex items-center gap-2 sm:gap-3"
+    >
+      <div className="w-16 sm:w-[72px] shrink-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 flex flex-col items-center gap-1.5">
+        <FileText className="w-5 h-5 text-[var(--color-text-muted)]" aria-hidden="true" />
+        <span className="text-[10px] font-medium text-[var(--color-text-secondary)]">PDF</span>
+      </div>
+
+      <div className="relative flex-1 h-6 min-w-[2.5rem]" aria-hidden="true">
+        <svg viewBox="0 0 100 2" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+          <line x1="0" y1="1" x2="100" y2="1" vectorEffect="non-scaling-stroke" className="stroke-[var(--color-border)] [stroke-width:1]" />
+          <line x1="0" y1="1" x2="100" y2="1" vectorEffect="non-scaling-stroke" className="flow-dash stroke-[var(--color-brand)] [stroke-width:1.5]" />
+        </svg>
+        <span className="particle-dot absolute top-1/2 w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] -translate-x-1/2 -translate-y-1/2" />
+      </div>
+
+      <div className="relative w-16 sm:w-[72px] shrink-0 rounded-xl surface-dark p-2.5 flex flex-col items-center gap-1.5">
+        <FileCode2 className="w-5 h-5 text-[var(--color-brand-dark)]" aria-hidden="true" />
+        <span className="text-[10px] font-medium font-mono text-[var(--color-text-secondary)]">.xml</span>
+        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-success)] flex items-center justify-center">
+          <CheckCircle2 className="w-3 h-3 text-[var(--color-on-brand)]" aria-hidden="true" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function XrechnungFormatVisual() {
   return (
     <div className="h-36 flex items-center justify-center" aria-hidden="true">

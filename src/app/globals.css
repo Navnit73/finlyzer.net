@@ -749,6 +749,22 @@ input:disabled {
   .flow-dash { animation: none; }
 }
 
+/* Single particle travelling left → right along a short connector (compact PDF → XML flow) */
+.particle-dot {
+  animation: particle-flow 1.8s ease-in-out infinite;
+}
+
+@keyframes particle-flow {
+  0% { left: 0%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particle-dot { animation: none; opacity: 0; }
+}
+
 /* ==========================================================================
    LONG-FORM PROSE (trust & legal pages — see src/components/legal/LegalPage.tsx)
    ========================================================================== */
