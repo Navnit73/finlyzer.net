@@ -125,9 +125,12 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="inline-block rounded-md hover:opacity-90 transition-opacity"
               >
+                {/* Lazy: without it React preloads this third-party footer image ahead of the page's own content. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  alt="Finlyzers - Convert PDF and scanned bank statements into Exce | Product Hunt"
+                  alt="Finlyzers featured on Product Hunt"
+                  loading="lazy"
+                  decoding="async"
                   width="250"
                   height="54"
                   src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1276722&theme=light&t=1791724223623"

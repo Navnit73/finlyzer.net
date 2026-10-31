@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { Transaction } from '@/types/ocr';
 import { Search, ArrowUpDown, Copy, Check } from 'lucide-react';
+import { TRANSACTION_KIND_META, TransactionKind, transactionKind } from '@/lib/transaction-kind';
 
 interface TransactionsTableProps {
   transactions: Transaction[];
@@ -15,7 +16,7 @@ export default function TransactionsTable({
 }: TransactionsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearch = useDeferredValue(searchTerm);
-  const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all');
+  const [filterType, setFilterType] = useState<'all' | TransactionKind>('all');
   const [sortField, setSortField] = useState<'date' | 'amount' | 'description'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [copiedRef, setCopiedRef] = useState<string | null>(null);
@@ -44,12 +45,18 @@ export default function TransactionsTable({
     setTimeout(() => setCopiedRef(null), 2000);
   };
 
+  const kinds = useMemo(() => new Map(transactions.map((t) => [t, transactionKind(t)])), [transactions]);
+  const kindCounts = useMemo(() => {
+    const counts: Record<TransactionKind, number> = { income: 0, expense: 0, investment: 0 };
+    kinds.forEach((kind) => counts[kind]++);
+    return counts;
+  }, [kinds]);
+
   const filteredTransactions = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
 
     return transactions.filter((t) => {
-      if (filterType === 'credit' && (!t.credit || t.credit <= 0)) return false;
-      if (filterType === 'debit' && (!t.debit || t.debit <= 0)) return false;
+      if (filterType !== 'all' && kinds.get(t) !== filterType) return false;
 
       if (!query) return true;
 
@@ -60,7 +67,7 @@ export default function TransactionsTable({
         (t.category && t.category.toLowerCase().includes(query))
       );
     });
-  }, [transactions, deferredSearch, filterType]);
+  }, [transactions, kinds, deferredSearch, filterType]);
 
   const sortedTransactions = useMemo(() => {
     if (filteredTransactions.length <= 1) return filteredTransactions;
@@ -134,57 +141,79 @@ export default function TransactionsTable({
         </div>
 
         {/* Filter segmented control */}
-        <div className="inline-flex items-center gap-1 p-1 self-start sm:self-auto bg-[var(--color-surface-subtle)] rounded-full overflow-x-auto no-scrollbar" role="group" aria-label="Filter transactions">
-          <button
-            type="button"
-            onClick={() => {
-              setFilterType('all');
-              setCurrentPage(1);
-            }}
-            aria-pressed={filterType === 'all'}
-            className={`min-h-[32px] px-3.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
-              filterType === 'all'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-          >
-            All ({transactions.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setFilterType('credit');
-              setCurrentPage(1);
-            }}
-            aria-pressed={filterType === 'credit'}
-            className={`min-h-[32px] px-3.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
-              filterType === 'credit'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-          >
-            Credits (+)
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setFilterType('debit');
-              setCurrentPage(1);
-            }}
-            aria-pressed={filterType === 'debit'}
-            className={`min-h-[32px] px-3.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
-              filterType === 'debit'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-          >
-            Debits (-)
-          </button>
+        <div className="inline-flex max-w-full items-center gap-1 p-1 self-start sm:self-auto bg-[var(--color-surface-subtle)] rounded-full overflow-x-auto no-scrollbar" role="group" aria-label="Filter transactions">
+          {(['all', 'income', 'expense', 'investment'] as const).map((id) => {
+            const selected = filterType === id;
+            const meta = id === 'all' ? null : TRANSACTION_KIND_META[id];
+            if (meta && kindCounts[id as TransactionKind] === 0) return null;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setFilterType(id);
+                  setCurrentPage(1);
+                }}
+                aria-pressed={selected}
+                className={`inline-flex shrink-0 min-h-[32px] items-center gap-1.5 px-3 sm:px-3.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                  selected
+                    ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                }`}
+              >
+                {meta && <span className={`w-2 h-2 rounded-full ${meta.fill}`} aria-hidden="true" />}
+                {meta ? meta.plural : 'All'}
+                <span className="tabular-nums text-[var(--color-text-muted)]">
+                  {meta ? kindCounts[id as TransactionKind] : transactions.length}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Table: sticky header, vertical scroll for long pages, horizontal scroll on mobile */}
-      <div className="overflow-auto max-h-[70vh] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overscroll-x-contain">
+      {/* Mobile: one card per transaction instead of a wide table */}
+      <ul className="sm:hidden overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-subtle)]" aria-label="Extracted Transactions">
+        {paginatedTransactions.length > 0 ? (
+          paginatedTransactions.map((t, index) => {
+            const kind = kinds.get(t) ?? transactionKind(t);
+            const kindMeta = TRANSACTION_KIND_META[kind];
+            const isIncome = kind === 'income';
+            const amount = isIncome ? t.credit : t.debit;
+            return (
+              <li key={`${t.date}-${index}`} className="flex items-start gap-3 px-4 py-3.5">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-[15px] leading-snug text-[var(--color-ink)] break-words">{t.description}</p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]">
+                    <span className="tabular-nums">{t.date}</span>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium ${kindMeta.soft} ${kindMeta.text}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${kindMeta.fill}`} aria-hidden="true" />
+                      {kindMeta.label}
+                    </span>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className={`text-[15px] font-semibold tabular-nums whitespace-nowrap ${kindMeta.text}`}>
+                    {amount ? `${isIncome ? '+' : '-'}${formatCurrency(amount)}` : '—'}
+                  </p>
+                  {t.balance !== undefined && t.balance !== null && (
+                    <p className="mt-0.5 text-xs tabular-nums whitespace-nowrap text-[var(--color-text-muted)]">
+                      Bal {formatCurrency(t.balance)}
+                    </p>
+                  )}
+                </div>
+              </li>
+            );
+          })
+        ) : (
+          <li className="px-4 py-12 text-center text-sm text-[var(--color-text-secondary)]">
+            No matching transactions found for &quot;{searchTerm}&quot;.
+          </li>
+        )}
+      </ul>
+
+      {/* Table: sticky header, vertical scroll for long pages */}
+      <div className="hidden sm:block overflow-auto max-h-[70vh] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overscroll-x-contain">
         <table className="w-full text-left text-sm min-w-[720px] border-separate border-spacing-0" aria-label="Extracted Transactions">
           <thead className="text-[13px] text-[var(--color-text-muted)] select-none">
             <tr>
@@ -232,7 +261,8 @@ export default function TransactionsTable({
           <tbody className="[&>tr:not(:last-child)>td]:border-b [&>tr>td]:border-[var(--color-border-subtle)]">
             {paginatedTransactions.length > 0 ? (
               paginatedTransactions.map((t, index) => {
-                const isCredit = t.credit !== null && t.credit !== undefined && t.credit > 0;
+                const kind = kinds.get(t) ?? transactionKind(t);
+                const kindMeta = TRANSACTION_KIND_META[kind];
                 return (
                   <tr
                     key={`${t.date}-${index}`}
@@ -272,13 +302,14 @@ export default function TransactionsTable({
 
                     {/* Category Chip */}
                     <td className="px-3 py-3 whitespace-nowrap align-top">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)]">
-                        {t.category || (isCredit ? 'Income' : 'Expense')}
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${kindMeta.soft} ${kindMeta.text}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${kindMeta.fill}`} aria-hidden="true" />
+                        {kindMeta.label}
                       </span>
                     </td>
 
                     {/* Debit */}
-                    <td className="text-right tabular-nums whitespace-nowrap text-[var(--color-ink)] px-3 py-3 align-top">
+                    <td className={`text-right tabular-nums whitespace-nowrap px-3 py-3 align-top ${kindMeta.text}`}>
                       {t.debit ? (
                         <>-{formatCurrency(t.debit)}</>
                       ) : (

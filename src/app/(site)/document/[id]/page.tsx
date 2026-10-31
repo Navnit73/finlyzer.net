@@ -116,9 +116,9 @@ export default function DocumentPage({ params }: DocumentPageProps) {
   }, [docId]);
 
   return (
-    <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto w-full space-y-6 pb-16 sm:pb-24">
       {/* Top Control Bar */}
-      <div className="flex items-center justify-between gap-2 pb-4 border-b border-[var(--color-border)]">
+      <div className="flex items-center justify-between gap-2">
         {/* Left: Back button + Document Name */}
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Link
@@ -132,7 +132,7 @@ export default function DocumentPage({ params }: DocumentPageProps) {
 
           <span className="w-px h-4 bg-[var(--color-border)] shrink-0 hidden sm:inline-block" aria-hidden="true"></span>
 
-          <p className="min-w-0 truncate text-sm font-medium text-[var(--color-ink)]">
+          <p className="min-w-0 truncate text-sm text-[var(--color-text-muted)]">
             {documentData?.filename || `Doc #${docId.slice(0, 8)}`}
           </p>
         </div>
@@ -167,25 +167,18 @@ export default function DocumentPage({ params }: DocumentPageProps) {
 
       {/* Content Area */}
       {isLoading ? (
-        <div role="status" aria-live="polite" className="space-y-6">
-          <span className="sr-only">Loading Extracted Statement...</span>
-          <div className="space-y-2.5">
-            <span className="skeleton-line block h-7 w-72 max-w-full" />
-            <span className="skeleton-line block h-4 w-96 max-w-full" />
+        <div role="status" aria-live="polite" className="space-y-14 pt-8">
+          <span className="sr-only">Loading converted statement...</span>
+          <div className="flex flex-col items-center gap-4">
+            <span className="skeleton-line block h-6 w-28" />
+            <span className="skeleton-line block h-12 w-[28rem] max-w-full" />
+            <span className="skeleton-line block h-5 w-80 max-w-full" />
+            <div className="flex gap-3 pt-2">
+              <span className="skeleton-line block h-12 w-36 !rounded-full" />
+              <span className="skeleton-line block h-12 w-44 !rounded-full" />
+            </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className="skeleton-line block h-20 !rounded-xl" />
-            ))}
-          </div>
-          <div className="space-y-3 pt-2">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <span key={i} className="skeleton-line block h-4" style={{ width: `${92 - i * 7}%` }} />
-            ))}
-          </div>
-          <p className="text-[13px] text-[var(--color-text-muted)]" aria-hidden="true">
-            Retrieving reconciled data and financial metrics from database
-          </p>
+          <span className="skeleton-line block h-64 max-w-4xl mx-auto !rounded-2xl" />
         </div>
       ) : errorMessage ? (
         <div role="alert" className="max-w-md mx-auto py-20 text-center space-y-4">

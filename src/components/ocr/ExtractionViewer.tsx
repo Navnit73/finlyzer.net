@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   ExtractionResponse,
   BankStatementData,
@@ -8,30 +8,30 @@ import {
   ReceiptData,
   InvoiceItem,
 } from '@/types/ocr';
-import FinancialMetricCard from './FinancialMetricCard';
 import TransactionsTable from './TransactionsTable';
 import ExportActionBar from './ExportActionBar';
+import { EXPORT_FORMATS, useExportDownload } from './useExportDownload';
+import GuestUnlockModal from '@/components/guest/GuestUnlockModal';
+import LazyAuthModal from '@/components/auth/LazyAuthModal';
+import { FREE_PAGE_LIMIT } from '@/types/pricing';
+import { GUEST_RETENTION_HOURS } from '@/lib/retention';
+import { TRANSACTION_KIND_META, TransactionKind, transactionKind } from '@/lib/transaction-kind';
 import { checkRunningBalance } from '@/lib/balance-check';
 import {
-  Sparkles,
   AlertTriangle,
   Info,
-  Layers,
-  FileCode,
-  FileSpreadsheet,
-  Cpu,
   Clock,
   Building,
-  User,
-  Calendar,
-  CreditCard,
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  Receipt,
   Copy,
   Check,
   CheckCircle2,
+  Download,
+  Upload,
+  Table,
+  FileText,
+  Braces,
+  Lock,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface ExtractionViewerProps {
@@ -130,222 +130,345 @@ export default function ExtractionViewer({
     }
   };
 
+  const isBank = docType === 'bank_statement';
+  const entityName = bankData.bank_name || invoiceData.vendor_name || receiptData.merchant_name;
+
+  const exportState = useExportDownload({
+    documentId: data.id,
+    documentTitle: bankData.bank_name || invoiceData.vendor_name || 'Statement',
+    pages: pageCount,
+    isGuest,
+    isPaid,
+  });
+  const { downloadingFormat, downloadSuccess, requiresUnlock, download } = exportState;
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  // Show the sticky download bar once the hero button has scrolled out of view.
+  const heroCtaRef = useRef<HTMLDivElement>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  useEffect(() => {
+    const node = heroCtaRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const moneyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency || 'USD',
+        maximumFractionDigits: 2,
+      }),
+    [currency]
+  );
+  const money = (value: number) => moneyFormatter.format(value || 0);
+
+  const rowCount = isBank ? transactions.length : items.length;
+  const rowNoun = isBank ? 'transaction' : 'line item';
+  const detailLine = [entityName, bankData.account_holder, bankData.statement_period].filter(Boolean);
+
+  // The balance equation that lets people check the result against their own statement.
+  const hasOpening = bankData.opening_balance !== undefined && bankData.opening_balance !== null;
+  const equation: { label: string; value: string; op?: string; total?: boolean; dot?: string }[] = isBank
+    ? [
+        ...(hasOpening ? [{ label: 'Opening balance', value: money(bankData.opening_balance as number) }] : []),
+        { label: 'Money in', value: money(totalInflow), op: hasOpening ? '+' : undefined, dot: TRANSACTION_KIND_META.income.fill },
+        { label: 'Money out', value: money(totalOutflow), op: '−', dot: TRANSACTION_KIND_META.expense.fill },
+        hasOpening
+          ? { label: 'Closing balance', value: money(closingBalance), op: '=', total: true }
+          : { label: 'Net cash flow', value: money(netSavings), op: '=', total: true },
+      ]
+    : [
+        { label: 'Subtotal', value: money(invoiceData.subtotal || receiptData.subtotal || 0) },
+        { label: 'Tax & VAT', value: money(invoiceData.tax_amount || receiptData.tax || 0), op: '+' },
+        { label: 'Total', value: money(invoiceData.total_amount || receiptData.total_amount || 0), op: '=', total: true },
+      ];
+
+  // Where the money went: income vs. spending vs. money put into investments.
+  const kindTotals = useMemo(() => {
+    const totals: Record<TransactionKind, number> = { income: 0, expense: 0, investment: 0 };
+    transactions.forEach((t) => {
+      totals[transactionKind(t)] += (t.credit || 0) + (t.debit || 0);
+    });
+    return totals;
+  }, [transactions]);
+  const kindSum = kindTotals.income + kindTotals.expense + kindTotals.investment;
+  const kindOrder: TransactionKind[] = ['income', 'expense', 'investment'];
+
+  const isVerified = isBank && transactions.length > 0 && balanceCheck.status === 'verified';
+  const isExcelDownloading = downloadingFormat === 'xlsx';
+  const isExcelDone = downloadSuccess === 'xlsx';
+  const otherFormats = EXPORT_FORMATS.filter((opt) => opt.format !== 'xlsx');
+
+  const primaryLabel = requiresUnlock
+    ? 'Unlock and download'
+    : isExcelDone
+      ? 'Downloaded'
+      : 'Download Excel';
+
+  const tabs = [
+    { id: 'structured' as const, label: isBank ? 'Transactions' : 'Line items', icon: Table },
+    { id: 'ai_summary' as const, label: 'Checks', icon: ShieldCheck },
+    { id: 'raw_text' as const, label: 'Raw text', icon: FileText },
+    { id: 'json' as const, label: 'JSON', icon: Braces },
+  ];
+
+  const openChecks = () => {
+    setActiveTab('ai_summary');
+    document.getElementById('details')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in">
-      {/* 1. Summary header */}
-      <section aria-label="Extraction summary" className="space-y-5 sm:space-y-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-2 min-w-0">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-[var(--color-text-muted)]">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[var(--color-brand-soft)] text-[var(--color-brand-dark)] text-xs font-medium capitalize">
-                {docType.replace('_', ' ')}
-              </span>
-              <span className="inline-flex items-center gap-1 tabular-nums">
-                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
-                {data.metadata?.processing_time_ms ? `${data.metadata.processing_time_ms}ms` : '1,150ms'}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Cpu className="w-3.5 h-3.5" aria-hidden="true" />
-                AI Financial Model
-              </span>
-              <span className="tabular-nums">
-                {data.metadata?.pages || 1} Page{data.metadata?.pages !== 1 ? 's' : ''}
-              </span>
-            </div>
+    <div className="space-y-16 sm:space-y-24 animate-fade-in">
+      {/* 1. Ready: one obvious next step */}
+      <section aria-label="Your file is ready" className="text-center space-y-5 pt-4 sm:pt-8">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-success-soft)] px-3 py-1 text-[13px] font-medium text-[var(--color-success)] tabular-nums">
+          <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+          {rowCount} {rowNoun}
+          {rowCount === 1 ? '' : 's'} found
+        </span>
 
-            <h2 className="type-title break-words">
-              {bankData.bank_name || invoiceData.vendor_name || receiptData.merchant_name || data.filename || 'Financial Extraction'}
-            </h2>
+        <h1 className="type-hero max-w-3xl mx-auto">
+          Your {isBank ? 'statement' : 'document'} is ready.
+        </h1>
 
-            {(bankData.account_holder || bankData.account_number_masked || bankData.statement_period) && (
-              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1.5 sm:gap-x-5 text-sm text-[var(--color-text-secondary)]">
-                {bankData.account_holder && (
-                  <span className="flex items-center gap-1.5 min-w-0">
-                    <User className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
-                    <span className="truncate max-w-[260px]">{bankData.account_holder}</span>
-                  </span>
-                )}
-                {bankData.account_number_masked && (
-                  <span className="flex items-center gap-1.5 tabular-nums">
-                    <CreditCard className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
-                    <span>{bankData.account_number_masked}</span>
-                  </span>
-                )}
-                {bankData.statement_period && (
-                  <span className="flex items-center gap-1.5 min-w-0">
-                    <Calendar className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
-                    <span className="truncate">{bankData.statement_period}</span>
-                  </span>
-                )}
-              </div>
+        <p className="type-lead max-w-2xl mx-auto break-words">
+          {detailLine.length > 0
+            ? detailLine.map((part, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span className="text-[var(--color-text-muted)]" aria-hidden="true"> · </span>}
+                  {part}
+                </React.Fragment>
+              ))
+            : <span className="break-all">{data.filename}</span>}
+        </p>
+
+        <div ref={heroCtaRef} className="space-y-4 pt-3">
+          <button
+            type="button"
+            onClick={() => download('xlsx')}
+            disabled={downloadingFormat !== null}
+            className="btn-brand-primary !min-h-[52px] !px-8 !text-[17px] w-full sm:w-auto"
+          >
+            {isExcelDownloading ? (
+              <span className="loading loading-spinner loading-sm" aria-label="Downloading"></span>
+            ) : isExcelDone ? (
+              <Check className="w-5 h-5" aria-hidden="true" />
+            ) : requiresUnlock ? (
+              <Lock className="w-[18px] h-[18px]" strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <Download className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
             )}
-          </div>
+            <span>{primaryLabel}</span>
+          </button>
 
-          {/* Quick Actions */}
-          {onNewScan && (
-            <button
-              type="button"
-              onClick={onNewScan}
-              className="btn-brand-secondary w-full sm:w-auto shrink-0"
-            >
-              Scan Another File
-            </button>
-          )}
+          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-sm text-[var(--color-text-secondary)]">
+            <span className="mr-1">Or download as</span>
+            {otherFormats.map((opt) => (
+              <button
+                key={opt.format}
+                type="button"
+                onClick={() => download(opt.format)}
+                disabled={downloadingFormat !== null}
+                className="inline-flex h-8 items-center gap-1 rounded-full bg-[var(--color-surface-subtle)] px-3 text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-muted)] cursor-pointer disabled:opacity-50"
+              >
+                {downloadingFormat === opt.format ? (
+                  <span className="loading loading-spinner loading-xs" aria-label="Downloading"></span>
+                ) : downloadSuccess === opt.format ? (
+                  <Check className="w-3.5 h-3.5 text-[var(--color-success)]" aria-hidden="true" />
+                ) : null}
+                {opt.ext.slice(1).toUpperCase()}
+              </button>
+            ))}
+            <a href="#export" className="link ml-1 text-[13px]">
+              Not sure?
+            </a>
+          </div>
         </div>
 
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {docType === 'bank_statement' ? (
-            <>
-              <FinancialMetricCard
-                title="Closing Balance"
-                value={closingBalance}
-                subtitle="Reconciled Statement Total"
-                icon={Wallet}
-                variant="brand"
-                currency={currency}
-              />
-              <FinancialMetricCard
-                title="Total Inflow / Credits"
-                value={totalInflow}
-                subtitle="Deposits &amp; Income"
-                icon={TrendingUp}
-                variant="blue"
-                currency={currency}
-              />
-              <FinancialMetricCard
-                title="Total Outflow / Debits"
-                value={totalOutflow}
-                subtitle="Expenses &amp; Withdrawals"
-                icon={TrendingDown}
-                variant="pink"
-                currency={currency}
-              />
-              <FinancialMetricCard
-                title="Net Cashflow"
-                value={netSavings}
-                subtitle={`${transactions.length} Total Transactions`}
-                icon={Layers}
-                variant="violet"
-                currency={currency}
-              />
-            </>
-          ) : (
-            <>
-              <FinancialMetricCard
-                title="Total Amount"
-                value={invoiceData.total_amount || receiptData.total_amount || 0}
-                subtitle="Tax &amp; Fees Included"
-                icon={Wallet}
-                variant="brand"
-                currency={currency}
-              />
-              <FinancialMetricCard
-                title="Subtotal"
-                value={invoiceData.subtotal || receiptData.subtotal || 0}
-                subtitle="Base Line Items"
-                icon={TrendingUp}
-                variant="blue"
-                currency={currency}
-              />
-              <FinancialMetricCard
-                title="Tax &amp; VAT"
-                value={invoiceData.tax_amount || receiptData.tax || 0}
-                subtitle="Deductions"
-                icon={TrendingDown}
-                variant="pink"
-                currency={currency}
-              />
-              <FinancialMetricCard
-                title="Line Items Count"
-                value={items.length || 1}
-                subtitle="Parsed Products/Services"
-                icon={Receipt}
-                variant="violet"
-              />
-            </>
+        <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 pt-1 text-[13px] text-[var(--color-text-muted)]">
+          {isVerified && (
+            <li className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-[var(--color-success)]" aria-hidden="true" />
+              Balance verified
+            </li>
+          )}
+          <li className="tabular-nums">
+            {pageCount} page{pageCount === 1 ? '' : 's'} · {currency}
+          </li>
+          {isGuest && (
+            <li className="inline-flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+              Deleted after {GUEST_RETENTION_HOURS} hours
+            </li>
+          )}
+        </ul>
+
+        {isGuest && exportState.hasDownloaded && (
+          <p role="status" className="mx-auto max-w-lg rounded-2xl bg-[var(--color-surface-subtle)] px-5 py-3 text-sm text-[var(--color-text-secondary)]">
+            <span className="font-semibold text-[var(--color-ink)]">Downloaded.</span> Want your next statements kept for you?{' '}
+            <button type="button" onClick={() => setIsAuthOpen(true)} className="link cursor-pointer">
+              Create a free account
+            </button>
+          </p>
+        )}
+      </section>
+
+      {/* 2. Check the numbers */}
+      <section aria-label="Check the numbers" className="space-y-8">
+        <div className="text-center space-y-2">
+          <h2 className="type-title">Check it matches your statement.</h2>
+          <p className="text-[17px] text-[var(--color-text-secondary)] max-w-xl mx-auto">
+            {isBank
+              ? 'We add up every row and compare the result with the balance printed on your statement.'
+              : 'The totals we read from your document.'}
+          </p>
+        </div>
+
+        <div className="max-w-5xl mx-auto rounded-2xl bg-[var(--color-surface-subtle)] p-3 sm:p-4 space-y-3">
+          <dl className="flex flex-col md:flex-row md:items-stretch gap-2">
+            {equation.map((term) => (
+              <React.Fragment key={term.label}>
+                {term.op && (
+                  <span className="self-center text-lg md:text-xl text-[var(--color-text-muted)] md:w-6 text-center leading-none -my-1 md:my-0" aria-hidden="true">
+                    {term.op}
+                  </span>
+                )}
+                <div
+                  className={`flex-1 min-w-0 flex items-baseline justify-between gap-3 md:block rounded-xl px-4 py-3 md:py-4 sm:px-5 ${
+                    term.total ? 'bg-[var(--color-surface)] ring-1 ring-[var(--color-border)]' : 'bg-[var(--color-surface)]'
+                  }`}
+                >
+                  <dt className="inline-flex items-center gap-1.5 text-[13px] text-[var(--color-text-muted)]">
+                    {term.dot && <span className={`w-2 h-2 rounded-full ${term.dot}`} aria-hidden="true" />}
+                    {term.label}
+                  </dt>
+                  <dd
+                    className={`md:mt-1 truncate font-semibold tracking-tight tabular-nums text-[var(--color-ink)] ${
+                      term.total ? 'text-xl md:text-[26px]' : 'text-[17px] md:text-[22px]'
+                    }`}
+                    title={term.value}
+                  >
+                    {term.value}
+                  </dd>
+                </div>
+              </React.Fragment>
+            ))}
+          </dl>
+
+          {isBank && kindSum > 0 && (
+            <div className="rounded-xl bg-[var(--color-surface)] px-4 py-4 sm:px-5 space-y-3">
+              <p className="text-[13px] text-[var(--color-text-muted)]">Where the money went</p>
+              <div
+                className="flex h-3 w-full gap-[3px] overflow-hidden rounded-full"
+                role="img"
+                aria-label={kindOrder.map((k) => `${TRANSACTION_KIND_META[k].plural} ${money(kindTotals[k])}`).join(', ')}
+              >
+                {kindOrder.map((k) =>
+                  kindTotals[k] > 0 ? (
+                    <span
+                      key={k}
+                      className={`h-full ${TRANSACTION_KIND_META[k].fill}`}
+                      style={{ width: `${(kindTotals[k] / kindSum) * 100}%` }}
+                    />
+                  ) : null
+                )}
+              </div>
+              <dl className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                {kindOrder.map((k) => (
+                  <div key={k} className="flex items-baseline justify-between gap-3 sm:block">
+                    <dt className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)]">
+                      <span className={`w-2 h-2 rounded-full ${TRANSACTION_KIND_META[k].fill}`} aria-hidden="true" />
+                      {TRANSACTION_KIND_META[k].plural}
+                    </dt>
+                    <dd className={`sm:mt-0.5 text-[17px] font-semibold tabular-nums ${TRANSACTION_KIND_META[k].text}`}>
+                      {money(kindTotals[k])}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {isBank && transactions.length > 0 && (
+            <div className="flex items-start gap-2.5 px-2 pb-1 text-sm text-[var(--color-text-secondary)]">
+              {balanceCheck.status === 'verified' ? (
+                <>
+                  <CheckCircle2 className="w-[18px] h-[18px] shrink-0 mt-px text-[var(--color-success)]" aria-hidden="true" />
+                  <p>
+                    <span className="font-semibold text-[var(--color-ink)]">Matches your statement.</span>{' '}
+                    {balanceCheck.checkedRows > 0
+                      ? `All ${balanceCheck.checkedRows} rows agree with the printed running balance.`
+                      : 'The totals agree with the printed balance.'}
+                  </p>
+                </>
+              ) : balanceCheck.status === 'mismatch' ? (
+                <>
+                  <AlertTriangle className="w-[18px] h-[18px] shrink-0 mt-px text-[var(--color-warning)]" aria-hidden="true" />
+                  <p>
+                    <span className="font-semibold text-[var(--color-ink)]">A few rows need a look.</span>{' '}
+                    Some amounts don&apos;t match the printed balance. Compare them with your PDF before you import.{' '}
+                    <button type="button" onClick={openChecks} className="link cursor-pointer">
+                      Show rows
+                    </button>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Info className="w-[18px] h-[18px] shrink-0 mt-px text-[var(--color-text-muted)]" aria-hidden="true" />
+                  <p>Your statement has no printed balance to compare with, so check these totals against your PDF.</p>
+                </>
+              )}
+            </div>
           )}
         </div>
       </section>
 
-      {/* 2. Export Action Bar */}
-      <ExportActionBar
-        documentId={data.id}
-        documentTitle={bankData.bank_name || invoiceData.vendor_name || 'Statement'}
-        pages={pageCount}
-        isGuest={isGuest}
-        isPaid={isPaid}
-        onConsolidateClick={onConsolidateClick}
-        onUnlockSuccess={handleUnlockSuccess}
-      />
+      {/* 3. Which file do I need? */}
+      <ExportActionBar exportState={exportState} onConsolidateClick={onConsolidateClick} />
 
-      {/* 3. Interactive Detail Tabs */}
-      <section aria-label="Extraction details" className="space-y-5">
-        {/* Segmented control (horizontally scrollable on mobile) */}
+      {/* 4. Every row */}
+      <section id="details" aria-label="Extraction details" className="scroll-mt-24 space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="type-title">See every row.</h2>
+          <p className="text-[17px] text-[var(--color-text-secondary)]">
+            Search, sort and filter before you download.
+          </p>
+        </div>
+
         <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
-          <div role="tablist" aria-label="Extraction view options" className="inline-flex items-center gap-1 p-1 rounded-full bg-[var(--color-surface-subtle)]">
-            <button
-              role="tab"
-              id="tab-structured"
-              aria-selected={activeTab === 'structured'}
-              aria-controls="tabpanel-structured"
-              onClick={() => setActiveTab('structured')}
-              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
-              activeTab === 'structured'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-            >
-              <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
-              <span>Structured Data ({docType === 'bank_statement' ? `${transactions.length} Rows` : `${items.length} Items`})</span>
-            </button>
-
-            <button
-              role="tab"
-              id="tab-ai_summary"
-              aria-selected={activeTab === 'ai_summary'}
-              aria-controls="tabpanel-ai_summary"
-              onClick={() => setActiveTab('ai_summary')}
-              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
-              activeTab === 'ai_summary'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-            >
-              <Sparkles className="w-4 h-4" aria-hidden="true" />
-              <span>AI Insights &amp; Audit</span>
-            </button>
-
-            <button
-              role="tab"
-              id="tab-raw_text"
-              aria-selected={activeTab === 'raw_text'}
-              aria-controls="tabpanel-raw_text"
-              onClick={() => setActiveTab('raw_text')}
-              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
-              activeTab === 'raw_text'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-            >
-              <FileCode className="w-4 h-4" aria-hidden="true" />
-              <span>OCR Raw Text</span>
-            </button>
-
-            <button
-              role="tab"
-              id="tab-json"
-              aria-selected={activeTab === 'json'}
-              aria-controls="tabpanel-json"
-              onClick={() => setActiveTab('json')}
-              className={`min-h-[36px] px-3.5 rounded-full text-[13px] sm:text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
-              activeTab === 'json'
-                ? 'bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
-            }`}
-            >
-              <span>{`{ JSON Payload }`}</span>
-            </button>
+          <div
+            role="tablist"
+            aria-label="Extraction view options"
+            className="mx-auto flex w-fit items-stretch gap-1 rounded-2xl bg-[var(--color-surface-subtle)] p-1.5"
+          >
+            {tabs.map(({ id, label, icon: Icon }) => {
+              const selected = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  role="tab"
+                  type="button"
+                  id={`tab-${id}`}
+                  aria-selected={selected}
+                  aria-controls={`tabpanel-${id}`}
+                  onClick={() => setActiveTab(id)}
+                  className={`flex min-w-[80px] sm:min-w-[112px] shrink-0 flex-col items-center gap-1.5 rounded-xl px-3 sm:px-5 py-3 text-[13px] sm:text-sm font-medium transition-colors cursor-pointer ${
+                    selected
+                      ? 'bg-[var(--color-surface)] text-[var(--color-brand-dark)]'
+                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-ink)]'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" strokeWidth={1.5} aria-hidden="true" />
+                  <span className="whitespace-nowrap">{label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -526,19 +649,19 @@ export default function ExtractionViewer({
                   <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
                     <dt className="text-[var(--color-text-secondary)]">OCR Text Extraction</dt>
                     <dd className="tabular-nums text-[var(--color-ink)]">
-                      {data.metadata?.stage_timings_ms?.ocr_extraction || 12}ms
+                      {data.metadata?.stage_timings_ms?.ocr_extraction != null ? `${data.metadata.stage_timings_ms.ocr_extraction}ms` : '—'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
                     <dt className="text-[var(--color-text-secondary)]">AI Cleaning</dt>
                     <dd className="tabular-nums text-[var(--color-ink)]">
-                      {data.metadata?.stage_timings_ms?.ai_cleaning || 480}ms
+                      {data.metadata?.stage_timings_ms?.ai_cleaning != null ? `${data.metadata.stage_timings_ms.ai_cleaning}ms` : '—'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0">
                     <dt className="text-[var(--color-text-secondary)]">Structured Entity Parser</dt>
                     <dd className="tabular-nums text-[var(--color-ink)]">
-                      {data.metadata?.stage_timings_ms?.structured_extraction || 655}ms
+                      {data.metadata?.stage_timings_ms?.structured_extraction != null ? `${data.metadata.stage_timings_ms.structured_extraction}ms` : '—'}
                     </dd>
                   </div>
                 </dl>
@@ -631,6 +754,88 @@ export default function ExtractionViewer({
           </div>
         )}
       </section>
+
+      {/* 5. What's next */}
+      <section aria-label="What's next" className="rounded-2xl bg-[var(--color-surface-subtle)] px-6 py-10 sm:px-12 sm:py-14 text-center space-y-5">
+        {isGuest ? (
+          <>
+            <h2 className="type-title">Convert statements often?</h2>
+            <p className="text-[17px] text-[var(--color-text-secondary)] max-w-xl mx-auto">
+              A free account comes with {FREE_PAGE_LIMIT} free pages and a private vault that keeps every result.
+              Guest files are deleted after {GUEST_RETENTION_HOURS} hours.
+            </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
+              <button type="button" onClick={() => setIsAuthOpen(true)} className="btn-brand-primary">
+                Create a free account
+              </button>
+              {onNewScan && (
+                <button type="button" onClick={onNewScan} className="btn-brand-secondary">
+                  <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  Convert another statement
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className="type-title">Got another one?</h2>
+            <p className="text-[17px] text-[var(--color-text-secondary)] max-w-xl mx-auto">
+              Every conversion is saved to your vault, so you can come back and download it again.
+            </p>
+            {onNewScan && (
+              <div className="pt-2">
+                <button type="button" onClick={onNewScan} className="btn-brand-primary">
+                  <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  Convert another statement
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* Sticky download bar */}
+      <div
+        aria-hidden={!showStickyBar}
+        className={`fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 transition-[opacity,transform] duration-300 ${
+          showStickyBar ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 translate-y-4'
+        }`}
+      >
+        <div className="surface-frosted flex w-full max-w-xl min-w-0 items-center gap-3 rounded-full border border-[var(--color-border)] py-2 pl-4 sm:pl-5 pr-2">
+          <p className="min-w-0 flex-1 truncate text-sm text-[var(--color-text-secondary)]">
+            <span className="font-semibold text-[var(--color-ink)]">{entityName || data.filename}</span>
+            <span className="hidden sm:inline tabular-nums"> · {rowCount} rows</span>
+          </p>
+          <button
+            type="button"
+            tabIndex={showStickyBar ? 0 : -1}
+            onClick={() => download('xlsx')}
+            disabled={downloadingFormat !== null}
+            className="btn-brand-primary !min-h-[40px] !px-5 !text-sm shrink-0"
+          >
+            {isExcelDownloading ? (
+              <span className="loading loading-spinner loading-xs" aria-label="Downloading"></span>
+            ) : requiresUnlock ? (
+              <Lock className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <Download className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            )}
+            <span className="sm:hidden">{requiresUnlock ? 'Unlock' : 'Download'}</span>
+            <span className="hidden sm:inline">{primaryLabel}</span>
+          </button>
+        </div>
+      </div>
+
+      <GuestUnlockModal
+        isOpen={exportState.isUnlockModalOpen}
+        onClose={exportState.closeUnlockModal}
+        documentId={data.id}
+        filename={bankData.bank_name || invoiceData.vendor_name || 'Statement'}
+        pageCount={pageCount}
+        onUnlockSuccess={handleUnlockSuccess}
+      />
+
+      <LazyAuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} reason="save_history" />
     </div>
   );
 }

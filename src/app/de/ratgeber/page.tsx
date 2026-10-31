@@ -13,7 +13,7 @@ import {
 } from '@/lib/seo-config';
 
 const path = '/de/ratgeber';
-const title = 'Ratgeber & Leitfäden für E-Rechnung, Steuern & Finanzen | Finlyzers';
+const title = 'Ratgeber: E-Rechnung, ZUGFeRD & XRechnung | Finlyzers';
 const description =
   'Praxisnahe Ratgeber, Anleitungen und Fachwissen rund um E-Rechnung, ZUGFeRD, XRechnung und Buchhaltung für Selbstständige und kleine Unternehmen.';
 

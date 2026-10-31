@@ -13,21 +13,25 @@ import { GERMAN_ROOT, LOCALE_HEADER } from '@/lib/i18n';
  * - non-admins hitting admin pages are sent to the dashboard
  * Shared pages (/pricing, /document/[id]) are not matched and work for both.
  */
+/** Routes whose slugs come from lowercase markdown filenames or registries. */
+const LOWERCASE_PREFIXES = ['/convert/', '/reconcile/', '/analyzer/', '/calculators/', '/guides/', '/de/ratgeber/', '/de/konverter/'];
+
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // Content slugs are lowercase; /convert/Bank-Statement-To-Excel → one canonical URL. Without this
+  // mixed-case URLs answered 200, either as a duplicate page or as a soft 404.
+  if (LOWERCASE_PREFIXES.some((p) => pathname.startsWith(p)) && pathname !== pathname.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
 
   // /de has no auth rules; just tag the request so unmatched /de URLs get the German 404.
   if (pathname === GERMAN_ROOT || pathname.startsWith(`${GERMAN_ROOT}/`)) {
     const headers = new Headers(request.headers);
     headers.set(LOCALE_HEADER, 'de');
     return NextResponse.next({ request: { headers } });
-  }
-
-  // Analyzer slugs are lowercase; /analyzer/Bank-statement-analyzer → one canonical URL.
-  if (pathname.startsWith('/analyzer/') && pathname !== pathname.toLowerCase()) {
-    const url = request.nextUrl.clone();
-    url.pathname = pathname.toLowerCase();
-    return NextResponse.redirect(url, 308);
   }
 
   const token = await getToken({ req: request, secret: AUTH_SECRET });
@@ -58,6 +62,8 @@ export const config = {
     '/convert/:path*',
     '/reconcile/:path*',
     '/analyzer/:path*',
+    '/calculators/:path*',
+    '/guides/:path*',
     '/reconciliations/:path*',
     '/dashboard/:path*',
     '/workspace/:path*',
