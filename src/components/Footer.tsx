@@ -72,11 +72,24 @@ const COLUMNS: { heading: string; links: FooterLink[] }[] = [
     ].map(([slug, label]) => ({ href: `/reconcile/${slug}`, label })),
   },
   {
-    heading: "Analyzers & Calculators",
+    heading: "Finance Calculators",
     links: [
-      { href: "/analyzer/bank-statement-analyzer", label: "Bank statement analyzer" },
-      { href: "/calculators/cash-flow-calculator", label: "Cash flow calculator" },
-    ],
+      ["emi-calculator", "EMI calculator"],
+      ["mortgage-calculator", "Mortgage calculator"],
+      ["loan-repayment-calculator", "Loan repayment calculator"],
+      ["credit-card-interest-calculator", "Credit card interest"],
+      ["debt-payoff-calculator", "Credit card debt payoff"],
+      ["loan-comparison-calculator", "Loan comparison"],
+      ["compound-interest-calculator", "Compound interest"],
+      ["simple-interest-calculator", "Simple interest"],
+      ["sip-calculator", "SIP calculator"],
+      ["cagr-calculator", "CAGR calculator"],
+      ["cash-flow-calculator", "Cash flow calculator"],
+    ].map(([slug, label]) => ({ href: `/calculators/${slug}`, label })).concat({ href: "/calculators", label: "All calculators" }),
+  },
+  {
+    heading: "Analyzers",
+    links: [{ href: "/analyzer/bank-statement-analyzer", label: "Bank statement analyzer" }],
   },
   {
     heading: "Product & Directory",

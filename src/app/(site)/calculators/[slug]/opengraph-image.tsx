@@ -14,7 +14,7 @@ const TOKENS = {
   surface: '#ffffff', // --color-surface
 };
 
-export const alt = 'Finlyzers cash flow calculator';
+export const alt = 'Finlyzers finance calculator';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -22,13 +22,13 @@ export function generateStaticParams() {
   return getAllCalculatorPages().map((page) => ({ slug: page.slug }));
 }
 
-const FORMATS = ['Operating', 'Investing', 'Financing', 'Net cash flow'];
-
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const page = getCalculatorPageBySlug(slug);
   const title = page?.title ?? 'Cash Flow Calculator';
   const badge = page?.badgeText ?? 'Free calculator';
+  // Chips along the bottom: the page's own `ogTags`, else its hub group and market.
+  const chips = page?.ogTags.length ? page.ogTags : [page?.group, page?.market].filter((c): c is string => Boolean(c));
 
   return new ImageResponse(
     (
@@ -64,13 +64,13 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           >
             {badge}
           </div>
-          <div style={{ fontSize: 72, fontWeight: 600, lineHeight: 1.05, color: TOKENS.ink, letterSpacing: -2.5 }}>
+          <div style={{ fontSize: title.length > 64 ? 60 : 72, fontWeight: 600, lineHeight: 1.05, color: TOKENS.ink, letterSpacing: -2.5 }}>
             {title}
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {FORMATS.map((fmt) => (
+          {chips.map((fmt) => (
             <div
               key={fmt}
               style={{

@@ -104,6 +104,23 @@ const sections: LegalSection[] = [
       </ul>
     ),
   },
+  {
+    id: 'calculators',
+    heading: 'How our calculators are built and checked',
+    body: (
+      <ul>
+        <li>Each calculator states the formula it uses and its assumptions, such as the day count or when interest is charged.</li>
+        <li>
+          The calculation code is tested against published reference values and against separate recalculations, including edge cases such as a 0% rate or
+          a payment that never repays the loan.
+        </li>
+        <li>Worked examples on a page are produced by the calculator itself, so the page and the tool agree.</li>
+        <li>Interest rates and investment returns are always your inputs. Example figures are labelled as examples, not as current market rates.</li>
+        <li>Rules quoted from regulators or tax authorities link to the official source, and the page shows the date it was last updated.</li>
+        <li>Calculators run in your browser; the figures you type are not uploaded or stored. Results are estimates for planning, not financial advice.</li>
+      </ul>
+    ),
+  },
 ];
 
 export default function EditorialPolicyPage() {
@@ -115,7 +132,7 @@ export default function EditorialPolicyPage() {
       intro={
         <p>
           How Finlyzers turns a bank statement into clean data, how the result is verified, where it can go wrong, and
-          the standards we follow when writing guides.
+          the standards we follow when writing guides and building calculators.
         </p>
       }
       sections={sections}

@@ -131,6 +131,39 @@
 
   <!-- Calculators -->
   <url>
+    <loc>https://finlyzers.com/calculators</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/emi-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/mortgage-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/loan-repayment-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/credit-card-interest-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/debt-payoff-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/loan-comparison-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/compound-interest-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/simple-interest-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/sip-calculator</loc>
+  </url>
+  <url>
+    <loc>https://finlyzers.com/calculators/cagr-calculator</loc>
+  </url>
+  <url>
     <loc>https://finlyzers.com/calculators/cash-flow-calculator</loc>
   </url>
 

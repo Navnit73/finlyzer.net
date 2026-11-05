@@ -4,6 +4,7 @@ import { FREE_PAGE_LIMIT, GUEST_MAX_PAGES } from '@/types/pricing';
 import { GUEST_RETENTION_HOURS } from '@/lib/retention';
 import {
   SEOAnalyzerPage,
+  SEOCalculatorLink,
   SEOCalculatorPage,
   SEOConverterPage,
   SEOFeature,
@@ -13,6 +14,7 @@ import {
   SEOReconSampleRow,
   SEOReconciliationPage,
   SEOSampleRow,
+  SEOSource,
   SEOStep,
 } from '@/types/seo';
 
@@ -110,6 +112,10 @@ function cleanYamlValue(val: string): unknown {
   if (trimmed === 'false') return false;
   if (!isNaN(Number(trimmed)) && trimmed !== '') return Number(trimmed);
   return trimmed;
+}
+
+function str(value: unknown, fallback = ''): string {
+  return value === undefined || value === null || value === '' ? fallback : String(value);
 }
 
 function escapeHtml(text: string): string {
@@ -430,7 +436,7 @@ export function getAllCalculatorPages(): SEOCalculatorPage[] {
       .filter((f) => f.endsWith('.md'))
       .sort()
       .map((file) => {
-        const { data, content } = parseFrontmatter(fs.readFileSync(path.join(CALCULATORS_DIR, file), 'utf8'));
+        const { data, content } = parseFrontmatter(fillConstants(fs.readFileSync(path.join(CALCULATORS_DIR, file), 'utf8')));
         const title = (data.title as string) || 'Calculator';
         return {
           slug: (data.slug as string) || file.replace(/\.md$/, ''),
@@ -446,6 +452,23 @@ export function getAllCalculatorPages(): SEOCalculatorPage[] {
           datePublished: String(data.datePublished || ''),
           dateModified: String(data.dateModified || data.datePublished || ''),
           contentHtml: renderMarkdown(content),
+          category: data.category === 'business' ? 'business' : 'personal',
+          ogTags: Array.isArray(data.ogTags) ? (data.ogTags as string[]) : [],
+          group: str(data.group, 'Other calculators'),
+          market: str(data.market, 'Global'),
+          summary: str(data.summary, (data.metaDescription as string) || ''),
+          ctaLabel: str(data.ctaLabel, 'Use the calculator'),
+          secondaryHref: str(data.secondaryHref),
+          secondaryLabel: str(data.secondaryLabel),
+          faqSubtitle: str(data.faqSubtitle),
+          related: Array.isArray(data.related) ? (data.related as string[]) : [],
+          relatedLinks: Array.isArray(data.relatedLinks) ? (data.relatedLinks as SEOCalculatorLink[]) : [],
+          sources: Array.isArray(data.sources) ? (data.sources as SEOSource[]) : [],
+          lastVerified: str(data.lastVerified),
+          finalCtaTitle: str(data.finalCtaTitle),
+          finalCtaBody: str(data.finalCtaBody),
+          finalCtaHref: str(data.finalCtaHref),
+          finalCtaLabel: str(data.finalCtaLabel),
         };
       });
   } catch (err) {

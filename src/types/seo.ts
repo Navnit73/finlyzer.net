@@ -156,4 +156,44 @@ export interface SEOCalculatorPage {
   datePublished: string;
   dateModified: string;
   contentHtml: string;
+  /** Hub section: personal or business finance. */
+  category: 'personal' | 'business';
+  /** Short chips on the share image (2–4 words each). */
+  ogTags: string[];
+  /** Hub sub-group, e.g. "Loans and credit". */
+  group: string;
+  /** Market the page is written for: "Global", "India", "United States"… */
+  market: string;
+  /** One line for hub and related-tool cards. */
+  summary: string;
+  /** Hero primary button text (scrolls to the calculator). */
+  ctaLabel: string;
+  /** Optional hero secondary button. */
+  secondaryHref: string;
+  secondaryLabel: string;
+  faqSubtitle: string;
+  /** Calculator slugs shown under "Related tools", in order. */
+  related: string[];
+  /** Related non-calculator pages (analyzer, converters, reconcile). */
+  relatedLinks: SEOCalculatorLink[];
+  /** Official or primary sources for rates and rules quoted on the page. */
+  sources: SEOSource[];
+  /** Date the rates/rules on the page were last checked against `sources` (tax pages). */
+  lastVerified: string;
+  /** Optional closing CTA band; omitted when finalCtaHref is empty. */
+  finalCtaTitle: string;
+  finalCtaBody: string;
+  finalCtaHref: string;
+  finalCtaLabel: string;
+}
+
+export interface SEOCalculatorLink {
+  href: string;
+  label: string;
+  body: string;
+}
+
+export interface SEOSource {
+  label: string;
+  url: string;
 }

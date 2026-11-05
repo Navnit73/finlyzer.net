@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "indexnow": "node scripts/indexnow.mjs"
+    "indexnow": "node scripts/indexnow.mjs",
+    "test:calc": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/lib/calculators/**/*.test.ts\""
   },
   "dependencies": {
     "daisyui": "^5.7.47",
